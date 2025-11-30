@@ -234,11 +234,12 @@ ResultadoSimulacion simular_opcion(const OpcionComputadora& opcion, std::mt19937
         resultado.satisfaccion_desarrollo -= 1.0;
     }
     
-    // 10. COSTO TOTAL (INCLUYE COSTOS OPORTUNIDAD)
+    // 10. COSTO TOTAL (INCLUYE COSTOS OPORTUNIDAD + PORTABILIDAD)
     resultado.costo_total_2años = precio_real + 
                                   costo_pantalla + 
                                   costos_upgrades_2años + 
-                                  resultado.dinero_perdido_downtime - // COSTO OPORTUNIDAD
+                                  resultado.dinero_perdido_downtime +     // Costo oportunidad downtime
+                                  resultado.penalizacion_portabilidad -   // Costo oportunidad portabilidad ⚠️
                                   opcion.valor_reventa_después_2años;
     
     return resultado;
@@ -249,9 +250,9 @@ int main() {
     
     std::cout << "🎯 TU SITUACIÓN:\n";
     std::cout << "   • MacBook 2019 funciona pero se queda corto de RAM\n";
-    std::cout << "   • Presupuesto: ~$300 USD\n";
-    std::cout << "   • Desarrollador que usa Ubuntu/Linux\n";
-    std::cout << "   • Quieres el mejor valor por tu dinero\n\n";
+    std::cout << "   • Desarrollador freelance ($25/hora)\n";
+    std::cout << "   • Trabajas desde cualquier lugar (portabilidad crítica)\n";
+    std::cout << "   • Quieres mejor valor a largo plazo (sin límite presupuesto)\n\n";
     
     // DEFINIR TUS OPCIONES REALES
     std::vector<OpcionComputadora> opciones = {
@@ -331,31 +332,6 @@ int main() {
             5.0      // Familiaridad: MEDIA (Linux conocido, pero HW nuevo)
         },
         {
-            "Laptop usado ThinkPad",
-            "ThinkPad T480/T490 con 16GB RAM, excelente para Linux",
-            270,     // Precio objetivo
-            0.6,     // 60% chance buen deal
-            7.5,     // Buen rendimiento
-            16,      // 16GB RAM  
-            3.0,     // Durará ~3 años
-            60,      // $60/año mantenimiento
-            10,      // Perfecto para Linux
-            0.2,     // 20% chance problemas (usado, pero ThinkPad confiable)
-            100,     // Valor residual decente
-            false,   // Pantalla incluida
-            0,       // No necesitas pantalla externa
-            
-            // NUEVOS FACTORES
-            10.0,    // Portabilidad: PERFECTA (laptop legendario) ✅
-            9.0,     // Facilidad upgrade RAM: MUY FÁCIL (SO-DIMM, ThinkPad diseñado para eso)
-            60,      // Costo upgrade 16→32GB: $60 USD (barato, RAM estándar)
-            10.0,    // Ecosistema Docker/compiladores: PERFECTO en Linux
-            0.15,    // Prob downtime: 15% (usado, pero ThinkPad confiable)
-            25,      // Costo oportunidad: $25/hora
-            0.25,    // Estrés base: MEDIO (usado = ansiedad, pero ThinkPad = confianza)
-            7.0      // Familiaridad: BUENA (Linux conocido, HW nuevo pero estándar)
-        },
-        {
             "Laptop nuevo económico",
             "Acer/HP con AMD Ryzen 5, 16GB RAM",
             300,     // En el límite del presupuesto
@@ -379,6 +355,156 @@ int main() {
             25,      // Costo oportunidad: $25/hora
             0.20,    // Estrés base: BAJO-MEDIO (nuevo = confianza, pero marca desconocida)
             6.0      // Familiaridad: MEDIA (Linux conocido, HW nuevo genérico)
+        },
+        {
+            "Computador del trabajo",
+            "Laptop empresa (gratis, sin restricciones explícitas)",
+            0,       // GRATIS ✅
+            1.0,     // 100% chance (ya disponible)
+            7.5,     // Rendimiento: probablemente decente (laptop corporativo)
+            16,      // 16GB RAM asumido (estándar corporativo)
+            2.0,     // Duración: mientras sigas empleado (incertidumbre)
+            0,       // $0 mantenimiento (empresa mantiene)
+            6.0,     // Linux: puede tener restricciones IT corporativas
+            0.05,    // 5% problemas (soporte IT disponible)
+            0,       // Valor reventa: NO ES TUYO
+            false,   // Laptop incluida
+            0,
+            
+            // NUEVOS FACTORES
+            10.0,    // Portabilidad: PERFECTA (laptop) ✅
+            0.0,     // Facilidad upgrade RAM: IMPOSIBLE (no es tuyo)
+            0,       // Costo upgrade: N/A
+            6.0,     // Ecosistema: LIMITADO (políticas corporativas, posible Windows)
+            0.10,    // Prob downtime: 10% (si pierdes trabajo = crisis total)
+            25,      // Costo oportunidad: $25/hora
+            0.60,    // Estrés base: ALTO (dependencia laboral crítica) ⚠️
+            3.0      // Familiaridad: BAJA (OS/HW desconocido, posible Windows)
+        },
+        {
+            "MacBook Pro 2020 usado",
+            "MacBook Pro 13\" 2020, i5-1038NG7, 16GB RAM, 512GB SSD",
+            320,     // Precio promedio eBay Nov 2025
+            0.6,     // 60% chance buen precio
+            8.5,     // Muy buen rendimiento
+            16,      // 16GB RAM (upgrade completo)
+            3.5,     // Durará ~3.5 años (usado pero reciente)
+            80,      // $80/año mantenimiento
+            7.5,     // macOS decente para dev
+            0.15,    // 15% problemas (usado, 4 años)
+            200,     // Mac retiene valor
+            false,   // Laptop incluida
+            0,
+            
+            // NUEVOS FACTORES
+            10.0,    // Portabilidad: PERFECTA ✅
+            0.0,     // Facilidad upgrade RAM: IMPOSIBLE (soldado)
+            0,       // Costo upgrade: N/A (soldado)
+            8.0,     // Ecosistema: BUENO (macOS buen dev, Docker OK)
+            0.12,    // Prob downtime: 12% (usado, pero Mac confiable)
+            25,      // Costo oportunidad: $25/hora
+            0.20,    // Estrés base: BAJO (muy similar a actual, confiable)
+            9.0      // Familiaridad: PERFECTA (usas Mac ahora, mismo OS)
+        },
+        {
+            "Mini PC chino barato",
+            "GMKtec/BOSGAME Ryzen 5 3500U, 16GB RAM, 512GB SSD",
+            260,     // Precio Amazon Nov 2025
+            0.75,    // 75% chance (amplia disponibilidad)
+            8.0,     // Buen rendimiento (Ryzen 5)
+            16,      // 16GB RAM
+            3.5,     // Durará ~3.5 años
+            35,      // $35/año mantenimiento
+            9.0,     // Excelente para Linux
+            0.08,    // 8% problemas (nuevo, pero marca china)
+            100,     // Depreciación rápida
+            true,    // REQUIERE pantalla externa
+            80,      // $80 pantalla básica
+            
+            // NUEVOS FACTORES
+            0.0,     // Portabilidad: CERO (desktop) ❌ CRÍTICO
+            8.0,     // Facilidad upgrade RAM: FÁCIL (SO-DIMM upgradeable)
+            50,      // Costo upgrade 16→32GB: $50
+            9.0,     // Ecosistema: EXCELENTE (Linux perfecto)
+            0.08,    // Prob downtime: 8%
+            25,      // Costo oportunidad: $25/hora
+            0.50,    // Estrés base: ALTO (desktop = no movilidad = ansiedad) ⚠️
+            4.0      // Familiaridad: MEDIA-BAJA (Linux conocido, HW chino desconocido)
+        },
+        {
+            "MSI Bravo 15 usado",
+            "MSI Bravo 15.6\" Ryzen 7, 16GB RAM, RX 6550M (gaming)",
+            400,     // Precio eBay Nov 2025 (SOBRE PRESUPUESTO)
+            0.5,     // 50% chance buen deal
+            9.0,     // Excelente rendimiento (gaming spec)
+            16,      // 16GB RAM
+            3.0,     // Durará ~3 años (gaming laptops degastan más)
+            70,      // $70/año mantenimiento
+            8.5,     // Muy bueno para Linux
+            0.18,    // 18% problemas (usado, gaming = alta temperatura)
+            180,     // Depreciación moderada
+            false,   // Laptop incluida
+            0,
+            
+            // NUEVOS FACTORES
+            10.0,    // Portabilidad: PERFECTA (laptop) ✅
+            7.0,     // Facilidad upgrade RAM: BUENA (gaming laptops upgradeable)
+            70,      // Costo upgrade 16→32GB: $70
+            9.0,     // Ecosistema: EXCELENTE (Linux perfecto en AMD)
+            0.15,    // Prob downtime: 15% (usado gaming = riesgo térmico)
+            25,      // Costo oportunidad: $25/hora
+            0.30,    // Estrés base: MEDIO (usado gaming = ansiedad térmica, pero potente)
+            6.0      // Familiaridad: MEDIA (Linux conocido, HW gaming desconocido)
+        },
+        {
+            "MacBook Air M2 nuevo a cuotas",
+            "MacBook Air M2 2024, 16GB RAM, 512GB SSD (financiamiento 12-24 meses)",
+            1200,    // Precio total a pagar (con intereses ~10-15%)
+            1.0,     // 100% chance (disponible en tiendas oficiales)
+            9.5,     // Excelente rendimiento (M2 muy eficiente)
+            16,      // 16GB RAM (configuración ideal)
+            5.0,     // Durará ~5 años (nuevo, Apple Silicon duradero)
+            30,      // $30/año mantenimiento (bajo, nuevo con garantía)
+            7.5,     // macOS decente para dev
+            0.02,    // 2% problemas (nuevo, garantía Apple)
+            700,     // Retiene 58% valor después 2 años
+            false,   // Laptop incluida
+            0,
+            
+            // NUEVOS FACTORES
+            10.0,    // Portabilidad: PERFECTA ✅
+            0.0,     // Facilidad upgrade RAM: IMPOSIBLE (soldado)
+            0,       // Costo upgrade: N/A
+            8.5,     // Ecosistema: MUY BUENO (macOS excelente dev, Docker OK)
+            0.02,    // Prob downtime: 2% (nuevo, garantía 1 año)
+            25,      // Costo oportunidad: $25/hora
+            0.10,    // Estrés base: MUY BAJO (nuevo, confiable, garantía) ⭐
+            10.0     // Familiaridad: PERFECTA (mismo OS actual, mejor HW)
+        },
+        {
+            "MacBook Pro M3 nuevo a cuotas",
+            "MacBook Pro 14\" M3 2024, 16GB RAM, 512GB SSD (financiamiento 12-24 meses)",
+            1800,    // Precio total con intereses (~10-15%)
+            1.0,     // 100% chance (disponible tiendas oficiales)
+            10.0,    // Rendimiento MÁXIMO (M3 top tier)
+            16,      // 16GB RAM
+            6.0,     // Durará ~6 años (nuevo, Pro quality)
+            30,      // $30/año mantenimiento
+            8.0,     // macOS muy bueno para dev
+            0.01,    // 1% problemas (nuevo, Pro build quality)
+            1100,    // Retiene 61% valor después 2 años (Pro models)
+            false,   // Laptop incluida
+            0,
+            
+            // NUEVOS FACTORES
+            10.0,    // Portabilidad: PERFECTA ✅
+            0.0,     // Facilidad upgrade RAM: IMPOSIBLE (soldado)
+            0,       // Costo upgrade: N/A
+            9.0,     // Ecosistema: EXCELENTE (macOS mejor dev experience)
+            0.01,    // Prob downtime: 1% (nuevo, Pro quality)
+            25,      // Costo oportunidad: $25/hora
+            0.05,    // Estrés base: MÍNIMO (mejor laptop mercado, garantía) ⭐⭐
+            10.0     // Familiaridad: PERFECTA (mismo OS, hardware premium)
         }
     };
     
@@ -577,10 +703,11 @@ int main() {
     }
     
     std::cout << "\n💡 FACTORES CLAVE PARA TU DECISIÓN:\n";
-    std::cout << "   • ¿Necesitas portabilidad? → ThinkPad\n";
-    std::cout << "   • ¿Prioridad máximo rendimiento? → Mini PC AMD\n";
-    std::cout << "   • ¿Presupuesto muy ajustado? → Seguir con MacBook\n";
-    std::cout << "   • ¿Quieres ecosistema Mac? → Mac Mini usado\n\n";
+    std::cout << "   • Portabilidad: CRÍTICA (trabajas desde cualquier lugar)\n";
+    std::cout << "   • Downtime: Cuesta $25/hora (freelance)\n";
+    std::cout << "   • Estrés: Confiabilidad > precio inicial\n";
+    std::cout << "   • Cuotas: Puedes generar dinero suficiente → opciones premium viables\n";
+    std::cout << "   • ROI: Considera valor total a 2 años (no solo precio inicial)\n\n";
     
     std::cout << "🔧 PRÓXIMOS PASOS:\n";
     std::cout << "1. Buscar ofertas específicas de tu opción favorita\n";
