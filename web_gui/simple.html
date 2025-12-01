@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎲 Decision Maker - Monte Carlo Simple</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f8f9fa;
+        }
+        
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+        
+        .btn:hover { background: #0056b3; }
+        .btn-success { background: #28a745; }
+        .btn-success:hover { background: #1e7e34; }
+        
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .option-card {
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 1rem;
+        }
+        
+        .option-card.winner {
+            border-color: #28a745;
+            background-color: #f8fff9;
+        }
+        
+        .result-section {
+            display: none;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background-color: #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 1rem 0;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background-color: #007bff;
+            width: 0%;
+            transition: width 0.3s;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .stat-item {
+            text-align: center;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+        
+        .emoji { font-size: 1.2em; }
+        .text-success { color: #28a745; }
+        .text-primary { color: #007bff; }
+        .text-warning { color: #ffc107; }
+        
+        .hidden { display: none; }
+        
+        @media (max-width: 768px) {
+            .container { padding: 10px; }
+            .header { padding: 1rem; }
+            .options-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🎲 Decision Maker</h1>
+            <p>Simulador Monte Carlo para tomar decisiones inteligentes</p>
+        </div>
+
+        <!-- Configuración -->
+        <div class="card" id="configSection">
+            <h2>⚙️ Configurar tu Decisión</h2>
+            
+            <div class="form-group">
+                <label for="decisionTitle">Título de tu decisión:</label>
+                <input type="text" id="decisionTitle" placeholder="Ej: ¿Qué computadora comprar?" value="¿Qué computadora comprar?">
+            </div>
+            
+            <div class="form-group">
+                <label for="numOptions">Número de opciones:</label>
+                <select id="numOptions" onchange="updateOptionsCount()">
+                    <option value="2">2 opciones</option>
+                    <option value="3" selected>3 opciones</option>
+                    <option value="4">4 opciones</option>
+                    <option value="5">5 opciones</option>
+                </select>
+            </div>
+
+            <div id="optionsContainer" class="options-grid">
+                <!-- Las opciones se generan aquí -->
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                <div class="form-group">
+                    <label for="numSimulations">Simulaciones:</label>
+                    <select id="numSimulations">
+                        <option value="1000">1,000 (rápido)</option>
+                        <option value="5000" selected>5,000 (balanceado)</option>
+                        <option value="10000">10,000 (preciso)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="timeHorizon">Años a evaluar:</label>
+                    <input type="number" id="timeHorizon" value="2" min="1" max="10">
+                </div>
+            </div>
+
+            <button class="btn btn-success" onclick="runSimulation()" style="width: 100%; padding: 15px; font-size: 16px;">
+                🚀 Ejecutar Simulación Monte Carlo
+            </button>
+        </div>
+
+        <!-- Progreso -->
+        <div class="card hidden" id="progressSection">
+            <h3>🎲 Ejecutando simulaciones...</h3>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <p id="progressText">Simulación 0 de 5000</p>
+        </div>
+
+        <!-- Resultados -->
+        <div class="result-section" id="resultsSection">
+            <div class="card">
+                <h2>📊 Resultados de la Simulación</h2>
+                <div id="resultsContainer">
+                    <!-- Los resultados se muestran aquí -->
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>🏆 Recomendación</h2>
+                <div id="recommendationContainer">
+                    <!-- La recomendación se muestra aquí -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Variables globales
+        let options = [];
+        let simulationResults = [];
+
+        // Inicializar la aplicación
+        document.addEventListener('DOMContentLoaded', function() {
+            updateOptionsCount();
+        });
+
+        function updateOptionsCount() {
+            const numOptions = parseInt(document.getElementById('numOptions').value);
+            const container = document.getElementById('optionsContainer');
+            
+            // Limpiar contenedor
+            container.innerHTML = '';
+            options = [];
+
+            // Crear opciones por defecto
+            const defaultOptions = [
+                { name: 'Seguir con actual', cost: 50, satisfaction: 6.5, reliability: 8.0 },
+                { name: 'Mini PC AMD', cost: 290, satisfaction: 8.7, reliability: 9.0 },
+                { name: 'Mac Mini usado', cost: 280, satisfaction: 7.5, reliability: 7.5 },
+                { name: 'Laptop ThinkPad', cost: 270, satisfaction: 8.1, reliability: 7.8 },
+                { name: 'Laptop nuevo', cost: 300, satisfaction: 7.9, reliability: 8.5 }
+            ];
+
+            for (let i = 0; i < numOptions; i++) {
+                const option = defaultOptions[i] || { 
+                    name: `Opción ${i + 1}`, 
+                    cost: 200, 
+                    satisfaction: 7.0, 
+                    reliability: 7.0 
+                };
+                
+                options.push(option);
+
+                const optionCard = document.createElement('div');
+                optionCard.className = 'option-card';
+                optionCard.innerHTML = `
+                    <h4>Opción ${i + 1}</h4>
+                    <div class="form-group">
+                        <label>Nombre:</label>
+                        <input type="text" value="${option.name}" onchange="updateOption(${i}, 'name', this.value)">
+                    </div>
+                    <div class="form-group">
+                        <label>Costo inicial ($):</label>
+                        <input type="number" value="${option.cost}" onchange="updateOption(${i}, 'cost', parseFloat(this.value))">
+                    </div>
+                    <div class="form-group">
+                        <label>Satisfacción esperada (1-10):</label>
+                        <input type="number" min="1" max="10" step="0.1" value="${option.satisfaction}" onchange="updateOption(${i}, 'satisfaction', parseFloat(this.value))">
+                    </div>
+                    <div class="form-group">
+                        <label>Confiabilidad (1-10):</label>
+                        <input type="number" min="1" max="10" step="0.1" value="${option.reliability}" onchange="updateOption(${i}, 'reliability', parseFloat(this.value))">
+                    </div>
+                `;
+                container.appendChild(optionCard);
+            }
+        }
+
+        function updateOption(index, field, value) {
+            options[index][field] = value;
+        }
+
+        function normalRandom(mean = 0, stdDev = 1) {
+            let u = 0, v = 0;
+            while(u === 0) u = Math.random();
+            while(v === 0) v = Math.random();
+            
+            const z = Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+            return z * stdDev + mean;
+        }
+
+        function clamp(value, min, max) {
+            return Math.max(min, Math.min(max, value));
+        }
+
+        function simulateOption(option, timeHorizon) {
+            // Simular costo total
+            let totalCost = option.cost;
+            
+            // Costos de mantenimiento anuales (basado en confiabilidad)
+            const maintenanceRate = (10 - option.reliability) / 10 * 0.1; // 0-10% del costo inicial
+            for (let year = 1; year <= timeHorizon; year++) {
+                if (Math.random() < maintenanceRate) {
+                    totalCost += option.cost * normalRandom(0.05, 0.02); // 5% ± 2%
+                }
+            }
+            
+            // Depreciación (valor residual)
+            const depreciationRate = 0.15 + Math.random() * 0.1; // 15-25% anual
+            const residualValue = option.cost * Math.pow(1 - depreciationRate, timeHorizon);
+            totalCost -= residualValue;
+            
+            // Simular satisfacción real
+            const actualSatisfaction = clamp(
+                normalRandom(option.satisfaction, 0.5),
+                1, 10
+            );
+            
+            // Simular problemas (tiempo perdido)
+            const problemsProbability = (10 - option.reliability) / 10 * 0.3;
+            const problemsTime = Math.random() < problemsProbability ? 
+                Math.random() * 20 : 0; // 0-20 horas perdidas
+            
+            return {
+                totalCost: Math.max(0, totalCost),
+                satisfaction: actualSatisfaction,
+                problems: problemsTime,
+                valueScore: actualSatisfaction / (totalCost / 100) // Satisfacción por cada $100
+            };
+        }
+
+        async function runSimulation() {
+            const numSimulations = parseInt(document.getElementById('numSimulations').value);
+            const timeHorizon = parseInt(document.getElementById('timeHorizon').value);
+            
+            // Mostrar progreso
+            document.getElementById('configSection').style.display = 'none';
+            document.getElementById('progressSection').classList.remove('hidden');
+            
+            // Preparar resultados
+            simulationResults = options.map(option => ({
+                name: option.name,
+                costs: [],
+                satisfactions: [],
+                problems: [],
+                valueScores: []
+            }));
+            
+            // Ejecutar simulaciones
+            for (let sim = 0; sim < numSimulations; sim++) {
+                if (sim % 100 === 0) {
+                    // Actualizar progreso
+                    const progress = (sim / numSimulations) * 100;
+                    document.getElementById('progressFill').style.width = `${progress}%`;
+                    document.getElementById('progressText').textContent = `Simulación ${sim} de ${numSimulations}`;
+                    
+                    // Permitir que la UI se actualice
+                    await new Promise(resolve => setTimeout(resolve, 1));
+                }
+                
+                // Simular cada opción
+                for (let i = 0; i < options.length; i++) {
+                    const result = simulateOption(options[i], timeHorizon);
+                    simulationResults[i].costs.push(result.totalCost);
+                    simulationResults[i].satisfactions.push(result.satisfaction);
+                    simulationResults[i].problems.push(result.problems);
+                    simulationResults[i].valueScores.push(result.valueScore);
+                }
+            }
+            
+            // Completar progreso
+            document.getElementById('progressFill').style.width = '100%';
+            document.getElementById('progressText').textContent = `Simulación completa: ${numSimulations} escenarios analizados`;
+            
+            // Mostrar resultados después de un momento
+            setTimeout(() => {
+                document.getElementById('progressSection').classList.add('hidden');
+                showResults();
+            }, 1000);
+        }
+
+        function calculateStats(array) {
+            const sorted = [...array].sort((a, b) => a - b);
+            const mean = array.reduce((sum, val) => sum + val, 0) / array.length;
+            const variance = array.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / array.length;
+            
+            return {
+                mean: mean,
+                min: Math.min(...array),
+                max: Math.max(...array),
+                std: Math.sqrt(variance),
+                median: sorted[Math.floor(sorted.length / 2)]
+            };
+        }
+
+        function showResults() {
+            // Calcular estadísticas para cada opción
+            const stats = simulationResults.map(result => ({
+                name: result.name,
+                cost: calculateStats(result.costs),
+                satisfaction: calculateStats(result.satisfactions),
+                problems: calculateStats(result.problems),
+                valueScore: calculateStats(result.valueScores)
+            }));
+            
+            // Encontrar el ganador (mejor value score promedio)
+            const winner = stats.reduce((best, current) => 
+                current.valueScore.mean > best.valueScore.mean ? current : best
+            );
+            
+            // Mostrar resultados
+            const container = document.getElementById('resultsContainer');
+            container.innerHTML = '';
+            
+            stats.forEach(stat => {
+                const isWinner = stat.name === winner.name;
+                const card = document.createElement('div');
+                card.className = `option-card ${isWinner ? 'winner' : ''}`;
+                
+                card.innerHTML = `
+                    <h3>${isWinner ? '🏆 ' : ''}${stat.name} ${isWinner ? '<span class="text-success">(Recomendado)</span>' : ''}</h3>
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="emoji">💰</div>
+                            <strong>$${Math.round(stat.cost.mean).toLocaleString()}</strong>
+                            <div>Costo promedio</div>
+                            <small>Rango: $${Math.round(stat.cost.min)} - $${Math.round(stat.cost.max)}</small>
+                        </div>
+                        <div class="stat-item">
+                            <div class="emoji">😊</div>
+                            <strong>${stat.satisfaction.mean.toFixed(1)}/10</strong>
+                            <div>Satisfacción</div>
+                            <small>±${stat.satisfaction.std.toFixed(1)}</small>
+                        </div>
+                        <div class="stat-item">
+                            <div class="emoji">⚠️</div>
+                            <strong>${stat.problems.mean.toFixed(1)}h</strong>
+                            <div>Problemas</div>
+                            <small>Tiempo perdido</small>
+                        </div>
+                        <div class="stat-item">
+                            <div class="emoji">🎯</div>
+                            <strong>${stat.valueScore.mean.toFixed(2)}</strong>
+                            <div>Score Valor</div>
+                            <small>Satisfacción/$100</small>
+                        </div>
+                    </div>
+                `;
+                
+                container.appendChild(card);
+            });
+            
+            // Mostrar recomendación
+            showRecommendation(stats, winner);
+            
+            // Mostrar sección de resultados
+            document.getElementById('resultsSection').style.display = 'block';
+            document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function showRecommendation(stats, winner) {
+            const container = document.getElementById('recommendationContainer');
+            
+            const cheapest = stats.reduce((min, current) => 
+                current.cost.mean < min.cost.mean ? current : min
+            );
+            
+            const mostSatisfying = stats.reduce((max, current) => 
+                current.satisfaction.mean > max.satisfaction.mean ? current : max
+            );
+            
+            container.innerHTML = `
+                <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem;">
+                    <div>
+                        <h3>🎯 Recomendación Final: ${winner.name}</h3>
+                        <p><strong>Esta es tu mejor opción</strong> porque ofrece la mejor relación valor-satisfacción según ${document.getElementById('numSimulations').value} simulaciones.</p>
+                        
+                        <h4>📊 Comparación Rápida:</h4>
+                        <ul>
+                            <li><strong>Más económico:</strong> ${cheapest.name} ($${Math.round(cheapest.cost.mean).toLocaleString()})</li>
+                            <li><strong>Mayor satisfacción:</strong> ${mostSatisfying.name} (${mostSatisfying.satisfaction.mean.toFixed(1)}/10)</li>
+                            <li><strong>Mejor valor general:</strong> ${winner.name}</li>
+                        </ul>
+                        
+                        <h4>💡 ¿Por qué ${winner.name}?</h4>
+                        <p>Con un costo promedio de $${Math.round(winner.cost.mean).toLocaleString()} y satisfacción de ${winner.satisfaction.mean.toFixed(1)}/10, 
+                        esta opción te da <strong>${winner.valueScore.mean.toFixed(2)} puntos de satisfacción por cada $100 invertidos</strong>.</p>
+                    </div>
+                    <div style="background: #f8f9fa; padding: 1rem; border-radius: 8px;">
+                        <h4>📈 Estadísticas</h4>
+                        <ul style="list-style: none; padding: 0;">
+                            <li><strong>Simulaciones:</strong> ${document.getElementById('numSimulations').value}</li>
+                            <li><strong>Horizonte:</strong> ${document.getElementById('timeHorizon').value} años</li>
+                            <li><strong>Confianza:</strong> 95%</li>
+                            <li><strong>Opciones:</strong> ${stats.length}</li>
+                        </ul>
+                        
+                        <h4>🔧 Próximos pasos:</h4>
+                        <ol style="font-size: 0.9em;">
+                            <li>Revisa los detalles</li>
+                            <li>Considera tu presupuesto</li>
+                            <li>¡Toma la decisión!</li>
+                        </ol>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Función para resetear la aplicación
+        function resetApp() {
+            document.getElementById('configSection').style.display = 'block';
+            document.getElementById('progressSection').classList.add('hidden');
+            document.getElementById('resultsSection').style.display = 'none';
+            options = [];
+            simulationResults = [];
+            updateOptionsCount();
+        }
+    </script>
+</body>
+</html>

@@ -40,6 +40,7 @@ struct OpcionComputadora {
     double costo_oportunidad_hora_perdida;    // $/hora perdida en freelance (promedio)
     double estres_base;                       // 0-1: ansiedad base con esta opción
     double familiaridad_sistema;              // 0-10: qué tan familiar es el sistema para ti
+    double gasto_extra_movil_semana;          // $/semana en café/comida adicional por trabajar fuera (cafés)
 };
 
 struct ResultadoSimulacion {
@@ -57,6 +58,7 @@ struct ResultadoSimulacion {
     bool upgrade_ram_necesario;        // ¿Necesité upgrade RAM?
     double costo_upgrade_ram_real;     // Costo real si upgradeé RAM
     double penalizacion_portabilidad;  // Penalización por no poder trabajar móvil
+    double gasto_comida_total;         // Gasto acumulado en café/comida extra por trabajo móvil
 };
 
 ResultadoSimulacion simular_opcion(const OpcionComputadora& opcion, std::mt19937& gen) {
@@ -133,6 +135,16 @@ ResultadoSimulacion simular_opcion(const OpcionComputadora& opcion, std::mt19937
         double horas_perdidas_portabilidad = 2.0 * 52 * 2; // 2h/semana × 52 semanas × 2 años = 208h
         resultado.penalizacion_portabilidad = horas_perdidas_portabilidad;
         resultado.dinero_perdido_downtime += horas_perdidas_portabilidad * opcion.costo_oportunidad_hora_perdida;
+    }
+
+    // 5.b GASTO EXTRA DE COMIDA / CAFÉ (nuevo)
+    // Si la opción permite portabilidad alta, asumimos que trabajas X veces fuera y gastas extra.
+    // Modelo: gasto semanal × factor portabilidad relativa × 104 semanas.
+    resultado.gasto_comida_total = 0;
+    if (opcion.portabilidad >= 7.0 && opcion.gasto_extra_movil_semana > 0) {
+        // Ajuste por portabilidad (más portátil → más uso fuera → más gasto)
+        double factor_porta = (opcion.portabilidad / 10.0); // 0-1
+        resultado.gasto_comida_total = opcion.gasto_extra_movil_semana * 104.0 * factor_porta; // 2 años
     }
     
     // 6. DOWNTIME CRÍTICO (NUEVO - FREELANCE)
@@ -240,7 +252,8 @@ ResultadoSimulacion simular_opcion(const OpcionComputadora& opcion, std::mt19937
                                   costos_upgrades_2años + 
                                   resultado.dinero_perdido_downtime +     // Costo oportunidad downtime
                                   resultado.penalizacion_portabilidad -   // Costo oportunidad portabilidad ⚠️
-                                  opcion.valor_reventa_después_2años;
+                                  opcion.valor_reventa_después_2años +
+                                  resultado.gasto_comida_total;           // Gasto café/comida móvil
     
     return resultado;
 }
@@ -279,7 +292,8 @@ int main() {
             0.12,    // Prob downtime: 12% (funciona bien pero RAM limita)
             25,      // Costo oportunidad: $25/hora freelance
             0.15,    // Estrés base: BAJO (funciona súper bien, confiable)
-            10.0     // Familiaridad: MÁXIMA (ya lo usas, conoces todo)
+            10.0,    // Familiaridad: MÁXIMA (ya lo usas, conoces todo)
+            12       // Gasto extra móvil semanal (café/comida trabajando fuera)
         },
         {
             "Mac Mini usado (2018-2020)",
@@ -304,7 +318,8 @@ int main() {
             0.10,    // Prob downtime: 10% (más estable que MacBook viejo)
             25,      // Costo oportunidad: $25/hora
             0.30,    // Estrés base: MEDIO (usado + no portátil = ansiedad)
-            8.5      // Familiaridad: ALTA (macOS conocido, pero desktop nuevo)
+            8.5,     // Familiaridad: ALTA (macOS conocido, pero desktop nuevo)
+            0        // Gasto extra móvil semanal (no portátil → no café adicional)
         },
         {
             "Mini PC AMD (nuevo)",
@@ -329,7 +344,8 @@ int main() {
             0.05,    // Prob downtime: 5% (nuevo, confiable)
             25,      // Costo oportunidad: $25/hora
             0.35,    // Estrés base: MEDIO-ALTO (no portátil + sistema nuevo)
-            5.0      // Familiaridad: MEDIA (Linux conocido, pero HW nuevo)
+            5.0,     // Familiaridad: MEDIA (Linux conocido, pero HW nuevo)
+            0        // Gasto extra móvil semanal (desktop)
         },
         {
             "Laptop nuevo económico",
@@ -354,7 +370,8 @@ int main() {
             0.08,    // Prob downtime: 8% (nuevo, garantía)
             25,      // Costo oportunidad: $25/hora
             0.20,    // Estrés base: BAJO-MEDIO (nuevo = confianza, pero marca desconocida)
-            6.0      // Familiaridad: MEDIA (Linux conocido, HW nuevo genérico)
+            6.0,     // Familiaridad: MEDIA (Linux conocido, HW nuevo genérico)
+            15       // Gasto extra móvil semanal (trabajo frecuente fuera)
         },
         {
             "Computador del trabajo",
@@ -454,7 +471,8 @@ int main() {
             0.15,    // Prob downtime: 15% (usado gaming = riesgo térmico)
             25,      // Costo oportunidad: $25/hora
             0.30,    // Estrés base: MEDIO (usado gaming = ansiedad térmica, pero potente)
-            6.0      // Familiaridad: MEDIA (Linux conocido, HW gaming desconocido)
+            6.0,     // Familiaridad: MEDIA (Linux conocido, HW gaming desconocido)
+            18       // Gasto extra móvil semanal (más uso en cafés para potencia)
         },
         {
             "MacBook Air M2 nuevo a cuotas",
@@ -479,7 +497,8 @@ int main() {
             0.02,    // Prob downtime: 2% (nuevo, garantía 1 año)
             25,      // Costo oportunidad: $25/hora
             0.10,    // Estrés base: MUY BAJO (nuevo, confiable, garantía) ⭐
-            10.0     // Familiaridad: PERFECTA (mismo OS actual, mejor HW)
+            10.0,    // Familiaridad: PERFECTA (mismo OS actual, mejor HW)
+            20       // Gasto extra móvil semanal (mayor comodidad → más cafés)
         },
         {
             "MacBook Pro M3 nuevo a cuotas",
@@ -504,7 +523,8 @@ int main() {
             0.01,    // Prob downtime: 1% (nuevo, Pro quality)
             25,      // Costo oportunidad: $25/hora
             0.05,    // Estrés base: MÍNIMO (mejor laptop mercado, garantía) ⭐⭐
-            10.0     // Familiaridad: PERFECTA (mismo OS, hardware premium)
+            10.0,    // Familiaridad: PERFECTA (mismo OS, hardware premium)
+            22       // Gasto extra móvil semanal (más uso externo profesional)
         }
     };
     
@@ -533,6 +553,8 @@ int main() {
         double probabilidad_upgrade_ram;
         double costo_upgrade_ram_promedio;
         double penalizacion_portabilidad_promedio;
+        double gasto_comida_promedio;
+        std::vector<double> gasto_comida_vec;
     };
     
     std::vector<EstadisticasOpcion> resultados;
@@ -548,6 +570,7 @@ int main() {
         std::vector<double> estres_vec;
         std::vector<double> costo_upgrade_ram_vec;
         std::vector<double> penalizacion_portabilidad_vec;
+        std::vector<double> gasto_comida_vec;
         
         int upgrades_tempranos = 0;
         int buenos_deals = 0;
@@ -565,6 +588,7 @@ int main() {
             estres_vec.push_back(resultado.estres_acumulado);
             costo_upgrade_ram_vec.push_back(resultado.costo_upgrade_ram_real);
             penalizacion_portabilidad_vec.push_back(resultado.penalizacion_portabilidad);
+            gasto_comida_vec.push_back(resultado.gasto_comida_total);
             
             if (resultado.necesite_upgrade_temprano) upgrades_tempranos++;
             if (resultado.encontre_buen_deal) buenos_deals++;
@@ -584,6 +608,7 @@ int main() {
         stats.estres_promedio = 0;
         stats.costo_upgrade_ram_promedio = 0;
         stats.penalizacion_portabilidad_promedio = 0;
+        stats.gasto_comida_promedio = 0;
         
         for (size_t i = 0; i < costos.size(); ++i) {
             stats.costo_promedio += costos[i];
@@ -594,6 +619,7 @@ int main() {
             stats.estres_promedio += estres_vec[i];
             stats.costo_upgrade_ram_promedio += costo_upgrade_ram_vec[i];
             stats.penalizacion_portabilidad_promedio += penalizacion_portabilidad_vec[i];
+            stats.gasto_comida_promedio += gasto_comida_vec[i];
         }
         
         stats.costo_promedio /= num_simulaciones;
@@ -604,6 +630,7 @@ int main() {
         stats.estres_promedio /= num_simulaciones;
         stats.costo_upgrade_ram_promedio /= num_simulaciones;
         stats.penalizacion_portabilidad_promedio /= num_simulaciones;
+        stats.gasto_comida_promedio /= num_simulaciones;
         
         stats.probabilidad_upgrade_temprano = (double)upgrades_tempranos / num_simulaciones;
         stats.probabilidad_buen_deal = (double)buenos_deals / num_simulaciones;
@@ -644,6 +671,8 @@ int main() {
                   << stats.penalizacion_portabilidad_promedio << " horas\n";
         std::cout << "   ⚠️  Probabilidad downtime crítico: " << std::setprecision(1) 
                   << stats.probabilidad_downtime_critico * 100 << "%\n";
+        std::cout << "   ☕ Gasto café/comida (2 años): $" << std::setprecision(0)
+              << stats.gasto_comida_promedio << "\n";
         
         std::cout << "   📈 Probabilidad upgrade temprano: " << std::setprecision(1) 
                   << stats.probabilidad_upgrade_temprano * 100 << "%\n";
