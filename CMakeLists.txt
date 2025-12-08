@@ -25,8 +25,9 @@ set(EXAMPLES_DIR "${CMAKE_CURRENT_SOURCE_DIR}/examples")
 set(TESTS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/tests")
 
 # Archivos fuente del framework
-# Mejoras V4: todos los 5 módulos
+# Framework base + mejoras V4: todos los 5 módulos + framework genérico
 set(FRAMEWORK_SOURCES
+    "${SRC_DIR}/decision_framework.cpp"
     "${SRC_DIR}/real_time_monitor.cpp"
     "${SRC_DIR}/bayesian_updater.cpp"
     "${SRC_DIR}/scenario_analysis.cpp"
@@ -67,6 +68,10 @@ endif()
 
 if(EXISTS "${EXAMPLES_DIR}/v4_complete_analysis.cpp")
     add_decision_example(v4_complete_analysis "${EXAMPLES_DIR}/v4_complete_analysis.cpp")
+endif()
+
+if(EXISTS "${EXAMPLES_DIR}/template_new_decision.cpp")
+    add_decision_example(template_new_decision "${EXAMPLES_DIR}/template_new_decision.cpp")
 endif()
 
 # Habilitar testing
