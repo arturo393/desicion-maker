@@ -25,11 +25,13 @@ set(EXAMPLES_DIR "${CMAKE_CURRENT_SOURCE_DIR}/examples")
 set(TESTS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/tests")
 
 # Archivos fuente del framework
-# Primero los 3 módulos nuevos (mejoras V4)
+# Mejoras V4: todos los 5 módulos
 set(FRAMEWORK_SOURCES
     "${SRC_DIR}/real_time_monitor.cpp"
     "${SRC_DIR}/bayesian_updater.cpp"
     "${SRC_DIR}/scenario_analysis.cpp"
+    "${SRC_DIR}/ml_demand_predictor.cpp"
+    "${SRC_DIR}/value_at_risk.cpp"
 )
 
 # Crear biblioteca estática del framework
@@ -61,6 +63,10 @@ endfunction()
 # Agregar ejemplos si existen
 if(EXISTS "${EXAMPLES_DIR}/v4_improvements_demo.cpp")
     add_decision_example(v4_improvements_demo "${EXAMPLES_DIR}/v4_improvements_demo.cpp")
+endif()
+
+if(EXISTS "${EXAMPLES_DIR}/v4_complete_analysis.cpp")
+    add_decision_example(v4_complete_analysis "${EXAMPLES_DIR}/v4_complete_analysis.cpp")
 endif()
 
 # Habilitar testing
