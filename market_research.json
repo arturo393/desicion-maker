@@ -1,0 +1,87 @@
+{
+  "timestamp": "2025-12-08T15:19:27.886199",
+  "ciudad": "Santiago, La Florida",
+  "sillones_nuevos": [
+    {
+      "tipo": "Sillón moderno tapizado",
+      "precio_min": 250000,
+      "precio_max": 500000
+    },
+    {
+      "tipo": "Sillón relajante/reclinable",
+      "precio_min": 400000,
+      "precio_max": 800000
+    },
+    {
+      "tipo": "Sillón clásico madera",
+      "precio_min": 350000,
+      "precio_max": 700000
+    },
+    {
+      "tipo": "Sillón vintage/restaurado",
+      "precio_min": 150000,
+      "precio_max": 400000
+    }
+  ],
+  "sillones_usados": [
+    {
+      "tipo": "Sillón moderno (buen estado)",
+      "precio_min": 100000,
+      "precio_max": 250000
+    },
+    {
+      "tipo": "Sillón relajante (funcionando)",
+      "precio_min": 150000,
+      "precio_max": 350000
+    },
+    {
+      "tipo": "Sillón madera (necesita limpieza)",
+      "precio_min": 50000,
+      "precio_max": 150000
+    },
+    {
+      "tipo": "Sillón vintage (restaurado)",
+      "precio_min": 80000,
+      "precio_max": 200000
+    }
+  ],
+  "costos_reparacion": [
+    {
+      "servicio": "Limpieza profunda",
+      "precio": "30,000 - 50,000 CLP"
+    },
+    {
+      "servicio": "Reparación mecánica (resortes)",
+      "precio": "20,000 - 50,000 CLP"
+    },
+    {
+      "servicio": "Reupholstery parcial (partes)",
+      "precio": "40,000 - 100,000 CLP"
+    },
+    {
+      "servicio": "Reupholstery completo",
+      "precio": "150,000 - 300,000 CLP"
+    },
+    {
+      "servicio": "Recolección a domicilio",
+      "precio": "15,000 - 30,000 CLP"
+    }
+  ],
+  "servicios_botado": [
+    {
+      "empresa": "Genérico (recogida)",
+      "precio_min": 50000,
+      "precio_max": 100000
+    },
+    {
+      "empresa": "Empresas de logística",
+      "precio_min": 80000,
+      "precio_max": 150000
+    },
+    {
+      "empresa": "Servicio premium (rápido)",
+      "precio_min": 100000,
+      "precio_max": 200000
+    }
+  ]
+}
