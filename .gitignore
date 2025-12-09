@@ -44,3 +44,33 @@ qrc_*.cpp
 # Archivos temporales
 *.tmp
 *.bak
+
+# SEGURIDAD: No subir credenciales ni tokens
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+*.cert
+*.crt
+*.p12
+*.p8
+.ssh/
+credentials/
+secrets/
+
+# Tokens y credenciales específicas
+github_token.txt
+api_keys.json
+credentials.json
+config.local.json
+.aws/credentials
+.aws/config
+
+# Firebase
+google-services.json
+serviceAccountKey.json
+
+# OAuth
+client_secret*.json
+oauth*.json
