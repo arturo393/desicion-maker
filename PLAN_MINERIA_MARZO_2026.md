@@ -2,19 +2,19 @@
 
 **Arturo Veras** | Diciembre 2025 - Marzo 2026  
 **Objetivo**: Conseguir oferta minería $4M-5M en 3 meses  
-**Confianza**: 70-80% (tu perfil es PERFECTO para minería)
+**Confianza**: 70-80% (tu perfil es exacto para minería)
 
 ---
 
-## ⏰ REALIDAD: TIEMPO LIMITADO (Entendido)
+## ⏰ REALIDAD: TIEMPO LIMITADO (Lo entendemos)
 
-**Problema**: Postulaciones minería toman mucho tiempo (procesos largos, investigación, CVs especializados)
+**El desafío**: Postulaciones en minería toman tiempo (procesos largos, investigación, CVs especializados)
 
-**Solución**: 
+**La solución**: 
 - 🎯 **Enfoque**: Solo minería BIG 3 (Codelco, BHP, Anglo) + 2-3 especializadas
 - ⏱️ **Dedicación**: 5-8 horas/semana (factible incluso con trabajo UQOMM)
 - 🔄 **Paralelo**: Mientras esperas respuestas, haces otras cosas
-- 📋 **Sistema**: Todo documentado, no hay confusión
+- 📋 **Sistema**: Todo documentado, sin confusión
 
 ---
 
