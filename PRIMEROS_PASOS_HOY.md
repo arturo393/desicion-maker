@@ -12,8 +12,8 @@ Arturo, esto es para que NO PIERDAS TIEMPO decidiendo. Estos son TUS PRÓXIMOS P
 1. **Abre LinkedIn en navegador**
 2. **Foto de perfil**:
    - Usa foto profesional con fondo blanco/neutro
-   - Cara clara, sonrisa, camisa oscura
-   - Si no tienes: toma una con teléfono, sirve
+   - Cara clara, expresión natural, camisa oscura
+   - Si no tienes: toma una con teléfono, está bien
 
 3. **Headline (lo que aparece bajo nombre)**:
    ```
@@ -22,7 +22,7 @@ Arturo, esto es para que NO PIERDAS TIEMPO decidiendo. Estos son TUS PRÓXIMOS P
    ```
 
 4. **Summary (About section - 250-300 palabras)**:
-   Copia-pega esto (personaliza con tus datos):
+   Personaliza esto para que suene natural:
    ```
    Ingeniero Civil Electrónico con 9+ años de experiencia en sistemas IoT 
    críticos, especializado en soluciones para minería subterránea.

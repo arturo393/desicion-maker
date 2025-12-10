@@ -200,17 +200,17 @@ DIC 2025                        ENE 2026                         FEB 2026       
 ## 💭 COMPARACIÓN: ANTES vs DESPUÉS
 
 ```
-ASPECTO              │ AHORA (UQOMM)      │ MINERÍA (META)
-─────────────────────┼────────────────────┼────────────────────
-Sueldo mensual       │ $2.6M              │ $4.5M (+$1.9M)
-Sueldo anual         │ $31.2M             │ $54M (+$22.8M)
-Estabilidad empresa  │ 36 people, UNCLEAR │ 1000+ people, CLEAR
-Carrera clarity      │ Path NO existe     │ Path VISIBLE
-Motivation           │ DECLINING ⬇️       │ RENEWED ⬆️
-Tech stack (IoT)     │ 70% match          │ 100% match ✅
-Work from home       │ 2h commute daily   │ Posible negotiable
-Team size            │ 2 directos         │ TBD but escalable
-Learning opportunity │ LIMITED            │ GROWTH potential
+ASPECTO              │ AHORA (UQOMM)         │ MINERÍA (META)
+─────────────────────┼──────────────────────┼────────────────────
+Sueldo mensual       │ $2.6M                 │ $4.5M (+$1.9M)
+Sueldo anual         │ $31.2M                │ $54M (+$22.8M)
+Estabilidad empresa  │ 36 personas, incierta │ 1000+ personas, clara
+Perspectiva carrera  │ Path indefinido       │ Path visible
+Motivación           │ En baja ⬇️             │ En recuperación ⬆️
+Alineación con skills│ 70% match             │ 100% match ✅
+Modalidad trabajo    │ 2h diaria de commute  │ Posible flexibilidad
+Tamaño equipo        │ 2 directos            │ Según posición
+Oportunidades aprendizaje│ Limitadas        │ Potencial de crecimiento
 ```
 
 ---
@@ -327,34 +327,26 @@ SI ALGUNA NO ES CHECKED:
 
 ---
 
-## 🎬 CLOSING (Lo real)
+## 🎬 CLOSING (La realidad)
 
-**Estás en decisión point ahora.**
+**Estás en un punto de decisión ahora.**
 
-Opción A: "Seguro, pero mañana empiezo" → NUNCA empiezas
-Opción B: "Espera, primero termino X en UQOMM" → Procrastination
-Opción C: **ABRE LINKEDIN AHORA** (5 min) → Momentum starts
+Opción A: "Seguro, mañana empiezo" → Nunca empiezas (procrastinación)
+Opción B: "Espera, primero termino X en UQOMM" → Más procrastinación
+Opción C: **ABRE LINKEDIN AHORA** (5 min) → El momentum empieza
 
 La diferencia entre $31M/año y $54M/año es:
 - 30 min hoy (LinkedIn)
 - 1.5h mañana (CV)
-- 3.5h semana siguiente (Aplicar)
+- 3.5h semana siguiente (Aplicar a empresas)
 
-**= $22.8M/año adicionales**
+**= $22.8M/año adicionales por 5 horas de esfuerzo**
 
 **= $1.9M/mes más**
 
-Eso es 1900 veces lo que te va a tomar hacer LinkedIn hoy.
+Ese es el retorno de inversión (ROI) real: el tiempo que inviertes aquí te multiplica los ingresos.
 
-**RETURN ON INVESTMENT = INFINITO** 📈
-
----
-
-**Próximo paso: LINKEDIN AHORA**
-
-No pienses. No planifiques. No leas otro documento.
-
-**ABRE LINKEDIN. AHORA. 5 MINUTOS.**
+**AHORA VE A LINKEDIN. AHORA. 5 MINUTOS.**
 
 Luego espera mañana para CV.
 

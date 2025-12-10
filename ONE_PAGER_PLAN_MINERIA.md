@@ -7,6 +7,8 @@
 ## 🎯 META
 Conseguir contrato minería **$4.5M+/mes antes de 31 MAR 2026**
 
+Entendemos tu situación: UQOMM se quedó corto ($2.6M, sin futuro claro). Minería es la movida: demanda real, perfil perfecto, +$1.9M/mes.
+
 ---
 
 ## 📊 NÚMEROS

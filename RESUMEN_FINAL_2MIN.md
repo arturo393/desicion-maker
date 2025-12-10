@@ -17,11 +17,11 @@ Meta: $4M en 3 años = +$1.4M necesario
 ## 🎯 LA SOLUCIÓN: MINERÍA CHILE
 
 ```
-Por qué: 
-✅ Tu perfil PERFECTO para minería (IoT industrial)
-✅ Demanda REAL (Codelco, BHP, Anglo hiring)
-✅ Sueldo REALISTA: $4M-5M (vs $2.6M actual)
-✅ Timeline CORTO: 3 meses a oferta
+Por qué esto funciona: 
+✅ Tu perfil es exacto para minería (IoT industrial)
+✅ Hay demanda real (Codelco, BHP, Anglo contratando)
+✅ El sueldo es realista: $4M-5M (vs $2.6M actual)
+✅ Timeline es corto y ejecutable: 3 meses
 
 Meta: Marzo 2026 = Firma contrato minería $4.5M+ 💰
 ```
@@ -36,11 +36,11 @@ ACTUAL (UQOMM):
 
 MINERÍA (TARGET):
 └─ $4.5M/mes × 12 = $54M/año
-└─ Diferencia: +$22.8M/año = +$1.9M/mes
+└─ Diferencia: +$22.8M/año = +$1.9M/mes (real)
 
-AUSTRALIA (si la aventura llama):
+AUSTRALIA (si la aventura te llama):
 └─ AUD $130K/año = ~$7.8M CLP/mes
-└─ Diferencia: +$5.2M/mes (pero relocación)
+└─ Diferencia: +$5.2M/mes (pero con relocación)
 ```
 
 ---

@@ -1,30 +1,30 @@
 # 👈 EMPIEZA AQUÍ (READ ME FIRST)
 
-## 🎯 Esto es tu plan para conseguir $4.5M+ en minería antes de MARZO 2026
+## 🎯 Tu plan para conseguir $4.5M+ en minería antes de MARZO 2026
 
-Estás cansado de UQOMM ($2.6M, sin futuro claro), así que vamos a ganar +$1.9M/mes en minería.
+Ya entendemos: UQOMM no va a llegar a los $4M que necesitas ($2.6M sin perspectiva clara). Minería es la ruta correcta: demanda real, perfil perfecto, +$1.9M/mes. Esto funciona si lo haces bien.
 
-**Probabilidad**: 70-80% si sigues el plan  
-**Tiempo**: 21 horas en 12 semanas (30 min/día)  
-**Empezar**: HOY LinkedIn (5 min)
+**Probabilidad de éxito**: 70-80% si ejecutas el plan  
+**Inversión de tiempo**: 21 horas en 12 semanas (25 minutos al día)  
+**Primer paso**: HOY LinkedIn (5 minutos)
 
 ---
 
-## 📚 ¿QUÉ DOCUMENTO LEER? (Según tu situación)
+## 📚 ¿QUÉ DOCUMENTO LEER? (Según tu disponibilidad)
 
-### Si tienes 2 minutos (máximo)
-→ Lee: **RESUMEN_FINAL_2MIN.md**
+### Si tienes 2 minutos
+→ Lee: **RESUMEN_FINAL_2MIN.md** (directo al punto)
 
 ### Si tienes 5 minutos
-→ Lee: **VISUALIZACION_PLAN_MINERIA.md**
+→ Lee: **VISUALIZACION_PLAN_MINERIA.md** (números y claridad)
 
 ### Si tienes 10 minutos
-→ Lee: **QUICK_REFERENCE_APLICACIONES.md**
+→ Lee: **QUICK_REFERENCE_APLICACIONES.md** (lo esencial)
 
-### Si tienes 20 minutos (recomendado)
+### Si tienes 20 minutos (lo ideal)
 → Lee: **PLAN_MINERIA_MARZO_2026.md** (primeras 10 páginas)
 
-### Si tienes 30+ minutos (full)
+### Si tienes 30+ minutos (comprensión total)
 → Lee en este orden:
 1. RESUMEN_FINAL_2MIN.md (2 min)
 2. VISUALIZACION_PLAN_MINERIA.md (5 min)
@@ -33,30 +33,30 @@ Estás cansado de UQOMM ($2.6M, sin futuro claro), así que vamos a ganar +$1.9M
 
 ---
 
-## 🚀 TUS PRÓXIMOS PASOS (HOJA DE RUTA)
+## 🚀 TUS PRÓXIMOS PASOS
 
 ### HOY (30 minutos)
 ```
-Abre LinkedIn
-├─ Foto profesional
+Optimiza tu LinkedIn
+├─ Foto profesional (clara y de buen tamaño)
 ├─ Headline: "Tech Lead | IoT | 9+ years | Minería"
-├─ Summary: copy-paste de PRIMEROS_PASOS_HOY.md
-├─ Añade keywords minería
-└─ Solicita 3-5 recommendations
+├─ Summary: adaptar desde PRIMEROS_PASOS_HOY.md
+├─ Añade keywords de minería e IoT
+└─ Solicita recomendaciones a 3-5 colegas
 
-✅ DONE - FIN DEL DÍA HOY
+✅ Completado - LinkedIn listo hoy
 ```
 
 ### MAÑANA (1.5 horas)
 ```
-Crea CV Minería
+Desarrolla tu CV especializado
 ├─ Google Doc nuevo
-├─ Copy estructura de PRIMEROS_PASOS_HOY.md
-├─ Personaliza con TUS datos
-├─ Descarga como PDF
+├─ Estructura para minería (ver PRIMEROS_PASOS_HOY.md)
+├─ Personaliza con tus datos y proyectos reales
+├─ Descarga en PDF
 └─ Guarda en Google Drive
 
-✅ LISTO PARA APLICAR
+✅ CV listo para aplicar
 ```
 
 ### PRÓXIMA SEMANA (3.5 horas)
@@ -174,22 +174,22 @@ SEMANA 3-4+:
 
 ---
 
-## 💡 TIPS PARA NO FALLAR
+## 💡 CLAVES PARA QUE FUNCIONE
 
 ```
-✅ HACED:
-- Aplica a 5-7 posiciones (no 1)
-- Personaliza CV para cada empresa (5 min por cada)
-- Responde emails en <24h
-- Follow-up si no hay respuesta en 2 semanas
-- Negocia salarial (target $4.5M+)
+✅ ESTRATEGIA CORRECTA:
+- Aplica a 5-7 posiciones (no confíes en una sola)
+- Personaliza CV para cada empresa (5 min por posición)
+- Responde todos los emails antes de 24 horas
+- Haz follow-up si no hay respuesta después de 2 semanas
+- Negocia salarial con confianza (target $4.5M+)
 
-❌ NO HAGAS:
-- Esperar respuesta de 1 empresa (paraliza)
-- Enviar CV genérico sin editar
-- Desaparecer después de entrevista
-- Aceptar <$3.5M sin pensarlo
-- Abandonar después 1-2 rechazos
+❌ ERRORES COMUNES:
+- Esperar respuesta de 1 empresa (te paraliza)
+- Enviar CV genérico sin ajustar
+- Desaparecer después de la entrevista
+- Aceptar <$3.5M sin negociar
+- Rendirse después de 1-2 rechazos
 ```
 
 ---
