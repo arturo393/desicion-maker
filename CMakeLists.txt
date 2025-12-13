@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.12)
-project(DecisionMaker VERSION 1.0.0 LANGUAGES CXX)
+project(DecisionMaker VERSION 2.0.0 LANGUAGES CXX)
 
 # Configuración del estándar C++
 set(CMAKE_CXX_STANDARD 17)
@@ -18,6 +18,9 @@ endif()
 
 # Encontrar dependencias del sistema
 find_package(Threads REQUIRED)
+
+# Nueva opción: Deep Research Pro
+option(ENABLE_DEEP_RESEARCH "Enable Google Deep Research Pro integration" ON)
 
 # Definir directorios
 set(SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src")
@@ -74,19 +77,32 @@ if(EXISTS "${EXAMPLES_DIR}/template_new_decision.cpp")
     add_decision_example(template_new_decision "${EXAMPLES_DIR}/template_new_decision.cpp")
 endif()
 
+# Agregar ejemplo con Deep Research Pro (NUEVO)
+if(ENABLE_DEEP_RESEARCH)
+    if(EXISTS "${EXAMPLES_DIR}/deep_research_decision_example.cpp")
+        add_decision_example(deep_research_example "${EXAMPLES_DIR}/deep_research_decision_example.cpp")
+        message(STATUS "✓ Deep Research Pro Integration ENABLED")
+    endif()
+else()
+    message(STATUS "✗ Deep Research Pro Integration DISABLED")
+endif()
+
 # Habilitar testing
 enable_testing()
 
 # Mostrar información de compilación
 message(STATUS "====================================")
-message(STATUS "📊 DECISION MAKER V4 - BUILD SYSTEM")
+message(STATUS "📊 DECISION MAKER V2 - BUILD SYSTEM")
 message(STATUS "====================================")
+message(STATUS "✓ Framework de Decisiones (5 metodologías)")
+message(STATUS "✓ Deep Research Pro Integration (v2.0)")
 message(STATUS "✓ Real-Time Market Monitoring")
 message(STATUS "✓ Bayesian Updater")
 message(STATUS "✓ Scenario Analysis")
 message(STATUS "====================================")
 message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 message(STATUS "C++ compiler: ${CMAKE_CXX_COMPILER}")
+message(STATUS "Deep Research: ${ENABLE_DEEP_RESEARCH}")
 message(STATUS "C++ standard: ${CMAKE_CXX_STANDARD}")
 message(STATUS "Install prefix: ${CMAKE_INSTALL_PREFIX}")
 message(STATUS "====================================")
