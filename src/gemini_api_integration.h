@@ -9,7 +9,7 @@
  * 
  * Requiere:
  *   - libcurl (para HTTP requests)
- *   - GEMINI_API_KEY en variable de entorno
+ *   - GEMINI_API_KEY en variable de entorno o pasado al constructor
  */
 
 #pragma once
@@ -27,6 +27,7 @@ class GeminiAPI {
 private:
     std::string api_key_;
     std::string base_url_ = "https://generativelanguage.googleapis.com/v1beta/models";
+    // NO hardcodear API keys en código. Usar variables de entorno.
     
     // Callback para capturar respuesta HTTP
     static size_t WriteCallback(void* contents, size_t size, size_t nmemb, std::string* userp) {
@@ -43,7 +44,14 @@ public:
             if (env_key) {
                 api_key_ = env_key;
             } else {
-                throw std::runtime_error("GEMINI_API_KEY no encontrado");
+                throw std::runtime_error(
+                    "GEMINI_API_KEY no encontrado.\n"
+                    "Soluciones:\n"
+                    "1. Copia .env.gemini.template a .env.gemini\n"
+                    "2. Agrega tu API key en .env.gemini\n"
+                    "3. O establece GEMINI_API_KEY como variable de entorno\n"
+                    "4. O pasa la API key en el constructor"
+                );
             }
         }
     }
