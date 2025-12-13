@@ -48,6 +48,22 @@ qrc_*.cpp
 # SEGURIDAD: No subir credenciales ni tokens
 .env
 .env.local
+.env.gemini
+.env.*.local
+
+# ⚠️ SECURITY: Archivos con credenciales y API keys
+*.key
+*.pem
+*.crt
+.secrets/
+secrets/
+credentials/
+**/api_keys*
+**/apikeys*
+**/*_key*
+**/*_secret*
+**/*_token*
+**/*_password*
 .env.*.local
 *.pem
 *.key
