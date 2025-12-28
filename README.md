@@ -1,162 +1,331 @@
-# 🎯 desicion-maker: Plan Minería + Framework Decisiones
+# 🎯 Decision Maker Framework
 
-> **Repositorio reorganizado**: Plan ejecutivo minería Chile + Framework de decisiones automático
+> Sistema profesional de análisis de decisiones con implementación dual (C++ y Python) + Integración Gemini Deep Research
 
----
-
-## 🚀 INICIO INMEDIATO
-
-### ⭐ PLAN MINERÍA 2026 (EJECUTA ESTO AHORA)
-
-**Meta**: $4.5M+ en minería antes de Marzo 2026
-**Tiempo**: 21 horas en 12 semanas  
-**Probabilidad**: 70-80% si ejecutas
-
-👉 **Ve a**: [`mineria-2026/READ_ME_FIRST.md`](./mineria-2026/READ_ME_FIRST.md)
+[![C++17](https://img.shields.io/badge/C++-17-blue.svg)](https://en.cppreference.com/w/cpp/17)
+[![Python](https://img.shields.io/badge/Python-3.9+-green.svg)](https://www.python.org/)
+[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 ---
 
-## 📚 ESTRUCTURA DEL REPOSITORIO
+## 🚀 Quick Start
+
+### Python Framework (AI-Powered) - RECOMENDADO ⭐
+```bash
+cd python
+
+# Con UV (más rápido)
+uv run python core/deep_research_decision_agent.py
+
+# O tradicional
+source .venv/bin/activate
+python core/deep_research_decision_agent.py
+```
+
+**Configurado con**:
+- ✅ UV 0.9.17 (10-100x más rápido que pip)
+- ✅ Gemini Flash (GRATIS)
+- ✅ 13 metodologías + IA
+- ✅ 39 paquetes instalados
+
+### C++ Framework (Performance-Critical)
+```bash
+cd core
+cmake -B build && cmake --build build
+./build/examples/basic/sillon_decision
+```
+
+---
+
+## 📁 Estructura del Proyecto
 
 ```
 desicion-maker/
-├── mineria-2026/              ⭐ PLAN ACTIVO (Empieza aquí)
-│   ├── READ_ME_FIRST.md       (Guía principal)
-│   ├── INDICE_DOCUMENTOS.md   (Mapa de lecturas)
-│   ├── planning/              (Plan 12 semanas)
-│   ├── cv/                    (CV minería)
-│   └── references/            (Links + templates)
+├── core/                   # C++ Framework (3,971 líneas)
+│   ├── src/                # Código fuente
+│   │   ├── framework/      # Framework base
+│   │   ├── methodologies/  # 5 metodologías (ML, Bayesian, VaR, etc)
+│   │   ├── integrations/   # API Gemini
+│   │   ├── advanced/       # Herramientas avanzadas
+│   │   ├── core/           # Tipos y estructuras
+│   │   ├── distributions/  # 7 distribuciones estocásticas
+│   │   ├── scenarios/      # Escenarios de negocio
+│   │   └── utils/          # Utilidades
+│   ├── examples/           # 24 ejemplos compilables
+│   │   ├── basic/          # Ejemplos básicos
+│   │   ├── business/       # Análisis de negocios
+│   │   ├── personal/       # Decisiones personales
+│   │   ├── advanced/       # Análisis avanzados
+│   │   └── templates/      # Templates para nuevos casos
+│   ├── docs/               # Documentación técnica C++
+│   ├── CMakeLists.txt      # Build system
+│   └── Makefile            # Alternative build
 │
-├── carrera-analisis/          📊 Evaluaciones alternativas
-│   └── evaluaciones/
-│       ├── CARRERA_ARTURO_V2_REALISTA.md
-│       ├── VALOR_MERCADO_ARTURO_2025.md
-│       └── TRABAJO_EXTRANJERO_ANALISIS.md
+├── python/                 # Python Framework (731 líneas)
+│   ├── core/               # Motor de decisiones
+│   │   ├── deep_research_decision_agent.py  # 13 metodologías + Gemini
+│   │   └── mining_career_analyzer.py        # Análisis minería
+│   ├── tests/              # Tests organizados
+│   │   ├── test_gemini_flash.py
+│   │   ├── test_structure.py
+│   │   └── test_framework.py
+│   ├── scripts/            # Scripts de utilidad
+│   │   ├── gemini_query.py
+│   │   ├── validate_logic.py
+│   │   └── ...más scripts
+│   ├── config.py           # Sistema de modelos Gemini
+│   ├── meta_decision.py    # Meta-análisis del framework
+│   ├── requirements.txt    # Dependencias
+│   ├── README.md           # Guía Python
+│   └── .venv/              # Virtual environment (UV)
 │
-├── decisiones/                🏛️ Framework + Casos
-│   ├── sillon/                (Caso: sillón)
-│   ├── computador/            (Caso: PC 32GB)
-│   └── framework/             (Framework genérico)
+├── cases/                  # Casos de análisis reales
+│   ├── career/             # Análisis de carrera profesional
+│   ├── mining/             # Plan minería 2026 ($4.5M meta)
+│   ├── decisions/          # Decisiones personales (sillón, PC)
+│   └── business/           # Análisis de negocios (DeFi Monitor)
 │
-├── negocios/                  💼 Opciones Plan B
-│   └── defi-monitor/          (Startup DeFi)
+├── results/                # Resultados de análisis
+│   ├── sillon/             # JSONs de análisis sillón
+│   ├── mining/             # Resultados minería
+│   └── research/           # Research Gemini
 │
-├── docs-legacy/               📦 Histórico
-│   ├── deprecated/            (Versiones antigas)
-│   ├── indices/               (Índices antiguos)
-│   └── versiones/             (Resúmenes v1-v4)
+├── docs/                   # Documentación
+│   ├── UV_SETUP.md            # Guía completa UV
+│   ├── GEMINI_FLASH_SETUP.md  # Config modelos Gemini
+│   ├── session-logs/          # Logs de reorganización
+│   ├── tests-results/         # Resultados de análisis
+│   ├── architecture/       # Arquitectura del sistema (futuro)
+│   ├── guides/             # Guías de uso (futuro)
+│   └── legacy/             # 9 READMEs antiguos
 │
-├── src/                       💻 C++ Framework
-├── docs/                      📄 Técnico
-├── scripts/                   🔧 Utilidades
-└── INDEX.md                   (Índice maestro completo)
+├── README.md               # Este archivo
+├── QUICK_START.md          # Guía rápida
+└── CHANGELOG.md            # Historial de cambios
 ```
 
 ---
 
-## 🎯 GUÍA RÁPIDA POR CASO
+## 🧠 Capacidades del Framework
 
-### Caso 1: Ejecutar Plan Minería
-1. Lee: `mineria-2026/READ_ME_FIRST.md` (5 min)
-2. Entiende: `mineria-2026/planning/VISUALIZACION_PLAN_MINERIA.md` (5 min)
-3. Ejecuta: `mineria-2026/planning/PRIMEROS_PASOS_HOY.md` (10 min)
-4. Sigue: `mineria-2026/planning/GANTT_MINERIA_VISUAL.md` (semanas 1-12)
+### C++ Framework (Motor de Alto Rendimiento)
 
-### Caso 2: Entender Alternativas Carrera
-1. `carrera-analisis/evaluaciones/CARRERA_ARTURO_V2_REALISTA.md` (realista)
-2. `carrera-analisis/evaluaciones/VALOR_MERCADO_ARTURO_2025.md` (benchmark)
-3. `carrera-analisis/evaluaciones/TRABAJO_EXTRANJERO_ANALISIS.md` (internacional)
+#### 5 Metodologías Avanzadas
+1. **ML Demand Predictor** - Regresión logística entrenable
+2. **Bayesian Updater** - Actualización probabilística con evidencia
+3. **Value at Risk (VaR)** - VaR 90/95/99 + CVaR
+4. **Real-Time Monitor** - Streaming de mercado
+5. **Scenario Analysis** - Árboles de decisión complejos
 
-### Caso 3: Aprender Framework Decisiones
-1. `decisiones/sillon/SILLON_README.md` (caso simple)
-2. `decisiones/computador/COMPUTADOR_RESUMEN_EJECUTIVO.md` (caso complejo)
-3. `decisiones/framework/DECISION_NEGOCIO_AUTOMATIZADO.md` (framework)
+#### 7 Distribuciones Estocásticas
+- Normal (Gaussian)
+- Uniform
+- Triangular
+- Bernoulli (Éxito/Fracaso)
+- Exponential
+- Beta
+- Deterministic
 
-### Caso 4: Revisar Plan B
-1. `negocios/defi-monitor/REEVALUACION_DEFI_MONITOR_DIC2025.md`
-2. `carrera-analisis/evaluaciones/TRABAJO_EXTRANJERO_ANALISIS.md`
+#### Performance
+- ⚡ 10k - 1M simulaciones Monte Carlo
+- 🔧 Compilado a binario nativo
+- 💾 Biblioteca estática linkeable
+- 📐 Arquitectura OOP extensible
 
----
+### Python Framework (AI-Powered)
 
-## 📊 CONTENIDO POR CARPETA
+#### 13 Metodologías de Decisión
+1. Monte Carlo Simulation (10k iter)
+2. TOPSIS Ranking
+3. Pareto Optimality
+4. Regret Analysis (Minimax)
+5. Risk Analysis (VaR básico)
+6. Scenario Planning
+7. Sensitivity Analysis
+8. Decision Trees
+9. Multi-Criteria (AHP-like)
+10. Expected Value
+11. Break-even Analysis
+12. Payoff Matrix
+13. Analytic Hierarchy Process
 
-### mineria-2026/ (10 docs)
-Plan ejecutivo para conseguir $4.5M+ en minería antes Marzo 2026.
+#### Integración Gemini Deep Research
+- 🤖 Research profundo de mercados
+- 🌐 Búsqueda web automática
+- 📊 Análisis de tendencias
+- 🔄 Async/await nativo
 
-**Documentos principales**:
-- `READ_ME_FIRST.md` - Entrada principal
-- `planning/PLAN_MINERIA_MARZO_2026.md` - Plan completo 12 semanas
-- `planning/GANTT_MINERIA_VISUAL.md` - Timeline visual
-- `planning/PRIMEROS_PASOS_HOY.md` - Acciones HOY/MAÑANA
-- `planning/VISUALIZACION_PLAN_MINERIA.md` - Por qué funciona
-- `cv/CV_INTERNACIONAL_MINERIA_2025.md` - CV minería
-- `references/QUICK_REFERENCE_APLICACIONES.md` - Links + templates
-
-### carrera-analisis/ (4 docs)
-Análisis de alternativas evaluadas: Minería, Remoto Internacional, Emprendimiento.
-
-### decisiones/ (9+ docs)
-Framework decisiones con casos: Sillón, Computador, Carrera.
-
-### negocios/ (3+ docs)
-Opciones emprendimiento: DeFi Monitor Phase 2, evaluación tecnologías.
-
-### docs-legacy/ (40+ docs)
-Documentos históricos, versiones antigas, índices deprecated.
-
----
-
-## ✅ PRÓXIMOS PASOS
-
-### HOY
-1. Abre [`mineria-2026/READ_ME_FIRST.md`](./mineria-2026/READ_ME_FIRST.md)
-2. Lee resumen en 5 minutos
-3. Entiende por qué minería es la opción
-
-### MAÑANA
-1. Lee plan completo `mineria-2026/planning/PLAN_MINERIA_MARZO_2026.md`
-2. Mira timeline `mineria-2026/planning/GANTT_MINERIA_VISUAL.md`
-3. Prepara documentos en `mineria-2026/planning/PRIMEROS_PASOS_HOY.md`
-
-### SEMANA 1
-1. Sigue checklist primeros pasos
-2. LinkedIn optimizado (5 min)
-3. CV minería creado (1.5h)
-4. Investigación empresas (2h)
-
-### SEMANAS 2-12
-Ejecuta timeline completo según `mineria-2026/planning/GANTT_MINERIA_VISUAL.md`
+#### Ventajas
+- 🚀 Desarrollo rápido
+- 🔌 FastAPI-ready
+- 📦 Fácil deployment
+- 🧪 Testing simple
 
 ---
 
-## 📖 ÍNDICE COMPLETO
+## 📊 Comparación: Python vs C++
 
-Para navegación detallada por caso de uso y tiempo disponible:
-→ Ver [`INDEX.md`](./INDEX.md)
+| Aspecto | Python | C++ |
+|---------|--------|-----|
+| **Líneas de código** | 731 | 3,971 |
+| **Metodologías** | 13 simples | 5 avanzadas |
+| **Monte Carlo** | 10k iter | 10k-1M iter |
+| **Distribuciones** | 1 (uniforme) | 7 tipos |
+| **ML Predictor** | ❌ | ✅ Entrenable |
+| **Bayesian Update** | ❌ | ✅ Formal |
+| **VaR/CVaR** | Básico | VaR 90/95/99 |
+| **Gemini Integration** | ✅ Nativo | ⚠️ Via API |
+| **Performance** | Moderado | Muy rápido |
+| **Desarrollo** | Rápido | Complejo |
+| **Mejor para** | Prototipo + AI | Producción + Escala |
 
----
-
-## 💡 RESUMEN RÁPIDO
-
-| Necesitas | Archivo | Tiempo |
-|-----------|---------|--------|
-| Plan activo | `mineria-2026/READ_ME_FIRST.md` | 5 min |
-| Timeline visual | `mineria-2026/planning/GANTT_MINERIA_VISUAL.md` | 10 min |
-| Plan completo | `mineria-2026/planning/PLAN_MINERIA_MARZO_2026.md` | 20 min |
-| Primer paso | `mineria-2026/planning/PRIMEROS_PASOS_HOY.md` | 10 min |
-| Alternativas | `carrera-analisis/evaluaciones/CARRERA_ARTURO_V2_REALISTA.md` | 20 min |
-| Framework | `decisiones/sillon/SILLON_README.md` | 15 min |
-| Todo navegable | `INDEX.md` | 5 min |
-
----
-
-## 🏗️ ESTADO DEL REPOSITORIO
-
-✅ **Organizado**: 5 carpetas principales + 60+ documentos
-✅ **Activo**: Plan minería completo y listo para ejecutar
-✅ **Documentado**: Cada carpeta tiene guía de lectura
-✅ **Histórico**: Versiones antigas preservadas en `docs-legacy/`
+**Recomendación**: Usar ambos en arquitectura híbrida (Python orquesta + C++ procesa)
 
 ---
 
-**🚀 ¿Listo? Ve a [`mineria-2026/READ_ME_FIRST.md`](./mineria-2026/READ_ME_FIRST.md)**
+## 🎯 Casos de Uso
+
+### 1. Análisis de Carrera (Mining 2026)
+```bash
+cd python
+python3 core/mining_career_analyzer.py
+```
+- Meta: $4.5M+ salario minería Chile
+- Timeline: 12 semanas
+- Probabilidad: 70-80%
+
+### 2. Decisión Personal (Sillón)
+```bash
+cd core
+./build/examples/personal/sillon_decision
+```
+- Opciones: Botar vs Restaurar vs Vender
+- Metodologías: 5 análisis cruzados
+- Resultado: Recomendación con confianza
+
+### 3. Análisis de Negocio (DeFi Monitor)
+```bash
+cd python
+python3 scripts/analyze_defi_monitor_business.py
+```
+- Evaluación de viabilidad
+- Market sizing
+- Risk assessment
+
+---
+
+## 🛠️ Instalación Completa
+
+### Requisitos
+- **C++**: g++ 9+ o clang 10+, CMake 3.12+
+- **Python**: 3.9+, pip
+- **API Keys**: Gemini API (opcional)
+
+### Setup C++
+```bash
+cd core
+cmake -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build -j4
+
+# Ejecutar ejemplo
+./build/examples/basic/demo_simple
+```
+
+### Setup Python
+```bash
+cd python
+python3 -m venv .venv
+source .venv/bin/activate  # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+
+# Configurar API key
+cp .env.example .env
+# Editar .env y agregar: GEMINI_API_KEY=tu_clave_aqui
+
+# Ejecutar
+python3 core/deep_research_decision_agent.py
+```
+
+---
+
+## 📖 Documentación
+
+- **[QUICK_START.md](QUICK_START.md)** - Guía rápida de inicio
+- **[core/docs/](core/docs/)** - Documentación técnica C++
+- **[docs/architecture/](docs/architecture/)** - Arquitectura del sistema
+- **[cases/](cases/)** - Ejemplos de casos reales
+
+---
+
+## 🧪 Testing
+
+### C++ Tests
+```bash
+cd core
+cmake -B build -DENABLE_TESTING=ON
+cmake --build build
+ctest --test-dir build
+```
+
+### Python Tests
+```bash
+cd python
+pytest tests/
+```
+
+---
+
+## 🤝 Contribuir
+
+1. Fork el repositorio
+2. Crea una rama: `git checkout -b feature/nueva-metodologia`
+3. Commit: `git commit -am 'Add nueva metodología'`
+4. Push: `git push origin feature/nueva-metodologia`
+5. Abre Pull Request
+
+---
+
+## 📝 Changelog
+
+Ver [CHANGELOG.md](CHANGELOG.md) para historial completo.
+
+### v2.0.0 (Diciembre 2024)
+- ✅ Reorganización completa del repositorio
+- ✅ Separación C++ / Python
+- ✅ Estructura profesional modular
+- ✅ 13 metodologías Python
+- ✅ 5 metodologías C++ avanzadas
+- ✅ Integración Gemini Deep Research
+- ✅ 24 ejemplos compilables
+- ✅ Documentación completa
+
+---
+
+## 📄 Licencia
+
+MIT License - Ver [LICENSE](LICENSE) para detalles.
+
+---
+
+## 🎯 Próximos Pasos
+
+### Para Usuarios
+1. Explora [cases/mining/](cases/mining/) - Plan minería 2026
+2. Ejecuta ejemplo sillón: `cd core && make sillon_decision && ./sillon_decision`
+3. Prueba Python + Gemini: `cd python && python3 core/deep_research_decision_agent.py`
+
+### Para Desarrolladores
+1. Lee [docs/architecture/HYBRID_ARCHITECTURE.md](docs/architecture/)
+2. Crea tu primer caso con `core/examples/templates/template_new_decision.cpp`
+3. Contribuye con nuevas metodologías
+
+---
+
+## 📬 Contacto
+
+- Issues: [GitHub Issues](https://github.com/tu-usuario/desicion-maker/issues)
+- Discussions: [GitHub Discussions](https://github.com/tu-usuario/desicion-maker/discussions)
+
+---
+
+**⭐ Si este proyecto te ayudó a tomar mejores decisiones, dale una estrella!**

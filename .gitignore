@@ -2,16 +2,16 @@
 *.o
 *.out
 *.exe
+*.a
+*.so
+*.dylib
 bin/*
 !bin/.gitkeep
-auto_personalizado
-business_analysis
-decision_arturo
-decision_auto
-demo_simple
 
 # Directorios de build
 build/
+core/build/
+core/bin/
 cmake-build-*/
 gui_cpp/build/
 
@@ -50,6 +50,17 @@ qrc_*.cpp
 .env.local
 .env.gemini
 .env.*.local
+python/.env
+python/.env.local
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+python/.venv/
+python/venv/
+.venv/
+venv/
 
 # ⚠️ SECURITY: Archivos con credenciales y API keys
 *.key
