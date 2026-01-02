@@ -1,0 +1,43 @@
+{
+  "timestamp": "2025-12-13T18:14:24.853557",
+  "goal": "$4M CLP in 3 years",
+  "options_analyzed": 5,
+  "results": {
+    "Codelco - Senior IoT Engineer (Rajo Sur)": {
+      "score": 2.5553297305967937,
+      "confidence": 0.5358999999999999,
+      "recommendation": "❌ NOT RECOMMENDED - High risks or poor fit",
+      "salary": 4200000,
+      "success_prob": 0.7
+    },
+    "BHP - Tech Lead Mining Software": {
+      "score": 2.1603630467744104,
+      "confidence": 0.4645,
+      "recommendation": "❌ NOT RECOMMENDED - High risks or poor fit",
+      "salary": 4600000,
+      "success_prob": 0.55
+    },
+    "SQM - Data/Analytics Engineer": {
+      "score": 2.5507920165555746,
+      "confidence": 0.7898999999999999,
+      "recommendation": "❌ NOT RECOMMENDED - High risks or poor fit",
+      "salary": 4800000,
+      "success_prob": 0.6
+    },
+    "Mining Consulting (Accenture/EY/Deloitte)": {
+      "score": 2.1547347819251623,
+      "confidence": 0.48425,
+      "recommendation": "❌ NOT RECOMMENDED - High risks or poor fit",
+      "salary": 4200000,
+      "success_prob": 0.65
+    },
+    "Hybrid - Part-time UCOM + Mining Freelance": {
+      "score": 1.8118066743159675,
+      "confidence": 0.74075,
+      "recommendation": "❌ NOT RECOMMENDED - High risks or poor fit",
+      "salary": 4100000,
+      "success_prob": 0.5
+    }
+  },
+  "research_topics": []
+}

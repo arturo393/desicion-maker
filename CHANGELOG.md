@@ -4,6 +4,61 @@ Todos los cambios notables en este proyecto serán documentados en este archivo.
 
 ---
 
+## [2.1.0] - 2024-12-28 - CONFIGURACIÓN UV + GEMINI FLASH
+
+### 🚀 Agregado
+
+#### Entorno UV
+- **UV setup completo**: Virtual environment con uv 0.9.17
+- **39 paquetes instalados**: google-genai 1.56.0 + dependencias
+- **Python 3.11.3**: Configurado y testeado
+- Tests: 5/5 pasados (entorno, google-genai, dependencias, .env, conexión)
+
+#### Sistema de Modelos Gemini
+- **config.py**: Sistema de configuración de modelos
+- **3 modelos disponibles**: Flash (GRATIS), Pro ($1.25/1M), Ultra ($1.25/1M)
+- **Gemini Flash configurado**: gemini-2.0-flash-exp (gratis en preview)
+- **CLI para modelos**: `python config.py list/set/current/estimate`
+
+#### Tests y Validación
+- **test_gemini_flash.py**: Tests con modelo más barato
+- **test_structure.py**: Validación de estructura
+- **meta_decision.py**: Meta-análisis usando el propio framework
+- Todos los tests pasando ✅
+
+#### Documentación
+- **UV_SETUP.md**: Guía completa UV vs pip
+- **GEMINI_FLASH_SETUP.md**: Configuración modelos y costos
+- **META_DECISION_RESULT.txt**: Análisis paradójico framework
+
+### 🗂️ Organización
+
+#### Nueva Estructura Documentación
+- `docs/session-logs/`: Logs de reorganización y verificación
+- `docs/tests-results/`: Resultados de análisis
+- `python/tests/`: Tests centralizados
+
+#### Archivos Movidos
+- Tests Python → `python/tests/`
+- Setup docs → `docs/`
+- Resultados → `docs/tests-results/`
+- Session logs → `docs/session-logs/`
+
+### 📊 Meta-Análisis
+
+#### Decisión Arquitectura
+- **Análisis ejecutado**: 3 opciones (Super C++, Super Python, Híbrido)
+- **Resultado**: Opción B (Super Python) ganó con 3.32/10
+- **Conclusión**: Score bajo indica usar framework actual sin mejoras grandes
+- **Decisión final**: Enfocarse en uso real, no en mejoras prematuras
+
+### 💰 Costos Optimizados
+- **Modelo Flash**: $0.00 (GRATIS en preview)
+- **100 análisis/mes**: $0.00 con Flash vs $0.38 con Pro
+- **Estimación**: Suficiente para 99% de casos de uso
+
+---
+
 ## [2.0.0] - 2025-12-09 - REORGANIZACIÓN COMPLETA
 
 ### 🏗️ Reorganización Mayor
