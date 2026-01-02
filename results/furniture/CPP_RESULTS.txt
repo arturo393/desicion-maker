@@ -1,0 +1,135 @@
+
+======================================================================
+   🔨 ANÁLISIS C++: Mueble DIY vs Comprar
+======================================================================
+
+📋 Especificaciones:
+   • Tamaño: 60cm alto × 60cm ancho × 1.8m largo
+   • Uso: Mesón bebé + almacenamiento
+   • Similar: Rack TV
+
+======================================================================
+   📊 CRITERIOS C++ FRAMEWORK
+======================================================================
+
+1️⃣ FACTORES (0-10):
+   • Quality Expected:      25% ⭐ (muy importante)
+   • Safety (bebé):         20% ⭐ (crítico)
+   • Time/Effort:           15%
+   • Satisfaction:          15%
+   • Learning:              10%
+   • Customization:         10%
+   • Future Utility:         5%
+
+2️⃣ RIESGOS (0-1):
+   • Risk Fail:             50% (que salga mal)
+   • Risk Cost Overrun:     30% (que cueste más)
+   • Risk Time Overrun:     20% (que tarde más)
+
+3️⃣ COSTO: Ajuste inverso (más barato = mejor)
+
+4️⃣ MONTE CARLO: 40,000 sims costo y tiempo
+
+======================================================================
+
+📋 Opciones a evaluar:
+
+1. DIY - Construir yo mismo
+   💰 $150000 | 🎯 60% éxito | ⏱️ 14 días
+   📝 Comprar materiales (MDF/melamina) y construir desde cero
+
+2. Comprar - Rack tienda (Sodimac/Falabella)
+   💰 $300000 | 🎯 95% éxito | ⏱️ 1 días
+   📝 Comprar rack TV similar ya hecho
+
+3. Encargar - Carpintero profesional
+   💰 $400000 | 🎯 85% éxito | ⏱️ 21 días
+   📝 Diseño a medida, carpintero construye
+
+4. Kit DIY - Comprar kit para armar
+   💰 $200000 | 🎯 80% éxito | ⏱️ 1 días
+   📝 Kit tipo Ikea con instrucciones
+
+🔄 Ejecutando análisis C++...
+   • Monte Carlo: 40,000 iteraciones
+   • Simulando costos y tiempo reales
+
+   ▶ DIY - Construir yo mismo...
+   ▶ Comprar - Rack tienda (Sodimac/Falabella)...
+   ▶ Encargar - Carpintero profesional...
+   ▶ Kit DIY - Comprar kit para armar...
+
+======================================================================
+   📊 RESULTADOS C++
+======================================================================
+
+🥇 RANK 1: Kit DIY - Comprar kit para armar
+   📊 Score C++: 3.93/10 ⚠️ VIABLE
+   💰 Costo base: $200000
+   📈 Monte Carlo:
+      Costo mean: $232422
+      Costo worst (VaR95): $300000
+      Días mean: 1 días
+      Días worst: 2 días
+   ⚖️ Factores clave:
+      Quality: 8/10 | Safety: 8/10 | Learning: 6/10
+   ⚠️ Riesgos:
+      Fail 10% | Cost+ 15% | Time+ 15%
+
+🥈 RANK 2: Comprar - Rack tienda (Sodimac/Falabella)
+   📊 Score C++: 3.19/10 ⚠️ VIABLE
+   💰 Costo base: $300000
+   📈 Monte Carlo:
+      Costo mean: $322741
+      Costo worst (VaR95): $450000
+      Días mean: 1 días
+      Días worst: 2 días
+   ⚖️ Factores clave:
+      Quality: 8/10 | Safety: 9/10 | Learning: 2/10
+   ⚠️ Riesgos:
+      Fail 5% | Cost+ 10% | Time+ 5%
+
+🥉 RANK 3: Encargar - Carpintero profesional
+   📊 Score C++: 3.08/10 ⚠️ VIABLE
+   💰 Costo base: $400000
+   📈 Monte Carlo:
+      Costo mean: $473468
+      Costo worst (VaR95): $600000
+      Días mean: 25 días
+      Días worst: 42 días
+   ⚖️ Factores clave:
+      Quality: 9/10 | Safety: 10/10 | Learning: 4/10
+   ⚠️ Riesgos:
+      Fail 15% | Cost+ 25% | Time+ 20%
+
+   RANK 4: DIY - Construir yo mismo
+   📊 Score C++: 2.52/10
+   💰 Costo base: $150000
+   📈 Monte Carlo:
+      Costo mean: $193571
+      Costo worst (VaR95): $225000
+      Días mean: 21 días
+      Días worst: 28 días
+   ⚖️ Factores clave:
+      Quality: 6/10 | Safety: 6/10 | Learning: 9/10
+   ⚠️ Riesgos:
+      Fail 40% | Cost+ 30% | Time+ 40%
+
+======================================================================
+   🏆 GANADOR C++
+======================================================================
+
+   Kit DIY - Comprar kit para armar
+   Score: 3.93/10
+
+   ✅ Por qué gana:
+      • Quality: 7.50/10
+      • Safety: 8.50/10 (bebé)
+      • Costo esperado: $232422
+      • Tiempo: 1 días
+      • Riesgo falla: 10%
+
+======================================================================
+
+✨ Análisis C++ completado
+

@@ -1,0 +1,94 @@
+
+======================================================================
+   🏔️ ANÁLISIS: ¿Qué versión de minería es mejor?
+======================================================================
+
+📋 Escenarios a evaluar:
+
+1. Minería Faena - Norte Chile
+   💰 $4,500,000 | ⏱️ 3m | 🎯 75%
+   ⚖️  WLB: 5.0/10 | 🏠 Remote: 2.0/10 | 🔥 Burnout: 35%
+   📝 Minería tradicional en faena. Turnos 7x7, Antofagasta/Calama. Alto sal...
+
+2. Minería Oficina - Santiago
+   💰 $4,200,000 | ⏱️ 4m | 🎯 65%
+   ⚖️  WLB: 7.5/10 | 🏠 Remote: 6.0/10 | 🔥 Burnout: 20%
+   📝 Trabajo en oficinas mineras Santiago (Codelco HQ, BHP). Salario alto, ...
+
+3. Minería Híbrida - 2 años + Transición
+   💰 $4,500,000 | ⏱️ 3m | 🎯 75%
+   ⚖️  WLB: 6.0/10 | 🏠 Remote: 4.0/10 | 🔥 Burnout: 25%
+   📝 2 años minería → experiencia + ahorro + network → transición a remoto ...
+
+4. UQOMM - Actual
+   💰 $2,600,000 | ⏱️ 0m | 🎯 100%
+   ⚖️  WLB: 8.0/10 | 🏠 Remote: 7.0/10 | 🔥 Burnout: 20%
+   📝 Status quo. Seguro pero limitado....
+
+🔄 Analizando con Python Framework (13 metodologías)...
+
+   ▶ Minería Faena - Norte Chile...
+   ▶ Minería Oficina - Santiago...
+   ▶ Minería Híbrida - 2 años + Transición...
+   ▶ UQOMM - Actual...
+
+======================================================================
+   📊 RESULTADOS COMPARATIVOS
+======================================================================
+
+🥇 RANK 1: Minería Híbrida - 2 años + Transición
+   📊 Score: 3.07/10 | 🎯 Confianza: 85%
+   💰 Salario: $4,500,000
+   ⚖️  WLB: 6.0/10 | 🏠 Remote: 4.0/10
+   ⚠️  Risk: 0.17 | 🏆 TOPSIS: #1
+   ❌ NOT RECOMMENDED - High risks or poor fit
+
+🥈 RANK 2: UQOMM - Actual
+   📊 Score: 2.88/10 | 🎯 Confianza: 95%
+   💰 Salario: $2,600,000
+   ⚖️  WLB: 8.0/10 | 🏠 Remote: 7.0/10
+   ⚠️  Risk: 0.17 | 🏆 TOPSIS: #4
+   ❌ NOT RECOMMENDED - High risks or poor fit
+
+🥉 RANK 3: Minería Faena - Norte Chile
+   📊 Score: 2.84/10 | 🎯 Confianza: 83%
+   💰 Salario: $4,500,000
+   ⚖️  WLB: 5.0/10 | 🏠 Remote: 2.0/10
+   ⚠️  Risk: 0.23 | 🏆 TOPSIS: #3
+   ❌ NOT RECOMMENDED - High risks or poor fit
+
+   RANK 4: Minería Oficina - Santiago
+   📊 Score: 2.63/10 | 🎯 Confianza: 81%
+   💰 Salario: $4,200,000
+   ⚖️  WLB: 7.5/10 | 🏠 Remote: 6.0/10
+   ⚠️  Risk: 0.18 | 🏆 TOPSIS: #2
+   ❌ NOT RECOMMENDED - High risks or poor fit
+
+======================================================================
+   📈 ANÁLISIS DE MEJORA
+======================================================================
+
+   Faena Original:     2.84/10 (baseline)
+   Santiago Oficina:   2.63/10 (mejora: -0.21)
+   Híbrida Temporal:   3.07/10 (mejora: +0.22)
+
+   🎯 MEJOR OPCIÓN MINERÍA: Minería Híbrida - 2 años + Transición
+   📊 Score: 3.07/10
+   ⚠️  Score bajo (<3.5)
+
+   📊 vs UQOMM actual (2.88/10):
+   ✅ Minería Minería Híbrida - 2 años + Transición es mejor (+0.19)
+
+======================================================================
+   💡 RECOMENDACIÓN FINAL
+======================================================================
+
+   🎯 Estrategia HÍBRIDA TEMPORAL
+   • 2 años en faena (experiencia + $$)
+   • Network minería
+   • Transición a remoto internacional
+
+======================================================================
+
+✨ Mejor opción: Minería Híbrida - 2 años + Transición (3.07/10)
+

@@ -1,0 +1,123 @@
+⚠️  google-generativeai no instalado. Instalar: uv pip install google-generativeai
+
+======================================================================
+   🔨 DECISIÓN: ¿Hacer mueble DIY o Comprar?
+======================================================================
+
+📋 Especificaciones:
+   • 60cm alto × 60cm ancho × 1.8m largo
+   • Uso: Mesón para bebé + almacenamiento
+   • Similar a: Rack TV
+
+⚠️  Gemini no disponible. Usando estimaciones.
+
+
+======================================================================
+   💡 ANÁLISIS DE RESULTADOS GEMINI
+======================================================================
+
+📌 Precio materiales:
+----------------------------------------------------------------------
+Estimación: $100-200k CLP
+
+📌 Precio tienda:
+----------------------------------------------------------------------
+Estimación: $250-400k CLP
+
+📌 Dificultad DIY:
+----------------------------------------------------------------------
+Medio-Alto para principiantes
+
+📌 Precio carpintero:
+----------------------------------------------------------------------
+Estimación: $350-500k CLP
+
+
+======================================================================
+   🔨 OPCIONES A EVALUAR
+======================================================================
+
+📋 Opciones creadas:
+
+1. DIY - Construir yo mismo
+   💰 $150,000 | 🎯 60% éxito
+   ⏱️  1 mes
+   📝 Comprar materiales y construir. Aprendes, personalizas, pero riesgo que salga mal.
+
+2. Comprar - Rack en tienda (Sodimac/Falabella)
+   💰 $300,000 | 🎯 95% éxito
+   ⏱️  0 meses
+   📝 Rápido, garantizado, sin esfuerzo. Más caro pero sin riesgo.
+
+3. Encargar - Carpintero a medida
+   💰 $400,000 | 🎯 85% éxito
+   ⏱️  1 mes
+   📝 A tu medida, calidad profesional. Más caro, pero exactamente lo que quieres.
+
+4. Kit DIY - Comprar kit para armar
+   💰 $200,000 | 🎯 80% éxito
+   ⏱️  0 meses
+   📝 Término medio: aprendes algo, no muy caro, menos riesgo que DIY completo.
+
+======================================================================
+   🐍 ANÁLISIS PYTHON FRAMEWORK (13 metodologías)
+======================================================================
+
+   ▶ DIY - Construir yo mismo...
+   ▶ Comprar - Rack en tienda (Sodimac/Falabella)...
+   ▶ Encargar - Carpintero a medida...
+   ▶ Kit DIY - Comprar kit para armar...
+
+======================================================================
+   📊 RESULTADOS PYTHON
+======================================================================
+
+🥇 RANK 1: Comprar - Rack en tienda (Sodimac/Falabella)
+   📊 Score: 2.05/10
+   💰 Costo: $300,000
+   🎯 Éxito: 95%
+   ⏱️  Timeline: 0 meses
+   ❌ ❌ NOT RECOMMENDED - High risks or poor fit
+
+🥈 RANK 2: Encargar - Carpintero a medida
+   📊 Score: 2.03/10
+   💰 Costo: $400,000
+   🎯 Éxito: 85%
+   ⏱️  Timeline: 1 mes
+   ❌ ❌ NOT RECOMMENDED - High risks or poor fit
+
+🥉 RANK 3: Kit DIY - Comprar kit para armar
+   📊 Score: 1.82/10
+   💰 Costo: $200,000
+   🎯 Éxito: 80%
+   ⏱️  Timeline: 0 meses
+   ❌ ❌ NOT RECOMMENDED - High risks or poor fit
+
+   RANK 4: DIY - Construir yo mismo
+   📊 Score: 1.33/10
+   💰 Costo: $150,000
+   🎯 Éxito: 60%
+   ⏱️  Timeline: 1 mes
+   ❌ ❌ NOT RECOMMENDED - High risks or poor fit
+
+======================================================================
+   🏆 GANADOR PYTHON
+======================================================================
+
+   Comprar - Rack en tienda (Sodimac/Falabella)
+   Score: 2.05/10
+
+   ✅ Ventajas:
+      • Costo: $300,000
+      • Probabilidad éxito: 95%
+      • Timeline: 0 meses
+      • Learning: 2.0/10
+      • WLB: 9.0/10
+
+======================================================================
+
+💡 SIGUIENTE: Ejecutar análisis C++ para comparar
+   Comando: cd core && ./furniture_analysis
+
+✨ Mejor opción (Python): Comprar - Rack en tienda (Sodimac/Falabella) (2.05/10)
+

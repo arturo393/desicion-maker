@@ -1,0 +1,124 @@
+
+======================================================================
+   🏔️ ANÁLISIS C++: Decisión Minería Chile 2026
+======================================================================
+
+📋 Escenarios a evaluar:
+
+1. Minería Faena - Norte Chile
+   💰 $4500000 | ⏱️ 3m | 🎯 75%
+   ⚖️  WLB: 5/10 | 🏠 Remote: 2/10 | 🔥 Burnout: 35%
+   📝 Turnos 7x7, Antofagasta/Calama. Alto salario, lejos de familia
+
+2. Minería Oficina - Santiago
+   💰 $4200000 | ⏱️ 4m | 🎯 65%
+   ⚖️  WLB: 8/10 | 🏠 Remote: 6/10 | 🔥 Burnout: 20%
+   📝 Oficinas Codelco/BHP Santiago. Vida normal, híbrido posible
+
+3. Minería Híbrida - 2 años + Transición
+   💰 $4500000 | ⏱️ 3m | 🎯 75%
+   ⚖️  WLB: 6/10 | 🏠 Remote: 4/10 | 🔥 Burnout: 25%
+   📝 2 años faena → experiencia → remoto internacional
+
+4. UQOMM - Actual
+   💰 $2600000 | ⏱️ 0m | 🎯 100%
+   ⚖️  WLB: 8/10 | 🏠 Remote: 7/10 | 🔥 Burnout: 20%
+   📝 Status quo. Seguro pero limitado
+
+🔄 Analizando con C++ Framework...
+   • Monte Carlo: 40,000 iteraciones por opción
+   • Distribuciones: Normal (salary), Uniform (success)
+   • VaR/CVaR: Análisis de riesgo real
+
+   ▶ Minería Faena - Norte Chile...
+   ▶ Minería Oficina - Santiago...
+   ▶ Minería Híbrida - 2 años + Transición...
+   ▶ UQOMM - Actual...
+
+======================================================================
+   📊 RESULTADOS C++ FRAMEWORK
+======================================================================
+
+🥇 RANK 1: UQOMM - Actual
+   📊 Score: 5.79/10
+   💰 Salario: $2600000
+   📈 Monte Carlo (40,000 sims):
+      Mean:  $1872123
+      P50:   $1870373
+      VaR95: $1410847 (worst 5%)
+      CVaR:  $1292103 (expected shortfall)
+   ⚖️  WLB: 8/10 | 🏠 Remote: 7/10
+   ⚠️  Risk: Burnout 20% | Market 25%
+
+🥈 RANK 2: Minería Híbrida - 2 años + Transición
+   📊 Score: 5.31/10
+   💰 Salario: $4500000
+   📈 Monte Carlo (40,000 sims):
+      Mean:  $2421923
+      P50:   $2516211
+      VaR95: $1835295 (worst 5%)
+      CVaR:  $1676556 (expected shortfall)
+   ⚖️  WLB: 6/10 | 🏠 Remote: 4/10
+   ⚠️  Risk: Burnout 25% | Market 15%
+
+🥉 RANK 3: Minería Oficina - Santiago
+   📊 Score: 4.57/10
+   💰 Salario: $4200000
+   📈 Monte Carlo (40,000 sims):
+      Mean:  $2755346
+      P50:   $2600000
+      VaR95: $2227483 (worst 5%)
+      CVaR:  $2040169 (expected shortfall)
+   ⚖️  WLB: 8/10 | 🏠 Remote: 6/10
+   ⚠️  Risk: Burnout 20% | Market 20%
+
+   RANK 4: Minería Faena - Norte Chile
+   📊 Score: 4.43/10
+   💰 Salario: $4500000
+   📈 Monte Carlo (40,000 sims):
+      Mean:  $2042502
+      P50:   $1976585
+      VaR95: $1442670 (worst 5%)
+      CVaR:  $1321278 (expected shortfall)
+   ⚖️  WLB: 5/10 | 🏠 Remote: 2/10
+   ⚠️  Risk: Burnout 35% | Market 20%
+
+======================================================================
+   📈 ANÁLISIS COMPARATIVO
+======================================================================
+
+   Faena Original:     4.43/10 (baseline)
+   Santiago Oficina:   4.57/10 (+0.13)
+   Híbrida Temporal:   5.31/10 (+0.87)
+   UQOMM Actual:       5.79/10
+
+   🎯 MEJOR OPCIÓN MINERÍA: Minería Híbrida - 2 años + Transición
+   📊 Score: 5.31/10
+   ✅ Score aceptable (≥5.0)
+
+   📊 vs UQOMM actual (5.79/10):
+   ⚠️  UQOMM es más seguro (+0.48)
+
+======================================================================
+   💡 RECOMENDACIÓN C++ FRAMEWORK
+======================================================================
+
+   🎯 Estrategia HÍBRIDA TEMPORAL
+   • 2 años en faena (experiencia + $$)
+   • Network minería
+   • Transición a remoto internacional
+   • Ahorro objetivo: $50-60M
+
+   📊 ROI Esperado:
+   • Incremento: +73%
+   • Extra mensual: $1900000
+   • Extra anual: $22800000
+
+======================================================================
+
+✨ Análisis C++ completado
+
+📊 Comparar con Python:
+   Python: 10,000 sims, 1 distribución
+   C++:    40,000 sims, 2 distribuciones, VaR/CVaR real
+
