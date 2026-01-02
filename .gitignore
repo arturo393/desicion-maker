@@ -8,6 +8,12 @@
 bin/*
 !bin/.gitkeep
 
+# Binarios específicos del proyecto
+core/furniture_analysis
+core/mining_decision
+core/sqm_analysis
+core/test_demo
+
 # Directorios de build
 build/
 core/build/
