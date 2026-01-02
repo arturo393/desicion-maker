@@ -16,7 +16,7 @@ import os
 from pathlib import Path
 
 # Cargar variables de entorno desde .env.gemini
-env_file = Path(__file__).parent / ".env.gemini"
+env_file = Path(__file__).parent.parent / ".env.gemini"
 if env_file.exists():
     with open(env_file) as f:
         for line in f:

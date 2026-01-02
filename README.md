@@ -37,7 +37,21 @@ cmake -B build && cmake --build build
 
 ---
 
-## 📁 Estructura del Proyecto
+## � Documentación Completa
+
+Después de instalar, consulta:
+
+| Documento | Para quién | Contenido |
+|-----------|-----------|----------|
+| **[QUICK_START.md](docs/QUICK_START.md)** | Principiantes | 3 pasos para empezar (5 min) |
+| **[CREAR_NUEVO_SCRIPT.md](docs/CREAR_NUEVO_SCRIPT.md)** | Desarrolladores | Plantilla para nuevo análisis |
+| **[ARCHITECTURE.md](docs/ARCHITECTURE.md)** | Arquitectos | Estructura técnica dual |
+| **[INTEGRATION_SUMMARY.md](docs/INTEGRATION_SUMMARY.md)** | Integradores | Deep Research Pro setup |
+| **[CHANGELOG.md](docs/CHANGELOG.md)** | Maintainers | Historial de versiones |
+
+---
+
+## �📁 Estructura del Proyecto
 
 ```
 desicion-maker/
