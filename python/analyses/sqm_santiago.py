@@ -1,8 +1,52 @@
 #!/usr/bin/env python3
 """
-🏢 ANÁLISIS: SQM Santiago + Opciones mejoradas
+Título: Análisis de Decisión - SQM Santiago Career Option
+Propósito: Evaluar oportunidad laboral en SQM Santiago vs otras opciones
+Fecha de Creación: 2025-12-10
+Última Actualización: 2025-12-10
+Versión: 1.0
+Status: Activo
 
-Agrega SQM Santiago al análisis y explora cómo mejorar scores.
+DESCRIPCIÓN:
+🏢 Análisis de oportunidad SQM Santiago
+- Empresa: SQM (Sociedad Química y Minera de Chile)
+- Posición: Ingeniero Senior
+- Ubicación: Santiago (oficinas, no faena)
+- Sector: Minería/Químicos (litio, potasio, yodo)
+
+CONTEXTO:
+Análisis específico de oportunidad en SQM Santiago comparando con:
+- Otras opciones de minería
+- Trabajo actual
+- Otras empresas del sector
+
+CAMBIOS EN ESTA VERSIÓN (1.0):
+- Movido a python/analyses/ directory
+- Actualizado import paths
+- Primera versión del análisis SQM
+
+METODOLOGÍAS USADAS:
+- TOPSIS (multi-criteria ranking)
+- Multi-Criteria Decision Analysis
+- Scenario Analysis (mejor caso, caso base, peor caso)
+
+FACTORES EVALUADOS:
+- Salario: $4.8M CLP/mes (competitivo)
+- Estabilidad: 9.5/10 (empresa sólida)
+- Crecimiento técnico: 8.5/10 (innovación litio)
+- Ubicación: Santiago (no faena)
+- Work-life balance: Mejor que faena
+
+PRÓXIMOS PASOS:
+- [ ] Actualizar con datos reales si hay oferta
+- [ ] Comparar con minería faena vs oficina
+- [ ] Análisis de compensación total (no solo sueldo)
+
+NOTAS:
+- Análisis confidencial para decisión personal
+- SQM = líder mundial en litio y yodo
+- Ventaja: Ubicación Santiago (sin 4x3)
+- Resultados guardados en results/sqm/
 """
 
 import sys

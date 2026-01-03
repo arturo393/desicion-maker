@@ -1,0 +1,100 @@
+{
+  "analyses": {
+    "furniture_diy": {
+      "name": "DIY Furniture vs Secondhand Analysis",
+      "description": "Análisis comparativo entre comprar muebles DIY nuevos versus comprar muebles de segunda mano",
+      "purpose": "Decidir la mejor estrategia de compra de muebles considerando costo, calidad y tiempo",
+      "created": "2025-12-01",
+      "last_updated": "2026-01-03",
+      "version": "1.2",
+      "status": "active",
+      "results_location": "results/furniture/",
+      "methodologies_used": [
+        "Monte Carlo",
+        "TOPSIS",
+        "Pareto Analysis"
+      ],
+      "notes": "Incluye análisis de precios del mercado chileno usando Gemini Research"
+    },
+    "mining_decision": {
+      "name": "Mining Career Decision Analysis",
+      "description": "Análisis de decisión sobre carrera en minería",
+      "purpose": "Evaluar opciones de carrera en el sector minero considerando salario, crecimiento y riesgos",
+      "created": "2025-11-15",
+      "last_updated": "2025-12-15",
+      "version": "1.0",
+      "status": "archived",
+      "results_location": "results/mining/",
+      "methodologies_used": [
+        "Decision Trees",
+        "Expected Value",
+        "Scenario Analysis"
+      ],
+      "notes": "Primera versión del análisis de carrera minera. Ver mining_improved para versión actualizada"
+    },
+    "mining_improved": {
+      "name": "Mining Career Decision Analysis (Improved)",
+      "description": "Versión mejorada del análisis de carrera en minería con más datos y metodologías",
+      "purpose": "Evaluar opciones de carrera en minería con análisis más detallado de riesgos y oportunidades",
+      "created": "2025-12-20",
+      "last_updated": "2026-01-03",
+      "version": "2.0",
+      "status": "active",
+      "results_location": "results/mining/",
+      "methodologies_used": [
+        "Monte Carlo",
+        "TOPSIS",
+        "Decision Trees",
+        "Sensitivity Analysis",
+        "VaR (Value at Risk)"
+      ],
+      "notes": "Mejora significativa sobre mining_decision.py con análisis de riesgo más robusto y datos actualizados"
+    },
+    "refactoring_decision": {
+      "name": "Code Refactoring Decision Analysis",
+      "description": "Análisis de decisión sobre refactorización de código",
+      "purpose": "Decidir si vale la pena refactorizar código legacy considerando costo, tiempo y beneficios",
+      "created": "2025-11-30",
+      "last_updated": "2025-11-30",
+      "version": "1.0",
+      "status": "completed",
+      "results_location": "results/refactoring/",
+      "methodologies_used": [
+        "Break-even Analysis",
+        "Decision Trees",
+        "Payoff Matrix"
+      ],
+      "notes": "Análisis único para proyecto específico de refactorización"
+    },
+    "sqm_santiago": {
+      "name": "SQM Santiago Analysis",
+      "description": "Análisis de decisión específico sobre proyecto SQM en Santiago",
+      "purpose": "Evaluar viabilidad y estrategia para proyecto SQM",
+      "created": "2025-12-10",
+      "last_updated": "2025-12-10",
+      "version": "1.0",
+      "status": "active",
+      "results_location": "results/sqm/",
+      "methodologies_used": [
+        "TOPSIS",
+        "Multi-Criteria Decision Analysis",
+        "Scenario Analysis"
+      ],
+      "notes": "Análisis confidencial para proyecto SQM"
+    }
+  },
+  "metadata": {
+    "total_analyses": 5,
+    "active_analyses": 3,
+    "archived_analyses": 1,
+    "completed_analyses": 1,
+    "last_updated": "2026-01-03",
+    "framework_version": "2.0"
+  },
+  "status_definitions": {
+    "active": "Análisis en uso regular, puede ser actualizado frecuentemente",
+    "archived": "Análisis obsoleto pero preservado para referencia histórica",
+    "completed": "Análisis finalizado, no requiere más actualizaciones",
+    "draft": "Análisis en desarrollo inicial, no listo para uso"
+  }
+}

@@ -1,11 +1,39 @@
 #!/usr/bin/env python3
 """
-🏔️ ANÁLISIS: Decisión trabajo minería Chile 2026
+Título: Análisis de Decisión - Mining Career (v1 - Archived)
+Propósito: Decisión de buscar trabajo en minería en Chile con objetivo $4.5M+ CLP/mes
+Fecha de Creación: 2025-11-15
+Última Actualización: 2025-12-15
+Versión: 1.0
+Status: Archivado (ver mining_improved.py para versión actualizada)
 
-Analiza la decisión de buscar trabajo en minería en Chile
-con objetivo de $4.5M+ CLP/mes antes de Marzo 2026.
+DESCRIPCIÓN:
+🏔️ Análisis inicial de decisión de trabajo en minería Chile
+- Objetivo: $4.5M+ CLP/mes antes de Marzo 2026
+- Compara minería vs trabajo actual vs otras opciones
+- Primera iteración del análisis de carrera minera
 
-Usa el framework completo con 13 metodologías.
+CAMBIOS EN ESTA VERSIÓN (1.0):
+- Movido a python/analyses/ directory
+- Actualizado import paths
+- Versión original archivada para referencia
+
+METODOLOGÍAS USADAS:
+- Decision Trees
+- Expected Value
+- Scenario Analysis
+
+ESTADO: ARCHIVADO
+Esta es la versión 1.0 del análisis. Ver mining_improved.py (v2.0) para:
+- Análisis más robusto con Monte Carlo y VaR
+- Tres escenarios en lugar de dos
+- Análisis de sensibilidad mejorado
+- Datos actualizados 2025-2026
+
+NOTAS:
+- Preservado para referencia histórica
+- No actualizar, usar mining_improved.py en su lugar
+- Resultados guardados en results/mining/
 """
 
 import sys

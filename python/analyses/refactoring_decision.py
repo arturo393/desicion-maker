@@ -1,21 +1,52 @@
 #!/usr/bin/env python3
 """
-🎯 DECISIÓN: ¿Completar refactorización FSK/LoRa Opción B?
+Título: Análisis de Decisión - Code Refactoring FSK/LoRa
+Propósito: Decidir si completar refactorización de código legacy en proyecto FSK/LoRa
+Fecha de Creación: 2025-11-30
+Última Actualización: 2025-11-30
+Versión: 1.0
+Status: Completado
 
-Contexto:
-- Líder técnico con ganas de irse
-- Cultura "salir del paso"
-- Refactorización 60% completa (punto sin retorno)
+DESCRIPCIÓN:
+🎯 Decisión sobre completar refactorización FSK/LoRa Opción B
+Contexto del proyecto:
+- Líder técnico con intención de irse
+- Cultura organizacional "salir del paso"
+- Refactorización 60% completa (punto de no retorno)
 - 40% pendiente: actualizar FskScanner + main.cpp
 
-Usar framework de decisiones para responder: ¿Vale la pena terminar?
+PREGUNTA CLAVE:
+¿Vale la pena invertir tiempo en terminar la refactorización?
+
+CAMBIOS EN ESTA VERSIÓN (1.0):
+- Movido a python/analyses/ directory
+- Actualizado import paths
+- Análisis completado (decisión tomada)
+
+METODOLOGÍAS USADAS:
+- Break-even Analysis (punto de equilibrio esfuerzo/beneficio)
+- Decision Trees (secuencia de decisiones)
+- Payoff Matrix (comparación de opciones)
+
+RESULTADO FINAL:
+Análisis completado - Decisión tomada basada en análisis
+Ver results/refactoring/ para detalles
+
+PRÓXIMOS PASOS:
+- [ ] N/A - Análisis completado
+
+NOTAS:
+- Caso de estudio único para decisión de refactorización
+- Factores considerados: deuda técnica, tiempo, cultura organizacional
+- Metodología aplicable a futuros casos de refactoring
+- Resultados guardados en results/refactoring/
 """
 
 import sys
 from pathlib import Path
 
 # Add core to path
-sys.path.insert(0, str(Path(__file__).parent / 'core'))
+sys.path.insert(0, str(Path(__file__).parent.parent / 'core'))
 
 from deep_research_decision_agent import CareerOption, DecisionAnalysisEngine
 

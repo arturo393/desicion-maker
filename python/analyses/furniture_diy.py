@@ -1,14 +1,38 @@
 #!/usr/bin/env python3
 """
-🔨 ANÁLISIS: ¿Hacer mueble DIY o Comprar?
+Título: Análisis de Decisión - DIY Furniture vs Compra
+Propósito: Decidir entre construir muebles DIY, comprar nuevos o comprar usados
+Fecha de Creación: 2025-12-01
+Última Actualización: 2026-01-03
+Versión: 1.2
+Status: Activo
 
-Decisión: Construir mesa/rack 60cm alto × 60cm ancho × 1.8m largo
-- Para bebé (mesón)
-- Con almacenamiento debajo (cajones/cajas)
-- Similar a rack TV
+DESCRIPCIÓN:
+🔨 Decisión sobre construcción de mesa/rack:
+- Dimensiones: 60cm alto × 60cm ancho × 1.8m largo
+- Uso: Para bebé (mesón) con almacenamiento debajo
+- Similar a rack TV con cajones/cajas
 
-Evalúa: DIY vs Comprar vs Encargar
-Usa: Gemini API para buscar precios y tutoriales
+CAMBIOS EN ESTA VERSIÓN (1.2):
+- Movido a python/analyses/ directory
+- Actualizado import paths
+- Mantiene integración con Gemini API para búsqueda de precios
+
+METODOLOGÍAS USADAS:
+- Monte Carlo Simulation (10k iteraciones)
+- TOPSIS (multi-criteria ranking)
+- Pareto Analysis
+- Gemini Research para precios de mercado chileno
+
+PRÓXIMOS PASOS:
+- [ ] Actualizar precios de mercado 2026
+- [ ] Agregar análisis de tiempo de construcción
+- [ ] Comparar con precios Amazon/MercadoLibre
+
+NOTAS:
+- Usa Gemini API para buscar precios reales en Chile
+- Requiere GEMINI_API_KEY en .env
+- Resultados guardados en results/furniture/
 """
 
 import sys

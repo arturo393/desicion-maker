@@ -1,11 +1,48 @@
 #!/usr/bin/env python3
 """
-🏔️ ANÁLISIS MEJORADO: Comparar versiones de minería
+Título: Análisis de Decisión - Mining Career (Improved)
+Propósito: Comparar 3 escenarios de carrera en minería con análisis de riesgo robusto
+Fecha de Creación: 2025-12-20
+Última Actualización: 2026-01-03
+Versión: 2.0
+Status: Activo
 
-Analiza 3 escenarios de minería para ver cuál tiene mejor score:
-1. Minería faena tradicional (original)
-2. Minería oficina Santiago (mejorada)
-3. Minería híbrida (balance)
+DESCRIPCIÓN:
+🏔️ Decisión sobre carrera en minería - Versión mejorada
+Analiza 3 escenarios diferentes:
+1. Minería Faena Norte Chile (tradicional - 4x3)
+2. Minería Oficina Santiago (modalidad mejorada)
+3. Minería Híbrida (balance faena/oficina)
+
+CAMBIOS EN ESTA VERSIÓN (2.0):
+- Movido a python/analyses/ directory
+- Actualizado import paths
+- Análisis de riesgo más robusto con VaR
+- Comparación con baseline (trabajo actual)
+- Más metodologías: Monte Carlo, TOPSIS, Decision Trees, Sensitivity, VaR
+
+MEJORAS SOBRE v1.0 (mining_decision.py):
+- Tercer escenario híbrido agregado
+- Análisis de sensibilidad para variables clave
+- Value at Risk (VaR) al 95% de confianza
+- Datos salariales actualizados 2025-2026
+
+METODOLOGÍAS USADAS:
+- Monte Carlo Simulation (10k iteraciones)
+- TOPSIS (multi-criteria ranking)
+- Decision Trees
+- Sensitivity Analysis (impacto variables)
+- Value at Risk (VaR 95%)
+
+PRÓXIMOS PASOS:
+- [ ] Agregar datos reales de ofertas laborales 2026
+- [ ] Incluir análisis de calidad de vida por escenario
+- [ ] Comparar con sector tecnología
+
+NOTAS:
+- Basado en salarios promedio sector minero chileno 2025
+- Considera riesgo de accidentes y burnout en faena
+- Resultados guardados en results/mining/
 """
 
 import sys
