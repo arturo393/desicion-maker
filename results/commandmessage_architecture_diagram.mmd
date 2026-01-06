@@ -1,0 +1,190 @@
+---
+title: CommandMessage Current Architecture Analysis
+---
+classDiagram
+    %% =================================================================
+    %% GATEWAY 2 LORA - CommandMessage Usage Analysis
+    %% Current State: 492 lines monolithic class
+    %% CRC Validation: DISABLED (ENABLE_CRC_VALIDATION = 0)
+    %% =================================================================
+    
+    %% === MAIN CONTROLLER ===
+    class main {
+        <<STM32 Main Loop>>
+        -uartCommandParser* CommandMessage
+        -loraCommandParser* CommandMessage
+        -uartSimulatedCommandParse* CommandMessage
+        -loraTx* Lora
+        -loraRx* Lora
+        -fskTx* FskModem
+        -fskRx* FskModem
+        -uartHandler1* UartHandler
+        +processUartCommand() void
+        +processLoraData() void
+        +triggerSnifferSimulation() void
+        +transmitLoraSettingResponse() void
+    }
+    
+    %% === COMMAND MESSAGE (MONOLITHIC) ===
+    class CommandMessage {
+        <<Monolithic 492 lines>>
+        
+        %% PARSING STATE
+        -message vector~uint8_t~
+        -listening bool
+        -ready bool
+        -module_function uint8_t
+        -module_id uint8_t
+        -command_id uint8_t
+        -max_message_size uint8_t
+        -data_size size_t
+        
+        %% CRC STATE (mostly unused!)
+        -crc_calculated uint16_t
+        -crc_received uint16_t
+        -status STATUS
+        
+        %% === CONSTRUCTORS (4 variants) ===
+        +CommandMessage(module_function, module_id, max_size)
+        +CommandMessage(module_function, module_id)
+        +CommandMessage(max_size)
+        +CommandMessage()
+        
+        %% === PARSING (byte-by-byte + batch) ===
+        +checkByte(uint8_t) void
+        +validate(buffer*, length) STATUS
+        +getData() vector~uint8_t~
+        +getDataAsUint8() uint8_t
+        +getDataAsUint16() uint16_t
+        +getDataAsUint32() uint32_t
+        +getDataAsFloat() float
+        +freqDecode() int
+        +isReady() bool
+        +isListening() bool
+        +reset() void
+        +reset(init) void
+        
+        %% === COMPOSING (message building) ===
+        +composeMessage(data*) bool
+        +composeMessage() bool
+        +composeAndGetMessage(data, size, output&) bool
+        +composeAndSendMessage(uartComm*, data, size) bool
+        +setMessage(arr*, size) void
+        +get_composed_message() vector~uint8_t~
+        +messageClear() void
+        
+        %% === CRC (3 redundant methods!) ===
+        +checkCRC() bool
+        +calculateCRC(start, end) uint16_t
+        +crc_get(buffer*, len)$ uint16_t
+        
+        %% === VALIDATION (frame checking) ===
+        -checkFrameValidity(frame*, length) STATUS
+        -checkModule(frame*, length) STATUS
+        -checkCRCValidity(frame*, len) STATUS
+        
+        %% === OTHERS ===
+        +saveFrame(buffer*, length) void
+        +setModuleFunction(uint8_t) void
+        +setModuleId(uint8_t) void
+        +getCommandId() uint8_t
+        +getModuleId() uint8_t
+        +getModuleFunction() uint8_t
+        +getMaxSize() uint8_t
+    }
+    
+    %% === UART HANDLER ===
+    class UartHandler {
+        <<Communication Layer>>
+        -uart_port* UART_HandleTypeDef
+        -receive_buffer uint8_t[255]
+        -transmit_buffer uint8_t[255]
+        +send(buffer*, size) bool
+        +receive(buffer*, size) bool
+        +get_and_send_command(CommandMessage) bool
+    }
+    
+    %% === LORA MODEM ===
+    class Lora {
+        <<LoRa SX1276>>
+        -tx_freq uint32_t
+        -rx_freq uint32_t
+        -bandwidth uint8_t
+        -spread_factor uint8_t
+        -coding_rate uint8_t
+        +set_tx_freq(freq) void
+        +set_rx_freq(freq) void
+        +set_bandwidth(bw) void
+        +set_spread_factor(sf) void
+        +set_coding_rate(cr) void
+        +configure_modem() void
+        +save_settings() void
+        +initialize() void
+    }
+    
+    %% === FSK MODEM ===
+    class FskModem {
+        <<FSK Mode SX1276>>
+        -radio_mode RadioMode
+        -fsk_freq uint32_t
+        -fsk_bitrate uint32_t
+        -fsk_deviation uint32_t
+        +get_radio_mode() RadioMode
+        +set_radio_mode(mode) void
+        +configure_modem() void
+        +save_settings() void
+        +initialize() void
+    }
+    
+    %% === ENUMS ===
+    class STATUS {
+        <<enumeration>>
+        MESSAGE_OK
+        WAITING
+        START_READING
+        CONFIG_FRAME
+        RETRANSMIT_FRAME
+        VALID_FRAME
+        NOT_VALID_FRAME
+        RDSS_DATA_OK
+        CRC_ERROR
+    }
+    
+    class CommandType {
+        <<enumeration>>
+        QUERY_MODULE_ID
+        QUERY_STATUS
+        QUERY_TX_FREQ
+        QUERY_RX_FREQ
+        QUERY_BANDWIDTH
+        QUERY_SPREAD_FACTOR
+        QUERY_CODING_RATE
+        QUERY_RADIO_MODE
+        SET_TX_FREQ
+        SET_RX_FREQ
+        SET_BANDWIDTH
+        SET_SPREAD_FACTOR
+        SET_CODING_RATE
+        SET_RADIO_MODE
+        START_FSK_SCAN
+        STOP_FSK_SCAN
+    }
+    
+    %% === RELATIONSHIPS ===
+    main "1" --> "3" CommandMessage : creates 3 instances
+    main "1" --> "1" UartHandler : uses for TX/RX
+    main "1" --> "2" Lora : TX and RX modems
+    main "1" --> "2" FskModem : TX and RX modems
+    
+    CommandMessage --> UartHandler : composeAndSendMessage()
+    CommandMessage ..> STATUS : returns
+    main ..> CommandType : uses enum
+    
+    %% === DETAILED USAGE NOTES ===
+    note for CommandMessage "⚠️ PROBLEMAS DETECTADOS:\n\n1. MONOLÍTICO: 492 líneas\n2. CRC REDUNDANTE: 3 métodos diferentes\n   - checkCRC()\n   - calculateCRC()\n   - crc_get()\n3. VALIDACIÓN DISABLED:\n   #define ENABLE_CRC_VALIDATION 0\n4. RESPONSABILIDADES MEZCLADAS:\n   - Parsing\n   - Composing\n   - Validation\n   - CRC calculation\n5. ESTADO COMPLEJO:\n   - 2 flags booleanos\n   - 5+ campos de estado\n   - vector mutable\n6. 4 CONSTRUCTORES diferentes"
+    
+    note for main "📍 USO REAL EN MAIN.CPP:\n\n=== UART PARSER ===\nuartCommandParser usado:\n• validate() - 1x por frame\n• getCommandId() - 10+ veces\n• getDataAsUint8() - 8+ veces\n• freqDecode() - 3 veces\n• composeAndSendMessage() - 5+ veces\n\n=== LORA PARSER ===\nloraCommandParser:\n• Declarado pero NO usado\n  directamente en código visible\n\n=== SIMULATOR ===\nuartSimulatedCommandParse:\n• Solo para simulación interna"
+    
+    note for UartHandler "COMUNICACIÓN DIRECTA\n\nSTM32 <--UART--> PC/GUI\n\n• Cable corto (<2m)\n• Sin interferencia\n• CRC innecesario\n• Ya funciona sin validar CRC"
+    
+    note "⚡ DESCUBRIMIENTO CLAVE:\n\nCRC YA ESTÁ DESHABILITADO\nENABLE_CRC_VALIDATION = 0\n\nPero composeMessage()\nSIGUE CALCULANDO CRC\n→ DESPERDICIO DE CPU\n\nvalidate() NO valida CRC\n→ Funciona sin problemas"
