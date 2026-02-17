@@ -1,0 +1,201 @@
+{
+  "timestamp": "20260217_145124",
+  "decision_matrix": {
+    "Upgrade RAM (Keep Intel)": {
+      "total_score": 29.651669199061022,
+      "Score_Performance": {
+        "raw": 10.988907521451141,
+        "weight": 0.3,
+        "contribution": 3.2966722564353423,
+        "maximize": true
+      },
+      "Score_CostEfficiency": {
+        "raw": 91.0,
+        "weight": 0.2,
+        "contribution": 18.2,
+        "maximize": true
+      },
+      "Score_Longevity": {
+        "raw": 18.032373987038397,
+        "weight": 0.15,
+        "contribution": 2.7048560980557594,
+        "maximize": true
+      },
+      "Score_Battery": {
+        "raw": 11.995262408952136,
+        "weight": 0.15,
+        "contribution": 1.7992893613428205,
+        "maximize": true
+      },
+      "Score_Comfort": {
+        "raw": 30.0,
+        "weight": 0.1,
+        "contribution": 3.0,
+        "maximize": true
+      },
+      "Score_Resale": {
+        "raw": 8.005772603587243,
+        "weight": 0.05,
+        "contribution": 0.40028863017936217,
+        "maximize": true
+      },
+      "Score_Productivity": {
+        "raw": 5.011257060954874,
+        "weight": 0.05,
+        "contribution": 0.25056285304774367,
+        "maximize": true
+      }
+    },
+    "New MacBook Pro M4 Max": {
+      "total_score": 61.98016466933139,
+      "Score_Performance": {
+        "raw": 59.97463407563841,
+        "weight": 0.3,
+        "contribution": 17.992390222691522,
+        "maximize": true
+      },
+      "Score_CostEfficiency": {
+        "raw": 23.95911450583878,
+        "weight": 0.2,
+        "contribution": 4.791822901167756,
+        "maximize": true
+      },
+      "Score_Longevity": {
+        "raw": 72.00054029365153,
+        "weight": 0.15,
+        "contribution": 10.800081044047728,
+        "maximize": true
+      },
+      "Score_Battery": {
+        "raw": 71.96710049154268,
+        "weight": 0.15,
+        "contribution": 10.795065073731402,
+        "maximize": true
+      },
+      "Score_Comfort": {
+        "raw": 90.0,
+        "weight": 0.1,
+        "contribution": 9.0,
+        "maximize": true
+      },
+      "Score_Resale": {
+        "raw": 72.01431486354997,
+        "weight": 0.05,
+        "contribution": 3.6007157431774988,
+        "maximize": true
+      },
+      "Score_Productivity": {
+        "raw": 100.00179369030964,
+        "weight": 0.05,
+        "contribution": 5.0000896845154825,
+        "maximize": true
+      }
+    },
+    "Wait for M5 (Late 2027)": {
+      "total_score": 68.49517422241493,
+      "Score_Performance": {
+        "raw": 74.9707421888844,
+        "weight": 0.3,
+        "contribution": 22.491222656665318,
+        "maximize": true
+      },
+      "Score_CostEfficiency": {
+        "raw": 10.012549457566632,
+        "weight": 0.2,
+        "contribution": 2.0025098915133266,
+        "maximize": true
+      },
+      "Score_Longevity": {
+        "raw": 83.98682758315486,
+        "weight": 0.15,
+        "contribution": 12.59802413747323,
+        "maximize": true
+      },
+      "Score_Battery": {
+        "raw": 80.00602457127587,
+        "weight": 0.15,
+        "contribution": 12.00090368569138,
+        "maximize": true
+      },
+      "Score_Comfort": {
+        "raw": 100.0,
+        "weight": 0.1,
+        "contribution": 10.0,
+        "maximize": true
+      },
+      "Score_Resale": {
+        "raw": 88.03486019270424,
+        "weight": 0.05,
+        "contribution": 4.401743009635212,
+        "maximize": true
+      },
+      "Score_Productivity": {
+        "raw": 100.01541682872933,
+        "weight": 0.05,
+        "contribution": 5.000770841436466,
+        "maximize": true
+      }
+    }
+  },
+  "monte_carlo": {
+    "Upgrade RAM (Keep Intel)": {
+      "mean": 29.651669199061022,
+      "std": 1.2288952855723754,
+      "min": 24.360332313797052,
+      "max": 34.75251249947544,
+      "p5": 27.630888477676265,
+      "p95": 31.66349396591396,
+      "var_95": 27.630888477676265,
+      "cvar_95": 27.122375081583915,
+      "success_rate": 1.0
+    },
+    "New MacBook Pro M4 Max": {
+      "mean": 61.98016466933139,
+      "std": 2.120709413783582,
+      "min": 53.1426079727991,
+      "max": 70.8270822831191,
+      "p5": 58.47989439407467,
+      "p95": 65.4646283815445,
+      "var_95": 58.47989439407467,
+      "cvar_95": 57.60873561812268,
+      "success_rate": 1.0
+    },
+    "Wait for M5 (Late 2027)": {
+      "mean": 68.49517422241493,
+      "std": 2.032933846331104,
+      "min": 60.28730077162666,
+      "max": 76.50041603252765,
+      "p5": 65.13745994941696,
+      "p95": 71.83873131529434,
+      "var_95": 65.13745994941696,
+      "cvar_95": 64.31863115009038,
+      "success_rate": 1.0
+    }
+  },
+  "topsis": {
+    "Wait for M5 (Late 2027)": 0.5907776082734982,
+    "New MacBook Pro M4 Max": 0.5699689314146706,
+    "Upgrade RAM (Keep Intel)": 0.40922239172650177
+  },
+  "algorithm_comparison": {
+    "Wait for M5 (Late 2027)": {
+      "mc_rank": 1,
+      "mc_score": 68.49517422241493,
+      "topsis_rank": 1,
+      "topsis_score": 0.5907776082734982
+    },
+    "New MacBook Pro M4 Max": {
+      "mc_rank": 2,
+      "mc_score": 61.98016466933139,
+      "topsis_rank": 2,
+      "topsis_score": 0.5699689314146706
+    },
+    "Upgrade RAM (Keep Intel)": {
+      "mc_rank": 3,
+      "mc_score": 29.651669199061022,
+      "topsis_rank": 3,
+      "topsis_score": 0.40922239172650177
+    }
+  },
+  "ai_insights": {}
+}

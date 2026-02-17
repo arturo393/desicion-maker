@@ -1,0 +1,109 @@
+{
+  "timestamp": "20260213_163208",
+  "decision_matrix": {
+    "Upgrade RAM (64GB)": {
+      "total_score": -59.09905388042552,
+      "PerformanceMultiplier": {
+        "raw": 1.2002276186215588,
+        "weight": 0.5,
+        "contribution": 0.6001138093107794,
+        "maximize": true
+      },
+      "TotalCost": {
+        "raw": 200.0,
+        "weight": 0.3,
+        "contribution": -60.0,
+        "maximize": false
+      },
+      "LongevityYears": {
+        "raw": 1.504161551318516,
+        "weight": 0.2,
+        "contribution": 0.3008323102637032,
+        "maximize": true
+      }
+    },
+    "New MacBook Pro M4 Max": {
+      "total_score": -1137.0135007228466,
+      "PerformanceMultiplier": {
+        "raw": 3.016766847846877,
+        "weight": 0.5,
+        "contribution": 1.5083834239234386,
+        "maximize": true
+      },
+      "TotalCost": {
+        "raw": 3798.740206097023,
+        "weight": 0.3,
+        "contribution": -1139.6220618291068,
+        "maximize": false
+      },
+      "LongevityYears": {
+        "raw": 5.5008884116836825,
+        "weight": 0.2,
+        "contribution": 1.1001776823367366,
+        "maximize": true
+      }
+    },
+    "Wait for M5 (Late 2027)": {
+      "total_score": -1347.7407740915758,
+      "PerformanceMultiplier": {
+        "raw": 3.9981237017808913,
+        "weight": 0.5,
+        "contribution": 1.9990618508904456,
+        "maximize": true
+      },
+      "TotalCost": {
+        "raw": 4503.470932368046,
+        "weight": 0.3,
+        "contribution": -1351.0412797104138,
+        "maximize": false
+      },
+      "LongevityYears": {
+        "raw": 6.507218839738803,
+        "weight": 0.2,
+        "contribution": 1.3014437679477606,
+        "maximize": true
+      }
+    }
+  },
+  "monte_carlo": {
+    "Upgrade RAM (64GB)": {
+      "mean": -59.09905388042552,
+      "std": 0.10216445185527478,
+      "min": -59.51708568141106,
+      "max": -58.6856499575898,
+      "p5": -59.26651725772556,
+      "p95": -58.93036677891487,
+      "var_95": -59.26651725772556,
+      "cvar_95": -59.31041433647076,
+      "success_rate": 0.0
+    },
+    "New MacBook Pro M4 Max": {
+      "mean": -1137.0135007228466,
+      "std": 59.90178362924275,
+      "min": -1391.1250213727137,
+      "max": -882.3685261135868,
+      "p5": -1235.509204350082,
+      "p95": -1038.5699111973365,
+      "var_95": -1235.509204350082,
+      "cvar_95": -1260.8898899820804,
+      "success_rate": 0.0
+    },
+    "Wait for M5 (Late 2027)": {
+      "mean": -1347.7407740915758,
+      "std": 60.93717125014128,
+      "min": -1496.4645791869411,
+      "max": -1197.3275410119893,
+      "p5": -1449.1461941470607,
+      "p95": -1245.2976758558827,
+      "var_95": -1449.1461941470607,
+      "cvar_95": -1465.608485557051,
+      "success_rate": 0.0
+    }
+  },
+  "topsis": {
+    "Wait for M5 (Late 2027)": 0.5741024187676911,
+    "New MacBook Pro M4 Max": 0.4933450881691714,
+    "Upgrade RAM (64GB)": 0.425897581232309
+  },
+  "ai_insights": {}
+}

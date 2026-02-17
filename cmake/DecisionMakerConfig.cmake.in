@@ -1,6 +1,0 @@
-@PACKAGE_INIT@
-
-include("${CMAKE_CURRENT_LIST_DIR}/DecisionMakerTargets.cmake")
-
-# Verificar componentes requeridos
-check_required_components(DecisionMaker)
