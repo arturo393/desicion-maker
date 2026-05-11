@@ -1,0 +1,137 @@
+{
+  "fecha": "2026-03-18T14:47:12.841498",
+  "objetivo": "Seleccion analizador espectro mesa de pruebas sw-testbench",
+  "precio_referencia_usd": 1360,
+  "precio_objetivo_usd": 800,
+  "gemini_research": "De acuerdo! Analicemos los analizadores de espectro de bajo costo adecuados para una mesa de pruebas de producción automatizada en 2025-2026, enfocándonos en los requisitos que has especificado.\n\n**Importante:**  Los precios indicados son los *actuales* (Octubre 2024) y pueden variar en 2025-2026. Siempre verifica los precios con los proveedores oficiales en el momento de la compra.  La disponibilidad también es un factor a considerar.\n\n**Suposiciones:**\n\n*   Estamos buscando analizadores de espectro \"de banco\" (benchtop), no analizadores portátiles.\n*   El precio objetivo es < $1,200 USD, y la disponibilidad de descuento por volumen es un plus.\n*   Asumimos que \"precisión de amplitud total\" incluye todas las fuentes de error (e.g., atenuador, frecuencia, temperatura).\n\n**Análisis de las Opciones (NUEVAS):**\n\n**1. Rigol DSA815**\n\n*   **Precio (Nuevo, Octubre 2024):**  Aproximadamente $550 - $650 USD.\n*   **Rango de Frecuencias:** 9 kHz - 1.5 GHz\n*   **DANL:** -85 dBm/Hz (típico, preamplificador apagado).  Puede mejorar con el preamplificador activado, pero aún podría ser marginal para tus requerimientos.\n*   **Precisión de Amplitud Total:** ±1.5 dB (típico)\n*   **RBW Mínimo:** 10 Hz\n*   **Protocolo de Control:** SCPI, VISA (a través de USB o LAN opcional)\n*   **Soporte de pyvisa/Python:** Excelente soporte.  Rigol proporciona ejemplos y bibliotecas.\n*   **Zero Span:** Sí\n*   **Apto para Producción Automatizada:** Sí. API robusta, fácil de integrar con Python.\n*   **Descuentos por Volumen:** Posible, contacta a Rigol o a distribuidores.\n\n**2. Rigol DSA832**\n\n*   **Precio (Nuevo, Octubre 2024):** Aproximadamente $1,100 - $1,300 USD\n*   **Rango de Frecuencias:** 9 kHz - 3.2 GHz\n*   **DANL:** -130 dBm/Hz (típico, preamplificador encendido)\n*   **Precisión de Amplitud Total:** ±1.5 dB (típico)\n*   **RBW Mínimo:** 10 Hz\n*   **Protocolo de Control:** SCPI, VISA (a través de USB o LAN opcional)\n*   **Soporte de pyvisa/Python:** Excelente soporte.  Rigol proporciona ejemplos y bibliotecas.\n*   **Zero Span:** Sí\n*   **Apto para Producción Automatizada:** Sí. API robusta, fácil de integrar con Python.\n*   **Descuentos por Volumen:** Posible, contacta a Rigol o a distribuidores.\n\n**3. Rohde & Schwarz FPC1000 / FPC1500**\n\n*   **Precio FPC1000 (Nuevo, Octubre 2024):**  Aproximadamente $1,200 - $1,500 USD (depende de las opciones)\n*   **Precio FPC1500 (Nuevo, Octubre 2024):**  Aproximadamente $2,000 - $2,500 USD (depende de las opciones)\n*   **Rango de Frecuencias FPC1000:** 5 kHz - 1 GHz (Actualizable por software hasta 3 GHz)\n*   **Rango de Frecuencias FPC1500:** 5 kHz - 3 GHz\n*   **DANL:** -150 dBm (típico, preamplificador encendido)\n*   **Precisión de Amplitud Total:** ±1 dB (típico)\n*   **RBW Mínimo:** 1 Hz\n*   **Protocolo de Control:** SCPI, VISA (a través de USB o LAN)\n*   **Soporte de pyvisa/Python:** Excelente soporte. Rohde & Schwarz proporciona documentación y ejemplos.\n*   **Zero Span:** Sí\n*   **Apto para Producción Automatizada:** Sí.  Buena estabilidad y repetibilidad.\n*   **Descuentos por Volumen:** Posible, contacta a Rohde & Schwarz o a distribuidores.\n\n**4. Siglent SSA3015X Plus**\n\n*   **Precio (Nuevo, Octubre 2024):** Aproximadamente $1,000 - $1,200 USD.\n*   **Rango de Frecuencias:** 9 kHz - 1.5 GHz\n*   **DANL:** -148 dBm/Hz (típico, preamplificador encendido)\n*   **Precisión de Amplitud Total:** ±1.5 dB (típico)\n*   **RBW Mínimo:** 1 Hz\n*   **Protocolo de Control:** SCPI, VISA (a través de USB, LAN opcional)\n*   **Soporte de pyvisa/Python:** Soporte adecuado.  Siglent proporciona documentación y ejemplos.\n*   **Zero Span:** Sí\n*   **Apto para Producción Automatizada:** Sí.\n*   **Descuentos por Volumen:** Posible, contacta a Siglent o a distribuidores.\n\n**5. Siglent SSA3021X Plus**\n\n*   **Precio (Nuevo, Octubre 2024):** Aproximadamente $1,300 - $1,500 USD.\n*   **Rango de Frecuencias:** 9 kHz - 2.1 GHz\n*   **DANL:** -148 dBm/Hz (típico, preamplificador encendido)\n*   **Precisión de Amplitud Total:** ±1.5 dB (típico)\n*   **RBW Mínimo:** 1 Hz\n*   **Protocolo de Control:** SCPI, VISA (a través de USB, LAN opcional)\n*   **Soporte de pyvisa/Python:** Soporte adecuado.  Siglent proporciona documentación y ejemplos.\n*   **Zero Span:** Sí\n*   **Apto para Producción Automatizada:** Sí.\n*   **Descuentos por Volumen:** Posible, contacta a Siglent o a distribuidores.\n\n**6. BK Precision 2658 o similar**\n\n*   **Precio (Nuevo, Octubre 2024):**  Alrededor de $1,200 - $1,400 USD\n*   **Rango de Frecuencias:** 9 kHz - 3 GHz\n*   **DANL:** -140 dBm (típico, preamplificador activado)\n*   **Precisión de Amplitud Total:** ±1.5 dB\n*   **RBW Mínimo:** 1 Hz\n*   **Protocolo de Control:** SCPI, VISA (a través de USB y LAN)\n*   **Soporte de pyvisa/Python:** Adecuado, pero quizás no tan completo como Rigol o R&S.\n*   **Zero Span:** Sí\n*   **Apto para Producción Automatizada:** Sí.\n*   **Descuentos por Volumen:** Posible, contacta a BK Precision o a distribuidores.\n\n**7. Owon HSA1016 / HSA1036**\n\n*   **Precio (Nuevo, Octubre 2024):** HSA1016 alrededor de $600 - $800 USD, HSA1036 alrededor de $800 - $1000 USD.\n*   **Rango de Frecuencias:** HSA1016: 10 MHz - 1.6 GHz, HSA1036: 10 MHz - 3.6 GHz\n*   **DANL:** -120 dBm (típico, preamplificador activado)\n*   **Precisión de Amplitud Total:** Podría ser mayor a ±1 dB. Revisa la hoja de datos cuidadosamente.\n*   **RBW Mínimo:** 100 Hz\n*   **Protocolo de Control:** SCPI (a través de USB)\n*   **Soporte de pyvisa/Python:** El soporte podría ser limitado comparado con las otras marcas.\n*   **Zero Span:** Sí\n*   **Apto para Producción Automatizada:** Podría ser adecuado para aplicaciones menos exigentes, pero la precisión y soporte de software podrían ser limitantes.\n*   **Descuentos por Volumen:** Posible, contacta a Owon o a distribuidores.\n\n**8. GW Instek GSP-818 / GSP-830**\n\n*   **Precio (Nuevo, Octubre 2024):** GSP-818 alrededor de $1,000 - $1,200 USD, GSP-830 alrededor de $1,300 - $1,500 USD\n*   **Rango de Frecuencias:** GSP-818: 1.8 GHz, GSP-830: 3 GHz\n*   **DANL:** -132 dBm (típico, preamplificador activado)\n*   **Precisión de Amplitud Total:** ±1.5 dB\n*   **RBW Mínimo:** 300 Hz\n*   **Protocolo de Control:** SCPI (a través de USB)\n*   **Soporte de pyvisa/Python:** El soporte podría ser limitado comparado con las otras marcas.\n*   **Zero Span:** Sí\n*   **Apto para Producción Automatizada:** Podría ser adecuado para aplicaciones menos exigentes, pero la precisión y soporte de software podrían ser limitantes.\n*   **Descuentos por Volumen:** Posible, contacta a GW Instek o a distribuidores.\n\n**9. Anritsu MS2711E**\n\n*   **Estado:**  Este modelo está descontinuado.  No está disponible NUEVO.\n*   **NO APLICABLE.**\n\n**10. Keysight N9320B**\n\n*   **Precio (Nuevo, Octubre 2024):**  Aproximadamente $7,000 - $9,000 USD (precio de lista).\n*   **Rango de Frecuencias:** 9 kHz - 3 GHz\n*   **DANL:** -130 dBm (típico, preamplificador activado)\n*   **Precisión de Amplitud Total:** ±1.5 dB\n*   **RBW Mínimo:** 10 Hz\n*   **Protocolo de Control:** SCPI, VISA (a través de USB y LAN)\n*   **Soporte de pyvisa/Python:** Excelente soporte. Keysight proporciona amplios recursos.\n*   **Zero Span:** Sí\n*   **Apto para Producción Automatizada:** Sí.  Construido para entornos de producción.\n*   **Descuentos por Volumen:** Posible, contacta a Keysight o a distribuidores.\n*   **Conclusión:** Queda fuera de presupuesto.\n\n**11. Otras Opciones NUEVAS < $1,000 USD**\n\n*   **Verifica cuidadosamente:**  En este rango de precios, los analizadores de espectro suelen tener especificaciones comprometidas (DANL, precisión de amplitud) o soporte de software limitado.  Las opciones más económicas podrían ser adecuadas para pruebas básicas, pero no para una mesa de pruebas de producción automatizada que requiere precisión y confiabilidad.\n\n**Evaluación y Comparación: Mejores Relaciones Calidad/Precio**\n\nConsiderando tus requisitos (especialmente DANL, precisión de amplitud, control por software robusto y precio), estas son las mejores opciones, ordenadas por precio y relación valor/funcionalidad:\n\n1.  **Rigol DSA832:**  Excelente balance entre precio, rendimiento y soporte de software.  El DANL es suficiente, y el soporte de Python es muy bueno.  Es una excelente opción *si puedes estirar un poco el presupuesto.*\n2.  **Siglent SSA3015X Plus:** Una muy buena opción.  DANL decente, soporte SCPI/VISA correcto.  Podría ser una excelente alternativa a la DSA815 si encuentras una buena oferta.\n3.  **Rigol DSA815:** El más económico de la lista, *pero* el DANL puede ser un problema para medir señales de -20 dBm.  Si puedes tolerar un rendimiento DANL marginal o usas un preamplificador externo, podría ser una opción viable. Es importante probarlo con tus señales específicas.\n\n**Recomendaciones Adicionales:**\n\n*   **Software de control personalizado:** Para una mesa de pruebas de producción, considera desarrollar tu propio software de control en Python usando las bibliotecas pyvisa. Esto te dará la máxima flexibilidad y control sobre el proceso de prueba.\n*   **Calibración regular:**  Para mantener la precisión de amplitud, calibra los analizadores de espectro regularmente.  Considera si necesitas una calibración interna o si dependerás de un servicio de calibración externo.\n*   **Pre-amplificador externo:**  Si el DANL es un problema, considera agregar un pre-amplificador de bajo ruido externo a tu cadena de señal.  Esto puede mejorar significativamente la sensibilidad del sistema.\n*   **Automatización de calibración:**  Investiga si puedes automatizar el proceso de calibración usando fuentes de señal calibradas.\n\n**Consideraciones Clave para la Decisión Final:**\n\n*   **Prueba real:**  Antes de comprar múltiples unidades, *prueba* los modelos que te interesan con tus señales reales y en tu entorno de prueba. Verifica que el DANL, la precisión de amplitud y la estabilidad sean adecuados.\n*   **Soporte técnico:** Evalúa la calidad del soporte técnico ofrecido por el fabricante o distribuidor.  Un buen soporte puede ser crucial para resolver problemas y mantener la mesa de pruebas funcionando sin problemas.\n*   **Vida útil y garantía:** Considera la vida útil esperada de los analizadores de espectro y la duración de la garantía.  Un equipo con una garantía más larga puede ofrecer una mayor tranquilidad.\n*   **Costos ocultos:**  Ten en cuenta los costos ocultos, como el software opcional, los cables, los adaptadores y los servicios de calibración.\n*   **Ofertas y disponibilidad:**  Contacta a los distribuidores para obtener cotizaciones y verificar la disponibilidad de los equipos. Pregunta por descuentos por volumen y opciones de financiación.\n\n**En resumen:**\n\nPara tu caso de uso, la **Rigol DSA832** ofrece la mejor combinación de precio, rendimiento y soporte. Si el presupuesto es un limitante, la **Siglent SSA3015X Plus** es una buena alternativa. La **Rigol DSA815** es la opción más económica, pero requiere una evaluación cuidadosa de su DANL para tus señales específicas.\nLos demás modelos (Owon, GW Instek) podrían quedarse cortos en precision de amplitud y/o soporte pyvisa, aunque Owon podría ser considerado en proyectos de muy bajo presupuesto y tolerantes a mayor imprecisión.\n\nRecuerda que esta es una evaluación basada en la información disponible en Octubre de 2024. Siempre verifica las especificaciones y los precios más recientes antes de tomar una decisión de compra. Contacta a los fabricantes y distribuidores para obtener información más detallada y para solicitar cotizaciones.\n",
+  "topsis_ranking": [
+    {
+      "name": "OWON HSA1016 (nuevo)",
+      "precio": 500,
+      "precision_db": 1.5,
+      "danl_dbm": 120,
+      "rbw_min_hz": 10,
+      "integracion_py": 6,
+      "zero_span": 1,
+      "freq_range_ghz": 1.6,
+      "topsis_score": 0.7487,
+      "rank": 1
+    },
+    {
+      "name": "Rigol DSA815 (sin TG)",
+      "precio": 780,
+      "precision_db": 0.7,
+      "danl_dbm": 161,
+      "rbw_min_hz": 100,
+      "integracion_py": 9,
+      "zero_span": 1,
+      "freq_range_ghz": 1.5,
+      "topsis_score": 0.7235,
+      "rank": 2
+    },
+    {
+      "name": "tinySA Ultra (ZS405/ZS406)",
+      "precio": 120,
+      "precision_db": 2.0,
+      "danl_dbm": 95,
+      "rbw_min_hz": 200,
+      "integracion_py": 6,
+      "zero_span": 0,
+      "freq_range_ghz": 0.8,
+      "topsis_score": 0.7067,
+      "rank": 3
+    },
+    {
+      "name": "GW Instek GSP-818 (nuevo)",
+      "precio": 750,
+      "precision_db": 1.5,
+      "danl_dbm": 148,
+      "rbw_min_hz": 10,
+      "integracion_py": 7,
+      "zero_span": 1,
+      "freq_range_ghz": 1.8,
+      "topsis_score": 0.6781,
+      "rank": 4
+    },
+    {
+      "name": "Rigol DSA832 (sin TG)",
+      "precio": 1100,
+      "precision_db": 0.7,
+      "danl_dbm": 161,
+      "rbw_min_hz": 10,
+      "integracion_py": 9,
+      "zero_span": 1,
+      "freq_range_ghz": 3.2,
+      "topsis_score": 0.6025,
+      "rank": 5
+    },
+    {
+      "name": "Signal Hound SA44B",
+      "precio": 1295,
+      "precision_db": 0.25,
+      "danl_dbm": 151,
+      "rbw_min_hz": 100,
+      "integracion_py": 8,
+      "zero_span": 0,
+      "freq_range_ghz": 4.4,
+      "topsis_score": 0.5524,
+      "rank": 6
+    },
+    {
+      "name": "R&S FPC1000 (nuevo)",
+      "precio": 1200,
+      "precision_db": 1.0,
+      "danl_dbm": 155,
+      "rbw_min_hz": 1,
+      "integracion_py": 9,
+      "zero_span": 1,
+      "freq_range_ghz": 1.0,
+      "topsis_score": 0.5497,
+      "rank": 7
+    },
+    {
+      "name": "Siglent SSA3021X Plus (nuevo)",
+      "precio": 1600,
+      "precision_db": 0.7,
+      "danl_dbm": 161,
+      "rbw_min_hz": 1,
+      "integracion_py": 9,
+      "zero_span": 1,
+      "freq_range_ghz": 2.1,
+      "topsis_score": 0.5164,
+      "rank": 8
+    },
+    {
+      "name": "Siglent SSA3015X Plus",
+      "precio": 1360,
+      "precision_db": 1.2,
+      "danl_dbm": 156,
+      "rbw_min_hz": 1,
+      "integracion_py": 9,
+      "zero_span": 1,
+      "freq_range_ghz": 1.5,
+      "topsis_score": 0.4981,
+      "rank": 9
+    },
+    {
+      "name": "Spectrum Analyzer SDR (RTL-SDR + kalibr8)",
+      "precio": 50,
+      "precision_db": 5.0,
+      "danl_dbm": 70,
+      "rbw_min_hz": 1000,
+      "integracion_py": 5,
+      "zero_span": 0,
+      "freq_range_ghz": 1.7,
+      "topsis_score": 0.4897,
+      "rank": 10
+    }
+  ],
+  "aptos": [
+    "Signal Hound SA44B",
+    "Rigol DSA815 (sin TG)",
+    "Rigol DSA832 (sin TG)",
+    "R&S FPC1000 (nuevo)",
+    "Siglent SSA3021X Plus (nuevo)"
+  ],
+  "recomendacion": "Rigol DSA815 (sin TG)"
+}

@@ -226,6 +226,41 @@ python3 scripts/analyze_defi_monitor_business.py
 - Market sizing
 - Risk assessment
 
+### 4. Decisión Técnica - Power Supply Module (Minería Subterránea) ⭐
+```bash
+cat README_POWER_SUPPLY_DECISION.md
+```
+
+**Caso Real:** Sistema de minería subterránea necesita monitoreo remoto de fuentes de poder.
+
+**Variables Críticas Identificadas:**
+- **Downtime cost:** $50k-$200k/hora
+- **Viaje diagnóstico:** $5k-15k + 1-2 días
+- **MTTR actual:** ~12 horas
+- **Equipo expertise:** Go/Vue/MongoDB conocido
+
+**Análisis Realizado:**
+- 📊 Matriz de decisión ponderada 8 criterios
+- 💰 Costo-beneficio: 4 opciones vs presupuesto
+- 📈 Análisis de sensibilidad: ¿Qué pasa si cambian variables?
+- 🎯 ROI esperado: Payback en 13 días (2,880% ROI Año 1)
+
+**Opciones Evaluadas:**
+1. **Custom Extensión** (Recomendada) - 9.2/10 puntos
+2. Grafana + Prometheus - 7.85/10
+3. Schneider SCADA - 7.55/10
+4. Victron Venus OS - 4.5/10
+
+**Conclusión:** Extensión custom de sw-diagnosticoremoto:
+- Timeline: 4-5 semanas
+- Cost: $50k (vs $300k Schneider)
+- Payback: 13 días
+- Team puede mantener y extender
+
+**Métrica de Éxito:** MTTR de 12h → 2h (6x), Disponibilidad >99.5%
+
+👉 Ver [README_POWER_SUPPLY_DECISION.md](README_POWER_SUPPLY_DECISION.md) para análisis completo.
+
 ---
 
 ## 🛠️ Instalación Completa
