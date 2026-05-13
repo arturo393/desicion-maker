@@ -107,3 +107,15 @@ serviceAccountKey.json
 # OAuth
 client_secret*.json
 oauth*.json
+
+# Generated reports
+results/
+.benchmarks/
+
+# Scratch/exploratory scripts at root
+/bank_evaluation*.py
+/device_evaluation*.py
+/eval_conmute.py
+/go_vs_python.py
+/language_evaluation.py
+/test_ahp.py

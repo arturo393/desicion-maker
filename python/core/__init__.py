@@ -1,8 +1,3 @@
-"""
-Backward-compatibility wrapper.
-All functionality has been moved to separate modules in python/core/.
-This file re-exports everything for scripts that import from here.
-"""
 from python.core.models import DistributionType, UncertainVariable, Factor, Statistics, DecisionOption
 from python.core.monte_carlo import MonteCarloEngine
 from python.core.topsis import TOPSISEngine

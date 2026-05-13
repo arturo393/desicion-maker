@@ -10,6 +10,12 @@ import sys
 import os
 from pathlib import Path
 
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
+
 # Cargar variables de entorno desde .env.gemini si existe
 env_file = Path(__file__).parent.parent / ".env.gemini"
 if env_file.exists():

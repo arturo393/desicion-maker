@@ -1,0 +1,45 @@
+decision:
+  name: "Generic Decision Template"
+  mode: standard
+  simulations: 10000
+
+  factors:
+    - name: Cost
+      weight: 0.40
+      maximize: false
+      category: Financial
+    - name: ROI
+      weight: 0.40
+      maximize: true
+      category: Financial
+    - name: Risk
+      weight: 0.20
+      maximize: false
+      category: Risk
+
+  options:
+    - name: Conservative Option
+      description: Safe and steady
+      variables:
+        Cost:
+          distribution: deterministic
+          params: [1000]
+        ROI:
+          distribution: normal
+          params: [1.2, 0.1]
+        Risk:
+          distribution: deterministic
+          params: [2]
+
+    - name: Aggressive Option
+      description: High risk, high reward
+      variables:
+        Cost:
+          distribution: triangular
+          params: [800, 1200, 1500]
+        ROI:
+          distribution: normal
+          params: [2.5, 0.8]
+        Risk:
+          distribution: uniform
+          params: [5, 9]

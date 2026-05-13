@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v2.2] - 2026-05-12
+
+### 🔌 Full Engine Integration
+-   **PROMETHEE with uncertainty** (`_promethee_with_uncertainty`) now runs in `standard` mode (previously only `advanced`), averaging PROMETHEE net flows across p5/mean/p95 percentiles.
+-   **Robust Optimizer** now runs in `standard` mode, computing worst-case scores under weight shocks.
+-   **Rank Aggregation (Borda)** now runs in both `standard` and `advanced` modes. `standard` aggregates 3 methods (TOPSIS, MC, PROMETHEE uncertainty); `advanced` aggregates 4 (adds crisp PROMETHEE).
+-   **Scale mismatch detection** (`_check_scale_mismatch`) warns when factor scales differ by >10x.
+-   Weights and max/min bools are computed once and reused across all engines.
+
+### 🧪 Test Suite
+-   Updated `test_orchestrator.py` and `test_integration_bdd.py` to verify new standard-mode engines.
+-   **199 tests passing** across all 18 engines.
+
+### 📊 Comparison Script
+-   Added `examples/mac_upgrade_comparison.py` to run the Mac upgrade case in all 3 modes (express/standard/advanced) and compare results side-by-side.
+
 ## [v2.1] - 2026-02-17
 
 ### 🚀 Major Improvements

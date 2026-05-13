@@ -126,30 +126,19 @@ class TestMonteCarlo(unittest.TestCase):
 
 class TestTOPSIS(unittest.TestCase):
     def test_ranking(self):
-        # Simple Decision Matrix
-        #       Price (min)  Quality (max)
-        # OptA: 100          10
-        # OptB: 200          20
-        # OptC: 150          15
-        
         data = {
-            "OptA": [100, 10],
-            "OptB": [200, 20],
-            "OptC": [150, 15]
+            "OptA": {"Price": (100, 100, 100), "Quality": (10, 10, 10)},
+            "OptB": {"Price": (200, 200, 200), "Quality": (20, 20, 20)},
+            "OptC": {"Price": (150, 150, 150), "Quality": (15, 15, 15)},
         }
-        df = pd.DataFrame.from_dict(data, orient='index', columns=["Price", "Quality"])
-        
-        # Weights equal, Price minimizes, Quality maximizes
         weights = [0.5, 0.5]
         maximize = [False, True]
-        
+
         engine = TOPSISEngine()
-        scores = engine.analyze(df, weights, maximize)
-        
-        # OptA is cheapest, OptB is highest quality.
-        # Verify scores exist and are properly sorted
+        scores = engine.analyze(data, weights, maximize)
+
         self.assertEqual(len(scores), 3)
-        self.assertEqual(scores.idxmax(), scores.index[0]) # First in sorted series is best
+        self.assertEqual(scores.idxmax(), scores.index[0])
 
 if __name__ == '__main__':
     unittest.main()

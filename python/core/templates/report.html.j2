@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Decision Intelligence Report</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { font-family: system-ui, -apple-system, sans-serif; background: #0d1117; color: #e6edf3; margin: 0; padding: 1.5rem; font-size: 14px; }
+        .dashboard { display: grid; grid-template-columns: repeat(12, 1fr); gap: 1.5rem; max-width: 1600px; margin: 0 auto; }
+        .header { grid-column: span 12; display: flex; justify-content: space-between; align-items: center; padding-bottom: 1rem; border-bottom: 1px solid #30363d; }
+        .header h1 { margin: 0; font-size: 1.5rem; color: #58a6ff; }
+        .badge { background: #1f6feb; color: white; padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.75rem; font-weight: bold; }
+        .kpi-card { grid-column: span 3; background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 1.25rem; }
+        .kpi-title { font-size: 0.75rem; color: #8b949e; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; margin-bottom: 0.5rem; }
+        .kpi-value { font-size: 1.5rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .kpi-sub { font-size: 0.75rem; color: #8b949e; margin-top: 0.25rem; }
+        .kpi-value.success { color: #3fb950; }
+        .kpi-value.accent { color: #a371f7; }
+        .panel { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 1.5rem; }
+        .panel-title { margin: 0 0 1rem 0; font-size: 1.1rem; border-bottom: 1px solid #30363d; padding-bottom: 0.75rem; }
+        .col-8 { grid-column: span 8; }
+        .col-4 { grid-column: span 4; }
+        .col-12 { grid-column: span 12; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 0.75rem; text-align: left; border-bottom: 1px solid #30363d; font-size: 0.875rem; }
+        th { color: #8b949e; font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; }
+        .bar-track { width: 100%; background: #0d1117; border-radius: 4px; height: 1.75rem; position: relative; border: 1px solid #30363d; }
+        .bar-fill { height: 100%; background: linear-gradient(90deg, #1f6feb 0%, #388bfd 100%); position: absolute; left: 0; top: 0; border-radius: 3px; }
+        .bar-label { position: relative; z-index: 2; font-size: 0.8rem; font-weight: 600; margin-left: 0.75rem; color: #fff; line-height: 1.75rem; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; }
+        .stat-box { background: #0d1117; border: 1px solid #30363d; border-radius: 6px; padding: 1rem; }
+        .stat-row { display: flex; justify-content: space-between; margin-bottom: 0.5rem; padding-bottom: 0.5rem; border-bottom: 1px dashed #21262d; }
+        .stat-label { color: #8b949e; }
+        .stat-val { font-family: monospace; font-weight: 600; }
+        @media (max-width: 1200px) { .kpi-card { grid-column: span 6; } .col-8, .col-4 { grid-column: span 12; } }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <header class="header">
+            <h1>Decision Intelligence Report</h1>
+            <div>
+                <span style="color:#8b949e;margin-right:1rem">{{ date }}</span>
+                <span class="badge">{{ mode.upper() }} TIER</span>
+            </div>
+        </header>
+
+        {% for card in kpi_cards %}
+        <div class="kpi-card">
+            <div class="kpi-title">{{ card.title }}</div>
+            <div class="kpi-value{% if card.class %} {{ card.class }}{% endif %}">{{ card.value }}</div>
+            <div class="kpi-sub">{{ card.sub }}</div>
+        </div>
+        {% endfor %}
+
+        {% if criteria %}
+        <div class="panel col-12">
+            <h2 class="panel-title">Evaluation Criteria & Assumptions</h2>
+            <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+            {% for c in criteria %}
+                <div style="flex:1;background:#0d1117;padding:1rem;border-radius:6px;border:1px solid #30363d;min-width:250px">
+                    <div style="font-weight:600;color:#58a6ff;margin-bottom:0.25rem;font-size:1rem">{{ c.name }}</div>
+                    <div style="font-size:0.85rem;color:#8b949e">Weight: <strong style="color:#e6edf3">{{ "%.0f" | format(c.weight * 100) }}%</strong></div>
+                    <div style="font-size:0.85rem;color:{% if c.maximize %}#3fb950{% else %}#f85149{% endif %};margin-top:0.25rem">{{ c.direction }}</div>
+                </div>
+            {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="panel col-8">
+            <h2 class="panel-title">Expected Value Distribution (Monte Carlo)</h2>
+            <table>
+                <colgroup><col style="width:25%"><col style="width:75%"></colgroup>
+                <tbody>
+                {% for item in mc_data %}
+                    <tr>
+                        <td style="font-weight:600">{{ item.name }}</td>
+                        <td>
+                            <div class="bar-track">
+                                <div class="bar-fill" style="width:{{ "%.1f" | format(item.pct) }}%"></div>
+                                <span class="bar-label">{{ "%.0f" | format(item.mean) }}</span>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="panel col-4">
+            <h2 class="panel-title">Algorithm Rankings</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Option</th>
+                        <th>MC</th>
+                        <th>F-TOP</th>
+                        {% if has_prom %}<th>PROM</th>{% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+                {% for name, data in algo_comp.items() %}
+                    <tr>
+                        <td style="font-weight:500">{{ name }}</td>
+                        <td>{% if data.get('mc_rank') == 1 %}<span style="color:#3fb950;font-weight:bold">#1</span>{% else %}#{{ data.get('mc_rank', '-') }}{% endif %}</td>
+                        <td>{% if data.get('topsis_rank') == 1 %}<span style="color:#3fb950;font-weight:bold">#1</span>{% else %}#{{ data.get('topsis_rank', '-') }}{% endif %}</td>
+                        {% if has_prom %}
+                        <td>{% if data.get('promethee_rank') == 1 %}<span style="color:#3fb950;font-weight:bold">#1</span>{% else %}#{{ data.get('promethee_rank', '-') }}{% endif %}</td>
+                        {% endif %}
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if advanced_insights %}
+        <div class="panel col-12">
+            <h2 class="panel-title">Advanced Strategic Insights</h2>
+            <div style="display:flex;gap:2rem">
+                {% if advanced_insights.get('improvement_potential') is not none %}
+                <div style="flex:1">
+                    <div class="kpi-title">Theoretical Frontier Gap</div>
+                    <div style="font-size:0.9rem;color:#c9d1d9;margin-top:0.5rem">
+                        The ultimate composite option is <strong style="color:#a371f7">{{ "%.1f" | format(advanced_insights.improvement_potential) }}%</strong> better than the current highest performer.
+                    </div>
+                </div>
+                {% endif %}
+                {% if advanced_insights.get('bayesian_leader') %}
+                <div style="flex:1;border-left:1px solid #30363d;padding-left:2rem">
+                    <div class="kpi-title">Bayesian Confidence</div>
+                    <div style="font-size:0.9rem;color:#c9d1d9;margin-top:0.5rem">
+                        The probability that <strong>{{ advanced_insights.bayesian_leader }}</strong> is the best choice is <strong style="color:#58a6ff">{{ "%.1f" | format(advanced_insights.bayesian_prob * 100) }}%</strong>.
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="panel col-12">
+            <h2 class="panel-title">Statistical Risk Profiles (95% Confidence)</h2>
+            <div class="stats-grid">
+            {% for profile in risk_profiles %}
+                <div class="stat-box">
+                    <div style="font-weight:600;color:#e6edf3;margin-bottom:1rem;border-bottom:1px solid #30363d;padding-bottom:0.5rem">{{ profile.name }}</div>
+                    <div class="stat-row"><span class="stat-label">Expected (Mean)</span><span class="stat-val">{{ "%.2f" | format(profile.mean) }}</span></div>
+                    <div class="stat-row"><span class="stat-label">Volatility (Std Dev)</span><span class="stat-val">±{{ "%.2f" | format(profile.std) }}</span></div>
+                    <div class="stat-row"><span class="stat-label">VaR</span><span class="stat-val" style="color:#f85149">{{ "%.2f" | format(profile.var_95) }}</span></div>
+                    <div class="stat-row"><span class="stat-label">CVaR</span><span class="stat-val" style="color:#f85149">{{ "%.2f" | format(profile.cvar_95) }}</span></div>
+                </div>
+            {% endfor %}
+            </div>
+        </div>
+    </div>
+</body>
+</html>

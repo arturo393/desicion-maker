@@ -2,6 +2,19 @@
 
 Current State: We have pivoted from a specific "Mac Upgrade App" to a **Generic Decision Framework**. The Streamlit Dashboard has been removed to keep the core pure.
 
+## ✅ Completed (v2.2)
+
+### 5. 🔌 Full Engine Integration in All Modes
+- **Goal**: `_check_scale_mismatch`, `_promethee_with_uncertainty`, `RobustOptimizer`, `RankAggregator` now run in `standard` mode (previously only `advanced`).
+- **Goal**: `advanced` mode includes full rank aggregation across all 4 methods (TOPSIS, MC, PROMETHEE crisp, PROMETHEE uncertainty).
+- **Files**: `python/core/orchestrator.py`
+- **Status**: ✅ Shipped
+
+### 6. 📋 Test Suite Updated
+- **Goal**: All 199 tests pass across all engines and modes.
+- **Files**: `python/tests/test_orchestrator.py`, `python/tests/test_integration_bdd.py`
+- **Status**: ✅ Shipped
+
 ## 🚀 Phase 1: Smart Inputs (CLI & Library)
 
 ### 1. 🤖 AI-Powered Parameter Estimation (Python API)
