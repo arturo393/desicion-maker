@@ -21,6 +21,7 @@ import numpy as np
 from python.core.config_runner import run_from_config
 from python.core.models import DecisionOption, DistributionType, Factor
 from python.core.orchestrator import UnifiedDecisionFramework
+from python.core.what_if import WhatIfEngine
 
 app = typer.Typer(
     name="decision-maker",
@@ -68,6 +69,14 @@ def run(
         Optional[str],
         typer.Option("--pref-type", help="PROMETHEE preference type: usual, ushape, vshape, level, linear, gaussian"),
     ] = None,
+    what_if: Annotated[
+        bool,
+        typer.Option("--what-if", "-w", help="Enter interactive what-if mode after analysis"),
+    ] = False,
+    explain: Annotated[
+        bool,
+        typer.Option("--explain", "-e", help="Generate AI narrative explanation via Gemini"),
+    ] = False,
 ):
     if verbose:
         logging.getLogger().setLevel(logging.DEBUG)
@@ -88,9 +97,15 @@ def run(
     pref_types = [pref_type] if pref_type else None
 
     if config:
-        asyncio.run(run_from_config(config, mode, ai, output))
+        result = asyncio.run(run_from_config(config, mode, ai, output))
     else:
-        asyncio.run(_run_interactive(mode, simulations, ai, output, corr_matrix, pref_types))
+        result = asyncio.run(_run_interactive(mode, simulations, ai, output, corr_matrix, pref_types))
+
+    if explain and result:
+        _generate_explanation(result)
+
+    if what_if and result:
+        _launch_what_if(result)
 
 
 @app.command()
@@ -148,6 +163,73 @@ async def _run_interactive(
         typer.echo(f"\nReports saved:")
         for fmt, path in files.items():
             typer.echo(f"  {fmt.upper()}: {path}")
+
+    return result
+
+
+def _launch_what_if(result: dict) -> None:
+    """Launch interactive what-if REPL from analysis results."""
+    mc_results = result.get("mc_results")
+    factors = result.get("factors")
+    if not mc_results or not factors:
+        typer.echo("No results to explore in what-if mode.")
+        return
+    engine = WhatIfEngine(mc_results, factors)
+    engine.repl()
+
+
+def _generate_explanation(result: dict) -> None:
+    """Generate AI narrative explanation from analysis results."""
+    from python.core.gemini_agent import GeminiDeepResearchAgent
+
+    mc = result.get("mc_results", {})
+    if not mc:
+        typer.echo("No results to explain.")
+        return
+
+    rankings = sorted(mc.items(), key=lambda x: x[1].mean_score, reverse=True)
+    
+    summary = (
+        f"Decision analysis with {len(mc)} options:\n"
+        + "\n".join(
+            f"{i+1}. {name}: mean={s.mean_score:.3f}, std={s.std_dev:.3f}, "
+            f"VaR={s.var_95:.3f}, CVaR={s.cvar_95:.3f}, success_rate={s.success_rate:.1%}"
+            for i, (name, s) in enumerate(rankings)
+        )
+        + "\n\n"
+    )
+
+    factors = result.get("factors", [])
+    if factors:
+        summary += "Factors:\n" + "\n".join(
+            f"  {f.name}: weight={f.weight}, maximize={f.maximize}"
+            for f in factors
+        ) + "\n\n"
+
+    explanation = result.get("explanation", "")
+    topology = result.get("topology", {})
+    if topology and "error" not in topology:
+        summary += f"Topology: {topology.get('num_options')} options in {topology.get('num_factors')} dimensions\n"
+        if topology.get("clusters"):
+            summary += f"Clusters detected: {len(topology['clusters'])}\n"
+
+    agent = GeminiDeepResearchAgent()
+    if not agent.is_available:
+        typer.echo("Gemini API key not found. Set GEMINI_API_KEY or use --ai flag.")
+        return
+
+    typer.echo("\nGenerating AI explanation...")
+    narrative = asyncio.run(agent.research(
+        topic="Explain this decision analysis result in plain language. "
+              "Who won, why, what are the key trade-offs, risks, and recommendations?",
+        context=summary + "\nExisting Explanation:\n" + explanation,
+    ))
+
+    typer.echo("\n" + "=" * 70)
+    typer.echo("AI NARRATIVE EXPLANATION")
+    typer.echo("=" * 70)
+    typer.echo(narrative)
+    typer.echo("=" * 70 + "\n")
 
 
 def main():

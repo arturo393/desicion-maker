@@ -3,7 +3,7 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 import numpy as np
 
@@ -115,6 +115,8 @@ class Statistics:
     factor_stats: Dict[str, Dict[str, float]]
     var_95: float
     cvar_95: float
+    raw_scores: Optional[np.ndarray] = None
+    raw_factor_data: Optional[Dict[str, np.ndarray]] = None
 
 
 @dataclass

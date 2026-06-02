@@ -119,6 +119,9 @@ def save_markdown_report(
     algo_comp: Dict[str, Any],
     decision_matrix: Dict[str, Any],
     factors: List[Factor],
+    explanation: str = "",
+    waterfall: Optional[Dict] = None,
+    counterfactual: Optional[Dict] = None,
 ) -> str:
     if not topsis_scores.empty:
         bluf_winner = topsis_scores.index[0]
@@ -130,9 +133,21 @@ def save_markdown_report(
     md = f"# Decision Analysis Report\n\n"
     md += f"**Date:** {datetime.now().strftime('%Y-%m-%d %H:%M')}\n"
     md += f"**Execution Tier:** {mode.upper()}\n\n"
+    
+    # Embed plots if they exist in the results_dir with the current timestamp
+    md += "## Visual Insights\n\n"
+    md += f"![Risk Profiles](risk_profiles_{timestamp}.png)\n\n"
+    md += f"![Factor Importance](factor_importance_{timestamp}.png)\n\n"
+    md += f"![Robustness Audit](robustness_audit_{timestamp}.png)\n\n"
 
-    md += "## 1. Executive Summary\n\n"
-    md += f"> **Primary Recommendation:** Based on {bluf_reason}, quantitative analysis indicates that **{bluf_winner}** is the optimal strategic choice under current criteria.\n\n"
+    md += "## 1. Resumen Ejecutivo\n\n"
+    mc_winner = max(mc_results.values(), key=lambda x: x.mean_score).option_name
+    md += f"> **Estrategia Recomendada:** Existe un empate técnico de alto nivel. **{bluf_winner}** es la opción más equilibrada (F-TOPSIS), ideal para minimizar riesgos en todos los frentes. Sin embargo, **{mc_winner}** ofrece el mayor beneficio económico directo (Monte Carlo).\n\n"
+    md += f"**Análisis de Situación:** {bluf_reason}. "
+    robustness_val = sensitivity.get('robustness_score', 0) * 100
+    if robustness_val < 30:
+        md += "⚠️ **Alerta de Sensibilidad:** La decisión actual es volátil. Un cambio menor en tus prioridades podría inclinar la balanza hacia otro banco."
+    md += "\n\n"
 
     md += "### 1.1 Algorithm Consensus\n"
     has_prom = mode == "advanced" and future and "promethee_scores" in future and not future["promethee_scores"].empty
@@ -170,8 +185,9 @@ def save_markdown_report(
             md += f"  - {loser} (Dominated by {winner})\n"
 
     if mode in ("standard", "advanced") and sensitivity:
-        md += "\n### 1.4 Risk & Sensitivity Overview\n"
-        md += f"- **Stability Score:** {sensitivity.get('robustness_score', 0) * 100:.0f}%\n"
+        md += "\n### 1.4 Diagnóstico de Estabilidad\n"
+        md += f"- **Consistencia de Prioridades:** {sensitivity.get('robustness_score', 0) * 100:.0f}%\n"
+        md += "  *(Indica qué tan estable es el ganador si tus pesos variaran un 20%)*\n"
         weight_changes = sensitivity.get("weight_changes", [])
         score_changes = sensitivity.get("score_changes", [])
         if weight_changes:
@@ -184,6 +200,23 @@ def save_markdown_report(
                 md += f"  - If **{change['factor']}** score changes by {change['change']} -> Winner flips to **{change['new_winner']}**\n"
         if not weight_changes and not score_changes:
             md += "- **Verdict:** Stable Decision.\n"
+        
+        if future.get("robust_optimizer"):
+            robust_data = future["robust_optimizer"]
+            md += "\n### 1.5 Distributionally Robust Optimization (DRO)\n"
+            md += "| Option | DRO Score (Worst-Case) | Stability Index |\n"
+            md += "| :--- | :---: | :---: |\n"
+            for opt, score in robust_data.get("dro_scores", {}).items():
+                stability = robust_data.get("stability_metrics", {}).get(opt, 0)
+                md += f"| {opt} | {score:.2f} | {stability*100:.1f}% |\n"
+        
+        if future.get("info_theory"):
+            md += "\n### 1.5 Information Theory (Non-linear Importance)\n"
+            for opt_name, mi_data in future["info_theory"].items():
+                md += f"- **{opt_name}:**\n"
+                sorted_mi = sorted(mi_data.items(), key=lambda x: x[1], reverse=True)
+                for fn, val in sorted_mi:
+                    md += f"  - {fn}: {val*100:.1f}%\n"
 
     if mode == "advanced" and future:
         md += "\n### 1.5 Advanced Predictive Insights\n"
@@ -210,13 +243,32 @@ def save_markdown_report(
         row += f"**{data['total_score']:.2f}** |\n"
         md += row
 
+    if explanation:
+        md += "\n## 2. Decision Explanation\n\n"
+        md += explanation + "\n\n"
+        if waterfall:
+            for opt_name, opt_data in waterfall.get("options", {}).items():
+                md += f"### Factor Breakdown: {opt_name}\n"
+                md += "| Factor | Weight | Raw | Normalized | Direction | Contribution | % of Total |\n"
+                md += "| :--- | :---: | :---: | :---: | :---: | ---: | ---: |\n"
+                for item in opt_data["factors"]:
+                    md += f"| {item['name']} | {item['weight']:.2f} | {item['raw']:.2f} | {item['normalized']:.2f} | {item['direction']} | {item['contribution']:.3f} | {item['pct_of_total']:.1f}% |\n"
+                md += "\n"
+        if counterfactual and counterfactual.get("flip_scenarios"):
+            for loser, scenarios in counterfactual["flip_scenarios"].items():
+                if scenarios:
+                    md += f"### How {loser} Could Win\n"
+                    for s in scenarios[:3]:
+                        md += f"- Adjust **{s['factor']}** weight from {s['current_value']:.2f} to {s['needed_value']:.2f} ({s['change_pct']})\n"
+                    md += "\n"
+
     if mode in ("standard", "advanced") and strategies:
-        md += "\n### 2.2 Classical Decision Theory\n"
+        md += "\n## 3. Classical Decision Theory\n"
         for strat, val in strategies.items():
             md += f"- **{strat}:** {val}\n"
 
     if mode == "advanced" and future:
-        md += "\n### 2.3 Extended Analysis\n"
+        md += "\n### 3.1 Extended Analysis\n"
         if "promethee_scores" in future and not future["promethee_scores"].empty:
             md += "#### PROMETHEE II\n"
             for idx, val in future["promethee_scores"].items():
@@ -226,7 +278,7 @@ def save_markdown_report(
             md += f"- **{k}**: {v * 100:.1f}%\n"
 
     if mode in ("standard", "advanced"):
-        md += "\n## 3. Appendix: Statistical Deep Dive\n"
+        md += "\n## 4. Appendix: Statistical Deep Dive\n"
         for name, stats in mc_results.items():
             md += f"\n### {name}\n"
             md += f"- **Mean Score:** {stats.mean_score:.2f} (SD: {stats.std_dev:.2f})\n"
@@ -267,6 +319,9 @@ def save_html_report(
     algo_comp: Dict[str, Any],
     decision_matrix: Dict[str, Any],
     factors: List[Factor],
+    explanation: str = "",
+    waterfall: Optional[Dict] = None,
+    counterfactual: Optional[Dict] = None,
 ) -> str:
     try:
         from jinja2 import Environment, FileSystemLoader
@@ -290,7 +345,8 @@ def save_html_report(
         bluf_reason = "MC Expected Value"
 
     best_mc = max(mc_results.items(), key=lambda x: x[1].mean_score)[0]
-    robustness = f"{sensitivity.get('robustness_score', 0) * 100:.0f}%" if sensitivity else "N/A"
+    robust_raw = sensitivity.get('robustness_score', 0) * 100 if sensitivity else 0
+    robustness = f"{robust_raw:.0f}%"
     pareto_count = len(pareto.get("efficient_frontier", [])) if pareto else 0
     max_score = max(s.mean_score for s in mc_results.values()) if mc_results else 1
 
@@ -300,10 +356,10 @@ def save_html_report(
         mc_data.append({"name": name, "mean": stats.mean_score, "pct": pct})
 
     kpi_cards = [
-        {"title": "Optimal Recommendation", "value": bluf_winner, "sub": f"Driven by {bluf_reason}", "class": "success"},
-        {"title": "Max Expected Value", "value": best_mc, "sub": "Highest mean in Monte Carlo", "class": ""},
-        {"title": "Decision Robustness", "value": robustness, "sub": "Stability against weight shocks", "class": "accent"},
-        {"title": "Pareto Efficiency", "value": f"{pareto_count} Options", "sub": "In the efficient frontier", "class": ""},
+        {"title": "Recomendación Balanceada", "value": bluf_winner, "sub": "Ganador por equilibrio total (F-TOPSIS)", "class": "success"},
+        {"title": "Máximo Valor Esperado", "value": best_mc, "sub": "Mejor promedio matemático (Monte Carlo)", "class": ""},
+        {"title": "Consistencia de Criterio", "value": robustness, "sub": "Estabilidad ante cambios de pesos", "class": "accent" if robust_raw > 50 else "warning"},
+        {"title": "Frontera de Eficiencia", "value": f"{pareto_count} Opciones", "sub": "Opciones técnicamente óptimas", "class": ""},
     ]
 
     criteria = []
@@ -345,6 +401,7 @@ def save_html_report(
         has_prom=has_prom,
         advanced_insights=advanced_insights,
         risk_profiles=risk_profiles,
+        explanation=explanation,
     )
 
     html_path = os.path.join(results_dir, f"report_{timestamp}.html")
@@ -356,6 +413,7 @@ def save_html_report(
 
 def _generate_html_inline(*args, **kwargs) -> str:
     from python.core.html_fallback import generate_html_inline
+    kwargs.setdefault("explanation", "")
     return generate_html_inline(*args, **kwargs)
 
 
@@ -369,7 +427,14 @@ def print_report(
     future: Dict[str, Any],
     ai_reports: Dict[str, str],
     factors: List[Factor],
+    explanation: str = "",
 ):
+    if explanation:
+        print("\n" + "-" * 70)
+        print("DECISION EXPLANATION")
+        print("-" * 70)
+        print(explanation)
+
     if not topsis_scores.empty:
         bluf_winner = topsis_scores.index[0]
         bluf_reason = "F-TOPSIS risk-adjusted distance"
@@ -412,6 +477,21 @@ def print_report(
             print(f"Warning: {wc} weight-shock scenarios flip the winner.")
         if sc > 0:
             print(f"Warning: {sc} score-shock scenarios flip the winner.")
+        
+        if future.get("robust_optimizer"):
+            robust_data = future["robust_optimizer"]
+            print("\nDistributionally Robust Analysis (DRO):")
+            for opt, score in robust_data.get("dro_scores", {}).items():
+                stability = robust_data.get("stability_metrics", {}).get(opt, 0)
+                print(f"  - {opt:20}: Score={score:8.2f} | Stability={stability*100:5.1f}%")
+        
+        if future.get("info_theory"):
+            print("\nNon-linear Factor Importance (Information Theory):")
+            for opt_name, mi_data in future["info_theory"].items():
+                print(f"  - {opt_name}:")
+                sorted_mi = sorted(mi_data.items(), key=lambda x: x[1], reverse=True)
+                for fn, val in sorted_mi:
+                    print(f"    * {fn}: {val*100:.1f}%")
 
     if mode == "advanced" and future:
         ideal = future.get("ideal_option")
@@ -441,6 +521,9 @@ def save_report(
     ai_reports: Dict[str, str],
     factors: List[Factor],
     results_dir: Optional[str] = None,
+    explanation: str = "",
+    waterfall: Optional[Dict] = None,
+    counterfactual: Optional[Dict] = None,
 ) -> Dict[str, str]:
     if results_dir is None:
         results_dir = os.path.join(os.getcwd(), "results")
@@ -452,7 +535,7 @@ def save_report(
     algo_comp = build_algorithm_comparison(mc_results, topsis_scores, future)
 
     json_path = save_json_report(results_dir, timestamp, mc_results, topsis_scores, decision_matrix, algo_comp, ai_reports)
-    md_path = save_markdown_report(results_dir, timestamp, mode, mc_results, topsis_scores, strategies, pareto, sensitivity, future, ai_reports, algo_comp, decision_matrix, factors)
-    html_path = save_html_report(results_dir, timestamp, mode, mc_results, topsis_scores, strategies, pareto, sensitivity, future, ai_reports, algo_comp, decision_matrix, factors)
+    md_path = save_markdown_report(results_dir, timestamp, mode, mc_results, topsis_scores, strategies, pareto, sensitivity, future, ai_reports, algo_comp, decision_matrix, factors, explanation=explanation, waterfall=waterfall, counterfactual=counterfactual)
+    html_path = save_html_report(results_dir, timestamp, mode, mc_results, topsis_scores, strategies, pareto, sensitivity, future, ai_reports, algo_comp, decision_matrix, factors, explanation=explanation, waterfall=waterfall, counterfactual=counterfactual)
 
-    return {"json": json_path, "md": md_path, "html": html_path}
+    return {"json": json_path, "md": md_path, "html": html_path, "timestamp": timestamp}

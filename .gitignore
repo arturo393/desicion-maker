@@ -1,25 +1,15 @@
-# Binarios compilados
-*.o
-*.out
-*.exe
-*.a
-*.so
-*.dylib
-bin/*
-!bin/.gitkeep
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.venv/
+venv/
+python/.venv/
+python/venv/
 
-# Binarios específicos del proyecto
-core/furniture_analysis
-core/mining_decision
-core/sqm_analysis
-core/test_demo
-
-# Directorios de build
-build/
-core/build/
-core/bin/
-cmake-build-*/
-gui_cpp/build/
+# Dependencies
+uv.lock
 
 # IDEs
 .vscode/
@@ -28,21 +18,6 @@ gui_cpp/build/
 *.swo
 *~
 .DS_Store
-
-# CMake
-CMakeCache.txt
-CMakeFiles/
-cmake_install.cmake
-Makefile
-*.cmake
-!CMakeLists.txt
-!cmake/DecisionMakerConfig.cmake.in
-
-# Qt
-*.app/
-*_autogen/
-moc_*.cpp
-qrc_*.cpp
 
 # Logs
 *.log
@@ -59,15 +34,6 @@ qrc_*.cpp
 python/.env
 python/.env.local
 
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
-python/.venv/
-python/venv/
-.venv/
-venv/
-
 # ⚠️ SECURITY: Archivos con credenciales y API keys
 *.key
 *.pem
@@ -81,41 +47,26 @@ credentials/
 **/*_secret*
 **/*_token*
 **/*_password*
-.env.*.local
-*.pem
-*.key
-*.cert
-*.crt
-*.p12
-*.p8
 .ssh/
-credentials/
-secrets/
-
-# Tokens y credenciales específicas
 github_token.txt
 api_keys.json
 credentials.json
 config.local.json
-.aws/credentials
-.aws/config
-
-# Firebase
-google-services.json
-serviceAccountKey.json
-
-# OAuth
-client_secret*.json
-oauth*.json
+*.p12
+*.p8
 
 # Generated reports
 results/
 .benchmarks/
 
-# Scratch/exploratory scripts at root
+# Scratch/exploratory
+scratch/
+
+# Root-level exploratory scripts (not part of library)
 /bank_evaluation*.py
 /device_evaluation*.py
-/eval_conmute.py
+/eval_conmute*.py
 /go_vs_python.py
 /language_evaluation.py
 /test_ahp.py
+/generic_template.py

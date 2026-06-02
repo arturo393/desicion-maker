@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import os
 from typing import Any, Dict, List, Optional
 
 import numpy as np
@@ -20,6 +21,10 @@ from python.core.gemini_agent import GeminiDeepResearchAgent
 from python.core.robust import RobustOptimizer
 from python.core.aggregator import RankAggregator
 from python.core.bootstrap import BootstrapRanking
+from python.core.information_theory import InformationTheoryEngine
+from python.core.visualization import VisualizationEngine
+from python.core.explainability import ExplainabilityEngine
+from python.core.antifragile import AntifragileEngine
 from python.core.reporting import print_report, save_report
 
 logger = logging.getLogger(__name__)
@@ -108,6 +113,10 @@ class UnifiedDecisionFramework:
         self.robust_engine = RobustOptimizer()
         self.aggregator = RankAggregator()
         self.bootstrap_engine = BootstrapRanking()
+        self.info_theory_engine = InformationTheoryEngine()
+        self.viz_engine = VisualizationEngine()
+        self.explain_engine = ExplainabilityEngine()
+        self.antifragile_engine = AntifragileEngine()
         self.promethee_pref_types = promethee_pref_types
         self.promethee_pref_params = promethee_pref_params
 
@@ -177,6 +186,7 @@ class UnifiedDecisionFramework:
             )
 
             robust = self.robust_engine.analyze(mc_results, self.mc_engine.factors)
+            info_theory = self.info_theory_engine.analyze(mc_results, self.mc_engine.factors)
 
             rankings: Dict[str, pd.Series] = {
                 "TOPSIS": topsis_scores,
@@ -189,6 +199,7 @@ class UnifiedDecisionFramework:
             future_metrics = {
                 "promethee_uncertainty": promethee_uncertainty,
                 "robust_optimizer": robust,
+                "info_theory": info_theory,
                 "rank_aggregation": borda,
             }
 
@@ -227,6 +238,16 @@ class UnifiedDecisionFramework:
                 "bootstrap_ci": bootstrap_ci,
             })
 
+        # Explainability analysis
+        waterfall = self.explain_engine.factor_waterfall(mc_results, self.mc_engine.factors)
+        counterfactual = self.explain_engine.counterfactual(mc_results, self.mc_engine.factors)
+        explanation = self.explain_engine.narrative(
+            mc_results, self.mc_engine.factors,
+            waterfall, counterfactual, topsis_scores, mode, use_ai=False,
+        )
+
+        antifragile = self.antifragile_engine.analyze(mc_results, self.mc_engine.factors)
+
         ai_reports = {}
         if use_ai and self.ai_agent.is_available:
             tasks = [self.ai_agent.research(opt.name, opt.description) for opt in self.mc_engine.options]
@@ -238,13 +259,26 @@ class UnifiedDecisionFramework:
             mode, mc_results, topsis_scores, strategies,
             pareto_results, sensitivity_results, future_metrics,
             ai_reports, self.mc_engine.factors,
+            explanation=explanation,
         )
 
         saved = save_report(
             mode, mc_results, topsis_scores, strategies,
             pareto_results, sensitivity_results, future_metrics,
             ai_reports, self.mc_engine.factors, results_dir,
+            explanation=explanation,
+            waterfall=waterfall,
+            counterfactual=counterfactual,
         )
+
+        # Generate plots in standard/advanced modes
+        if mode in ("standard", "advanced"):
+            timestamp = saved["timestamp"]
+            plots = self.viz_engine.generate_all_plots(
+                mc_results, self.mc_engine.factors, future_metrics, 
+                os.path.dirname(saved["json"]), timestamp
+            )
+            saved["plots"] = plots
 
         return {
             "mode": mode,
@@ -256,4 +290,9 @@ class UnifiedDecisionFramework:
             "future": future_metrics,
             "ai_reports": ai_reports,
             "files": saved,
+            "explanation": explanation,
+            "waterfall": waterfall,
+            "counterfactual": counterfactual,
+            "antifragile": antifragile,
+            "factors": self.mc_engine.factors,
         }

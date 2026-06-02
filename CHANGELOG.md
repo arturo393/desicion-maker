@@ -2,6 +2,46 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v3.0] - 2026-06-02
+
+### 🧠 10 New Decision Engines
+- **Antifragile** — Taleb-inspired barbell strategy, convexity/optionality, fragility indexing, and via negativa analysis.
+- **Group Decision** — Multi-stakeholder weight aggregation into consensus rankings using statistical methods.
+- **Information Theory** — Mutual information analysis to quantify non-linear influence of each factor on scores.
+- **Portfolio Optimization** — Mean-variance resource allocation across options with efficient frontier.
+- **What-If Analysis** — Interactive engine to tweak weights/directions and see scores recomputed in real time (includes REPL).
+- **Weight Derivation** — Swing weighting, AHP pairwise comparison, and PAPRIKA to derive weights from human judgment.
+- **Explainability** — Factor-contribution waterfalls, counterfactuals, and narrative generation for human-readable decision reports.
+- **Topological Data Analysis** — MDS/Isomap embedding, clustering, and ranking stability analysis.
+- **Visualization Engine** — Matplotlib/seaborn plots (Pareto frontier, tornado, distributions) with dark theme.
+- **Decision Registry** — SQLite-backed persistent store for querying, comparing, and tracking outcomes across analyses.
+
+### 🌐 API & Dashboard
+- **REST API** (`python/api/server.py`) — FastAPI server exposing the full decision framework via Pydantic-schematized endpoints.
+- **Web Dashboard** (`python/dashboard/app.py`) — Interactive frontend for running analyses and visualizing results.
+
+### 🖥️ CLI Overhaul
+- **`decision-maker` CLI** — Typer-based entry point with subcommands for running configs, simulation, and what-if sessions.
+- **`run` command** — Execute decision configs from YAML/JSON files.
+- **`what-if` command** — Interactive exploratory session with live score recomputation.
+- **`simulate` command** — Monte Carlo parameter sweeps from the terminal.
+
+### ⚙️ Core Improvements
+- Removed legacy `unified_decision_framework.py` — logic fully migrated into `orchestrator.py`.
+- Cleaned up old test artifacts (`old_framework.py`, `old_gemini.py`, `old_gemini_flash.py`, `old_structure.py`, `test_integration_bdd.py`).
+- Updated reporting engine with enhanced HTML templates.
+- Improved Monte Carlo and robust optimization internals.
+- Enhanced genetic optimizer convergence logic.
+
+### 🧪 Test Suite
+- **322 tests passing** across all 24 engines.
+- New test suites for: antifragile, explainability, group_decision, information_theory, portfolio, registry, topology, visualization, weight_derivation, what_if.
+- Updated existing test suites for genetic, monte_carlo, robust, and unified workflows.
+
+### 📦 Dependencies
+- Added `matplotlib`, `seaborn`, `scikit-learn`, `aiohttp`, `pydantic`, `typer`, `jinja2`.
+- Added optional `google-genai` dependency for AI-powered research.
+
 ## [v2.2] - 2026-05-12
 
 ### 🔌 Full Engine Integration

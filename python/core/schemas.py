@@ -7,7 +7,7 @@ from pydantic import BaseModel, Field, model_validator
 
 class VariableConfig(BaseModel):
     distribution: str = "deterministic"
-    params: List[float] = Field(default_factory=lambda: [0])
+    params: List[float] = Field(default_factory=lambda: [0.0])
 
 
 class OptionConfig(BaseModel):

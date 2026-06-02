@@ -60,29 +60,60 @@ class MonteCarloEngine:
             sampled_data[fn] = np.sort(original)[ranks]
         return sampled_data
 
-    def run(self) -> Dict[str, Statistics]:
-        if not self.options:
-            return {}
-        if not self.factors:
+    def run(self, normalize: bool = True) -> Dict[str, Statistics]:
+        if not self.options or not self.factors:
             return {}
 
-        results: Dict[str, Statistics] = {}
+        # 1. Collection Phase: Gather all samples and find global bounds for normalization
+        all_samples = {}
+        global_bounds = {f.name: {"min": float('inf'), "max": float('-inf')} for f in self.factors}
 
         for option in self.options:
             sampled_data = {}
             for var_name, var in option.variables.items():
                 sampled_data[var_name] = var.sample(self.num_simulations)
+            
             sampled_data = self._apply_correlation(sampled_data)
+            all_samples[option.name] = sampled_data
 
+            # Update global bounds across all options
+            for fn, values in sampled_data.items():
+                if fn in global_bounds:
+                    global_bounds[fn]["min"] = min(global_bounds[fn]["min"], np.min(values))
+                    global_bounds[fn]["max"] = max(global_bounds[fn]["max"], np.max(values))
+
+        # 2. Calculation Phase: Normalize and compute scores
+        results: Dict[str, Statistics] = {}
+
+        for option in self.options:
+            sampled_data = all_samples[option.name]
             total_scores = np.zeros(self.num_simulations)
 
             for factor in self.factors:
                 if factor.name in sampled_data:
-                    values = sampled_data[factor.name]
-                    if not factor.maximize:
-                        total_scores -= values * factor.weight
+                    raw_values = sampled_data[factor.name]
+                    
+                    if normalize:
+                        f_min = global_bounds[factor.name]["min"]
+                        f_max = global_bounds[factor.name]["max"]
+                        
+                        if f_max > f_min:
+                            # Standard Min-Max Normalization to [0, 1]
+                            norm_values = (raw_values - f_min) / (f_max - f_min)
+                        else:
+                            norm_values = np.full_like(raw_values, 1.0) # Equal values get top score
+
+                        # If maximize: 1.0 is best. If minimize: 0.0 is best (so we invert it).
+                        if factor.maximize:
+                            total_scores += norm_values * factor.weight
+                        else:
+                            total_scores += (1.0 - norm_values) * factor.weight
                     else:
-                        total_scores += values * factor.weight
+                        # Raw calculation (deprecated/absurd for mismatched scales)
+                        if not factor.maximize:
+                            total_scores -= raw_values * factor.weight
+                        else:
+                            total_scores += raw_values * factor.weight
 
             mean = float(np.mean(total_scores))
             std = float(np.std(total_scores)) if len(total_scores) > 1 else 0.0
@@ -92,7 +123,8 @@ class MonteCarloEngine:
             var_95 = p5
             cvar_95 = float(np.mean(total_scores[total_scores <= p5])) if np.any(total_scores <= p5) else p5
 
-            success_rate = float(np.mean(total_scores > 0))
+            # In normalized mode, success is relative to 0 or mean
+            success_rate = float(np.mean(total_scores > 0.5)) if normalize else float(np.mean(total_scores > 0))
 
             factor_stats = {}
             for name, values in sampled_data.items():
@@ -115,6 +147,8 @@ class MonteCarloEngine:
                 factor_stats=factor_stats,
                 var_95=var_95,
                 cvar_95=cvar_95,
+                raw_scores=total_scores,
+                raw_factor_data=sampled_data,
             )
             results[option.name] = stats
 

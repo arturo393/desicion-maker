@@ -13,9 +13,9 @@ class TestRobustOptimizer:
                             {"Cost": {"mean": 30}, "Quality": {"mean": 95}}, 80, 75),
         }
         factors = [Factor("Cost", 0.5, maximize=False), Factor("Quality", 0.5, maximize=True)]
-        result = RobustOptimizer.analyze(results, factors)
+        result = RobustOptimizer().analyze(results, factors)
         assert "robust_ranking" in result
-        assert "worst_case_scores" in result
+        assert "dro_scores" in result
         assert result["winner"] is not None
 
     def test_single_option(self):
@@ -24,22 +24,21 @@ class TestRobustOptimizer:
                                {"X": {"mean": 10}}, 42, 41),
         }
         factors = [Factor("X", 1.0, maximize=True)]
-        result = RobustOptimizer.analyze(results, factors)
+        result = RobustOptimizer().analyze(results, factors)
         assert result["winner"] == "Only"
 
     def test_empty_results(self):
-        result = RobustOptimizer.analyze({}, [Factor("X", 1.0)])
-        assert result["robust_ranking"] == {}
-        assert result["worst_case_scores"] == {}
+        result = RobustOptimizer().analyze({}, [Factor("X", 1.0)])
+        assert result == {}
 
     def test_empty_factors(self):
         results = {
             "A": Statistics("A", 100, 0, 100, 100, 100, 100, 1.0, {}, 100, 100),
         }
-        result = RobustOptimizer.analyze(results, [])
-        assert result["robust_ranking"] == {}
+        result = RobustOptimizer().analyze(results, [])
+        assert result == {}
 
-    def test_custom_alpha_and_shock(self):
+    def test_custom_epsilon_and_shock(self):
         results = {
             "A": Statistics("A", 100, 10, 80, 120, 85, 115, 0.9,
                             {"X": {"mean": 50}}, 85, 80),
@@ -47,7 +46,7 @@ class TestRobustOptimizer:
                             {"X": {"mean": 30}}, 80, 75),
         }
         factors = [Factor("X", 1.0, maximize=True)]
-        result = RobustOptimizer.analyze(results, factors, alpha=0.99, weight_shock=0.3)
+        result = RobustOptimizer().analyze(results, factors, epsilon=0.01, weight_shock=0.3)
         assert result["winner"] is not None
 
     def test_all_identical_options(self):
@@ -58,8 +57,7 @@ class TestRobustOptimizer:
                             {"X": {"mean": 10}}, 100, 100),
         }
         factors = [Factor("X", 1.0, maximize=True)]
-        result = RobustOptimizer.analyze(results, factors)
+        result = RobustOptimizer().analyze(results, factors)
         assert result["winner"] is not None
-        # Both have same robust score
-        scores = list(result["worst_case_scores"].values())
+        scores = list(result["dro_scores"].values())
         assert scores[0] == scores[1]

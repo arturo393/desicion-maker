@@ -19,7 +19,7 @@ uv run python my_decision.py
 - [Architecture](architecture.md) — building blocks, runtime flow, engines
 - [Guide](guide.md) — how to model and run decisions
 - [Changelog](../CHANGELOG.md) — version history
-- [Roadmap](../ROADMAP_v2.1.md) — planned features
+- [Roadmap](../ROADMAP_v3.0.md) — planned features
 - [Examples](../examples/) — reference implementations
 
 ## Project Layout

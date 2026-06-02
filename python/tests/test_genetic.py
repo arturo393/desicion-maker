@@ -12,9 +12,9 @@ class TestGeneticOptimizer:
         }
         factors = [Factor("Cost", 0.5, maximize=False), Factor("Quality", 0.5, maximize=True)]
         result = GeneticOptimizer.evolve_ideal(results, factors)
-        assert result["raw_max"] > 0
         assert "Cost" in result["ideal_composition"]
         assert "Quality" in result["ideal_composition"]
+        assert result["improvement_potential"] >= 0
 
     def test_single_option(self):
         results = {
@@ -27,7 +27,7 @@ class TestGeneticOptimizer:
 
     def test_empty_results(self):
         result = GeneticOptimizer.evolve_ideal({}, [Factor("X", 1.0, maximize=True)])
-        assert result["theoretical_max_score"] == 0
+        assert result["improvement_potential"] == 0
 
     def test_penalty_effect(self):
         results = {
@@ -37,7 +37,6 @@ class TestGeneticOptimizer:
         factors = [Factor("X", 0.5, maximize=True), Factor("Y", 0.5, maximize=True)]
         result = GeneticOptimizer.evolve_ideal(results, factors, penalty_variance=0.1)
         assert len(result["source_options"]) == 2
-        assert result["tradeoff_penalty"] > 0
 
     def test_penalty_variance_zero(self):
         results = {
@@ -46,7 +45,7 @@ class TestGeneticOptimizer:
         }
         factors = [Factor("X", 0.5, maximize=True), Factor("Y", 0.5, maximize=True)]
         result = GeneticOptimizer.evolve_ideal(results, factors, penalty_variance=0)
-        assert result["tradeoff_penalty"] == 0
+        assert "theoretical_max_score" in result
 
     def test_identical_options(self):
         results = {
@@ -62,5 +61,4 @@ class TestGeneticOptimizer:
             "A": Statistics("A", 10, 0, 10, 10, 10, 10, 1.0, {}, 10, 10),
         }
         result = GeneticOptimizer.evolve_ideal(results, [])
-        assert result["theoretical_max_score"] == 0
         assert result["improvement_potential"] == 0

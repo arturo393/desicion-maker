@@ -12,20 +12,14 @@ from unittest.mock import MagicMock
 
 import os
 
-# Add 'python' directory to path to allow imports from core
+# Add project root to path for imports
 current_dir = os.path.dirname(os.path.abspath(__file__))
-parent_dir = os.path.dirname(current_dir)
-sys.path.append(parent_dir)
+project_root = os.path.dirname(current_dir)
+sys.path.insert(0, project_root)
 
-from core.unified_decision_framework import (
-    DistributionType,
-    UncertainVariable,
-    DecisionOption,
-    Factor,
-    MonteCarloEngine,
-    TOPSISEngine,
-    UnifiedDecisionFramework
-)
+from python.core.models import DistributionType, UncertainVariable, DecisionOption, Factor
+from python.core.monte_carlo import MonteCarloEngine
+from python.core.topsis import TOPSISEngine
 
 class TestDistributions(unittest.TestCase):
     def setUp(self):
@@ -91,26 +85,26 @@ class TestMonteCarlo(unittest.TestCase):
         np.random.seed(42)
 
     def test_simple_simulation(self):
-        # Option A: Deterministic 100
+        # Option A: Deterministic 100, single factor
         opt = DecisionOption("Safe")
         opt.add_variable("Income", DistributionType.DETERMINISTIC, 100)
         
-        # Factor: Income (weight 1.0)
         self.engine.add_factor(Factor("Income", 1.0, maximize=True))
         self.engine.add_option(opt)
         
         results = self.engine.run()
         stats = results["Safe"]
         
-        self.assertEqual(stats.mean_score, 100.0)
-        self.assertEqual(stats.min_score, 100.0)
-        self.assertEqual(stats.max_score, 100.0)
+        # With normalization, single deterministic value maps to 1.0
+        self.assertEqual(stats.mean_score, 1.0)
+        self.assertEqual(stats.min_score, 1.0)
+        self.assertEqual(stats.max_score, 1.0)
         self.assertEqual(stats.std_dev, 0.0)
 
     def test_weighted_simulation(self):
-        # Option B: Cost (50) and Benefit (150)
-        # Net = Benefit*0.8 - Cost*0.2
-        #     = 150*0.8 - 50*0.2 = 120 - 10 = 110
+        # Option: Cost (50) and Benefit (150)
+        # Cost (minimize, w=0.2): both options identical so norm=1.0 → (1-1)*0.2 = 0
+        # Benefit (maximize, w=0.8): both options identical so norm=1.0 → 1*0.8 = 0.8
         opt = DecisionOption("Project")
         opt.add_variable("Cost", DistributionType.DETERMINISTIC, 50)
         opt.add_variable("Benefit", DistributionType.DETERMINISTIC, 150)
@@ -122,7 +116,7 @@ class TestMonteCarlo(unittest.TestCase):
         results = self.engine.run()
         stats = results["Project"]
         
-        self.assertAlmostEqual(stats.mean_score, 110.0)
+        self.assertAlmostEqual(stats.mean_score, 0.8)
 
 class TestTOPSIS(unittest.TestCase):
     def test_ranking(self):
