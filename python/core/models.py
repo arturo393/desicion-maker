@@ -64,7 +64,10 @@ def _sample_uniform(params: List[float], size: int) -> np.ndarray:
 
 
 def _sample_triangular(params: List[float], size: int) -> np.ndarray:
-    left, mode, right = sorted(params[:3])
+    left, mode, right = params[0], params[1], params[2]
+    if not (left <= mode <= right):
+        left, right = min(left, right), max(left, right)
+        mode = np.clip(mode, left, right)
     return np.random.triangular(left, mode, right, size)
 
 

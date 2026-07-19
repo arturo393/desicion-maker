@@ -275,7 +275,7 @@ class AntifragileEngine:
             cvar_gap = (mean - cvar) / (std + EPSILON)
 
             # Variance ratio: std relative to mean range
-            var_ratio = std / (mean + EPSILON)
+            var_ratio = std / (abs(mean) + EPSILON)
 
             # Tail fragility: how far the 5th percentile is from the mean
             tail_gap = (mean - var_95) / (std + EPSILON)

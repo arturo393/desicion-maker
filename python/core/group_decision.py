@@ -60,10 +60,11 @@ class GroupDecisionEngine:
         if method == "median":
             consensus = np.median(matrix, axis=0)
         elif method == "borda":
-            # Borda: rank factors per stakeholder, average ranks
-            ranks = np.argsort(np.argsort(-matrix, axis=1), axis=1) + 1
+            from scipy.stats import rankdata
+            ranks = np.apply_along_axis(lambda row: rankdata(-row, method='average'), 1, matrix)
             avg_rank = np.mean(ranks, axis=0)
-            consensus = 1.0 / avg_rank
+            borda_points = n_factors - avg_rank
+            consensus = borda_points / borda_points.sum()
         else:
             consensus = np.mean(matrix, axis=0)
 
@@ -110,11 +111,11 @@ class GroupDecisionEngine:
     @staticmethod
     def _kendall_w(matrix: np.ndarray) -> float:
         """Kendall's W (coefficient of concordance) for ranks."""
+        from scipy.stats import rankdata
         n_stakeholders, n_factors = matrix.shape
         if n_stakeholders < 2 or n_factors < 2:
             return 1.0
-        # Rank each stakeholder's weights (1 = highest)
-        ranks = np.argsort(np.argsort(-matrix, axis=1), axis=1) + 1
+        ranks = np.apply_along_axis(lambda row: rankdata(-row, method='average'), 1, matrix)
         # Sum of ranks per factor
         R = np.sum(ranks, axis=0)
         # Mean of R

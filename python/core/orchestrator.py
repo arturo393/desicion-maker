@@ -193,7 +193,7 @@ class UnifiedDecisionFramework:
             }
 
         if mode == "advanced":
-            self._run_advanced_analysis(mc_results, factor_names, weights, max_bools, data_fuzzy, future_metrics)
+            self._run_advanced_analysis(mc_results, factor_names, weights, max_bools, data_fuzzy, future_metrics, topsis_scores)
 
         waterfall = self.explain_engine.factor_waterfall(mc_results, self.mc_engine.factors)
         counterfactual = self.explain_engine.counterfactual(mc_results, self.mc_engine.factors)
@@ -274,7 +274,7 @@ class UnifiedDecisionFramework:
 
         return data_fuzzy, weights, max_bools, factor_names
 
-    def _run_advanced_analysis(self, mc_results, factor_names, weights, max_bools, data_fuzzy, future_metrics):
+    def _run_advanced_analysis(self, mc_results, factor_names, weights, max_bools, data_fuzzy, future_metrics, topsis_scores):
         """Run advanced mode analyses: crisp PROMETHEE, bootstrap, Bayesian, genetic."""
         data_crisp = {}
         for name, stats in mc_results.items():
@@ -288,7 +288,7 @@ class UnifiedDecisionFramework:
         )
 
         rankings_advanced: Dict[str, pd.Series] = {
-            "TOPSIS": pd.Series(),
+            "TOPSIS": topsis_scores,
             "MC": pd.Series({n: s.mean_score for n, s in mc_results.items()}).sort_values(ascending=False),
         }
         if not promethee_scores.empty:

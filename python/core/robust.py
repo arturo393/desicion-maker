@@ -42,6 +42,16 @@ class RobustOptimizer:
 
         # 1. Weight Sensitivity Analysis (Local)
         # Identifies which factors are most likely to flip the decision
+        # Compute global bounds for normalization
+        factor_names = list({fn for s in mc_results.values() for fn in s.factor_stats})
+        global_bounds = {fn: {"min": float("inf"), "max": float("-inf")} for fn in factor_names}
+        for stats in mc_results.values():
+            for fn in factor_names:
+                if fn in stats.factor_stats:
+                    val = stats.factor_stats[fn]["mean"]
+                    global_bounds[fn]["min"] = min(global_bounds[fn]["min"], val)
+                    global_bounds[fn]["max"] = max(global_bounds[fn]["max"], val)
+
         for opt_name, stats in mc_results.items():
             f_stats = stats.factor_stats
             worst_score = stats.mean_score
@@ -51,20 +61,25 @@ class RobustOptimizer:
                 if f.name not in f_stats:
                     continue
 
+                # Normalize the factor mean to [0, 1]
+                f_min = global_bounds[f.name]["min"]
+                f_max = global_bounds[f.name]["max"]
+                raw_mean = f_stats[f.name]["mean"]
+                if f_max > f_min:
+                    norm_mean = (raw_mean - f_min) / (f_max - f_min)
+                else:
+                    norm_mean = 1.0
+                eff_mean = norm_mean if f.maximize else (1.0 - norm_mean)
+
                 # Apply positive and negative shocks to the weight
                 for delta in [weight_shock, -weight_shock]:
                     new_weight = f.weight * (1 + delta)
-                    # Recalculate mean score with modified weight
-                    # Score = Sum(mean_i * weight_i)
-                    diff = (new_weight - f.weight) * f_stats[f.name]["mean"]
-                    if not f.maximize:
-                        diff = -diff
+                    diff = (new_weight - f.weight) * eff_mean
                     
                     shocked_score = stats.mean_score + diff
                     if shocked_score < worst_score:
                         worst_score = shocked_score
                     
-                    # If shock changes rank, log it (simplified logic here)
                     if abs(diff) > abs(stats.mean_score * 0.1): # 10% impact threshold
                         sensitive_factors.append({
                             "factor": f.name,
@@ -86,7 +101,7 @@ class RobustOptimizer:
                 
                 # The DRO score represents the worst-case mean within a 
                 # Wasserstein ball of radius epsilon around the empirical distribution.
-                dro_score = mean - np.sqrt(2 * epsilon * variance)
+                dro_score = mean - epsilon * np.sqrt(variance)
                 
                 # Confidence interval width penalty
                 stability = 1.0 - (np.sqrt(variance) / (abs(mean) + 1e-9))
