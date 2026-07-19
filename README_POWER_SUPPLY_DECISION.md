@@ -427,11 +427,9 @@ Integración con otros sistemas
 
 ---
 
-## 📚 Documentos Relacionados
+## Documentos Relacionados
 
-- [ESTADO_DEL_ARTE_UTILIDAD.md](ESTADO_DEL_ARTE_UTILIDAD.md) - Análisis competencia
-- [RECOMENDACIONES_TECNICAS_UTILIDAD.md](RECOMENDACIONES_TECNICAS_UTILIDAD.md) - Stack técnico
-- [ALCANCE.md](../ALCANCE.md) - Especificación proyecto
+Ver directorio `docs/docs/sw-diagnosticoremoto/05-power-supply/investigacion/` para documentacion tecnica completa.
 
 ---
 

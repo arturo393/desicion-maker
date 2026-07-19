@@ -22,6 +22,9 @@ from python.core.registry import DecisionRegistry
 from python.core.group_decision import GroupDecisionEngine
 from python.core.portfolio import PortfolioOptimizer
 from python.core.topology import TopologicalDataAnalysis
+from python.core.explainability import ExplainabilityEngine
+from python.core.reporting import prepare_decision_matrix, build_algorithm_comparison, save_report
+from python.core.schemas import DecisionConfig
 
 __all__ = [
     "DistributionType", "UncertainVariable", "Factor", "Statistics", "DecisionOption",
@@ -32,4 +35,6 @@ __all__ = [
     "RobustOptimizer", "RankAggregator", "BootstrapRanking", "WhatIfEngine",
     "AntifragileEngine", "WeightDerivationEngine", "DecisionRegistry",
     "GroupDecisionEngine", "PortfolioOptimizer", "TopologicalDataAnalysis",
+    "ExplainabilityEngine", "prepare_decision_matrix", "build_algorithm_comparison", "save_report",
+    "DecisionConfig",
 ]

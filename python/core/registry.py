@@ -8,6 +8,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+import numpy as np
+
 logger = logging.getLogger(__name__)
 
 
@@ -211,10 +213,7 @@ class DecisionRegistry:
             ).fetchall()
         return [dict(r) for r in rows]
 
-    def get_template(self, template_id: int) -> Optional[Dict[str, Any]]:
-        row = self._conn.execute(
-            "SELECT * FROM templates WHERE id = ?", (template_id,)
-        ).fetchone()
+    def _hydrate_template(self, row: Optional[sqlite3.Row]) -> Optional[Dict[str, Any]]:
         if row is None:
             return None
         result = dict(row)
@@ -226,20 +225,17 @@ class DecisionRegistry:
                     pass
         return result
 
+    def get_template(self, template_id: int) -> Optional[Dict[str, Any]]:
+        row = self._conn.execute(
+            "SELECT * FROM templates WHERE id = ?", (template_id,)
+        ).fetchone()
+        return self._hydrate_template(row)
+
     def get_template_by_name(self, name: str) -> Optional[Dict[str, Any]]:
         row = self._conn.execute(
             "SELECT * FROM templates WHERE name = ?", (name,)
         ).fetchone()
-        if row is None:
-            return None
-        result = dict(row)
-        for key in ("factors_json", "options_json"):
-            if result.get(key):
-                try:
-                    result[key] = json.loads(result[key])
-                except (json.JSONDecodeError, TypeError):
-                    pass
-        return result
+        return self._hydrate_template(row)
 
     def delete_template(self, template_id: int) -> bool:
         cur = self._conn.execute("DELETE FROM templates WHERE id = ?", (template_id,))
@@ -303,7 +299,6 @@ class DecisionRegistry:
 
 class _Encoder(json.JSONEncoder):
     def default(self, obj):
-        import numpy as np
         if isinstance(obj, np.integer):
             return int(obj)
         if isinstance(obj, np.floating):

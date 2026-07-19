@@ -7,8 +7,25 @@ from typing import Any, Dict, List, Optional, Tuple
 import numpy as np
 
 from python.core.models import Factor, Statistics
+from python.core.utils import EPSILON
 
 logger = logging.getLogger(__name__)
+
+# Fragility index weights
+FRAGILITY_CVAR_WEIGHT = 0.4
+FRAGILITY_VAR_WEIGHT = 0.3
+FRAGILITY_TAIL_WEIGHT = 0.2
+FRAGILITY_SUCCESS_WEIGHT = 0.1
+FRAGILITY_CVAR_SCALE = 5.0
+FRAGILITY_TAIL_SCALE = 5.0
+
+# Verdict thresholds
+CONVEXITY_THRESHOLD = 0.01
+FRAGILE_THRESHOLD = 0.6
+ROBUST_THRESHOLD = 0.3
+
+# Convexity perturbation multipliers
+CONVEXITY_PERTURBATIONS = [0.5, 0.8, 1.2, 1.5]
 
 
 class AntifragileEngine:
@@ -35,13 +52,11 @@ class AntifragileEngine:
                 "via_negativa": [],
             }
 
-        engine = AntifragileEngine()
-
         return {
-            "barbell": engine.barbell_analysis(mc_results, factors),
-            "convexity": engine.convexity_analysis(mc_results, factors),
-            "fragility": engine.fragility_index(mc_results),
-            "via_negativa": engine.via_negativa(mc_results, factors),
+            "barbell": AntifragileEngine.barbell_analysis(mc_results, factors),
+            "convexity": AntifragileEngine.convexity_analysis(mc_results, factors),
+            "fragility": AntifragileEngine.fragility_index(mc_results),
+            "via_negativa": AntifragileEngine.via_negativa(mc_results, factors),
         }
 
     # ── 1. Barbell Analysis ──────────────────────────────────────────
@@ -121,7 +136,7 @@ class AntifragileEngine:
             return {}
 
         result: Dict[str, Any] = {}
-        perturbations = [0.5, 0.8, 1.2, 1.5]
+        perturbations = CONVEXITY_PERTURBATIONS
 
         for opt_name, stats in mc_results.items():
             if stats.raw_factor_data is None:
@@ -143,7 +158,7 @@ class AntifragileEngine:
                 f_mean = float(np.mean(vals))
                 f_std = float(np.std(vals))
 
-                if f_std < 1e-9:
+                if f_std < EPSILON:
                     continue
 
                 centered = vals - f_mean
@@ -159,7 +174,7 @@ class AntifragileEngine:
                 # Convexity coefficient: regression slope of score ~ variance_mult
                 xs = np.array(perturbations)
                 ys = np.array([original_score + deltas.get(f"{p:.1f}x", 0.0) for p in perturbations])
-                if np.std(xs) > 1e-9:
+                if np.std(xs) > EPSILON:
                     coeff = np.polyfit(xs, ys, 2)[0]  # quadratic coefficient
                 else:
                     coeff = 0.0
@@ -171,8 +186,8 @@ class AntifragileEngine:
                     "deltas": deltas,
                     "convexity_coefficient": float(coeff),
                     "verdict": (
-                        "antifragile" if coeff > 0.01
-                        else "fragile" if coeff < -0.01
+                        "antifragile" if coeff > CONVEXITY_THRESHOLD
+                        else "fragile" if coeff < -CONVEXITY_THRESHOLD
                         else "neutral"
                     ),
                 }
@@ -255,20 +270,20 @@ class AntifragileEngine:
             success = stats.success_rate
 
             # CVaR gap: how far the tail is from the mean (normalized by std)
-            cvar_gap = (mean - cvar) / (std + 1e-9)
+            cvar_gap = (mean - cvar) / (std + EPSILON)
 
             # Variance ratio: std relative to mean range
-            var_ratio = std / (mean + 1e-9)
+            var_ratio = std / (mean + EPSILON)
 
             # Tail fragility: how far the 5th percentile is from the mean
-            tail_gap = (mean - var_95) / (std + 1e-9)
+            tail_gap = (mean - var_95) / (std + EPSILON)
 
             # Composite fragility score (heuristic, 0-1 range)
             raw = (
-                0.4 * np.clip(cvar_gap / 5.0, 0, 1)
-                + 0.3 * np.clip(var_ratio * 2.0, 0, 1)
-                + 0.2 * np.clip(tail_gap / 5.0, 0, 1)
-                + 0.1 * (1.0 - success)
+                FRAGILITY_CVAR_WEIGHT * np.clip(cvar_gap / FRAGILITY_CVAR_SCALE, 0, 1)
+                + FRAGILITY_VAR_WEIGHT * np.clip(var_ratio * 2.0, 0, 1)
+                + FRAGILITY_TAIL_WEIGHT * np.clip(tail_gap / FRAGILITY_TAIL_SCALE, 0, 1)
+                + FRAGILITY_SUCCESS_WEIGHT * (1.0 - success)
             )
             fragility = float(np.clip(raw, 0, 1))
 
@@ -281,8 +296,8 @@ class AntifragileEngine:
                 "var_95": var_95,
                 "success_rate": success,
                 "verdict": (
-                    "fragile" if fragility > 0.6
-                    else "robust" if fragility < 0.3
+                    "fragile" if fragility > FRAGILE_THRESHOLD
+                    else "robust" if fragility < ROBUST_THRESHOLD
                     else "moderate"
                 ),
             }
@@ -351,7 +366,7 @@ class AntifragileEngine:
                 new_scores[name] = float(np.mean(total)) if total is not None else 0.0
 
             all_improved = all(
-                new_scores[n] >= original_scores[n] - 1e-6 for n in names
+                new_scores[n] >= original_scores[n] - EPSILON for n in names
             )
             new_winner = max(new_scores, key=new_scores.get)
             winner_flipped = new_winner != original_winner

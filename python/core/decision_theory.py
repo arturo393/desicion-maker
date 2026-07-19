@@ -22,7 +22,7 @@ class DecisionTheoryEngine:
             return {
                 "Maximax (Optimistic)": f"{name} (P95: {s.percentile_95:.2f})",
                 "Maximin (Conservative)": f"{name} (P5: {s.percentile_5:.2f})",
-                "Hurwicz (Balanced)": f"{name} (Score: {0.5 * s.percentile_95 + 0.5 * s.percentile_5:.2f})",
+                "Hurwicz (Balanced)": f"{name} (Score: {hurwicz_alpha * s.percentile_95 + (1 - hurwicz_alpha) * s.percentile_5:.2f})",
                 "Laplace (Risk Neutral)": f"{name} (Avg: {s.mean_score:.2f})",
                 "Minimax Regret": f"{name} (Regret: 0.00)",
             }

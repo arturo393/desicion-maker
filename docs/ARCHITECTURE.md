@@ -1,6 +1,6 @@
 # Architecture
 
-Python framework for multi-criteria decision analysis under uncertainty. 18+ engines, 199+ tests.
+Python framework for multi-criteria decision analysis under uncertainty. 22+ engines, 322+ tests.
 
 ## Building Blocks
 
@@ -31,6 +31,16 @@ results = await fw.run_analysis(mode="standard")
 | Genetic | `genetic.py` | Evolve ideal composite option | advanced |
 | Bootstrap | `bootstrap.py` | Confidence intervals on rankings | advanced |
 | AI Agent | `gemini_agent.py` | External research via Gemini | advanced |
+| What-If | `what_if.py` | Interactive weight/score tweaking with live recomputation | standalone |
+| Antifragile | `antifragile.py` | Barbell strategy, convexity, fragility indexing, via negativa | standalone |
+| Group Decision | `group_decision.py` | Multi-stakeholder consensus ranking | standalone |
+| Information Theory | `information_theory.py` | Mutual information factor influence analysis | standalone |
+| Portfolio | `portfolio.py` | Mean-variance resource allocation | standalone |
+| Weight Derivation | `weight_derivation.py` | Swing, AHP, PAPRIKA from human judgment | standalone |
+| Explainability | `explainability.py` | Waterfall charts, counterfactuals, narrative reports | standalone |
+| Topology | `topology.py` | MDS/Isomap embedding, clustering, ranking stability | standalone |
+| Visualization | `visualization.py` | Matplotlib/seaborn plots (Pareto, tornado, distributions) | standalone |
+| Registry | `registry.py` | SQLite-backed persistent decision store | standalone |
 | AHP | `ahp.py` | Pairwise weight calibration | library |
 | Config Runner | `config_runner.py` | YAML-based decision config | library |
 
@@ -38,27 +48,29 @@ results = await fw.run_analysis(mode="standard")
 
 ```
 run_analysis(mode)
-  │
-  ├─ MonteCarloEngine.run()             # simulate N scenarios
-  ├─ _check_scale_mismatch()            # warn if scales differ >10x
-  │
-  ├─ TOPSISEngine.analyze(fuzzy)        # rank by distance to ideal
-  ├─ ParetoEngine.analyze()             # find efficient frontier
-  │
-  └─ if standard+:
-       ├─ DecisionTheoryEngine.analyze()      # game-theory lenses
-       ├─ SensitivityEngine.analyze()         # weight shocks
-       ├─ _promethee_with_uncertainty()       # PROMETHEE avg p5/p95
-       ├─ RobustOptimizer.analyze()           # worst-case scores
-       └─ RankAggregator.aggregate()          # Borda of TOPSIS+MC+PROMETHEE
-     │
-     └─ if advanced:
-          ├─ PROMETHEE (crisp data)
-          ├─ BayesianEngine.analyze()
-          ├─ GeneticOptimizer.evolve_ideal()
-          ├─ BootstrapRanking.confidence_intervals()
-          └─ RankAggregator.aggregate()       # Borda of all 4 methods
+  |
+  +-- MonteCarloEngine.run()             # simulate N scenarios
+  +-- _check_scale_mismatch()            # warn if scales differ >10x
+  |
+  +-- TOPSISEngine.analyze(fuzzy)        # rank by distance to ideal
+  +-- ParetoEngine.analyze()             # find efficient frontier
+  |
+  +-- if standard+:
+  |    +-- DecisionTheoryEngine.analyze()      # game-theory lenses
+  |    +-- SensitivityEngine.analyze()         # weight shocks
+  |    +-- _promethee_with_uncertainty()       # PROMETHEE avg p5/p95
+  |    +-- RobustOptimizer.analyze()           # worst-case scores
+  |    +-- RankAggregator.aggregate()          # Borda of TOPSIS+MC+PROMETHEE
+  |
+  +-- if advanced:
+       +-- PROMETHEE (crisp data)
+       +-- BayesianEngine.analyze()
+       +-- GeneticOptimizer.evolve_ideal()
+       +-- BootstrapRanking.confidence_intervals()
+       +-- RankAggregator.aggregate()       # Borda of all 4 methods
 ```
+
+Standalone engines (Antifragile, Group Decision, Information Theory, Portfolio, What-If, Weight Derivation, Explainability, Topology, Visualization, Registry) can be invoked independently or composed via the orchestrator.
 
 ## Modes
 
@@ -72,35 +84,35 @@ run_analysis(mode)
 
 ```
 DecisionOption
-  ├─ name: str
-  ├─ description: str
-  └─ variables: Dict[str, UncertainVariable]
-       └─ DistributionType (DETERMINISTIC, NORMAL, UNIFORM, TRIANGULAR, etc.)
-            └─ params: List[float]
+  +-- name: str
+  +-- description: str
+  +-- variables: Dict[str, UncertainVariable]
+       +-- DistributionType (DETERMINISTIC, NORMAL, UNIFORM, TRIANGULAR, etc.)
+            +-- params: List[float]
 
 Factor
-  ├─ name: str
-  ├─ weight: float
-  └─ maximize: bool
+  +-- name: str
+  +-- weight: float
+  +-- maximize: bool
 
 Statistics (per option after MC)
-  ├─ mean_score, std_dev, min_score, max_score
-  ├─ percentile_5, percentile_95
-  ├─ var_95, cvar_95, success_rate
-  └─ factor_stats: Dict[str, {mean, std, p5, p95, contribution}]
+  +-- mean_score, std_dev, min_score, max_score
+  +-- percentile_5, percentile_95
+  +-- var_95, cvar_95, success_rate
+  +-- factor_stats: Dict[str, {mean, std, p5, p95, contribution}]
 ```
 
 ## Key Decisions
 
-1. **Monte Carlo first** — all downstream engines consume MC statistics (means, percentiles). This propagates uncertainty through every method.
-2. **Fuzzy TOPSIS** — uses (p5, mean, p95) tuples instead of point estimates, making ranking uncertainty-aware.
-3. **PROMETHEE with uncertainty** — averages net flows across p5/mean/p95 scenarios rather than a single deterministic run.
-4. **Borda aggregation** — combines rankings from multiple methods into a consensus, reducing method bias.
-5. **Weights computed once** — factor weights and maximize/minimize flags are built once and reused across all engines.
+1. **Monte Carlo first** -- all downstream engines consume MC statistics (means, percentiles). This propagates uncertainty through every method.
+2. **Fuzzy TOPSIS** -- uses (p5, mean, p95) tuples instead of point estimates, making ranking uncertainty-aware.
+3. **PROMETHEE with uncertainty** -- averages net flows across p5/mean/p95 scenarios rather than a single deterministic run.
+4. **Borda aggregation** -- combines rankings from multiple methods into a consensus, reducing method bias.
+5. **Weights computed once** -- factor weights and maximize/minimize flags are built once and reused across all engines.
 
 ## Test Coverage
 
-199+ tests across all engines. Run with:
+322+ tests across all engines. Run with:
 
 ```bash
 uv run pytest python/tests/ -v

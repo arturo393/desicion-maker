@@ -5,6 +5,7 @@ from datetime import datetime
 from typing import Any, Dict
 
 from python.core.models import Statistics
+from python.core.utils import resolve_winner
 
 
 def generate_html_inline(
@@ -22,12 +23,7 @@ def generate_html_inline(
     decision_matrix: Dict[str, Any],
     factors: Any,
 ) -> str:
-    if not topsis_scores.empty:
-        bluf_winner = topsis_scores.index[0]
-        bluf_reason = "F-TOPSIS risk-adj"
-    else:
-        bluf_winner = max(mc_results.items(), key=lambda x: x[1].mean_score)[0]
-        bluf_reason = "MC Expected Value"
+    bluf_winner, bluf_reason = resolve_winner(topsis_scores, mc_results)
 
     best_mc = max(mc_results.items(), key=lambda x: x[1].mean_score)[0]
     robustness = f"{sensitivity.get('robustness_score', 0) * 100:.0f}%" if sensitivity else "N/A"

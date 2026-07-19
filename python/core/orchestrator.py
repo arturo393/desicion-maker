@@ -9,6 +9,9 @@ import numpy as np
 import pandas as pd
 
 from python.core.models import DecisionOption, Factor
+from python.core.utils import (
+    SCALE_MISMATCH_THRESHOLD, DEFAULT_BOOTSTRAP_ITERATIONS, HURWICZ_ALPHA_DEFAULT,
+)
 from python.core.monte_carlo import MonteCarloEngine
 from python.core.topsis import TOPSISEngine
 from python.core.promethee import PrometheeEngine
@@ -52,7 +55,7 @@ def _check_scale_mismatch(factors: List[Factor], mc_results: Dict) -> None:
     avg_means = {fn: abs(np.mean(v)) if v else 0.0 for fn, v in means_per_factor.items()}
     max_mean = max(avg_means.values()) if avg_means else 0.0
     for fn, avg in avg_means.items():
-        if max_mean > 0 and avg > 0 and max_mean / avg > 10:
+        if max_mean > 0 and avg > 0 and max_mean / avg > SCALE_MISMATCH_THRESHOLD:
             logger.warning(
                 f"Scale mismatch: '{fn}' avg={avg:.2f} vs max factor avg={max_mean:.2f} "
                 f"(ratio={max_mean/avg:.1f}x). Consider rescaling factors so weights reflect true importance."
@@ -227,7 +230,7 @@ class UnifiedDecisionFramework:
             borda_advanced = self.aggregator.aggregate(rankings_advanced, method="borda")
 
             bootstrap_ci = self.bootstrap_engine.confidence_intervals(
-                data_fuzzy, weights, max_bools, n_bootstrap=200,
+                data_fuzzy, weights, max_bools, n_bootstrap=DEFAULT_BOOTSTRAP_ITERATIONS,
             )
 
             future_metrics.update({

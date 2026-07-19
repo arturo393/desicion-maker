@@ -1,115 +1,99 @@
 """
-Título: Análisis de Decisión - [NOMBRE]
-Propósito: [Descripción de qué decisión se está tomando]
-Fecha de Creación: [YYYY-MM-DD]
-Última Actualización: [YYYY-MM-DD]
-Versión: 1.0
+Template: Decision Analysis - [NAME]
+Purpose: [What decision is being analyzed]
+Created: [YYYY-MM-DD]
+Last Updated: [YYYY-MM-DD]
+Version: 1.0
 
-CAMBIOS EN ESTA VERSIÓN:
-- [Cambio 1]
-- [Cambio 2]
+CHANGES IN THIS VERSION:
+- [Change 1]
+- [Change 2]
 
-PRÓXIMOS PASOS:
-- [ ] Paso 1
-- [ ] Paso 2
+NEXT STEPS:
+- [ ] Step 1
+- [ ] Step 2
 
-NOTAS:
-- Agregar notas importantes aquí
+NOTES:
+- Add important notes here
 """
 
+import asyncio
+import json
 import sys
+from datetime import datetime
 from pathlib import Path
 
-# Agregar path al core del framework
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from core.deep_research_decision_agent import DeepResearchDecisionAgent
-import json
-from datetime import datetime
+from python.core.models import DecisionOption, DistributionType, Factor
+from python.core.orchestrator import UnifiedDecisionFramework
 
 # ============================================================
-# CONFIGURACIÓN DEL ANÁLISIS
+# ANALYSIS CONFIGURATION
 # ============================================================
 
 analysis_name = "TODO_CHANGE_ME"
 analysis_date = datetime.now().isoformat()
 
-# Definir la pregunta de investigación
-research_question = """
-[Tu pregunta de investigación aquí]
-"""
+# ============================================================
+# DEFINE FACTORS (criteria for evaluation)
+# ============================================================
 
-# Definir alternativas
-alternatives = [
-    {
-        "name": "Alternativa 1",
-        "description": "Descripción de la alternativa 1",
-        "initial_cost": 0,
-        "monthly_cost": 0,
-    },
-    {
-        "name": "Alternativa 2",
-        "description": "Descripción de la alternativa 2",
-        "initial_cost": 0,
-        "monthly_cost": 0,
-    },
+factors = [
+    Factor(name="Cost", weight=0.3, maximize=False),
+    Factor(name="Benefit", weight=0.4, maximize=True),
+    Factor(name="Risk", weight=0.3, maximize=False),
 ]
 
-# Criterios de decisión
-criteria = {
-    "cost": {"weight": 0.3, "type": "min"},  # Minimizar costo
-    "quality": {"weight": 0.4, "type": "max"},  # Maximizar calidad
-    "time": {"weight": 0.3, "type": "min"},  # Minimizar tiempo
-}
-
 # ============================================================
-# EJECUTAR ANÁLISIS
+# DEFINE OPTIONS (alternatives with uncertain variables)
 # ============================================================
 
-def main():
-    print(f"🔍 Iniciando análisis: {analysis_name}")
-    print(f"📅 Fecha: {analysis_date}")
-    print("=" * 60)
-    
-    # Crear agente de decisión
-    agent = DeepResearchDecisionAgent()
-    
-    # Configurar análisis
-    agent.set_alternatives(alternatives)
-    agent.set_criteria(criteria)
-    
-    # Ejecutar análisis
-    print("\n📊 Ejecutando análisis con metodologías:")
-    print("  - Monte Carlo Simulation")
-    print("  - TOPSIS")
-    print("  - Pareto Analysis")
-    print("  - Sensitivity Analysis")
-    
-    results = agent.analyze(
-        question=research_question,
-        use_deep_research=False,  # Cambiar a True si necesitas Deep Research
-        monte_carlo_iterations=10000,
-    )
-    
-    # Mostrar resultados
-    print("\n" + "=" * 60)
-    print("📈 RESULTADOS DEL ANÁLISIS")
-    print("=" * 60)
-    print(f"\n🏆 Decisión Recomendada: {results['recommended_alternative']}")
-    print(f"💡 Confianza: {results['confidence']:.1%}")
-    print(f"\n📝 Razonamiento:\n{results['reasoning']}")
-    
-    # Guardar resultados
-    output_dir = Path(__file__).parent.parent.parent / "results" / analysis_name
-    output_dir.mkdir(parents=True, exist_ok=True)
-    
-    output_file = output_dir / f"{analysis_name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
-    
-    with open(output_file, "w", encoding="utf-8") as f:
-        json.dump(results, f, indent=2, ensure_ascii=False)
-    
-    print(f"\n💾 Resultados guardados en: {output_file}")
-    print("\n✅ Análisis completado exitosamente")
+options = [
+    DecisionOption(
+        name="Option A",
+        description="Description of option A",
+        variables={
+            "Cost": UncertainVariable("Cost", DistributionType.NORMAL, [5000, 1000]),
+            "Benefit": UncertainVariable("Benefit", DistributionType.NORMAL, [8000, 2000]),
+            "Risk": UncertainVariable("Risk", DistributionType.UNIFORM, [0.1, 0.5]),
+        },
+    ),
+    DecisionOption(
+        name="Option B",
+        description="Description of option B",
+        variables={
+            "Cost": UncertainVariable("Cost", DistributionType.NORMAL, [3000, 500]),
+            "Benefit": UncertainVariable("Benefit", DistributionType.NORMAL, [6000, 1500]),
+            "Risk": UncertainVariable("Risk", DistributionType.UNIFORM, [0.2, 0.6]),
+        },
+    ),
+]
+
+# ============================================================
+# RUN ANALYSIS
+# ============================================================
+
+
+async def main():
+    fw = UnifiedDecisionFramework()
+    for f in factors:
+        fw.add_factor(f)
+    for o in options:
+        fw.add_option(o)
+
+    results = await fw.run_analysis(mode="standard")
+
+    print(f"\nAnalysis '{analysis_name}' completed.")
+    print(f"Winner: {results.get('explanation', 'N/A')[:100]}...")
+
+    # Save results
+    output_file = f"results/{analysis_name.lower().replace(' ', '_')}.json"
+    Path("results").mkdir(exist_ok=True)
+    with open(output_file, "w") as f:
+        json.dump({"name": analysis_name, "date": analysis_date}, f, indent=2)
+    print(f"Results saved to {output_file}")
+
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())

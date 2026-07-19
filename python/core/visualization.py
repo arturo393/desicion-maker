@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 import os
 from typing import Dict, List, Optional
@@ -59,9 +61,9 @@ class VisualizationEngine:
             if stats.raw_scores is not None:
                 sns.kdeplot(stats.raw_scores, label=f"{name}", fill=True, alpha=0.4, linewidth=2)
         
-        plt.title("Perfiles de Riesgo: ¿Qué tan probable es cada resultado?", pad=20, fontsize=14, fontweight='bold')
-        plt.xlabel("Puntaje de Calidad (0 a 1)", fontsize=12)
-        plt.ylabel("Densidad de Probabilidad", fontsize=12)
+        plt.title("Risk Profiles: How likely is each outcome?", pad=20, fontsize=14, fontweight='bold')
+        plt.xlabel("Quality Score (0-1)", fontsize=12)
+        plt.ylabel("Probability Density", fontsize=12)
         plt.legend(frameon=False, loc='upper left')
         plt.grid(True, alpha=0.1)
         
@@ -103,18 +105,18 @@ class VisualizationEngine:
         
         # Bar for DRO Score
         bars = sns.barplot(x="Option", y="DRO_Score", data=df, ax=ax1, alpha=0.8, hue="Option", palette="viridis", legend=False)
-        ax1.set_ylabel("Puntaje Defensivo (Peor Escenario)", color="#58a6ff", fontsize=11)
+        ax1.set_ylabel("Defensive Score (Worst Case)", color="#58a6ff", fontsize=11)
         ax1.set_xlabel("")
         ax1.tick_params(axis='x', rotation=15)
         
         # Line for Stability
         ax2 = ax1.twinx()
         sns.lineplot(x="Option", y="Stability", data=df, ax=ax2, marker="o", color="#f85149", linewidth=3, markersize=8)
-        ax2.set_ylabel("Nivel de Certeza (0-1)", color="#f85149", fontsize=11)
+        ax2.set_ylabel("Certainty Level (0-1)", color="#f85149", fontsize=11)
         ax2.set_ylim(0, 1.1)
         ax2.grid(False)
         
-        plt.title("Auditoría de Robustez: Defensa vs Consistencia", pad=20, fontsize=14, fontweight='bold')
+        plt.title("Robustness Audit: Defense vs Consistency", pad=20, fontsize=14, fontweight='bold')
         
         path = os.path.join(output_dir, f"robustness_audit_{timestamp}.png")
         plt.savefig(path, dpi=150, bbox_inches="tight")

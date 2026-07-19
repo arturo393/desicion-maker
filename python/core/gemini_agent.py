@@ -5,12 +5,14 @@ from typing import Optional
 
 from dotenv import load_dotenv
 
-load_dotenv()
-
 
 class GeminiDeepResearchAgent:
-    def __init__(self, api_key: Optional[str] = None):
+    DEFAULT_MODEL = "gemini-2.0-flash"
+
+    def __init__(self, api_key: Optional[str] = None, model: Optional[str] = None):
+        load_dotenv()
         self.api_key = api_key or os.getenv("GEMINI_API_KEY")
+        self.model = model or os.getenv("GEMINI_MODEL", self.DEFAULT_MODEL)
         self._client = None
         if self.api_key:
             try:
@@ -30,7 +32,7 @@ class GeminiDeepResearchAgent:
             return "AI Disabled."
         try:
             response = client.models.generate_content(
-                model="gemini-2.0-flash",
+                model=self.model,
                 contents=f"Research Topic: {topic}\nContext: {context}\nProvide analysis.",
             )
             return response.text

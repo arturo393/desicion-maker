@@ -3,9 +3,12 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Dict, List, Optional
+from typing import Callable, Dict, List, Optional
 
 import numpy as np
+
+
+EPSILON = 1e-9
 
 
 class DistributionType(Enum):
@@ -19,6 +22,77 @@ class DistributionType(Enum):
     LOGNORMAL = "lognormal"
     GAMMA = "gamma"
     POISSON = "poisson"
+
+
+# Validation rules: (min_params, param_names)
+VALIDATION_RULES: Dict[DistributionType, tuple] = {
+    DistributionType.DETERMINISTIC: (1, ("value",)),
+    DistributionType.NORMAL: (2, ("mean", "std")),
+    DistributionType.UNIFORM: (2, ("low", "high")),
+    DistributionType.TRIANGULAR: (3, ("left", "mode", "right")),
+    DistributionType.BERNOULLI: (1, ("probability",)),
+    DistributionType.EXPONENTIAL: (1, ("scale",)),
+    DistributionType.BETA: (2, ("alpha", "beta")),
+    DistributionType.LOGNORMAL: (2, ("mean", "sigma")),
+    DistributionType.GAMMA: (2, ("shape", "scale")),
+    DistributionType.POISSON: (1, ("rate",)),
+}
+
+
+def _sample_deterministic(params: List[float], size: int) -> np.ndarray:
+    return np.full(size, params[0])
+
+
+def _sample_normal(params: List[float], size: int) -> np.ndarray:
+    return np.random.normal(params[0], max(params[1], EPSILON), size)
+
+
+def _sample_uniform(params: List[float], size: int) -> np.ndarray:
+    low, high = min(params[0], params[1]), max(params[0], params[1])
+    return np.random.uniform(low, high, size)
+
+
+def _sample_triangular(params: List[float], size: int) -> np.ndarray:
+    left, mode, right = sorted(params[:3])
+    return np.random.triangular(left, mode, right, size)
+
+
+def _sample_bernoulli(params: List[float], size: int) -> np.ndarray:
+    return np.random.binomial(1, np.clip(params[0], 0, 1), size).astype(float)
+
+
+def _sample_exponential(params: List[float], size: int) -> np.ndarray:
+    return np.random.exponential(max(params[0], EPSILON), size)
+
+
+def _sample_beta(params: List[float], size: int) -> np.ndarray:
+    return np.random.beta(max(params[0], EPSILON), max(params[1], EPSILON), size)
+
+
+def _sample_lognormal(params: List[float], size: int) -> np.ndarray:
+    return np.random.lognormal(params[0], max(params[1], EPSILON), size)
+
+
+def _sample_gamma(params: List[float], size: int) -> np.ndarray:
+    return np.random.gamma(max(params[0], EPSILON), max(params[1], EPSILON), size)
+
+
+def _sample_poisson(params: List[float], size: int) -> np.ndarray:
+    return np.random.poisson(max(int(params[0]), 0), size).astype(float)
+
+
+SAMPLE_DISPATCH: Dict[DistributionType, Callable] = {
+    DistributionType.DETERMINISTIC: _sample_deterministic,
+    DistributionType.NORMAL: _sample_normal,
+    DistributionType.UNIFORM: _sample_uniform,
+    DistributionType.TRIANGULAR: _sample_triangular,
+    DistributionType.BERNOULLI: _sample_bernoulli,
+    DistributionType.EXPONENTIAL: _sample_exponential,
+    DistributionType.BETA: _sample_beta,
+    DistributionType.LOGNORMAL: _sample_lognormal,
+    DistributionType.GAMMA: _sample_gamma,
+    DistributionType.POISSON: _sample_poisson,
+}
 
 
 @dataclass
@@ -37,60 +111,45 @@ class UncertainVariable:
         return result
 
     def sample(self, size: int = 1) -> np.ndarray:
+        defaults_map = {
+            DistributionType.DETERMINISTIC: [0],
+            DistributionType.NORMAL: [0, 1],
+            DistributionType.UNIFORM: [0, 1],
+            DistributionType.TRIANGULAR: [0, 1, 2],
+            DistributionType.BERNOULLI: [0.5],
+            DistributionType.EXPONENTIAL: [1],
+            DistributionType.BETA: [1, 1],
+            DistributionType.LOGNORMAL: [0, 1],
+            DistributionType.GAMMA: [1, 1],
+            DistributionType.POISSON: [1],
+        }
+        defaults = defaults_map.get(self.dist_type, [0])
+        p = self._sanitize(self.params, defaults)
+        sampler = SAMPLE_DISPATCH.get(self.dist_type)
+        if sampler is None:
+            return np.zeros(size)
         try:
-            if self.dist_type == DistributionType.DETERMINISTIC:
-                p = self._sanitize(self.params, [0])
-                return np.full(size, p[0])
-            elif self.dist_type == DistributionType.NORMAL:
-                p = self._sanitize(self.params, [0, 1])
-                return np.random.normal(p[0], max(p[1], 1e-9), size)
-            elif self.dist_type == DistributionType.UNIFORM:
-                p = self._sanitize(self.params, [0, 1])
-                low, high = min(p[0], p[1]), max(p[0], p[1])
-                return np.random.uniform(low, high, size)
-            elif self.dist_type == DistributionType.TRIANGULAR:
-                p = self._sanitize(self.params, [0, 1, 2])[:3]
-                left, mode, right = sorted(p)
-                return np.random.triangular(left, mode, right, size)
-            elif self.dist_type == DistributionType.BERNOULLI:
-                p = self._sanitize(self.params, [0.5])[0]
-                return np.random.binomial(1, np.clip(p, 0, 1), size).astype(float)
-            elif self.dist_type == DistributionType.EXPONENTIAL:
-                p = self._sanitize(self.params, [1])
-                return np.random.exponential(max(p[0], 1e-9), size)
-            elif self.dist_type == DistributionType.BETA:
-                p = self._sanitize(self.params, [1, 1])
-                return np.random.beta(max(p[0], 1e-9), max(p[1], 1e-9), size)
-            elif self.dist_type == DistributionType.LOGNORMAL:
-                p = self._sanitize(self.params, [0, 1])
-                return np.random.lognormal(p[0], max(p[1], 1e-9), size)
-            elif self.dist_type == DistributionType.GAMMA:
-                p = self._sanitize(self.params, [1, 1])
-                return np.random.gamma(max(p[0], 1e-9), max(p[1], 1e-9), size)
-            elif self.dist_type == DistributionType.POISSON:
-                p = self._sanitize(self.params, [1])
-                return np.random.poisson(max(int(p[0]), 0), size).astype(float)
-            else:
-                return np.zeros(size)
-        except Exception:
+            return sampler(p, size)
+        except (ValueError, TypeError):
             return np.zeros(size)
 
     def validate(self) -> List[str]:
         errors = []
-        if self.dist_type == DistributionType.DETERMINISTIC and len(self.params) < 1:
-            errors.append(f"{self.name}: DETERMINISTIC requires 1 param (value)")
-        elif self.dist_type == DistributionType.NORMAL and len(self.params) < 2:
-            errors.append(f"{self.name}: NORMAL requires 2 params (mean, std)")
-        elif self.dist_type == DistributionType.UNIFORM and len(self.params) < 2:
-            errors.append(f"{self.name}: UNIFORM requires 2 params (low, high)")
-        elif self.dist_type == DistributionType.TRIANGULAR and len(self.params) < 3:
-            errors.append(f"{self.name}: TRIANGULAR requires 3 params (left, mode, right)")
-        elif self.dist_type in (DistributionType.BETA, DistributionType.LOGNORMAL, DistributionType.GAMMA) and len(self.params) < 2:
-            errors.append(f"{self.name}: {self.dist_type.value} requires 2 params")
-        elif self.dist_type in (DistributionType.BERNOULLI, DistributionType.EXPONENTIAL, DistributionType.POISSON) and len(self.params) < 1:
-            errors.append(f"{self.name}: {self.dist_type.value} requires 1 param")
+        rule = VALIDATION_RULES.get(self.dist_type)
+        if rule is None:
+            errors.append(f"{self.name}: unknown distribution type")
+            return errors
+
+        min_params, param_names = rule
+        if len(self.params) < min_params:
+            names_str = ", ".join(param_names)
+            errors.append(
+                f"{self.name}: {self.dist_type.value} requires {min_params} param(s) ({names_str})"
+            )
+
         if self.dist_type == DistributionType.NORMAL and len(self.params) >= 2 and self.params[1] < 0:
             errors.append(f"{self.name}: NORMAL std must be >= 0, got {self.params[1]}")
+
         return errors
 
 

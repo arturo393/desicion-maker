@@ -58,44 +58,35 @@ def create_app():
     app = FastAPI(
         title="Decision Maker API",
         description="Multi-Criteria Decision Intelligence Framework",
-        version="1.0.0",
+        version="3.0.0",
     )
     app.add_middleware(
         CORSMiddleware,
         allow_origins=["*"],
-        allow_credentials=True,
+        allow_credentials=False,
         allow_methods=["*"],
         allow_headers=["*"],
     )
 
-    # ── In-memory registry (lazy import to avoid startup cost) ──
+    # ── Singleton registry ──
+    _registry_instance = None
 
     def _get_registry():
-        from python.core.registry import DecisionRegistry
-        reg = DecisionRegistry()
-        reg.seed_default_templates()
-        return reg
+        nonlocal _registry_instance
+        if _registry_instance is None:
+            from python.core.registry import DecisionRegistry
+            _registry_instance = DecisionRegistry()
+            _registry_instance.seed_default_templates()
+        return _registry_instance
 
     def _run_analysis(req: _AnalysisRequest) -> Dict[str, Any]:
         from python.core.models import DecisionOption, DistributionType, Factor
         from python.core.orchestrator import UnifiedDecisionFramework
+        from python.core.utils import DISTRIBUTION_MAP
         import asyncio
 
-        DIST_MAP = {
-            "deterministic": DistributionType.DETERMINISTIC,
-            "normal": DistributionType.NORMAL,
-            "uniform": DistributionType.UNIFORM,
-            "triangular": DistributionType.TRIANGULAR,
-            "bernoulli": DistributionType.BERNOULLI,
-            "exponential": DistributionType.EXPONENTIAL,
-            "beta": DistributionType.BETA,
-            "lognormal": DistributionType.LOGNORMAL,
-            "gamma": DistributionType.GAMMA,
-            "poisson": DistributionType.POISSON,
-        }
-
         fw = UnifiedDecisionFramework()
-        fw.mc_engine.num_simulations = req.simulations
+        fw.mc_engine.num_simulations = max(1, min(req.simulations, 1_000_000))
 
         for f in req.factors:
             fw.add_factor(Factor(f.name, f.weight, f.maximize, f.category))
@@ -103,7 +94,7 @@ def create_app():
         for o in req.options:
             opt = DecisionOption(o.name, o.description)
             for vname, vcfg in o.variables.items():
-                dt = DIST_MAP.get(vcfg.distribution, DistributionType.DETERMINISTIC)
+                dt = DISTRIBUTION_MAP.get(vcfg.distribution, DistributionType.DETERMINISTIC)
                 opt.add_variable(vname, dt, *vcfg.params)
             fw.add_option(opt)
 

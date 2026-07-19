@@ -9,6 +9,7 @@ from typing import Any, Dict, List, Optional
 import pandas as pd
 
 from python.core.models import Factor, Statistics
+from python.core.utils import resolve_winner
 
 logger = logging.getLogger(__name__)
 
@@ -123,12 +124,7 @@ def save_markdown_report(
     waterfall: Optional[Dict] = None,
     counterfactual: Optional[Dict] = None,
 ) -> str:
-    if not topsis_scores.empty:
-        bluf_winner = topsis_scores.index[0]
-        bluf_reason = "F-TOPSIS risk-adjusted distance to ideal"
-    else:
-        bluf_winner = max(mc_results.items(), key=lambda x: x[1].mean_score)[0]
-        bluf_reason = "Monte Carlo expected value"
+    bluf_winner, bluf_reason = resolve_winner(topsis_scores, mc_results)
 
     md = f"# Decision Analysis Report\n\n"
     md += f"**Date:** {datetime.now().strftime('%Y-%m-%d %H:%M')}\n"
@@ -140,13 +136,13 @@ def save_markdown_report(
     md += f"![Factor Importance](factor_importance_{timestamp}.png)\n\n"
     md += f"![Robustness Audit](robustness_audit_{timestamp}.png)\n\n"
 
-    md += "## 1. Resumen Ejecutivo\n\n"
+    md += "## 1. Executive Summary\n\n"
     mc_winner = max(mc_results.values(), key=lambda x: x.mean_score).option_name
-    md += f"> **Estrategia Recomendada:** Existe un empate técnico de alto nivel. **{bluf_winner}** es la opción más equilibrada (F-TOPSIS), ideal para minimizar riesgos en todos los frentes. Sin embargo, **{mc_winner}** ofrece el mayor beneficio económico directo (Monte Carlo).\n\n"
-    md += f"**Análisis de Situación:** {bluf_reason}. "
+    md += f"> **Recommended Strategy:** **{bluf_winner}** is the most balanced option ({bluf_reason}), ideal for minimizing risk across all fronts. However, **{mc_winner}** offers the highest direct expected value (Monte Carlo).\n\n"
+    md += f"**Situation Analysis:** {bluf_reason}. "
     robustness_val = sensitivity.get('robustness_score', 0) * 100
     if robustness_val < 30:
-        md += "⚠️ **Alerta de Sensibilidad:** La decisión actual es volátil. Un cambio menor en tus prioridades podría inclinar la balanza hacia otro banco."
+        md += "Warning: **Low Robustness:** The current decision is volatile. A minor change in priorities could tip the balance toward another option."
     md += "\n\n"
 
     md += "### 1.1 Algorithm Consensus\n"
@@ -185,9 +181,9 @@ def save_markdown_report(
             md += f"  - {loser} (Dominated by {winner})\n"
 
     if mode in ("standard", "advanced") and sensitivity:
-        md += "\n### 1.4 Diagnóstico de Estabilidad\n"
-        md += f"- **Consistencia de Prioridades:** {sensitivity.get('robustness_score', 0) * 100:.0f}%\n"
-        md += "  *(Indica qué tan estable es el ganador si tus pesos variaran un 20%)*\n"
+        md += "\n### 1.4 Stability Diagnosis\n"
+        md += f"- **Priority Consistency:** {sensitivity.get('robustness_score', 0) * 100:.0f}%\n"
+        md += "  *(How stable the winner is if your weights vary by 20%)*\n"
         weight_changes = sensitivity.get("weight_changes", [])
         score_changes = sensitivity.get("score_changes", [])
         if weight_changes:
@@ -211,7 +207,7 @@ def save_markdown_report(
                 md += f"| {opt} | {score:.2f} | {stability*100:.1f}% |\n"
         
         if future.get("info_theory"):
-            md += "\n### 1.5 Information Theory (Non-linear Importance)\n"
+            md += "\n### 1.6 Information Theory (Non-linear Importance)\n"
             for opt_name, mi_data in future["info_theory"].items():
                 md += f"- **{opt_name}:**\n"
                 sorted_mi = sorted(mi_data.items(), key=lambda x: x[1], reverse=True)
@@ -219,7 +215,7 @@ def save_markdown_report(
                     md += f"  - {fn}: {val*100:.1f}%\n"
 
     if mode == "advanced" and future:
-        md += "\n### 1.5 Advanced Predictive Insights\n"
+        md += "\n### 1.7 Advanced Predictive Insights\n"
         bayesian_leader = max(future.get("bayesian_probs", {}), key=future.get("bayesian_probs", {}).get, default=None)
         if bayesian_leader:
             md += f"- **Bayesian Highest Probability:** {bayesian_leader} ({future['bayesian_probs'][bayesian_leader] * 100:.1f}% confidence)\n"
@@ -337,12 +333,7 @@ def save_html_report(
             algo_comp, decision_matrix, factors,
         )
 
-    if not topsis_scores.empty:
-        bluf_winner = topsis_scores.index[0]
-        bluf_reason = "F-TOPSIS risk-adjusted distance"
-    else:
-        bluf_winner = max(mc_results.items(), key=lambda x: x[1].mean_score)[0]
-        bluf_reason = "MC Expected Value"
+    bluf_winner, bluf_reason = resolve_winner(topsis_scores, mc_results)
 
     best_mc = max(mc_results.items(), key=lambda x: x[1].mean_score)[0]
     robust_raw = sensitivity.get('robustness_score', 0) * 100 if sensitivity else 0
@@ -356,10 +347,10 @@ def save_html_report(
         mc_data.append({"name": name, "mean": stats.mean_score, "pct": pct})
 
     kpi_cards = [
-        {"title": "Recomendación Balanceada", "value": bluf_winner, "sub": "Ganador por equilibrio total (F-TOPSIS)", "class": "success"},
-        {"title": "Máximo Valor Esperado", "value": best_mc, "sub": "Mejor promedio matemático (Monte Carlo)", "class": ""},
-        {"title": "Consistencia de Criterio", "value": robustness, "sub": "Estabilidad ante cambios de pesos", "class": "accent" if robust_raw > 50 else "warning"},
-        {"title": "Frontera de Eficiencia", "value": f"{pareto_count} Opciones", "sub": "Opciones técnicamente óptimas", "class": ""},
+        {"title": "Balanced Recommendation", "value": bluf_winner, "sub": "Winner by total balance (F-TOPSIS)", "class": "success"},
+        {"title": "Maximum Expected Value", "value": best_mc, "sub": "Best mathematical average (Monte Carlo)", "class": ""},
+        {"title": "Criterion Consistency", "value": robustness, "sub": "Stability under weight changes", "class": "accent" if robust_raw > 50 else "warning"},
+        {"title": "Efficiency Frontier", "value": f"{pareto_count} Options", "sub": "Technically optimal options", "class": ""},
     ]
 
     criteria = []
@@ -435,12 +426,7 @@ def print_report(
         print("-" * 70)
         print(explanation)
 
-    if not topsis_scores.empty:
-        bluf_winner = topsis_scores.index[0]
-        bluf_reason = "F-TOPSIS risk-adjusted distance"
-    else:
-        bluf_winner = max(mc_results.items(), key=lambda x: x[1].mean_score)[0]
-        bluf_reason = "Monte Carlo expected value"
+    bluf_winner, bluf_reason = resolve_winner(topsis_scores, mc_results)
 
     print("\n" + "=" * 70)
     print(f"DECISION ANALYSIS REPORT ({mode.upper()} TIER)")

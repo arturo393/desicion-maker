@@ -3,6 +3,10 @@ from __future__ import annotations
 from typing import Any, Dict, List
 
 from python.core.models import Factor, Statistics
+from python.core.utils import EPSILON
+
+# Maximum improvement percentage cap to avoid outliers
+MAX_IMPROVEMENT_PCT = 500.0
 
 
 class GeneticOptimizer:
@@ -91,7 +95,7 @@ class GeneticOptimizer:
         
         # Calculate improvement potential relative to current best
         # Ensure we don't divide by zero
-        denominator = max(abs(current_best), 1e-9)
+        denominator = max(abs(current_best), EPSILON)
         gap = theoretical_max_score - current_best
         improvement_pct = (gap / denominator) * 100 if gap > 0 else 0.0
 
@@ -101,5 +105,5 @@ class GeneticOptimizer:
             "theoretical_max_score": float(theoretical_max_score),
             "best_actual_score": float(current_best),
             "gap": float(gap),
-            "improvement_potential": float(min(improvement_pct, 500.0)), # Cap at 500% to avoid outliers
+            "improvement_potential": float(min(improvement_pct, MAX_IMPROVEMENT_PCT)), # Cap at MAX_IMPROVEMENT_PCT to avoid outliers
         }

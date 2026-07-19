@@ -7,8 +7,13 @@ from typing import Any, Dict, List, Tuple
 import numpy as np
 
 from python.core.models import Statistics
+from python.core.utils import EPSILON
 
 logger = logging.getLogger(__name__)
+
+# Risk aversion grid for efficient frontier
+RISK_AVERSION_GRID = [0.0, 0.5, 1.0, 2.0, 5.0, 10.0]
+RANDOM_SEARCH_ITERATIONS = 10000
 
 
 class PortfolioOptimizer:
@@ -109,10 +114,11 @@ class PortfolioOptimizer:
 
         # Efficient frontier (vary risk_aversion)
         frontier = []
-        for ra in [0.0, 0.5, 1.0, 2.0, 5.0, 10.0]:
+        for ra in RISK_AVERSION_GRID:
+            best_obj = -np.inf
+            best_w = None
+
             if n == 2:
-                best_obj = -np.inf
-                best_w = None
                 for w0 in grid:
                     if w0 < min_allocation * budget or w0 > max_allocation * budget:
                         continue
@@ -124,30 +130,35 @@ class PortfolioOptimizer:
                     if obj > best_obj:
                         best_obj = obj
                         best_w = w.copy()
-                if best_w is not None:
-                    frontier.append({
-                        "risk_aversion": ra,
-                        "return": float(np.dot(best_w, returns)),
-                        "risk": float(np.sqrt(best_w @ cov_matrix @ best_w)),
-                        "allocations": dict(zip(names, best_w.tolist())),
-                    })
             else:
+                rng = np.random.default_rng(42)
+                for _ in range(RANDOM_SEARCH_ITERATIONS):
+                    raw = rng.uniform(0, 1, n)
+                    w = raw / raw.sum() * budget
+                    w = np.clip(w, min_allocation * budget, max_allocation * budget)
+                    w = w / w.sum() * budget
+                    obj = np.dot(w, returns) - ra * (w @ cov_matrix @ w)
+                    if obj > best_obj:
+                        best_obj = obj
+                        best_w = w.copy()
+
+            if best_w is not None:
                 frontier.append({
                     "risk_aversion": ra,
-                    "return": port_return,
-                    "risk": port_risk,
-                    "allocations": dict(zip(names, best_weights.tolist())),
+                    "return": float(np.dot(best_w, returns)),
+                    "risk": float(np.sqrt(best_w @ cov_matrix @ best_w)),
+                    "allocations": dict(zip(names, best_w.tolist())),
                 })
 
         # Compute diversification ratio
         weighted_risk = np.sum(best_weights * np.sqrt(np.diag(cov_matrix)))
-        div_ratio = weighted_risk / (port_risk + 1e-9)
+        div_ratio = weighted_risk / (port_risk + EPSILON)
 
         return {
             "allocations": dict(zip(names, best_weights.tolist())),
             "expected_return": port_return,
             "portfolio_risk": port_risk,
-            "sharpe_ratio": port_return / (port_risk + 1e-9),
+            "sharpe_ratio": port_return / (port_risk + EPSILON),
             "diversification_ratio": float(div_ratio),
             "risk_aversion_used": risk_aversion,
             "budget": budget,

@@ -46,7 +46,7 @@ class PrometheeEngine:
         if pref_types is None:
             pref_types = ["usual"] * n_factors
         if pref_params is None:
-            pref_params = [{}] * n_factors
+            pref_params = [{} for _ in range(n_factors)]
 
         pref_funcs = [
             PrometheeEngine._build_pref_func(pt, **pp)

@@ -44,6 +44,14 @@ dependencies = [
 ai = [
     "google-genai>=1.33.0",
 ]
+api = [
+    "fastapi>=0.100.0",
+    "uvicorn>=0.23.0",
+]
+dashboard = [
+    "streamlit>=1.25.0",
+    "plotly>=5.15.0",
+]
 test = [
     "pytest>=7.4.0",
     "pytest-asyncio>=0.21.0",

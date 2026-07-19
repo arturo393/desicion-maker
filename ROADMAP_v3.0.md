@@ -23,7 +23,7 @@
 - **Web Dashboard** — Streamlit interactive frontend
 
 ### CLI
-- Typer-based `decision-maker` CLI with `run`, `what-if`, `simulate` commands
+- Typer-based `decision-maker` CLI with `run` (with `--what-if` flag) and `list-distributions` commands
 
 ### Quality
 - **322 tests passing** across all engines

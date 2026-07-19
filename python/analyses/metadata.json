@@ -89,7 +89,7 @@
     "archived_analyses": 1,
     "completed_analyses": 1,
     "last_updated": "2026-01-03",
-    "framework_version": "2.0"
+    "framework_version": "3.0.0"
   },
   "status_definitions": {
     "active": "Análisis en uso regular, puede ser actualizado frecuentemente",

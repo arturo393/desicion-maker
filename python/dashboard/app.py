@@ -60,7 +60,6 @@ def _render_new_analysis():
             mode = st.selectbox("Mode", ["express", "standard", "advanced"])
         with col2:
             sims = st.number_input("Simulations", 100, 100000, 10000, step=1000)
-            budget = st.number_input("Budget/Weight Total", 0.0, 100.0, 1.0)
 
         st.subheader("Factors")
         n_factors = st.number_input("Number of factors", 1, 10, 3, key="nf")
@@ -114,12 +113,7 @@ def _execute_analysis(
     import asyncio
     from python.core.models import DecisionOption, DistributionType, Factor
     from python.core.orchestrator import UnifiedDecisionFramework
-
-    DIST_MAP = {
-        "deterministic": DistributionType.DETERMINISTIC,
-        "normal": DistributionType.NORMAL,
-        "uniform": DistributionType.UNIFORM,
-    }
+    from python.core.utils import DISTRIBUTION_MAP
 
     fw = UnifiedDecisionFramework()
     fw.mc_engine.num_simulations = sims
@@ -128,11 +122,15 @@ def _execute_analysis(
     for o in options:
         opt = DecisionOption(o["name"], "")
         for vname, vcfg in o["variables"].items():
-            dt = DIST_MAP.get(vcfg["distribution"], DistributionType.DETERMINISTIC)
+            dt = DISTRIBUTION_MAP.get(vcfg["distribution"], DistributionType.DETERMINISTIC)
             opt.add_variable(vname, dt, *vcfg["params"])
         fw.add_option(opt)
 
-    result = asyncio.run(fw.run_analysis(mode=mode))
+    loop = asyncio.new_event_loop()
+    try:
+        result = loop.run_until_complete(fw.run_analysis(mode=mode))
+    finally:
+        loop.close()
 
     # Save to registry
     from python.core.registry import DecisionRegistry
@@ -173,7 +171,8 @@ def _execute_analysis(
 
 def _simplify_result(result: Dict[str, Any]) -> Dict[str, Any]:
     """Remove large arrays for JSON storage."""
-    simple = dict(result)
+    from copy import deepcopy
+    simple = deepcopy(result)
     mc = simple.get("mc_results", {})
     if mc:
         for n, s in mc.items():
@@ -236,7 +235,7 @@ def _render_about():
 
     st.header("About")
     st.markdown("""
-    **Decision Maker Framework** v1.0
+    **Decision Maker Framework** v3.0
 
     Multi-Criteria Decision Intelligence Framework with:
     - Monte Carlo simulation

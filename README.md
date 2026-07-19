@@ -13,8 +13,9 @@ uv run python my_decision.py
 Or use the CLI:
 
 ```bash
-uv run decision-maker run config.yaml
-uv run decision-maker what-if
+uv run decision-maker run --config config.yaml
+uv run decision-maker run --config config.yaml --what-if   # interactive REPL after analysis
+uv run decision-maker list-distributions
 ```
 
 ## The Engines
@@ -61,12 +62,12 @@ uv run decision-maker what-if
 uv run decision-maker --help
 ```
 
-Commands: `run` (from YAML config), `what-if` (interactive REPL), `simulate` (parameter sweeps).
+Commands: `run` (from YAML config, with `--what-if` for interactive REPL), `list-distributions` (show available distributions).
 
 ## Documentation
 
-- [Index](docs/index.md) — overview and layout
-- [Architecture](docs/architecture.md) — building blocks, runtime flow
+- [Index](docs/INDEX.md) — overview and layout
+- [Architecture](docs/ARCHITECTURE.md) — building blocks, runtime flow
 - [Guide](docs/guide.md) — how to model a decision step by step
 - [Changelog](CHANGELOG.md) — version history
 - [Roadmap](ROADMAP_v3.0.md) — planned features

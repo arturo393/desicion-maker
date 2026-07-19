@@ -21,10 +21,9 @@ All notable changes to this project will be documented in this file.
 - **Web Dashboard** (`python/dashboard/app.py`) — Interactive frontend for running analyses and visualizing results.
 
 ### 🖥️ CLI Overhaul
-- **`decision-maker` CLI** — Typer-based entry point with subcommands for running configs, simulation, and what-if sessions.
-- **`run` command** — Execute decision configs from YAML/JSON files.
-- **`what-if` command** — Interactive exploratory session with live score recomputation.
-- **`simulate` command** — Monte Carlo parameter sweeps from the terminal.
+- **`decision-maker` CLI** — Typer-based entry point with subcommands for running configs and distribution listing.
+- **`run` command** — Execute decision configs from YAML/JSON files, with `--what-if` flag for interactive REPL mode.
+- **`list-distributions` command** — Show all available probability distributions and their parameters.
 
 ### ⚙️ Core Improvements
 - Removed legacy `unified_decision_framework.py` — logic fully migrated into `orchestrator.py`.

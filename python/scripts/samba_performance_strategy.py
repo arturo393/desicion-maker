@@ -1,17 +1,26 @@
 #!/usr/bin/env python3
 """
-ANALISIS: Estrategia para resolver lentitud Samba en servidor 192.168.60.200
-Contexto: Servidor Samba (dataserver) con 24+ usuarios concurrentes,
-load average ~67 en CPU 4 cores, backup rsync consumiendo I/O.
-Usando el framework de decisiones con 13 metodologias
+ANALYSIS: Strategy for Samba slowness on server 192.168.60.200
+Context: Samba server (dataserver) with 24+ concurrent users,
+load average ~67 on CPU 4 cores, backup rsync consuming I/O.
+Uses the decision framework with 13+ methodologies.
+
+NOTE: This script uses a legacy API (CareerOption, DecisionAnalysisEngine)
+that no longer exists. It needs to be rewritten to use UnifiedDecisionFramework.
 """
 
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).parent.parent / "core"))
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from deep_research_decision_agent import CareerOption, DecisionAnalysisEngine
+try:
+    from python.core.models import DecisionOption, DistributionType, Factor
+    from python.core.orchestrator import UnifiedDecisionFramework
+except ImportError:
+    print("ERROR: Cannot import decision framework. Run from project root.")
+    sys.exit(1)
+
 import asyncio
 import os
 from dotenv import load_dotenv

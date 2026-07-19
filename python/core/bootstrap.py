@@ -5,6 +5,11 @@ from typing import Any, Dict, List, Tuple
 import numpy as np
 import pandas as pd
 
+from python.core.topsis import TOPSISEngine
+
+# Noise scaling factor for bootstrap perturbation
+BOOTSTRAP_NOISE_SCALE = 0.1
+
 
 class BootstrapRanking:
     @staticmethod
@@ -25,7 +30,6 @@ class BootstrapRanking:
         n_opts = len(opt_names)
         factor_names = list(list(decision_matrix_fuzzy.values())[0].keys())
 
-        from python.core.topsis import TOPSISEngine
         engine = TOPSISEngine()
 
         rank_matrix = np.zeros((n_bootstrap, n_opts), dtype=int)
@@ -36,7 +40,7 @@ class BootstrapRanking:
                 boot_data[opt] = {}
                 for f in factor_names:
                     a, b_val, c = decision_matrix_fuzzy[opt][f]
-                    noise = np.random.normal(0, (c - a) * 0.1, 3)
+                    noise = np.random.normal(0, (c - a) * BOOTSTRAP_NOISE_SCALE, 3)
                     boot_data[opt][f] = (
                         a + noise[0], b_val + noise[1], c + noise[2],
                     )

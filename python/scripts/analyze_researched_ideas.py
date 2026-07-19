@@ -8,7 +8,8 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.dirname(current_dir)
 sys.path.append(parent_dir)
 
-from core.unified_decision_framework import UnifiedDecisionFramework, DecisionOption, Factor, DistributionType
+from python.core.models import DecisionOption, Factor, DistributionType
+from python.core.orchestrator import UnifiedDecisionFramework
 
 async def main():
     print("🚀 Auto-Business Analysis with Antigravity & Google Cloud (Researched Data)")
