@@ -16,7 +16,6 @@ logger = logging.getLogger(__name__)
 def _compute_raw_bounds(mc_results: Dict[str, Statistics], factor_names: list) -> Dict[str, Dict[str, float]]:
     """Compute bounds using raw per-simulation data for accurate What-If ranges."""
     bounds: Dict[str, Dict[str, float]] = {fn: {"min": float("inf"), "max": float("-inf")} for fn in factor_names}
-    has_raw = False
     for stats in mc_results.values():
         if stats.raw_factor_data is not None:
             for fn in factor_names:
@@ -24,9 +23,7 @@ def _compute_raw_bounds(mc_results: Dict[str, Statistics], factor_names: list) -
                     data = stats.raw_factor_data[fn]
                     bounds[fn]["min"] = min(bounds[fn]["min"], float(np.min(data)))
                     bounds[fn]["max"] = max(bounds[fn]["max"], float(np.max(data)))
-                    has_raw = True
-    if not has_raw:
-        for stats in mc_results.values():
+        if stats.factor_stats is not None:
             for fn in factor_names:
                 if fn in stats.factor_stats:
                     val = stats.factor_stats[fn]["mean"]
@@ -360,35 +357,35 @@ class WhatIfEngine:
         self._show_final()
 
     def _suggest(self) -> List[str]:
-        """
-        Find factors whose weight change could realistically flip the winner.
-
-        Uses the counterfactual approach: for each runner-up, compute
-        the weight adjustment needed for each factor to close the gap.
-        """
         scores = self.recompute()
         if len(scores) < 2:
             return []
         winner_name, winner_score = scores[0]
+        winner_stats = self.original_mc_results.get(winner_name)
         suggestions = []
         for name, score in scores[1:]:
             gap = winner_score - score
             stats = self.original_mc_results.get(name)
-            if not stats:
+            if not stats or not winner_stats:
                 continue
             for f in self.current_factors:
-                if f.name not in stats.factor_stats:
+                if f.name not in stats.factor_stats or f.name not in winner_stats.factor_stats:
                     continue
                 raw_mean = stats.factor_stats[f.name]["mean"]
+                winner_raw = winner_stats.factor_stats[f.name]["mean"]
                 bounds = self._global_bounds.get(f.name, {"min": 0, "max": 1})
                 f_min, f_max = bounds["min"], bounds["max"]
                 if f_max > f_min:
                     norm_val = (raw_mean - f_min) / (f_max - f_min)
+                    winner_norm = (winner_raw - f_min) / (f_max - f_min)
                 else:
                     norm_val = 1.0
+                    winner_norm = 1.0
                 effective = norm_val if f.maximize else (1.0 - norm_val)
-                if effective > 0:
-                    extra = gap / effective
+                winner_effective = winner_norm if f.maximize else (1.0 - winner_norm)
+                delta_per_unit = winner_effective - effective
+                if delta_per_unit < 0 and effective > 0:
+                    extra = gap / (-delta_per_unit)
                     pct = (extra / f.weight) * 100 if f.weight > 0 else 0
                     if abs(pct) < 200:
                         suggestions.append(

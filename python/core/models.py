@@ -92,7 +92,7 @@ def _sample_gamma(params: List[float], size: int) -> np.ndarray:
 
 
 def _sample_poisson(params: List[float], size: int) -> np.ndarray:
-    return np.random.poisson(max(int(params[0]), 0), size).astype(float)
+    return np.random.poisson(max(params[0], 0.0), size).astype(float)
 
 
 SAMPLE_DISPATCH: Dict[DistributionType, Callable] = {

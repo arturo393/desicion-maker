@@ -215,7 +215,7 @@ class WeightDerivationEngine:
         # Convert win counts to weights via normalized score
         if max_wins > 0:
             weights = {
-                f: float(wins[f] / max_wins) if wins[f] > 0 else 0.01
+                f: float(wins[f] / max_wins)
                 for f in factors
             }
         else:
