@@ -1,0 +1,99 @@
+{
+  "fecha": "2026-03-18T15:23:11.620814",
+  "objetivo": "Seleccion analizador espectro mesa de pruebas sw-testbench",
+  "precio_referencia_usd": 1360,
+  "precio_objetivo_usd": 800,
+  "gemini_research": "¡Excelente! Vamos a analizar los analizadores de espectro de bajo costo que has enumerado y a buscar alternativas, enfocándonos en tus requerimientos para una mesa de pruebas de producción.\n\n**Consideraciones Previas para Precios 2025-2026:**\n\n*   **Inflación:** Es imposible predecir con exactitud los precios en 2025-2026.  Asumiremos una inflación moderada, pero podrían haber fluctuaciones mayores debido a factores económicos globales.  Por tanto, consideraremos los precios actuales (a mediados de octubre de 2024) como una base.  Esperar un ligero incremento en los precios.\n*   **Disponibilidad:** La disponibilidad de modelos específicos podría variar en 2025-2026.  Las empresas a veces descontinúan productos.\n*   **Descuentos por Volumen:** La mayoría de los fabricantes ofrecen descuentos significativos por volumen, especialmente para equipos de prueba.  Es crucial contactar directamente a los proveedores y distribuidores para obtener cotizaciones personalizadas.  Menciona tu caso de uso (producción automatizada) y la cantidad de unidades que planeas comprar.\n\n**Análisis de Analizadores de Espectro (Precio actual en octubre de 2024):**\n\n**1. Rigol DSA815 (NUEVO):**\n\n*   **Precio:** Aproximadamente $1,200 USD (puede variar dependiendo del distribuidor).  Es el límite superior de tu presupuesto, y es probable que lo supere en 2025-2026.\n*   **Rango de Frecuencias:** 9 kHz a 1.5 GHz\n*   **DANL:** -80 dBm/Hz (Típico) a 1 GHz. **NO cumple** con tu requerimiento de -90 dBm/Hz.\n*   **Precisión de Amplitud:** ±1.5 dB\n*   **RBW Mínimo:** 10 Hz\n*   **Protocolo de Control:** SCPI, VISA\n*   **Soporte de PyVISA/Python:** Sí, con librerías y ejemplos disponibles.\n*   **Zero Span:** Sí\n*   **Apto para Producción Automatizada:** Sí.  Es un modelo muy popular en la industria.\n*   **Comentarios:** El precio lo hace menos atractivo, y el DANL no cumple con tus requerimientos.\n\n**2. Rigol DSA832 (NUEVO):**\n\n*   **Precio:** Aproximadamente $2,300 USD.  Fuera de tu presupuesto.\n*   **Rango de Frecuencias:** 9 kHz a 3.2 GHz\n*   **DANL:** -100 dBm/Hz (Típico). **Cumple** con tu requerimiento.\n*   **Precisión de Amplitud:** ±1.5 dB\n*   **RBW Mínimo:** 10 Hz\n*   **Protocolo de Control:** SCPI, VISA\n*   **Soporte de PyVISA/Python:** Sí.\n*   **Zero Span:** Sí\n*   **Apto para Producción Automatizada:** Sí.\n*   **Comentarios:** Excelente equipo, pero supera ampliamente el presupuesto.\n\n**3. Rohde & Schwarz FPC1000 o FPC1500 (NUEVO):**\n\n*   **Precio FPC1000:**  Aproximadamente $1,200 - $1,600 USD (Dependiendo de la configuración, opciones añadidas).\n*   **Precio FPC1500:** Aproximadamente $2,500 - $3,000 USD (Dependiendo de la configuración, opciones añadidas). Fuera de tu presupuesto.\n*   **Rango de Frecuencias FPC1000:** 5 kHz a 1 GHz (base).  Se puede actualizar a 2 GHz o 3 GHz con licencias de software (opciones pagas).\n*   **Rango de Frecuencias FPC1500:** 5 kHz a 1 GHz (base).  Se puede actualizar a 2 GHz o 3 GHz con licencias de software (opciones pagas).\n*   **DANL FPC1000:** -107 dBm (Típico con preamplificador activado). **Cumple** con tu requerimiento.\n*   **DANL FPC1500:** -110 dBm (Típico con preamplificador activado). **Cumple** con tu requerimiento.\n*   **Precisión de Amplitud:** ±1 dB (Típico)\n*   **RBW Mínimo:** 1 Hz\n*   **Protocolo de Control:** SCPI, VISA\n*   **Soporte de PyVISA/Python:** Sí.\n*   **Zero Span:** Sí\n*   **Apto para Producción Automatizada:** Sí. R&S tiene excelente reputación en equipos de prueba.\n*   **Comentarios:** El FPC1000, en su configuración básica, podría entrar en tu presupuesto.  Si necesitas más ancho de banda, las licencias de actualización elevan el precio.  La precisión de amplitud y el DANL son muy buenos.\n\n**4. Siglent SSA3015X Plus (NUEVO):**\n\n*   **Precio:** Aproximadamente $1,400 - $1,600 USD.  Puede superar tu presupuesto.\n*   **Rango de Frecuencias:** 9 kHz a 1.5 GHz\n*   **DANL:** -105 dBm/Hz (Típico). **Cumple** con tu requerimiento.\n*   **Precisión de Amplitud:** ±1.5 dB\n*   **RBW Mínimo:** 1 Hz\n*   **Protocolo de Control:** SCPI, VISA\n*   **Soporte de PyVISA/Python:** Sí.\n*   **Zero Span:** Sí\n*   **Apto para Producción Automatizada:** Sí.  Siglent ha ganado mucha popularidad por su buena relación calidad/precio.\n*   **Comentarios:** El precio podría ser un problema.\n\n**5. Siglent SSA3021X Plus (NUEVO):**\n\n*   **Precio:** Aproximadamente $1,800 - $2,000 USD.  Fuera de tu presupuesto.\n*   **Rango de Frecuencias:** 9 kHz a 2.1 GHz\n*   **DANL:** -105 dBm/Hz (Típico). **Cumple** con tu requerimiento.\n*   **Precisión de Amplitud:** ±1.5 dB\n*   **RBW Mínimo:** 1 Hz\n*   **Protocolo de Control:** SCPI, VISA\n*   **Soporte de PyVISA/Python:** Sí.\n*   **Zero Span:** Sí\n*   **Apto para Producción Automatizada:** Sí.\n*   **Comentarios:** Excelente, pero excede el presupuesto.\n\n**6. BK Precision 2658 o similar (NUEVO):**\n\n*   **Precio:** Aproximadamente $2,000 - $2,500 USD.  Fuera de tu presupuesto.\n*   **Rango de Frecuencias:** 9 kHz a 3 GHz\n*   **DANL:** -100 dBm (Típico). **Cumple** con tu requerimiento.\n*   **Precisión de Amplitud:** ±1.5 dB\n*   **RBW Mínimo:** 1 Hz\n*   **Protocolo de Control:** SCPI, VISA\n*   **Soporte de PyVISA/Python:** Sí.\n*   **Zero Span:** Sí\n*   **Apto para Producción Automatizada:** Sí.\n*   **Comentarios:** Muy buen equipo, pero excede el presupuesto.\n\n**7. Owon HSA1016 o HSA1036 (NUEVO):**\n\n*   **Precio HSA1016:** Aproximadamente $600 - $800 USD.  **Cumple** con tu requerimiento de precio.\n*   **Precio HSA1036:** Aproximadamente $800 - $1,000 USD. **Cumple** con tu requerimiento de precio.\n*   **Rango de Frecuencias HSA1016:** 10 MHz a 1.6 GHz\n*   **Rango de Frecuencias HSA1036:** 10 MHz a 3.6 GHz\n*   **DANL HSA1016/HSA1036:** -120 dBm/Hz (Típico con preamplificador). **Cumple y supera** tu requerimiento.\n*   **Precisión de Amplitud:** ±1.5 dB (Típico)\n*   **RBW Mínimo:** 10 Hz\n*   **Protocolo de Control:** SCPI, VISA (depende del modelo exacto, verificar).  Podría requerir un adaptador USB a serial si solo tiene puerto serial.\n*   **Soporte de PyVISA/Python:** Depende del modelo.  Verificar si hay librerías disponibles.  Si usa SCPI standard, debería ser posible controlarlo con PyVISA.\n*   **Zero Span:** Sí\n*   **Apto para Producción Automatizada:** Sí, aunque requiere más investigación para confirmar la robustez de la API y la facilidad de integración con Python.\n*   **Comentarios:** Esta es una opción MUY atractiva por el precio y el excelente DANL. Sin embargo, *investiga a fondo el soporte de software y la facilidad de uso de la API con Python.* Lee reseñas y foros de usuarios para ver si hay problemas conocidos.\n\n**8. GW Instek GSP-818 o GSP-830 (NUEVO):**\n\n*   **Precio GSP-818:** Aproximadamente $1,300 - $1,500 USD.  Podría exceder el presupuesto.\n*   **Precio GSP-830:** Aproximadamente $1,700 - $2,000 USD. Fuera del presupuesto.\n*   **Rango de Frecuencias GSP-818:** 1.8 GHz\n*   **Rango de Frecuencias GSP-830:** 3.0 GHz\n*   **DANL GSP-818/830:** -132 dBm (típico con preamplificador). **Cumple y supera** ampliamente tu requerimiento.\n*   **Precisión de Amplitud:** ±1.5 dB\n*   **RBW Mínimo:** 300 Hz\n*   **Protocolo de Control:** SCPI, VISA\n*   **Soporte de PyVISA/Python:** Sí.\n*   **Zero Span:** Sí\n*   **Apto para Producción Automatizada:** Sí.\n*   **Comentarios:** Muy buen DANL y soporte de software, pero el precio y el RBW mínimo podrían ser factores limitantes.\n\n**9. Anritsu MS2711E (NUEVO si disponible):**\n\n*   **Disponibilidad:** Es probable que este modelo esté descontinuado como producto nuevo. Anritsu se enfoca en analizadores de espectro portátiles de gama más alta.\n*   **Precio (Si se encontrara nuevo):** Probablemente estaría por encima de tu presupuesto.\n*   **Comentarios:** No lo consideraremos por su probable descontinuación.\n\n**10. Keysight N9320B (NUEVO):**\n\n*   **Precio:** Aproximadamente $4,000 - $5,000 USD (precio de lista).  Fuera de tu presupuesto.\n*   **Rango de Frecuencias:** 9 kHz a 3 GHz\n*   **DANL:** -122 dBm (Típico con preamplificador). **Cumple y supera** tu requerimiento.\n*   **Precisión de Amplitud:** ±1.5 dB\n*   **RBW Mínimo:** 10 Hz\n*   **Protocolo de Control:** SCPI, VISA\n*   **Soporte de PyVISA/Python:** Sí, excelente soporte.\n*   **Zero Span:** Sí\n*   **Apto para Producción Automatizada:** Sí.  Keysight es el estándar de oro en equipos de prueba, pero el precio es prohibitivo.\n*   **Comentarios:** Excelente equipo, pero inalcanzable para tu presupuesto.\n\n**11. Otras Opciones NUEVAS < $1,000 USD:**\n\nAquí es donde la investigación se vuelve más importante.  Busca en distribuidores como Digi-Key, Mouser, Newark/Element14 y Amazon.  Filtra por analizadores de espectro NUEVOS y establece un precio máximo de $1,000 USD.  Luego, revisa cuidadosamente las especificaciones.\n\n*   **Analizadores de Espectro USB:**  Algunos analizadores de espectro USB (que requieren una PC para la visualización) podrían entrar en tu presupuesto.  Ejemplos:\n    *   **Signal Hound BB60C/BB60A:** Aunque son principalmente analizadores en tiempo real (RTSA), pueden funcionar como analizadores de espectro convencionales. El precio del BB60C es superior a $2,000, pero puede que encuentres el BB60A en el mercado por debajo de los $1,500.\n    *   **Tektronix RSA306B:** Se situa por encima de los $3,000\n    *   **Aaronia Spectran V6:** Podrían tener opciones que se ajusten al precio.\n\n**Resumen y Recomendaciones:**\n\nBasándonos en el análisis, y teniendo en cuenta tus requisitos de precio, DANL, precisión, control por software y uso en producción, aquí están las mejores opciones (en orden de prioridad), considerando el precio actual (Octubre de 2024):\n\n1.  **Owon HSA1016 o HSA1036:** **Mayor potencial por precio/rendimiento.** El DANL es excelente, y el precio es muy atractivo. **PERO, INVESTIGA A FONDO EL SOPORTE DE SOFTWARE Y LA API PARA PYTHON.** Si la API es robusta y fácil de usar, esta es la mejor opción. Consigue un modelo de demostración para probarla. Verifica si hay foro/grupo de usuarios para ver sus experiencias.\n2.  **Rohde & Schwarz FPC1000 (Configuración Básica):** Si puedes conseguirlo dentro de tu presupuesto (alrededor de $1,200 - $1,600 USD) y no necesitas las licencias de actualización de frecuencia inmediatamente, es una excelente opción. R&S es una marca de confianza.\n3.  **Siglent SSA3015X Plus:** Si el precio está un poco por encima de tu presupuesto ($1,400-$1,600 USD), podría valer la pena considerarlo.  Tiene un buen DANL y un soporte de software decente.\n4.  **Rigol DSA815:** Última opción. El DANL no cumple tus requerimientos.\n\n**Pasos a Seguir:**\n\n1.  **Define un Presupuesto Firme:** Decide cuánto estás dispuesto a gastar por unidad.\n2.  **Contacta a Distribuidores:** Obtén cotizaciones de múltiples distribuidores para cada modelo.  Menciona la cantidad de unidades que necesitas y tu caso de uso (producción automatizada).  Pregunta por descuentos por volumen.\n3.  **Solicita Demostraciones:** Si es posible, pide unidades de demostración (o solicita acceso remoto) para probar el control por software con Python y PyVISA.  Valida que la API funcione bien y sea fácil de integrar con tu suite de pruebas automatizadas.\n4.  **Lee Reseñas y Foros:** Busca opiniones de otros usuarios sobre la facilidad de uso, la fiabilidad y el soporte técnico de cada modelo.\n5.  **Valida las Especificaciones:** Asegúrate de que el analizador de espectro que elijas cumpla con todos tus requisitos técnicos (rango de frecuencia, DANL, precisión de amplitud, etc.) en las condiciones de operación de tu mesa de pruebas.\n\n**Consideraciones Adicionales:**\n\n*   **Calibración:** Planifica la calibración periódica de los analizadores de espectro. La precisión puede degradarse con el tiempo.\n*   **Accesorios:** Considera la necesidad de atenuadores, cables, adaptadores y otros accesorios.\n*   **Software:** Asegúrate de que el software (librerías de Python, ejemplos de código) esté bien documentado y sea fácil de usar.\n\nEspero que este análisis detallado te sea útil. ¡Mucha suerte con tu búsqueda!\n",
+  "topsis_ranking": [
+    {
+      "name": "Signal Hound SA44B",
+      "precio": 1295,
+      "precision_db": 0.25,
+      "danl_dbm": 151,
+      "rbw_min_hz": 1,
+      "integracion_py": 9,
+      "zero_span": 1,
+      "freq_range_ghz": 4.4,
+      "topsis_score": 0.9114,
+      "rank": 1
+    },
+    {
+      "name": "Siglent SSA3021X (no Plus)",
+      "precio": 1595,
+      "precision_db": 0.7,
+      "danl_dbm": 161,
+      "rbw_min_hz": 1,
+      "integracion_py": 9,
+      "zero_span": 1,
+      "freq_range_ghz": 2.1,
+      "topsis_score": 0.8319,
+      "rank": 2
+    },
+    {
+      "name": "Siglent SSA3015X Plus",
+      "precio": 1360,
+      "precision_db": 1.2,
+      "danl_dbm": 156,
+      "rbw_min_hz": 1,
+      "integracion_py": 9,
+      "zero_span": 1,
+      "freq_range_ghz": 1.5,
+      "topsis_score": 0.8223,
+      "rank": 3
+    },
+    {
+      "name": "Rigol DSA815",
+      "precio": 1319,
+      "precision_db": 1.5,
+      "danl_dbm": 155,
+      "rbw_min_hz": 10,
+      "integracion_py": 8,
+      "zero_span": 1,
+      "freq_range_ghz": 1.5,
+      "topsis_score": 0.7854,
+      "rank": 4
+    },
+    {
+      "name": "Rigol DSA832E",
+      "precio": 1999,
+      "precision_db": 1.5,
+      "danl_dbm": 158,
+      "rbw_min_hz": 10,
+      "integracion_py": 8,
+      "zero_span": 1,
+      "freq_range_ghz": 3.2,
+      "topsis_score": 0.6875,
+      "rank": 5
+    },
+    {
+      "name": "tinySA Ultra",
+      "precio": 120,
+      "precision_db": 2.0,
+      "danl_dbm": 95,
+      "rbw_min_hz": 200,
+      "integracion_py": 5,
+      "zero_span": 0,
+      "freq_range_ghz": 0.8,
+      "topsis_score": 0.6605,
+      "rank": 6
+    },
+    {
+      "name": "Signal Hound SA124B",
+      "precio": 2850,
+      "precision_db": 0.5,
+      "danl_dbm": 153,
+      "rbw_min_hz": 1,
+      "integracion_py": 9,
+      "zero_span": 1,
+      "freq_range_ghz": 12.4,
+      "topsis_score": 0.6234,
+      "rank": 7
+    }
+  ],
+  "aptos": [
+    "Signal Hound SA44B",
+    "Signal Hound SA124B",
+    "Siglent SSA3021X (no Plus)"
+  ],
+  "recomendacion": "Signal Hound SA44B"
+}

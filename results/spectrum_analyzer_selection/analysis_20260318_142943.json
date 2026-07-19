@@ -1,0 +1,113 @@
+{
+  "fecha": "2026-03-18T14:29:43.474273",
+  "objetivo": "Seleccion analizador espectro mesa de pruebas sw-testbench",
+  "precio_referencia_usd": 1360,
+  "precio_objetivo_usd": 800,
+  "gemini_research": "¡Excelente! Este es un proyecto bien definido. A continuación, te presento un análisis detallado de los analizadores de espectro que mencionaste, enfocándome en su idoneidad para tu mesa de pruebas de producción automatizada, y teniendo en cuenta que estamos mirando hacia el mercado de 2025-2026 (aunque los precios actuales son una buena base).  Es importante recordar que los precios de los equipos usados pueden variar significativamente dependiendo del estado, la ubicación y el vendedor.  Los precios de equipos nuevos, aunque listados, pueden cambiar con el tiempo.\n\n**Importante:** Para la evaluación de precios, estoy usando los precios actuales (Octubre 26, 2023) como referencia. En 2025-2026, los precios podrían ser diferentes debido a inflación, obsolescencia o disponibilidad.  En general, se espera que los equipos más antiguos se deprecien aún más.\n\n**Tabla Resumen Comparativa**\n\n| Analizador                               | Precio (USD, Aprox.) | Rango Frecuencia      | DANL (@1 GHz)           | Precisión Amplitud     | RBW Mínimo | Control  | PyVISA/Python | Zero Span | Automatización | Notas                                                                                                                                                                                                                                                              |\n|------------------------------------------|------------------------|-----------------------|-------------------------|------------------------|------------|----------|---------------|------------|---------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|\n| 1. Rigol DSA815                         | Nuevo: ~$1200 Usado: ~$700 | 9 kHz - 1.5 GHz       | -80 dBm/Hz (Pre-Amp Off) | ±1.5 dB                | 10 Hz      | SCPI/VISA | Sí            | Sí        | Sí            | Supera el presupuesto como nuevo.  Usado podría ser una buena opción si se encuentra en buenas condiciones.  DANL no tan bueno como otros, pero podría ser suficiente.                                                                                                           |\n| 2. Rigol DSA832                         | Nuevo: ~$2500 Usado: ~$1500| 9 kHz - 3.2 GHz       | -85 dBm/Hz (Pre-Amp Off) | ±1.5 dB                | 10 Hz      | SCPI/VISA | Sí            | Sí        | Sí            | Supera significativamente el presupuesto. No recomendable.                                                                                                                                                                                                       |\n| 3. R&S FPC1000/FPC1500                  | FPC1000 Nuevo: ~$1200 FPC1500 Nuevo: ~$2000 Usado: ~$900+ (FPC1500) | 5 kHz - 1 GHz/1.5 GHz | -98 dBm/Hz (Pre-Amp On) | ±1 dB                  | 1 Hz       | SCPI/VISA | Sí            | Sí        | Sí            | Excelente opción si se encuentra un FPC1000 o FPC1500 usado dentro del presupuesto.  Excelente DANL y precisión.  Requiere licencia opcional para ciertos features.                                                                                         |\n| 4. Anritsu MS2711E                       | Usado: ~$500 - $1000    | 100 kHz - 3 GHz       | -100 dBm/Hz             | ±2 dB                  | 300 Hz     | SCPI/VISA | Sí            | Sí        | Sí            | Opción atractiva por precio, pero la precisión de amplitud es marginal.  Puede requerir mantenimiento debido a su antigüedad.  Verificar el estado cuidadosamente.                                                                                                |\n| 5. Keysight N9320B                       | Nuevo: ~$4000 Usado: ~$2000| 9 kHz - 3 GHz         | -115 dBm/Hz            | ±1.5 dB                | 10 Hz      | SCPI/VISA | Sí            | Sí        | Sí            | Demasiado caro para el presupuesto.  Excelente rendimiento, pero no viable.                                                                                                                                                                               |\n| 6. HP/Agilent E4401B/E4402B              | Usado: ~$300 - $800     | 9 kHz - 1.5 GHz/3 GHz | -108 dBm/Hz            | ±1.5 dB                | 10 Hz      | SCPI/VISA | Sí            | Sí        | Sí            | Excelente opción usada dentro del presupuesto.  DANL muy bueno.  Considerar posible necesidad de mantenimiento por antigüedad.  Verificar opciones de calibración y software.                                                                      |\n| 7. BK Precision 2658                      | Nuevo: ~$1200           | 9 kHz - 3 GHz         | -105 dBm/Hz            | ±1.5 dB                | 300 Hz      | SCPI/VISA | Sí            | Sí        | Sí            | Supera el presupuesto nuevo.  Podría ser una opción usada si se encuentra a buen precio.                                                                                                                                                                     |\n| 8. Owon HSA1016/HSA1036                   | Nuevo: ~$600/$800      | 9 kHz - 1.6 GHz/3.6 GHz| -120 dBm/Hz             | ±1.5 dB                | 10 Hz       | SCPI        | Limitado       | Sí        | Sí            | Opción económica. El modelo HSA1036 llega justo al límite superior del presupuesto.  DANL excelente. El soporte de Python es limitado, investigar a fondo.                                                                                                   |\n| 9. Siglent SSA3021X Plus                  | Nuevo: ~$1300 Usado: ~$800| 9 kHz - 2.1 GHz       | -102 dBm/Hz            | ±1.5 dB                | 1 Hz       | SCPI/VISA | Sí            | Sí        | Sí            | Supera ligeramente el presupuesto como nuevo. Usado podría ser una opción, pero el foco de este modelo es con pantalla. La versión sin pantalla (si existe) sería mejor para automatización.                                                                       |\n| 10. GW Instek GSP-818/GSP-830             | Nuevo: ~$1500/$2500      | 1.8 GHz/3 GHz          | -100 dBm/Hz            | ±1.5 dB                | 300 Hz     | SCPI/VISA | Sí            | Sí        | Sí            | Superan el presupuesto.                                                                                                                                                                                                                                       |\n| 11. TinySA Ultra                         | Nuevo: ~$650      | DC - 5.3 GHz          | -102 dBm/Hz            | ±2 dB                 | Varios      | serial      | Limitado         | No        | Sí            | Es una opción, pero la precisión de amplitud es marginal.  Soporte de Python es limitado, investigar a fondo. No tiene Zero Span.                                                                                                                                 |\n\n**Análisis Detallado y Recomendaciones:**\n\n*   **Rigol DSA815:** Si puedes encontrar uno usado en buenas condiciones y dentro de tu presupuesto, podría ser viable. El DANL es el punto más débil, pero podría ser suficiente para tus señales de -20 a +10 dBm. Asegúrate de que venga con las opciones de software necesarias para el control remoto.\n*   **Rigol DSA832:** No es una buena opción debido a su precio significativamente superior.\n*   **Rohde & Schwarz FPC1000/FPC1500:** La mejor opción si encuentras un FPC1000 o un FPC1500 usado a buen precio.  Ofrece una excelente combinación de rendimiento (DANL, precisión) y control por software.  R&S es conocido por la calidad de sus equipos.  Verifica las licencias de software necesarias.\n*   **Anritsu MS2711E:** Muy atractivo por su precio usado. Sin embargo, la precisión de amplitud es marginal y podría ser un factor limitante. Además, al ser un equipo más antiguo, es crucial verificar su estado y la disponibilidad de calibración.\n*   **Keysight N9320B:** Fuera de presupuesto. No recomendable.\n*   **HP/Agilent E4401B/E4402B:** Una excelente opción usada, especialmente si encuentras un E4402B (rango de frecuencia más amplio). El DANL es bueno, y el precio suele ser atractivo. Sin embargo, al igual que con el Anritsu, es fundamental verificar su estado y la disponibilidad de calibración. Busca opciones con el preamplificador instalado (opción 1DP).\n*   **BK Precision 2658:** Supera el presupuesto. Considera si lo encuentras usado a un precio atractivo.\n*   **Owon HSA1016/HSA1036:** La opción más económica como nuevo. El DANL es excelente y el precio es bastante bueno, pero investiga a fondo el soporte de Python. Si el soporte es limitado, podría requerir un esfuerzo considerable para integrarlo en tu suite de pruebas automatizada.\n*   **Siglent SSA3021X Plus:** Supera ligeramente el presupuesto como nuevo, aunque puede que encuentres unidades de segunda mano que entren dentro del rango.  El foco de este equipo es el uso con pantalla, por lo que si encuentras un modelo sin pantalla por menos precio sería una mejor alternativa.\n*   **GW Instek GSP-818/GSP-830:** Superan el presupuesto. No se consideran.\n*   **TinySA Ultra:** A pesar de su precio bajo, las especificaciones de precisión y el soporte de software limitan su aplicabilidad para tu caso de uso. No tiene zero span.\n\n**Otras Opciones a Considerar (< $500 USD):**\n\n*   **Buscar modelos descontinuados de fabricantes reconocidos (Keysight, Agilent, R&S):** A veces, se pueden encontrar ofertas interesantes en equipos antiguos pero funcionales.\n*   **Analizadores de espectro USB:**  Algunos analizadores de espectro USB podrían entrar en este rango de precios, pero es crucial verificar sus especificaciones (especialmente DANL y precisión) y el soporte de software.  Ejemplos incluyen:\n    *   **Signal Hound BB60C:** Podría encontrarse usado.\n    *   **Aaronia Spectran V6 X:**  Aunque el modelo completo supera el presupuesto, un modelo base usado podría ser una opción.\n\n**Mejores Relaciones Calidad/Precio para tu Caso de Uso Específico:**\n\nConsiderando tus requisitos y presupuesto, estas son mis recomendaciones en orden de preferencia:\n\n1.  **Rohde & Schwarz FPC1000/FPC1500 (usado):** Si encuentras uno dentro del presupuesto, es la mejor opción en términos de rendimiento y fiabilidad.\n\n2.  **HP/Agilent E4401B/E4402B (usado):** Una excelente alternativa si no encuentras un R&S. Asegúrate de verificar su estado y las opciones de calibración.\n\n3.  **Owon HSA1016/HSA1036 (nuevo):** Si el soporte de Python es suficiente para tus necesidades, es la opción más económica como nuevo.\n\n4.  **Anritsu MS2711E (usado):** Si el presupuesto es extremadamente limitado y puedes tolerar la precisión de amplitud marginal, podría ser una opción.\n\n5.  **Rigol DSA815 (usado):** Si no encuentras las opciones anteriores, esta puede ser una alternativa, verificando su estado y funcionalidad\n\n**Consideraciones Adicionales:**\n\n*   **Calibración:** Asegúrate de que el analizador de espectro esté calibrado. La calibración es crucial para garantizar la precisión de las mediciones. Si es un equipo usado, pregunta por el historial de calibración y la fecha de la última calibración.\n*   **Software:** Descarga y prueba el software de control antes de comprar el analizador de espectro. Asegúrate de que sea compatible con tu entorno de programación Python y que ofrezca las funciones que necesitas (set\\_center\\_freq, set\\_span, get\\_level\\_from\\_marker).\n*   **Garantía:** Si compras un equipo nuevo, asegúrate de que tenga garantía. Si compras un equipo usado, pregunta sobre la política de devolución y la posibilidad de probar el equipo antes de comprarlo.\n*   **Actualizaciones de Firmware:** Verifica si hay actualizaciones de firmware disponibles para el analizador de espectro. Las actualizaciones de firmware pueden mejorar el rendimiento y corregir errores.\n*   **Accesorios:** Verifica si el analizador de espectro viene con los accesorios que necesitas, como cables, adaptadores y antenas.\n\n**Estrategia de Búsqueda:**\n\n*   **eBay:** Es un buen lugar para buscar equipos usados, pero ten cuidado y verifica la reputación del vendedor.\n*   **Test Equipment Depot:** Un distribuidor confiable de equipos de prueba nuevos y usados.\n*   **Used-Line:** Un mercado en línea para equipos de prueba usados.\n*   **Contacta directamente a distribuidores de equipos de prueba:** Pregunta por ofertas en modelos descontinuados o equipos reacondicionados.\n*   **Estate atento a ventas de liquidación de empresas:** A veces, las empresas que cierran o actualizan sus equipos venden sus analizadores de espectro a precios muy bajos.\n\n**En resumen, la clave está en encontrar un buen equilibrio entre rendimiento, precio y soporte de software. Dedica tiempo a investigar y comparar diferentes opciones antes de tomar una decisión.**\n\nEspero que este análisis te sea de gran utilidad. ¡Mucha suerte con tu proyecto!\n",
+  "topsis_ranking": [
+    {
+      "name": "HP/Agilent E4401B (usado)",
+      "precio": 400,
+      "precision_db": 1.0,
+      "danl_dbm": 152,
+      "rbw_min_hz": 300,
+      "integracion_py": 7,
+      "zero_span": 1,
+      "freq_range_ghz": 1.5,
+      "topsis_score": 0.8444,
+      "rank": 1
+    },
+    {
+      "name": "Keysight N9320B (usado)",
+      "precio": 600,
+      "precision_db": 1.0,
+      "danl_dbm": 152,
+      "rbw_min_hz": 100,
+      "integracion_py": 9,
+      "zero_span": 1,
+      "freq_range_ghz": 3.0,
+      "topsis_score": 0.794,
+      "rank": 2
+    },
+    {
+      "name": "Rigol DSA815 (sin TG)",
+      "precio": 780,
+      "precision_db": 0.7,
+      "danl_dbm": 161,
+      "rbw_min_hz": 100,
+      "integracion_py": 9,
+      "zero_span": 1,
+      "freq_range_ghz": 1.5,
+      "topsis_score": 0.7235,
+      "rank": 3
+    },
+    {
+      "name": "tinySA Ultra (ZS405/ZS406)",
+      "precio": 120,
+      "precision_db": 2.0,
+      "danl_dbm": 95,
+      "rbw_min_hz": 200,
+      "integracion_py": 6,
+      "zero_span": 0,
+      "freq_range_ghz": 0.8,
+      "topsis_score": 0.7067,
+      "rank": 4
+    },
+    {
+      "name": "Rigol DSA832 (sin TG)",
+      "precio": 1100,
+      "precision_db": 0.7,
+      "danl_dbm": 161,
+      "rbw_min_hz": 10,
+      "integracion_py": 9,
+      "zero_span": 1,
+      "freq_range_ghz": 3.2,
+      "topsis_score": 0.6025,
+      "rank": 5
+    },
+    {
+      "name": "Signal Hound SA44B",
+      "precio": 1295,
+      "precision_db": 0.25,
+      "danl_dbm": 151,
+      "rbw_min_hz": 100,
+      "integracion_py": 8,
+      "zero_span": 0,
+      "freq_range_ghz": 4.4,
+      "topsis_score": 0.5524,
+      "rank": 6
+    },
+    {
+      "name": "Siglent SSA3015X Plus",
+      "precio": 1360,
+      "precision_db": 1.2,
+      "danl_dbm": 156,
+      "rbw_min_hz": 1,
+      "integracion_py": 9,
+      "zero_span": 1,
+      "freq_range_ghz": 1.5,
+      "topsis_score": 0.4981,
+      "rank": 7
+    },
+    {
+      "name": "Spectrum Analyzer SDR (RTL-SDR + kalibr8)",
+      "precio": 50,
+      "precision_db": 5.0,
+      "danl_dbm": 70,
+      "rbw_min_hz": 1000,
+      "integracion_py": 5,
+      "zero_span": 0,
+      "freq_range_ghz": 1.7,
+      "topsis_score": 0.4897,
+      "rank": 8
+    }
+  ],
+  "aptos": [
+    "Signal Hound SA44B",
+    "Rigol DSA815 (sin TG)",
+    "Rigol DSA832 (sin TG)",
+    "Keysight N9320B (usado)",
+    "HP/Agilent E4401B (usado)"
+  ],
+  "recomendacion": "HP/Agilent E4401B (usado)"
+}
