@@ -156,25 +156,10 @@ class UnifiedDecisionFramework:
 
         _check_scale_mismatch(self.mc_engine.factors, mc_results)
 
-        data_fuzzy = {}
-        for name, stats in mc_results.items():
-            data_fuzzy[name] = {}
-            for factor_name, f_stats in stats.factor_stats.items():
-                data_fuzzy[name][factor_name] = (f_stats["p5"], f_stats["mean"], f_stats["p95"])
-
-        weights = []
-        max_bools = []
-        first_opt = list(data_fuzzy.values())[0]
-        factor_names = list(first_opt.keys())
-        for col in factor_names:
-            f = next((f for f in self.mc_engine.factors if f.name == col), None)
-            weights.append(f.weight if f else 1.0)
-            max_bools.append(f.maximize if f else True)
+        data_fuzzy, weights, max_bools, factor_names = self._build_analysis_inputs(mc_results)
 
         topsis_scores = self.topsis_engine.analyze(data_fuzzy, weights, max_bools) if data_fuzzy else pd.Series()
-
         pareto_results = self.pareto_engine.analyze(mc_results, self.mc_engine.factors)
-
         strategies = {}
         sensitivity_results = {}
         future_metrics: Dict[str, Any] = {}
@@ -209,41 +194,8 @@ class UnifiedDecisionFramework:
             }
 
         if mode == "advanced":
-            data_crisp = {}
-            for name, stats in mc_results.items():
-                data_crisp[name] = {f_name: stats.factor_stats[f_name]["mean"] for f_name in stats.factor_stats}
-            df_crisp = pd.DataFrame.from_dict(data_crisp, orient="index")
+            self._run_advanced_analysis(mc_results, factor_names, weights, max_bools, data_fuzzy, future_metrics)
 
-            promethee_scores = self.promethee_engine.analyze(
-                df_crisp, weights, max_bools,
-                pref_types=self.promethee_pref_types,
-                pref_params=self.promethee_pref_params,
-            )
-
-            rankings_advanced: Dict[str, pd.Series] = {
-                "TOPSIS": topsis_scores,
-                "MC": pd.Series({n: s.mean_score for n, s in mc_results.items()}).sort_values(ascending=False),
-            }
-            if not promethee_scores.empty:
-                rankings_advanced["PROMETHEE"] = promethee_scores
-            prom_uncert = future_metrics.get("promethee_uncertainty", pd.Series())
-            if not prom_uncert.empty:
-                rankings_advanced["PROMETHEE_uncertainty"] = prom_uncert
-            borda_advanced = self.aggregator.aggregate(rankings_advanced, method="borda")
-
-            bootstrap_ci = self.bootstrap_engine.confidence_intervals(
-                data_fuzzy, weights, max_bools, n_bootstrap=DEFAULT_BOOTSTRAP_ITERATIONS,
-            )
-
-            future_metrics.update({
-                "bayesian_probs": self.bayes_engine.analyze(mc_results),
-                "ideal_option": self.gen_engine.evolve_ideal(mc_results, self.mc_engine.factors),
-                "promethee_scores": promethee_scores,
-                "rank_aggregation": borda_advanced,
-                "bootstrap_ci": bootstrap_ci,
-            })
-
-        # Explainability analysis
         waterfall = self.explain_engine.factor_waterfall(mc_results, self.mc_engine.factors)
         counterfactual = self.explain_engine.counterfactual(mc_results, self.mc_engine.factors)
         explanation = self.explain_engine.narrative(
@@ -260,13 +212,16 @@ class UnifiedDecisionFramework:
             for opt, res in zip(self.mc_engine.options, results):
                 ai_reports[opt.name] = res
 
-        print_report(
-            mode, mc_results, topsis_scores, strategies,
-            pareto_results, sensitivity_results, future_metrics,
-            ai_reports, self.mc_engine.factors,
+        from python.core.reporting import print_report, save_report, ReportData
+
+        report_data = ReportData(
+            mode=mode, mc_results=mc_results, topsis_scores=topsis_scores,
+            strategies=strategies, pareto=pareto_results, sensitivity=sensitivity_results,
+            future=future_metrics, ai_reports=ai_reports, factors=self.mc_engine.factors,
             explanation=explanation,
         )
 
+        print_report(report_data)
         saved = save_report(
             mode, mc_results, topsis_scores, strategies,
             pareto_results, sensitivity_results, future_metrics,
@@ -276,11 +231,10 @@ class UnifiedDecisionFramework:
             counterfactual=counterfactual,
         )
 
-        # Generate plots in standard/advanced modes
         if mode in ("standard", "advanced"):
             timestamp = saved["timestamp"]
             plots = self.viz_engine.generate_all_plots(
-                mc_results, self.mc_engine.factors, future_metrics, 
+                mc_results, self.mc_engine.factors, future_metrics,
                 os.path.dirname(saved["json"]), timestamp
             )
             saved["plots"] = plots
@@ -301,3 +255,58 @@ class UnifiedDecisionFramework:
             "antifragile": antifragile,
             "factors": self.mc_engine.factors,
         }
+
+    def _build_analysis_inputs(self, mc_results):
+        """Build fuzzy decision matrix and extract weights/directions from factors."""
+        data_fuzzy = {}
+        for name, stats in mc_results.items():
+            data_fuzzy[name] = {}
+            for factor_name, f_stats in stats.factor_stats.items():
+                data_fuzzy[name][factor_name] = (f_stats["p5"], f_stats["mean"], f_stats["p95"])
+
+        weights = []
+        max_bools = []
+        first_opt = list(data_fuzzy.values())[0]
+        factor_names = list(first_opt.keys())
+        for col in factor_names:
+            f = next((f for f in self.mc_engine.factors if f.name == col), None)
+            weights.append(f.weight if f else 1.0)
+            max_bools.append(f.maximize if f else True)
+
+        return data_fuzzy, weights, max_bools, factor_names
+
+    def _run_advanced_analysis(self, mc_results, factor_names, weights, max_bools, data_fuzzy, future_metrics):
+        """Run advanced mode analyses: crisp PROMETHEE, bootstrap, Bayesian, genetic."""
+        data_crisp = {}
+        for name, stats in mc_results.items():
+            data_crisp[name] = {f_name: stats.factor_stats[f_name]["mean"] for f_name in stats.factor_stats}
+        df_crisp = pd.DataFrame.from_dict(data_crisp, orient="index")
+
+        promethee_scores = self.promethee_engine.analyze(
+            df_crisp, weights, max_bools,
+            pref_types=self.promethee_pref_types,
+            pref_params=self.promethee_pref_params,
+        )
+
+        rankings_advanced: Dict[str, pd.Series] = {
+            "TOPSIS": pd.Series(),
+            "MC": pd.Series({n: s.mean_score for n, s in mc_results.items()}).sort_values(ascending=False),
+        }
+        if not promethee_scores.empty:
+            rankings_advanced["PROMETHEE"] = promethee_scores
+        prom_uncert = future_metrics.get("promethee_uncertainty", pd.Series())
+        if not prom_uncert.empty:
+            rankings_advanced["PROMETHEE_uncertainty"] = prom_uncert
+        borda_advanced = self.aggregator.aggregate(rankings_advanced, method="borda")
+
+        bootstrap_ci = self.bootstrap_engine.confidence_intervals(
+            data_fuzzy, weights, max_bools, n_bootstrap=DEFAULT_BOOTSTRAP_ITERATIONS,
+        )
+
+        future_metrics.update({
+            "bayesian_probs": self.bayes_engine.analyze(mc_results),
+            "ideal_option": self.gen_engine.evolve_ideal(mc_results, self.mc_engine.factors),
+            "promethee_scores": promethee_scores,
+            "rank_aggregation": borda_advanced,
+            "bootstrap_ci": bootstrap_ci,
+        })

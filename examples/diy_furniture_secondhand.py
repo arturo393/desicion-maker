@@ -7,11 +7,14 @@ Usando Gemini API (gemini-pro gratuito) para buscar precios en Chile
 import os
 import sys
 
-os.environ['GOOGLE_API_KEY'] = 'AIzaSyDeuMrGQuNpopWlAsEABsGwv6gvs67REw8'
+GOOGLE_API_KEY = os.environ.get('GOOGLE_API_KEY', '')
+if not GOOGLE_API_KEY:
+    print("Error: Set GOOGLE_API_KEY environment variable")
+    sys.exit(1)
 
 try:
     import google.generativeai as genai
-    genai.configure(api_key=os.environ['GOOGLE_API_KEY'])
+    genai.configure(api_key=GOOGLE_API_KEY)
 except ImportError:
     print("Error: Instalar google-generativeai")
     print("Ejecutar: uv pip install google-generativeai")

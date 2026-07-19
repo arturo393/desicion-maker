@@ -7,7 +7,6 @@ __all__ = [
     "run_from_config",
 ]
 
-import asyncio
 import logging
 import os
 from typing import Any, Dict, Optional

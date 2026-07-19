@@ -27,6 +27,42 @@ class PortfolioOptimizer:
     """
 
     @staticmethod
+    def _grid_search_2d(returns, cov_matrix, budget, risk_aversion, min_allocation, max_allocation):
+        """Exhaustive grid search for 2-option portfolios."""
+        best_obj = -np.inf
+        best_w = None
+        grid = np.linspace(0, budget, 101)
+        for w0 in grid:
+            if w0 < min_allocation * budget or w0 > max_allocation * budget:
+                continue
+            w1 = budget - w0
+            if w1 < min_allocation * budget or w1 > max_allocation * budget:
+                continue
+            w = np.array([w0, w1])
+            obj = np.dot(w, returns) - risk_aversion * (w @ cov_matrix @ w)
+            if obj > best_obj:
+                best_obj = obj
+                best_w = w.copy()
+        return best_obj, best_w
+
+    @staticmethod
+    def _random_search(returns, cov_matrix, budget, risk_aversion, n, min_allocation, max_allocation, iterations=10000):
+        """Random search for 3+ option portfolios."""
+        best_obj = -np.inf
+        best_w = None
+        rng = np.random.default_rng(42)
+        for _ in range(iterations):
+            raw = rng.uniform(0, 1, n)
+            w = raw / raw.sum() * budget
+            w = np.clip(w, min_allocation * budget, max_allocation * budget)
+            w = w / w.sum() * budget
+            obj = np.dot(w, returns) - risk_aversion * (w @ cov_matrix @ w)
+            if obj > best_obj:
+                best_obj = obj
+                best_w = w.copy()
+        return best_obj, best_w
+
+    @staticmethod
     def optimize(
         mc_results: Dict[str, Statistics],
         budget: float = 1.0,
@@ -73,40 +109,15 @@ class PortfolioOptimizer:
             stds = np.array([mc_results[n].std_dev for n in names])
             cov_matrix = np.diag(stds ** 2)
 
-        # Simple grid search over allocations
-        best_return = -np.inf
-        best_weights = None
-
+        # Search for optimal allocation
         if n == 2:
-            grid = np.linspace(0, budget, 101)
-            for w0 in grid:
-                if w0 < min_allocation * budget or w0 > max_allocation * budget:
-                    continue
-                w1 = budget - w0
-                if w1 < min_allocation * budget or w1 > max_allocation * budget:
-                    continue
-                weights = np.array([w0, w1])
-                port_return = np.dot(weights, returns)
-                port_var = weights @ cov_matrix @ weights
-                objective = port_return - risk_aversion * port_var
-                if objective > best_return:
-                    best_return = objective
-                    best_weights = weights.copy()
+            best_obj, best_weights = PortfolioOptimizer._grid_search_2d(
+                returns, cov_matrix, budget, risk_aversion, min_allocation, max_allocation,
+            )
         else:
-            # For 3+ options, use a simple random search
-            rng = np.random.default_rng(42)
-            for _ in range(10000):
-                raw = rng.uniform(0, 1, n)
-                weights = raw / raw.sum() * budget
-                # Clip to bounds
-                weights = np.clip(weights, min_allocation * budget, max_allocation * budget)
-                weights = weights / weights.sum() * budget
-                port_return = np.dot(weights, returns)
-                port_var = weights @ cov_matrix @ weights
-                objective = port_return - risk_aversion * port_var
-                if objective > best_return:
-                    best_return = objective
-                    best_weights = weights.copy()
+            best_obj, best_weights = PortfolioOptimizer._random_search(
+                returns, cov_matrix, budget, risk_aversion, n, min_allocation, max_allocation,
+            )
 
         if best_weights is None:
             best_weights = np.full(n, budget / n)
@@ -117,32 +128,14 @@ class PortfolioOptimizer:
         # Efficient frontier (vary risk_aversion)
         frontier = []
         for ra in RISK_AVERSION_GRID:
-            best_obj = -np.inf
-            best_w = None
-
             if n == 2:
-                for w0 in grid:
-                    if w0 < min_allocation * budget or w0 > max_allocation * budget:
-                        continue
-                    w1 = budget - w0
-                    if w1 < min_allocation * budget or w1 > max_allocation * budget:
-                        continue
-                    w = np.array([w0, w1])
-                    obj = np.dot(w, returns) - ra * (w @ cov_matrix @ w)
-                    if obj > best_obj:
-                        best_obj = obj
-                        best_w = w.copy()
+                _, best_w = PortfolioOptimizer._grid_search_2d(
+                    returns, cov_matrix, budget, ra, min_allocation, max_allocation,
+                )
             else:
-                rng = np.random.default_rng(42)
-                for _ in range(RANDOM_SEARCH_ITERATIONS):
-                    raw = rng.uniform(0, 1, n)
-                    w = raw / raw.sum() * budget
-                    w = np.clip(w, min_allocation * budget, max_allocation * budget)
-                    w = w / w.sum() * budget
-                    obj = np.dot(w, returns) - ra * (w @ cov_matrix @ w)
-                    if obj > best_obj:
-                        best_obj = obj
-                        best_w = w.copy()
+                _, best_w = PortfolioOptimizer._random_search(
+                    returns, cov_matrix, budget, ra, n, min_allocation, max_allocation,
+                )
 
             if best_w is not None:
                 frontier.append({
