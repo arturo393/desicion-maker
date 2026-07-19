@@ -42,7 +42,7 @@ def build_framework_from_config(config: Dict[str, Any]) -> UnifiedDecisionFramew
         corr_matrix = np.full((n, n), off_diag)
         np.fill_diagonal(corr_matrix, 1.0)
 
-    pref_types = [decision.promethee_pref_type] if decision.promethee_pref_type else None
+    pref_types = [decision.promethee_pref_type] * len(decision.factors) if decision.promethee_pref_type else None
 
     framework = UnifiedDecisionFramework(
         correlation_matrix=corr_matrix,

@@ -40,8 +40,12 @@ class RankAggregator:
                 wins_a = 0
                 wins_b = 0
                 for method_name, series in rankings.items():
-                    pos_a = series.index.get_loc(a) if a in series.index else len(series)
-                    pos_b = series.index.get_loc(b) if b in series.index else len(series)
+                    pos_a = series.index.get_indexer([a])[0]
+                    if pos_a < 0:
+                        pos_a = len(series)
+                    pos_b = series.index.get_indexer([b])[0]
+                    if pos_b < 0:
+                        pos_b = len(series)
                     if pos_a < pos_b:
                         wins_a += 1
                     elif pos_b < pos_a:

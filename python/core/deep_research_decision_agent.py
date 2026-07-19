@@ -102,12 +102,14 @@ class DecisionAnalysisEngine:
         return dict(zip(alternatives, scores))
 
 
+from python.core.gemini_agent import GeminiDeepResearchAgent as _GeminiAgent
+
+
 class GeminiDeepResearchAgent:
     """Legacy Gemini agent — wraps current API."""
-    from python.core.gemini_agent import GeminiDeepResearchAgent as _GeminiAgent
 
     def __init__(self):
-        self._agent = self._GeminiAgent()
+        self._agent = _GeminiAgent()
 
     async def research(self, topic: str, context: str = "") -> str:
         return await self._agent.research(topic, context)

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 __all__ = ["GeneticOptimizer"]
 
+import math
 from typing import Any, Dict, List
 
 from python.core.models import Factor, Statistics
@@ -73,6 +74,8 @@ class GeneticOptimizer:
         for f in factors:
             if f.name in ideal_genes:
                 raw_val = ideal_genes[f.name]
+                if not math.isfinite(raw_val):
+                    continue
                 f_min = global_bounds[f.name]["min"]
                 f_max = global_bounds[f.name]["max"]
                 

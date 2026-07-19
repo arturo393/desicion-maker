@@ -56,6 +56,7 @@ class PortfolioOptimizer:
             w = raw / raw.sum() * budget
             w = np.clip(w, min_allocation * budget, max_allocation * budget)
             w = w / w.sum() * budget
+            w = np.clip(w, min_allocation * budget, max_allocation * budget)
             obj = np.dot(w, returns) - risk_aversion * (w @ cov_matrix @ w)
             if obj > best_obj:
                 best_obj = obj

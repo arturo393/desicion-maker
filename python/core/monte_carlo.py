@@ -125,8 +125,9 @@ class MonteCarloEngine:
             var_95 = p5
             cvar_95 = float(np.mean(total_scores[total_scores <= p5])) if np.any(total_scores <= p5) else p5
 
-            # In normalized mode, success is relative to 0 or mean
-            success_rate = float(np.mean(total_scores > 0.5)) if normalize else float(np.mean(total_scores > 0))
+            total_weight = sum(f.weight for f in self.factors)
+            success_threshold = 0.5 * total_weight if normalize else 0.0
+            success_rate = float(np.mean(total_scores > success_threshold))
 
             factor_stats = {}
             for name, values in sampled_data.items():

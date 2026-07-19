@@ -13,7 +13,7 @@ class AHPHelper:
     @staticmethod
     def calculate_weights(
         matrix: np.ndarray, labels: List[str]
-    ) -> Dict[str, Optional]:
+    ) -> Dict[str, Optional[float]]:
         try:
             n = len(labels)
             if n != matrix.shape[0] or n != matrix.shape[1]:

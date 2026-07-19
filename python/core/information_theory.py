@@ -61,7 +61,7 @@ class InformationTheoryEngine:
                 results[name] = {
                     fn: float(val) for fn, val in zip(available_factors, normalized_mi)
                 }
-            except (ValueError, ZeroDivisionError) as e:
+            except ValueError as e:
                 logger.error(f"Error calculating Mutual Information for '{name}': {e}")
                 continue
 

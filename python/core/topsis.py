@@ -55,10 +55,12 @@ class TOPSISEngine:
                     div = max_c if max_c != 0 else 1.0
                     norm_matrix[opt][factor] = (a / div, b / div, c / div)
                 else:
-                    a_div = c if c != 0 else 1.0
-                    b_div = b if b != 0 else 1.0
-                    c_div = a if a != 0 else 1.0
-                    norm_matrix[opt][factor] = (min_a / a_div, min_a / b_div, min_a / c_div)
+                    divisor = max_c - min_a if max_c != min_a else 1.0
+                    norm_matrix[opt][factor] = (
+                        (max_c - c) / divisor,
+                        (max_c - b) / divisor,
+                        (max_c - a) / divisor,
+                    )
 
         weighted_matrix: Dict[str, Dict[str, Tuple[float, float, float]]] = {}
         for opt in norm_matrix:

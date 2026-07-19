@@ -78,6 +78,8 @@ class TopologicalDataAnalysis:
         # Connectivity analysis: at what distance threshold does the
         # graph become connected? (Vietoris-Rips-inspired)
         sorted_dists = np.sort(dist_matrix[dist_matrix > 0].flatten())
+        if len(sorted_dists) == 0:
+            return {"error": "All options are identical — no topological variation"}
         connectivity = []
         for threshold in np.linspace(0, max(sorted_dists), 20):
             adj = (dist_matrix > 0) & (dist_matrix <= threshold)

@@ -75,9 +75,10 @@ class VisualizationEngine:
         return path
 
     def plot_factor_importance(self, info_theory_results: Dict, output_dir: str, timestamp: str) -> str:
-        # We'll take the first option's MI for simplicity in this view, 
-        # or average them if they differ. Usually they are similar across options.
-        first_opt = next(iter(info_theory_results.keys()))
+        if not info_theory_results:
+            logger.warning("No information theory results to plot")
+            return ""
+        first_opt = next(iter(info_theory_results))
         mi_data = info_theory_results[first_opt]
         
         df = pd.DataFrame(list(mi_data.items()), columns=["Factor", "Importance"])
