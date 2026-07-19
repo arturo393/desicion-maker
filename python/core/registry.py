@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+__all__ = ["DecisionRegistry"]
+
 import json
 import logging
 import sqlite3
@@ -38,7 +40,7 @@ class DecisionRegistry:
             self._local.conn.execute("PRAGMA foreign_keys=ON")
         return self._local.conn
 
-    def _init_db(self):
+    def _init_db(self) -> None:
         conn = self._conn
         conn.executescript("""
             CREATE TABLE IF NOT EXISTS decisions (
@@ -242,7 +244,7 @@ class DecisionRegistry:
         self._conn.commit()
         return cur.rowcount > 0
 
-    def seed_default_templates(self):
+    def seed_default_templates(self) -> None:
         defaults = [
             {
                 "name": "Vendor Selection",
@@ -293,7 +295,7 @@ class DecisionRegistry:
         for t in defaults:
             try:
                 self.save_template(**t)
-            except Exception as e:
+            except (sqlite3.Error, ValueError) as e:
                 logger.warning(f"Could not seed template '{t['name']}': {e}")
 
 

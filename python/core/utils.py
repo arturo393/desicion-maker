@@ -2,6 +2,19 @@
 
 from __future__ import annotations
 
+__all__ = [
+    "EPSILON",
+    "DEFAULT_SEED",
+    "SCALE_MISMATCH_THRESHOLD",
+    "DEFAULT_BOOTSTRAP_ITERATIONS",
+    "WEIGHT_DELTA",
+    "SCORE_DELTAS",
+    "HURWICZ_ALPHA_DEFAULT",
+    "DISTRIBUTION_MAP",
+    "compute_global_bounds",
+    "resolve_winner",
+]
+
 import math
 from typing import TYPE_CHECKING, Any, Dict, List, Tuple
 
@@ -38,7 +51,10 @@ def compute_global_bounds(
     mc_results: Dict[str, Statistics],
     factor_names: List[str],
 ) -> Dict[str, Dict[str, float]]:
-    """Compute min/max bounds across all options for each factor."""
+    """Compute min/max bounds across all options for each factor.
+
+    Uses factor_stats means for normalization-compatible bounds.
+    """
     bounds: Dict[str, Dict[str, float]] = {
         fn: {"min": math.inf, "max": -math.inf} for fn in factor_names
     }

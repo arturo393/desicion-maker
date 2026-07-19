@@ -1,5 +1,13 @@
 from __future__ import annotations
 
+__all__ = [
+    "VariableConfig",
+    "OptionConfig",
+    "FactorConfig",
+    "DecisionConfig",
+    "RootConfig",
+]
+
 from typing import Dict, List, Optional
 
 from pydantic import BaseModel, Field, model_validator
@@ -33,7 +41,7 @@ class DecisionConfig(BaseModel):
     promethee_pref_type: Optional[str] = None
 
     @model_validator(mode="after")
-    def validate_options_have_required_variables(self):
+    def validate_options_have_required_variables(self) -> "DecisionConfig":
         factor_names = {f.name for f in self.factors}
         for opt in self.options:
             opt_factor_names = set(opt.variables.keys())

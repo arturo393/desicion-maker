@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+__all__ = ["InformationTheoryEngine"]
+
 import logging
 from typing import Dict, List
 
@@ -59,7 +61,7 @@ class InformationTheoryEngine:
                 results[name] = {
                     fn: float(val) for fn, val in zip(available_factors, normalized_mi)
                 }
-            except Exception as e:
+            except (ValueError, ZeroDivisionError) as e:
                 logger.error(f"Error calculating Mutual Information for '{name}': {e}")
                 continue
 

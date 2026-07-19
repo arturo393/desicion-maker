@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+__all__ = ["ExplainabilityEngine"]
+
 import logging
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -7,6 +9,7 @@ import numpy as np
 import pandas as pd
 
 from python.core.models import Factor, Statistics
+from python.core.utils import compute_global_bounds
 
 logger = logging.getLogger(__name__)
 
@@ -47,7 +50,7 @@ class ExplainabilityEngine:
         if not mc_results or not factors:
             return {"options": {}, "max_possible": 0.0}
 
-        global_bounds = self._compute_global_bounds(mc_results, factors)
+        global_bounds = compute_global_bounds(mc_results, [f.name for f in factors])
         max_possible = sum(f.weight for f in factors)
         result: Dict[str, Any] = {"options": {}, "max_possible": max_possible}
 
@@ -136,7 +139,7 @@ class ExplainabilityEngine:
         runner_name, runner_stats = sorted_options[1]
         gap = winner_stats.mean_score - runner_stats.mean_score
 
-        global_bounds = self._compute_global_bounds(mc_results, factors)
+        global_bounds = compute_global_bounds(mc_results, [f.name for f in factors])
         flip_scenarios: Dict[str, List[Dict]] = {}
 
         for opt_name, stats in mc_results.items():
@@ -287,23 +290,7 @@ class ExplainabilityEngine:
                     ai_text = agent.research("Explain decision", prompt)
                     lines.append("**AI-Generated Analysis:**")
                     lines.append(ai_text if isinstance(ai_text, str) else str(ai_text))
-            except Exception as e:
+            except (ConnectionError, TimeoutError, ValueError) as e:
                 logger.warning(f"AI narrative generation failed: {e}")
 
         return "\n".join(lines)
-
-    @staticmethod
-    def _compute_global_bounds(
-        mc_results: Dict[str, Statistics],
-        factors: List[Factor],
-    ) -> Dict[str, Dict[str, float]]:
-        bounds = {f.name: {"min": float("inf"), "max": float("-inf")} for f in factors}
-        for stats in mc_results.values():
-            for fn in bounds:
-                if fn in stats.factor_stats:
-                    val = stats.factor_stats[fn]["mean"]
-                    if val < bounds[fn]["min"]:
-                        bounds[fn]["min"] = val
-                    if val > bounds[fn]["max"]:
-                        bounds[fn]["max"] = val
-        return bounds

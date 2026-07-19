@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+__all__ = ["WhatIfEngine"]
+
 import copy
 import logging
 from typing import Dict, List, Optional, Tuple
@@ -9,6 +11,28 @@ import numpy as np
 from python.core.models import Factor, Statistics
 
 logger = logging.getLogger(__name__)
+
+
+def _compute_raw_bounds(mc_results: Dict[str, Statistics], factor_names: list) -> Dict[str, Dict[str, float]]:
+    """Compute bounds using raw per-simulation data for accurate What-If ranges."""
+    bounds: Dict[str, Dict[str, float]] = {fn: {"min": float("inf"), "max": float("-inf")} for fn in factor_names}
+    has_raw = False
+    for stats in mc_results.values():
+        if stats.raw_factor_data is not None:
+            for fn in factor_names:
+                if fn in stats.raw_factor_data:
+                    data = stats.raw_factor_data[fn]
+                    bounds[fn]["min"] = min(bounds[fn]["min"], float(np.min(data)))
+                    bounds[fn]["max"] = max(bounds[fn]["max"], float(np.max(data)))
+                    has_raw = True
+    if not has_raw:
+        for stats in mc_results.values():
+            for fn in factor_names:
+                if fn in stats.factor_stats:
+                    val = stats.factor_stats[fn]["mean"]
+                    bounds[fn]["min"] = min(bounds[fn]["min"], val)
+                    bounds[fn]["max"] = max(bounds[fn]["max"], val)
+    return bounds
 
 
 class WhatIfEngine:
@@ -36,8 +60,9 @@ class WhatIfEngine:
         self.original_mc_results = mc_results
         self.original_factors = [Factor(f.name, f.weight, f.maximize, f.category) for f in factors]
         self.current_factors = [Factor(f.name, f.weight, f.maximize, f.category) for f in factors]
-        self._global_bounds: Dict[str, Dict[str, float]] = {}
-        self._compute_global_bounds()
+        self._global_bounds = _compute_raw_bounds(
+            self.original_mc_results, [f.name for f in self.original_factors]
+        )
 
     # ── Public mutation API ──────────────────────────────────────────
 
@@ -333,31 +358,6 @@ class WhatIfEngine:
                 print("Type 'help' for available commands")
 
         self._show_final()
-
-    # ── Internal helpers ─────────────────────────────────────────────
-
-    def _compute_global_bounds(self) -> None:
-        bounds: Dict[str, Dict[str, float]] = {}
-
-        # Try raw_factor_data first (exact per-simulation bounds)
-        for stats in self.original_mc_results.values():
-            if stats.raw_factor_data is not None:
-                for fn, data in stats.raw_factor_data.items():
-                    if fn not in bounds:
-                        bounds[fn] = {"min": float("inf"), "max": float("-inf")}
-                    bounds[fn]["min"] = min(bounds[fn]["min"], float(np.min(data)))
-                    bounds[fn]["max"] = max(bounds[fn]["max"], float(np.max(data)))
-
-        # Fallback to factor_stats means
-        if not bounds:
-            for stats in self.original_mc_results.values():
-                for fn, fstats in stats.factor_stats.items():
-                    if fn not in bounds:
-                        bounds[fn] = {"min": float("inf"), "max": float("-inf")}
-                    bounds[fn]["min"] = min(bounds[fn]["min"], fstats["mean"])
-                    bounds[fn]["max"] = max(bounds[fn]["max"], fstats["mean"])
-
-        self._global_bounds = bounds
 
     def _suggest(self) -> List[str]:
         """

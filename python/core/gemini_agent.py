@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+__all__ = ["GeminiDeepResearchAgent"]
+
 import os
 from typing import Optional
 
@@ -36,5 +38,5 @@ class GeminiDeepResearchAgent:
                 contents=f"Research Topic: {topic}\nContext: {context}\nProvide analysis.",
             )
             return response.text
-        except Exception as e:
+        except (ConnectionError, TimeoutError, ValueError) as e:
             return f"Error: {e}"

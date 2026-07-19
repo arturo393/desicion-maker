@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+__all__ = ["BayesianEngine"]
+
 from typing import Dict
 
 import numpy as np

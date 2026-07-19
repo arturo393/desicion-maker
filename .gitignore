@@ -22,11 +22,11 @@ uv.lock
 # Logs
 *.log
 
-# Archivos temporales
+# Temp files
 *.tmp
 *.bak
 
-# SEGURIDAD: No subir credenciales ni tokens
+# SECURITY: credentials and tokens
 .env
 .env.local
 .env.gemini
@@ -34,7 +34,7 @@ uv.lock
 python/.env
 python/.env.local
 
-# ⚠️ SECURITY: Archivos con credenciales y API keys
+# SECURITY: credentials and API keys
 *.key
 *.pem
 *.crt
@@ -58,6 +58,9 @@ config.local.json
 # Generated reports
 results/
 .benchmarks/
+
+# Stray files from other projects
+core/examples/
 
 # Scratch/exploratory
 scratch/

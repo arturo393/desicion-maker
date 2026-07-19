@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+__all__ = ["MonteCarloEngine"]
+
 import logging
 from typing import Dict, List, Optional
 
@@ -20,10 +22,10 @@ class MonteCarloEngine:
         self._option_names: set = set()
         self.correlation_matrix = correlation_matrix
 
-    def add_factor(self, factor: Factor):
+    def add_factor(self, factor: Factor) -> None:
         self.factors.append(factor)
 
-    def add_option(self, option: DecisionOption):
+    def add_option(self, option: DecisionOption) -> None:
         if option.name in self._option_names:
             logger.warning(f"Duplicate option name '{option.name}' — previous will be overwritten")
         self._option_names.add(option.name)

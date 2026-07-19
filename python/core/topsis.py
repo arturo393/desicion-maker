@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+__all__ = ["TOPSISEngine"]
+
 import math
 import logging
 from typing import Dict, List, Tuple

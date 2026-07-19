@@ -1,5 +1,15 @@
 from __future__ import annotations
 
+__all__ = [
+    "prepare_decision_matrix",
+    "build_algorithm_comparison",
+    "save_json_report",
+    "save_markdown_report",
+    "save_html_report",
+    "print_report",
+    "save_report",
+]
+
 import json
 import logging
 import os
@@ -12,6 +22,78 @@ from python.core.models import Factor, Statistics
 from python.core.utils import resolve_winner
 
 logger = logging.getLogger(__name__)
+
+
+# ── Shared helper functions ──────────────────────────────────────────
+
+
+def _md_table(
+    headers: List[str],
+    rows: List[List[str]],
+    alignments: Optional[List[str]] = None,
+) -> str:
+    """Build a complete markdown table string."""
+    if alignments is None:
+        alignments = [":---"] * len(headers)
+    lines = [
+        "| " + " | ".join(headers) + " |",
+        "| " + " | ".join(alignments) + " |",
+    ]
+    for row in rows:
+        lines.append("| " + " | ".join(row) + " |")
+    return "\n".join(lines) + "\n"
+
+
+def _mc_context(mc_results: Dict[str, Statistics]) -> Dict[str, Any]:
+    """Extract common MC statistics used across report functions."""
+    best_name, best_stats = max(mc_results.items(), key=lambda x: x[1].mean_score)
+    return {
+        "best_name": best_name,
+        "best_score": best_stats.mean_score,
+        "max_score": best_stats.mean_score,
+        "max_label_len": max(len(n) for n in mc_results),
+    }
+
+
+def _bar_chart(mc_results: Dict[str, Statistics], width: int = 40) -> str:
+    """Build an ASCII bar chart string from MC results."""
+    ctx = _mc_context(mc_results)
+    lines = []
+    for name, stats in mc_results.items():
+        bar_len = int((stats.mean_score / ctx["max_score"]) * width) if ctx["max_score"] > 0 else 0
+        bar = "\u2588" * bar_len
+        lines.append(f"{name:<{ctx['max_label_len']}} | {bar} {stats.mean_score:.0f}")
+    return "\n".join(lines)
+
+
+def _has_promethee(mode: str, future: Optional[Dict[str, Any]]) -> bool:
+    """Check if PROMETHEE data is available."""
+    return bool(
+        mode == "advanced"
+        and future
+        and "promethee_scores" in future
+        and not future["promethee_scores"].empty
+    )
+
+
+def _bayesian_leader(future: Optional[Dict[str, Any]]) -> Optional[tuple]:
+    """Extract the Bayesian leader from future analysis data."""
+    if not future:
+        return None
+    bl = future.get("bayesian_leader")
+    if bl:
+        return (bl[0], bl[1]) if isinstance(bl, (list, tuple)) and len(bl) >= 2 else None
+    return None
+
+
+def _rank_scores(scores: pd.Series, prefix: str) -> Dict[str, Dict[str, Any]]:
+    """Rank a Series and return dict with rank/score per option."""
+    result: Dict[str, Dict[str, Any]] = {}
+    for rank, (name, score) in enumerate(scores.sort_values(ascending=False).items(), 1):
+        result.setdefault(name, {})
+        result[name][f"{prefix}_rank"] = rank
+        result[name][f"{prefix}_score"] = score
+    return result
 
 
 def prepare_decision_matrix(
@@ -41,29 +123,23 @@ def build_algorithm_comparison(
     topsis_scores: pd.Series,
     future: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any]:
-    algo_comp = {}
+    algo_comp: Dict[str, Any] = {}
+
     sorted_mc = sorted(mc_results.items(), key=lambda x: x[1].mean_score, reverse=True)
     for rank, (name, stats) in enumerate(sorted_mc, 1):
-        if name not in algo_comp:
-            algo_comp[name] = {}
+        algo_comp.setdefault(name, {})
         algo_comp[name]["mc_rank"] = rank
         algo_comp[name]["mc_score"] = stats.mean_score
 
     if not topsis_scores.empty:
-        sorted_topsis = topsis_scores.sort_values(ascending=False)
-        for rank, (name, score) in enumerate(sorted_topsis.items(), 1):
-            if name not in algo_comp:
-                algo_comp[name] = {}
-            algo_comp[name]["topsis_rank"] = rank
-            algo_comp[name]["topsis_score"] = score
+        for name, data in _rank_scores(topsis_scores, "topsis").items():
+            algo_comp.setdefault(name, {})
+            algo_comp[name].update(data)
 
-    if future and "promethee_scores" in future and not future["promethee_scores"].empty:
-        sorted_prom = future["promethee_scores"].sort_values(ascending=False)
-        for rank, (name, score) in enumerate(sorted_prom.items(), 1):
-            if name not in algo_comp:
-                algo_comp[name] = {}
-            algo_comp[name]["promethee_rank"] = rank
-            algo_comp[name]["promethee_score"] = score
+    if _has_promethee("advanced", future):
+        for name, data in _rank_scores(future["promethee_scores"], "promethee").items():
+            algo_comp.setdefault(name, {})
+            algo_comp[name].update(data)
 
     return algo_comp
 
@@ -146,31 +222,22 @@ def save_markdown_report(
     md += "\n\n"
 
     md += "### 1.1 Algorithm Consensus\n"
-    has_prom = mode == "advanced" and future and "promethee_scores" in future and not future["promethee_scores"].empty
+    has_prom = _has_promethee(mode, future)
     if has_prom:
-        md += "| Option | MC Rank | F-TOPSIS Rank | PROMETHEE Rank |\n"
-        md += "| :--- | :--- | :--- | :--- |\n"
+        headers = ["Option", "MC Rank", "F-TOPSIS Rank", "PROMETHEE Rank"]
     else:
-        md += "| Option | MC Rank | F-TOPSIS Rank |\n"
-        md += "| :--- | :--- | :--- |\n"
-
+        headers = ["Option", "MC Rank", "F-TOPSIS Rank"]
+    rows = []
     for name, data in algo_comp.items():
-        mc_r = f"#{data.get('mc_rank')}"
-        top_r = f"#{data.get('topsis_rank', '-')}"
+        row = [f"**{name}**", f"#{data.get('mc_rank')}", f"#{data.get('topsis_rank', '-')}"]
         if has_prom:
-            prom_r = f"#{data.get('promethee_rank', '-')}"
-            md += f"| **{name}** | {mc_r} | {top_r} | {prom_r} |\n"
-        else:
-            md += f"| **{name}** | {mc_r} | {top_r} |\n"
+            row.append(f"#{data.get('promethee_rank', '-')}")
+        rows.append(row)
+    md += _md_table(headers, rows)
 
     md += "\n### 1.2 Visual Summary (Expected Value)\n"
     md += "```text\n"
-    max_score = max(s.mean_score for s in mc_results.values())
-    max_label_len = max(len(n) for n in mc_results.keys())
-    for name, stats in mc_results.items():
-        bar_len = int((stats.mean_score / max_score) * 40) if max_score > 0 else 0
-        bar = "█" * bar_len
-        md += f"{name:<{max_label_len}} | {bar} {stats.mean_score:.0f}\n"
+    md += _bar_chart(mc_results) + "\n"
     md += "```\n"
 
     md += "\n### 1.3 Strategic Option Set (Pareto Efficiency)\n"
@@ -200,11 +267,11 @@ def save_markdown_report(
         if future.get("robust_optimizer"):
             robust_data = future["robust_optimizer"]
             md += "\n### 1.5 Distributionally Robust Optimization (DRO)\n"
-            md += "| Option | DRO Score (Worst-Case) | Stability Index |\n"
-            md += "| :--- | :---: | :---: |\n"
+            dro_rows = []
             for opt, score in robust_data.get("dro_scores", {}).items():
                 stability = robust_data.get("stability_metrics", {}).get(opt, 0)
-                md += f"| {opt} | {score:.2f} | {stability*100:.1f}% |\n"
+                dro_rows.append([opt, f"{score:.2f}", f"{stability*100:.1f}%"])
+            md += _md_table(["Option", "DRO Score (Worst-Case)", "Stability Index"], dro_rows)
         
         if future.get("info_theory"):
             md += "\n### 1.6 Information Theory (Non-linear Importance)\n"
@@ -225,19 +292,20 @@ def save_markdown_report(
 
     md += "\n## 2. Detailed Analysis\n\n"
     md += "### 2.1 Decision Matrix\n"
-    md += "| Option | " + " | ".join([f"{f.name} (w={f.weight})" for f in factors]) + " | **Total Score** |\n"
-    md += "| :--- | " + " | ".join(["---:"] * len(factors)) + " | ---: |\n"
-
+    dm_headers = ["Option"] + [f"{f.name} (w={f.weight})" for f in factors] + ["**Total Score**"]
+    dm_alignments = [":---"] + ["---:"] * len(factors) + ["---:"]
+    dm_rows = []
     for name, data in decision_matrix.items():
-        row = f"| **{name}** | "
+        row = [f"**{name}**"]
         for factor in factors:
             if factor.name in data:
                 item = data[factor.name]
-                row += f"{item['raw']:.2f} ({item['contribution']:+.2f}) | "
+                row.append(f"{item['raw']:.2f} ({item['contribution']:+.2f})")
             else:
-                row += "N/A | "
-        row += f"**{data['total_score']:.2f}** |\n"
-        md += row
+                row.append("N/A")
+        row.append(f"**{data['total_score']:.2f}**")
+        dm_rows.append(row)
+    md += _md_table(dm_headers, dm_rows, dm_alignments)
 
     if explanation:
         md += "\n## 2. Decision Explanation\n\n"
@@ -435,20 +503,14 @@ def print_report(
     print("--- 1. EXECUTIVE SUMMARY ---\n")
     print(f"RECOMMENDATION: {bluf_winner} is the optimal choice based on {bluf_reason}.\n")
 
-    best_mc = max(mc_results.items(), key=lambda x: x[1].mean_score)
-    print(f"Best Monte Carlo: {best_mc[0]} (Mean: {best_mc[1].mean_score:.2f})")
-
-    max_score = max(s.mean_score for s in mc_results.values())
-    max_label_len = max(len(name) for name in mc_results.keys())
-    for name, stats in mc_results.items():
-        bar_len = int((stats.mean_score / max_score) * 40) if max_score > 0 else 0
-        bar = "█" * bar_len
-        print(f"{name:<{max_label_len}} | {bar} {stats.mean_score:.0f}")
+    ctx = _mc_context(mc_results)
+    print(f"Best Monte Carlo: {ctx['best_name']} (Mean: {ctx['best_score']:.2f})")
+    print(_bar_chart(mc_results))
 
     if not topsis_scores.empty:
         print(f"Best F-TOPSIS: {topsis_scores.index[0]} (Score: {topsis_scores.iloc[0]:.4f})")
 
-    if mode == "advanced" and future and "promethee_scores" in future and not future["promethee_scores"].empty:
+    if _has_promethee(mode, future):
         print(f"Best PROMETHEE: {future['promethee_scores'].index[0]} (Net Flow: {future['promethee_scores'].iloc[0]:.4f})")
 
     print(f"\nPareto Efficient: {', '.join(pareto.get('efficient_frontier', []))}")

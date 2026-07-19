@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+__all__ = ["PrometheeEngine"]
+
 from typing import Callable, List, Optional
 
 import numpy as np

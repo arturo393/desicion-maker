@@ -1,5 +1,16 @@
 from __future__ import annotations
 
+__all__ = [
+    "DistributionType",
+    "UncertainVariable",
+    "Factor",
+    "Statistics",
+    "DecisionOption",
+    "EPSILON",
+    "VALIDATION_RULES",
+    "SAMPLE_DISPATCH",
+]
+
 import math
 from dataclasses import dataclass, field
 from enum import Enum
@@ -184,5 +195,5 @@ class DecisionOption:
     description: str = ""
     variables: Dict[str, UncertainVariable] = field(default_factory=dict)
 
-    def add_variable(self, name: str, dist_type: DistributionType, *params):
+    def add_variable(self, name: str, dist_type: DistributionType, *params: float) -> None:
         self.variables[name] = UncertainVariable(name, dist_type, list(params))

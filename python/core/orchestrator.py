@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+__all__ = ["UnifiedDecisionFramework"]
+
 import asyncio
 import logging
 import os
@@ -123,7 +125,7 @@ class UnifiedDecisionFramework:
         self.promethee_pref_types = promethee_pref_types
         self.promethee_pref_params = promethee_pref_params
 
-    def add_option(self, option: DecisionOption):
+    def add_option(self, option: DecisionOption) -> None:
         errors = []
         for var_name, var in option.variables.items():
             errors.extend(var.validate())
@@ -132,7 +134,7 @@ class UnifiedDecisionFramework:
                 logger.warning(f"Validation warning for '{option.name}': {e}")
         self.mc_engine.add_option(option)
 
-    def add_factor(self, factor: Factor):
+    def add_factor(self, factor: Factor) -> None:
         self.mc_engine.add_factor(factor)
 
     async def run_analysis(

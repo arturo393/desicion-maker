@@ -79,11 +79,10 @@ def create_app():
             _registry_instance.seed_default_templates()
         return _registry_instance
 
-    def _run_analysis(req: _AnalysisRequest) -> Dict[str, Any]:
+    async def _run_analysis(req: _AnalysisRequest) -> Dict[str, Any]:
         from python.core.models import DecisionOption, DistributionType, Factor
         from python.core.orchestrator import UnifiedDecisionFramework
         from python.core.utils import DISTRIBUTION_MAP
-        import asyncio
 
         fw = UnifiedDecisionFramework()
         fw.mc_engine.num_simulations = max(1, min(req.simulations, 1_000_000))
@@ -98,7 +97,7 @@ def create_app():
                 opt.add_variable(vname, dt, *vcfg.params)
             fw.add_option(opt)
 
-        result = asyncio.run(fw.run_analysis(mode=req.mode))
+        result = await fw.run_analysis(mode=req.mode)
         return result
 
     # ── Routes ──
@@ -108,9 +107,9 @@ def create_app():
         return {"status": "ok"}
 
     @app.post("/analyze", response_model=_AnalysisResponse)
-    def analyze(req: _AnalysisRequest):
+    async def analyze(req: _AnalysisRequest):
         try:
-            result = _run_analysis(req)
+            result = await _run_analysis(req)
             registry = _get_registry()
             factors_dict = [f.model_dump() for f in req.factors]
             options_dict = [o.model_dump() for o in req.options]

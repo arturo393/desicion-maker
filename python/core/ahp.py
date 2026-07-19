@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+__all__ = ["AHPHelper"]
+
 from typing import Dict, List, Optional
 
 import numpy as np
@@ -73,5 +75,5 @@ class AHPHelper:
                 result["correction_advice"] = advice
 
             return result
-        except Exception as e:
+        except (ValueError, np.linalg.LinAlgError) as e:
             return {"error": str(e)}

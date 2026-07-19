@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+__all__ = ["generate_html_inline"]
+
 import os
 from datetime import datetime
 from typing import Any, Dict

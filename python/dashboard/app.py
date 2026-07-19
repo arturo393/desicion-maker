@@ -207,7 +207,7 @@ def _render_history():
                     st.json(dec.get("results_json", {}), expanded=False)
         else:
             st.info("No decisions in registry yet.")
-    except Exception as e:
+    except (ImportError, OSError, json.JSONDecodeError) as e:
         st.error(f"Could not load history: {e}")
 
 
@@ -226,7 +226,7 @@ def _render_templates():
             st.dataframe(df[["name", "description", "category"]], use_container_width=True)
         else:
             st.info("No templates available.")
-    except Exception as e:
+    except (ImportError, OSError) as e:
         st.error(f"Could not load templates: {e}")
 
 

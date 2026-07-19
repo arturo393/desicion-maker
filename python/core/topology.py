@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+__all__ = ["TopologicalDataAnalysis"]
+
 import logging
 from typing import Any, Dict, List
 
@@ -70,7 +72,7 @@ class TopologicalDataAnalysis:
                 iso = manifold.Isomap(n_components=2, n_neighbors=max(2, n_opts - 1))
                 isomap_2d = iso.fit_transform(X)
                 isomap_err = float(iso.reconstruction_error())
-            except Exception:
+            except (ValueError, np.linalg.LinAlgError):
                 pass
 
         # Connectivity analysis: at what distance threshold does the

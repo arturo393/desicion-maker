@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+__all__ = ["WeightDerivationEngine"]
+
 import itertools
 import logging
 from typing import Any, Dict, List, Optional, Tuple

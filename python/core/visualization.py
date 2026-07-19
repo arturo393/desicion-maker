@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+__all__ = ["VisualizationEngine"]
+
 import logging
 import os
 from typing import Dict, List, Optional
