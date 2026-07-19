@@ -1,0 +1,33 @@
+{
+  "date": "2026-06-26T07:58:27.019332",
+  "recommended": "Hybrid: fsk-scanner + monitor-serial",
+  "engine_scores": {
+    "sw-vlad-dac-tools (Tauri Rust)": 1.852,
+    "monitor-serial (Python RabbitMQ)": 1.855,
+    "fw-diagnostico-remoto-vlad (firmware)": 1.269,
+    "Hybrid: fsk-scanner + monitor-serial": 2.303,
+    "Tauri + servidor HTTP embebido": 1.587
+  },
+  "subjective_ranking": [
+    [
+      "Hybrid: fsk-scanner + monitor-serial",
+      0.85
+    ],
+    [
+      "monitor-serial (Python RabbitMQ)",
+      0.745
+    ],
+    [
+      "sw-vlad-dac-tools (Tauri Rust)",
+      0.685
+    ],
+    [
+      "Tauri + servidor HTTP embebido",
+      0.595
+    ],
+    [
+      "fw-diagnostico-remoto-vlad (firmware)",
+      0.515
+    ]
+  ]
+}
