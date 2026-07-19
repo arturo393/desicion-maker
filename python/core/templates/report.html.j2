@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reporte de Inteligencia de Decisiones | Premium</title>
+    <title>Decision Intelligence Report | Premium</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
@@ -145,19 +145,19 @@
     <div class="dashboard">
         <header>
             <div>
-                <div class="badge" style="margin-bottom: 0.5rem;">Análisis de Nivel Profesional</div>
-                <h1>Inteligencia de Decisiones</h1>
+                <div class="badge" style="margin-bottom: 0.5rem;">Professional Analysis</div>
+                <h1>Decision Intelligence</h1>
             </div>
             <div style="text-align: right">
-                <div style="font-size: 0.9rem; color: #8b949e;">Fecha de Reporte: {{ date }}</div>
-                <div style="font-weight: 600; color: var(--accent);">Caso: Comparativa Bancaria</div>
+                <div style="font-size: 0.9rem; color: #8b949e;">Report Date: {{ date }}</div>
+                <div style="font-weight: 600; color: var(--accent);">Case: {{ mode | upper }} Analysis</div>
             </div>
         </header>
 
         {% for card in kpi_cards %}
         <div class="kpi-card">
             <div class="kpi-title">
-                {% if card.title == 'Primary Recommendation' %}Recomendación{% else %}{{ card.title }}{% endif %}
+                {% if card.title == 'Balanced Recommendation' %}Recommendation{% else %}{{ card.title }}{% endif %}
             </div>
             <div class="kpi-value" style="color: {% if 'Success' in card.title %}var(--success){% elif 'Potential' in card.title %}var(--accent){% else %}#fff{% endif %};">
                 {{ card.value }}
@@ -166,21 +166,21 @@
         </div>
         {% endfor %}
 
-        <!-- Perfiles de Riesgo -->
+        <!-- Risk Profiles -->
         <div class="panel col-8">
-            <h2 class="panel-title">Perfiles de Riesgo Estocásticos</h2>
+            <h2 class="panel-title">Stochastic Risk Profiles</h2>
             <div class="viz-container">
-                <img src="risk_profiles_{{ timestamp }}.png" alt="Perfiles de Riesgo">
+                <img src="risk_profiles_{{ timestamp }}.png" alt="Risk Profiles">
             </div>
-            <p class="explanation">Este gráfico muestra la probabilidad de cada resultado. Cuanto más a la derecha y más "estrecha" sea la curva, mayor beneficio con menor incertidumbre.</p>
+            <p class="explanation">This chart shows each option's score distribution. A narrower curve further right means higher return with lower uncertainty.</p>
         </div>
 
-        <!-- Consenso de Algoritmos -->
+        <!-- Algorithm Consensus -->
         <div class="panel col-4">
-            <h2 class="panel-title">Consenso Matemático</h2>
+            <h2 class="panel-title">Algorithm Consensus</h2>
             <table style="margin-top: 1rem;">
                 <thead>
-                    <tr><th>Opción</th><th>Promedio</th><th>Puntaje F-TOP</th></tr>
+                    <tr><th>Option</th><th>Average</th><th>F-TOPSIS</th></tr>
                 </thead>
                 <tbody>
                     {% for name, data in algo_comp.items() %}
@@ -192,26 +192,26 @@
                     {% endfor %}
                 </tbody>
             </table>
-            <p class="explanation">Comparamos 4 motores distintos (Monte Carlo, TOPSIS, Borda, Bayes). Si todos coinciden en el #1, la decisión es indiscutible.</p>
+            <p class="explanation">We compare 4 engines (Monte Carlo, TOPSIS, Borda, Bayes). Agreement on #1 means the decision is clear.</p>
         </div>
 
-        <!-- Auditoría de Robustez -->
+        <!-- Robustness Audit -->
         <div class="panel col-12">
-            <h2 class="panel-title">Auditoría de Robustez: Defensa vs Certeza</h2>
+            <h2 class="panel-title">Robustness Audit: Defense vs Certainty</h2>
             <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 2rem; align-items: start;">
                 <div>
                     <div class="viz-container">
-                        <img src="robustness_audit_{{ timestamp }}.png" alt="Auditoría Robustez">
+                        <img src="robustness_audit_{{ timestamp }}.png" alt="Robustness Audit">
                     </div>
-                    <p class="explanation">El <b>Puntaje Defensivo</b> mide el peor escenario posible. El <b>Nivel de Certeza</b> indica qué tan probable es que el beneficio se mantenga estable ante cambios de mercado.</p>
+                    <p class="explanation"><b>Defensive Score</b> measures the worst-case scenario. <b>Certainty Level</b> indicates how stable the benefit is under market changes.</p>
                 </div>
                 <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1rem;">
                     {% for profile in risk_profiles %}
                     <div class="stat-box">
                         <div style="font-weight: 700; margin-bottom: 0.75rem; color: var(--accent); border-bottom: 1px solid var(--border); padding-bottom: 0.5rem;">{{ profile.name }}</div>
-                        <div class="stat-row"><span>Promedio Esperado</span><span class="stat-val">{{ "%.2f" | format(profile.mean) }}</span></div>
-                        <div class="stat-row"><span>Nivel de Certeza</span><span class="stat-val" style="color:var(--success)">{{ "%.1f" | format((1 - (profile.std / (profile.mean|abs + 1e-9)))*100) }}%</span></div>
-                        <div class="stat-row"><span>Piso de Riesgo</span><span class="stat-val" style="color:var(--danger)">{{ "%.2f" | format(profile.var_95) }}</span></div>
+                        <div class="stat-row"><span>Expected Average</span><span class="stat-val">{{ "%.2f" | format(profile.mean) }}</span></div>
+                        <div class="stat-row"><span>Certainty Level</span><span class="stat-val" style="color:var(--success)">{{ "%.1f" | format((1 - (profile.std / (profile.mean|abs + 1e-9)))*100) }}%</span></div>
+                        <div class="stat-row"><span>Risk Floor</span><span class="stat-val" style="color:var(--danger)">{{ "%.2f" | format(profile.var_95) }}</span></div>
                     </div>
                     {% endfor %}
                 </div>
@@ -220,21 +220,21 @@
 
         {% if advanced_insights %}
         <div class="panel col-12" style="background: linear-gradient(135deg, rgba(88,166,255,0.05), rgba(0,0,0,0));">
-            <h2 class="panel-title">Hallazgos Estratégicos</h2>
+            <h2 class="panel-title">Strategic Insights</h2>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 3rem;">
                 <div>
-                    <div class="kpi-title">Confianza Bayesiana</div>
+                    <div class="kpi-title">Bayesian Confidence</div>
                     <div style="font-size: 1.1rem; color: var(--text-bright); margin-top: 0.5rem;">
                         {% if advanced_insights.bayesian_prob is defined %}
-                        Existe una probabilidad del <strong style="color: var(--accent)">{{ "%.1f" | format(advanced_insights.bayesian_prob * 100) }}%</strong> de que <strong>{{ advanced_insights.bayesian_leader }}</strong> sea la opción óptima absoluta bajo cualquier circunstancia.
+                        There is a <strong style="color: var(--accent)">{{ "%.1f" | format(advanced_insights.bayesian_prob * 100) }}%</strong> probability that <strong>{{ advanced_insights.bayesian_leader }}</strong> is the optimal choice under any circumstances.
                         {% endif %}
                     </div>
                 </div>
                 <div>
-                    <div class="kpi-title">Potencial de Mejora</div>
+                    <div class="kpi-title">Improvement Potential</div>
                     <div style="font-size: 1.1rem; color: var(--text-bright); margin-top: 0.5rem;">
                         {% if advanced_insights.improvement_potential is defined %}
-                        La frontera de eficiencia teórica es un <strong style="color: var(--accent)">{{ "%.1f" | format(advanced_insights.improvement_potential) }}%</strong> superior a la mejor opción actual.
+                        The theoretical efficiency frontier is <strong style="color: var(--accent)">{{ "%.1f" | format(advanced_insights.improvement_potential) }}%</strong> above the current best option.
                         {% endif %}
                     </div>
                 </div>
@@ -244,7 +244,7 @@
 
         {% if explanation %}
         <div class="panel col-12">
-            <h2 class="panel-title">Explicación de la Decisión</h2>
+            <h2 class="panel-title">Decision Explanation</h2>
             <div style="background: #0d1117; border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; line-height: 1.8; font-size: 0.95rem;">
                 {{ explanation | replace('\n', '<br>') | safe }}
             </div>
@@ -253,7 +253,7 @@
 
     </div>
     <footer style="text-align: center; padding: 4rem; color: #8b949e; font-size: 0.8rem; border-top: 1px solid var(--border); margin-top: 2rem;">
-        &copy; 2026 Decision Maker Framework | Desarrollado por Antigravity AI | Rigor Matemático Certificado
+        &copy; 2026 Decision Maker Framework
     </footer>
 </body>
 </html>

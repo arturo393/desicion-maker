@@ -24,6 +24,7 @@ def generate_html_inline(
     algo_comp: Dict[str, Any],
     decision_matrix: Dict[str, Any],
     factors: Any,
+    explanation: str = "",
 ) -> str:
     bluf_winner, bluf_reason = resolve_winner(topsis_scores, mc_results)
 
@@ -126,7 +127,12 @@ th {{ color: #8b949e; font-weight: 600; font-size: 0.75rem; text-transform: uppe
         html += f'<div class="stat-row"><span class="stat-label">VaR</span><span class="stat-val" style="color:#f85149">{stats.var_95:,.2f}</span></div>'
         html += f'<div class="stat-row"><span class="stat-label">CVaR</span><span class="stat-val" style="color:#f85149">{stats.cvar_95:,.2f}</span></div>'
         html += "</div>"
-    html += "</div></div></div></body></html>"
+    html += "</div></div>"
+
+    if explanation:
+        html += f'<div class="panel col-12"><h2 class="panel-title">Decision Explanation</h2><div style="padding:1rem;line-height:1.7">{explanation.replace(chr(10), "<br>")}</div></div>'
+
+    html += '</div></div></div></body></html>'
 
     html_path = os.path.join(results_dir, f"report_{timestamp}.html")
     with open(html_path, "w", encoding="utf-8") as f:

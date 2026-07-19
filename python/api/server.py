@@ -122,11 +122,19 @@ def create_app():
                 results=result,
                 description=req.description,
             )
+            mc = result.get("mc_results", {})
+            topsis = result.get("topsis_scores")
+            if topsis is not None and hasattr(topsis, 'empty') and not topsis.empty:
+                winner_name = topsis.index[0]
+            elif mc:
+                winner_name = max(mc.items(), key=lambda x: x[1].mean_score)[0]
+            else:
+                winner_name = ""
             return _AnalysisResponse(
                 id=rid,
                 status="completed",
                 summary={
-                    "winner": result.get("explanation", ""),
+                    "winner": winner_name,
                     "mode": req.mode,
                     "option_count": len(req.options),
                     "factor_count": len(req.factors),
