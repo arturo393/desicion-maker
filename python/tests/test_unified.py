@@ -10,13 +10,6 @@ import numpy as np
 import pandas as pd
 from unittest.mock import MagicMock
 
-import os
-
-# Add project root to path for imports
-current_dir = os.path.dirname(os.path.abspath(__file__))
-project_root = os.path.dirname(current_dir)
-sys.path.insert(0, project_root)
-
 from python.core.models import DistributionType, UncertainVariable, DecisionOption, Factor
 from python.core.monte_carlo import MonteCarloEngine
 from python.core.topsis import TOPSISEngine

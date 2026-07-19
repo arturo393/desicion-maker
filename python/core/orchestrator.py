@@ -12,7 +12,7 @@ import pandas as pd
 
 from python.core.models import DecisionOption, Factor
 from python.core.utils import (
-    SCALE_MISMATCH_THRESHOLD, DEFAULT_BOOTSTRAP_ITERATIONS, HURWICZ_ALPHA_DEFAULT,
+    SCALE_MISMATCH_THRESHOLD, DEFAULT_BOOTSTRAP_ITERATIONS,
 )
 from python.core.monte_carlo import MonteCarloEngine
 from python.core.topsis import TOPSISEngine
