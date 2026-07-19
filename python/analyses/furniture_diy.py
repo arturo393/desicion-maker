@@ -43,31 +43,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent / 'core'))
 
 from deep_research_decision_agent import CareerOption, DecisionAnalysisEngine
 
-# Primero: Configurar Gemini para búsqueda
-try:
-    import google.generativeai as genai
-    GEMINI_AVAILABLE = True
-except ImportError:
-    GEMINI_AVAILABLE = False
-    print("⚠️  google-generativeai no instalado. Instalar: uv pip install google-generativeai")
-
-def search_with_gemini(query: str) -> str:
-    """Buscar información con Gemini"""
-    if not GEMINI_AVAILABLE:
-        return "Gemini no disponible - instalar google-generativeai"
-    
-    api_key = os.environ.get('GEMINI_API_KEY')
-    if not api_key:
-        return "GEMINI_API_KEY no configurada en environment"
-    
-    try:
-        genai.configure(api_key=api_key)
-        model = genai.GenerativeModel('gemini-2.0-flash-exp')  # Gratis
-        
-        response = model.generate_content(query)
-        return response.text
-    except Exception as e:
-        return f"Error Gemini: {str(e)}"
+from python.core.gemini_helper import GEMINI_AVAILABLE, search_with_gemini
 
 
 def research_diy_furniture():

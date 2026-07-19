@@ -35,31 +35,7 @@ if env_file.exists():
                 key, value = line.split("=", 1)
                 os.environ[key.strip()] = value.strip()
 
-try:
-    from google import genai as _genai_new
-    GEMINI_AVAILABLE = True
-    GEMINI_SDK = "new"
-except ImportError:
-    GEMINI_AVAILABLE = False
-    GEMINI_SDK = None
-
-
-def search_with_gemini(query: str) -> str:
-    if not GEMINI_AVAILABLE:
-        return "Gemini no disponible"
-    api_key = os.environ.get("GEMINI_API_KEY")
-    if not api_key:
-        return "GEMINI_API_KEY no configurada"
-    try:
-        if GEMINI_SDK == "new":
-            client = _genai_new.Client(api_key=api_key)
-            response = client.models.generate_content(
-                model="gemini-2.5-flash", contents=query
-            )
-            return response.text
-    except Exception as e:
-        return f"Error Gemini: {str(e)}"
-    return ""
+from python.core.gemini_helper import GEMINI_AVAILABLE, search_with_gemini
 
 
 # ============================================================

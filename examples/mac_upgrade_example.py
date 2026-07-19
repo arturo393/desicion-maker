@@ -21,12 +21,8 @@ import asyncio
 # Fix path to import core logic
 sys.path.append(os.path.join(os.path.dirname(__file__), "../python"))
 
-from core.unified_decision_framework import (
-    UnifiedDecisionFramework, 
-    DecisionOption, 
-    Factor, 
-    DistributionType
-)
+from python.core.orchestrator import UnifiedDecisionFramework
+from python.core.models import DecisionOption, Factor, DistributionType
 
 async def main():
     print("🍎 Setting up Mac Upgrade Decision...")

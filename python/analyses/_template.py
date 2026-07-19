@@ -25,7 +25,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from python.core.models import DecisionOption, DistributionType, Factor
+from python.core.models import DecisionOption, DistributionType, Factor, UncertainVariable
 from python.core.orchestrator import UnifiedDecisionFramework
 
 # ============================================================
