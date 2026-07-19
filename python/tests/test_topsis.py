@@ -13,7 +13,7 @@ class TestTOPSISEngine:
         engine = TOPSISEngine()
         scores = engine.analyze(data, [0.5, 0.5], [False, True])
         assert len(scores) == 3
-        assert scores.index[0] in scores
+        assert scores["OptA"] > scores["OptC"] > scores["OptB"]
 
     def test_single_option(self):
         data = {"Only": {"X": (1, 2, 3)}}

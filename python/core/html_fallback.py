@@ -112,7 +112,8 @@ th {{ color: #8b949e; font-weight: 600; font-size: 0.75rem; text-transform: uppe
         ideal = future.get("ideal_option")
         if ideal:
             html += f'<div style="flex:1"><div class="kpi-title">Theoretical Gap</div><div style="font-size:.9rem;margin-top:.5rem">Composite option is <strong style="color:#a371f7">{ideal["improvement_potential"]:.1f}%</strong> better than current winner.</div></div>'
-        bayesian_leader = max(future.get("bayesian_probs", {}), key=future.get("bayesian_probs", {}).get, default=None)
+        bayesian_probs = future.get("bayesian_probs", {})
+        bayesian_leader = max(bayesian_probs, key=bayesian_probs.get, default=None)
         if bayesian_leader:
             html += f'<div style="flex:1;border-left:1px solid #30363d;padding-left:2rem"><div class="kpi-title">Bayesian Confidence</div><div style="font-size:.9rem;margin-top:.5rem"><strong>{bayesian_leader}</strong> probability: <strong style="color:#58a6ff">{future["bayesian_probs"][bayesian_leader]*100:.1f}%</strong></div></div>'
         html += "</div></div>"

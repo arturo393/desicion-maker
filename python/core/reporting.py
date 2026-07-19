@@ -290,7 +290,8 @@ def save_markdown_report(data: ReportData) -> str:
 
     if data.mode == "advanced" and data.future:
         md += "\n### 1.7 Advanced Predictive Insights\n"
-        bayesian_leader = max(data.future.get("bayesian_probs", {}), key=data.future.get("bayesian_probs", {}).get, default=None)
+        bayesian_probs = data.future.get("bayesian_probs", {})
+        bayesian_leader = max(bayesian_probs, key=bayesian_probs.get, default=None)
         if bayesian_leader:
             md += f"- **Bayesian Highest Probability:** {bayesian_leader} ({data.future['bayesian_probs'][bayesian_leader] * 100:.1f}% confidence)\n"
         ideal = data.future.get("ideal_option")
@@ -524,7 +525,8 @@ def print_report(data: ReportData):
         ideal = data.future.get("ideal_option")
         if ideal:
             print(f"Theoretical Gap: {ideal['improvement_potential']:.1f}%")
-        bayesian_leader = max(data.future.get("bayesian_probs", {}), key=data.future.get("bayesian_probs", {}).get, default=None)
+        bayesian_probs = data.future.get("bayesian_probs", {})
+        bayesian_leader = max(bayesian_probs, key=bayesian_probs.get, default=None)
         if bayesian_leader:
             print(f"Bayesian Pick: {bayesian_leader} ({data.future['bayesian_probs'][bayesian_leader] * 100:.1f}%)")
 

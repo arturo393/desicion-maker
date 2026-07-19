@@ -187,7 +187,7 @@
                     <tr>
                         <td style="font-weight: 600; color: var(--text-bright)">{{ name }}</td>
                         <td>#{{ data.mc_rank }}</td>
-                        <td>#{{ data.topsis_rank }}</td>
+                        <td>#{{ data.topsis_rank|default('-') }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -225,13 +225,17 @@
                 <div>
                     <div class="kpi-title">Confianza Bayesiana</div>
                     <div style="font-size: 1.1rem; color: var(--text-bright); margin-top: 0.5rem;">
+                        {% if advanced_insights.bayesian_prob is defined %}
                         Existe una probabilidad del <strong style="color: var(--accent)">{{ "%.1f" | format(advanced_insights.bayesian_prob * 100) }}%</strong> de que <strong>{{ advanced_insights.bayesian_leader }}</strong> sea la opción óptima absoluta bajo cualquier circunstancia.
+                        {% endif %}
                     </div>
                 </div>
                 <div>
                     <div class="kpi-title">Potencial de Mejora</div>
                     <div style="font-size: 1.1rem; color: var(--text-bright); margin-top: 0.5rem;">
+                        {% if advanced_insights.improvement_potential is defined %}
                         La frontera de eficiencia teórica es un <strong style="color: var(--accent)">{{ "%.1f" | format(advanced_insights.improvement_potential) }}%</strong> superior a la mejor opción actual.
+                        {% endif %}
                     </div>
                 </div>
             </div>

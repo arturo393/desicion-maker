@@ -38,7 +38,7 @@ class SensitivityEngine:
         mc_results: Dict[str, Statistics], factors: List[Factor]
     ) -> Dict[str, Any]:
         if not mc_results or not factors:
-            return {"base_winner": None, "changes": [], "score_changes": [], "robustness_score": 1.0}
+            return {"base_winner": None, "weight_changes": [], "score_changes": [], "robustness_score": 1.0}
 
         base_winner = max(mc_results.items(), key=lambda x: x[1].mean_score)[0]
 
