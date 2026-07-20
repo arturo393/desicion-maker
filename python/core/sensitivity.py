@@ -17,7 +17,13 @@ class SensitivityEngine:
         target_delta: float = 0.0,
         modify_weight: bool = False,
     ) -> Dict[str, float]:
-        """Compute composite scores with optional weight or score shock on one factor."""
+        """Compute composite scores with normalization, matching Monte Carlo logic."""
+        # Compute global bounds per factor across all options
+        bounds: Dict[str, Dict[str, float]] = {}
+        for f in factors:
+            vals = [s.get(f.name, 0) for s in raw_scores.values()]
+            bounds[f.name] = {"min": min(vals), "max": max(vals)}
+
         result = {}
         for name, f_vals in raw_scores.items():
             score = 0.0
@@ -29,7 +35,10 @@ class SensitivityEngine:
                         w = f.weight * (1 + target_delta)
                     else:
                         val = val * (1 + target_delta)
-                score += val * w if f.maximize else -val * w
+                f_min = bounds[f.name]["min"]
+                f_max = bounds[f.name]["max"]
+                norm_val = (val - f_min) / (f_max - f_min) if f_max > f_min else 1.0
+                score += norm_val * w if f.maximize else (1.0 - norm_val) * w
             result[name] = score
         return result
 

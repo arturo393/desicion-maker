@@ -224,12 +224,13 @@ class TestWhatIfEngine:
         assert "Δ" in table
 
     def test_suggest_returns_suggestions(self, engine):
-        engine.set_weight("Cost", 0.8)
-        engine.set_weight("Quality", 0.1)
+        engine.set_weight("Cost", 0.1)
+        engine.set_weight("Quality", 0.8)
         engine.set_weight("Speed", 0.1)
         suggestions = engine._suggest()
-        # Should find some suggestions when weights are extreme
         assert isinstance(suggestions, list)
+        if suggestions:
+            assert any("Cost" in s or "Quality" in s for s in suggestions)
 
     def test_recompute_single_option(self, mc_results, factors):
         single_result = {"OptA": mc_results["OptA"]}

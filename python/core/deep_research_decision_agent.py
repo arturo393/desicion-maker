@@ -122,6 +122,11 @@ class DecisionAnalysisEngine:
         return self._cached_results.get(option.name, AnalysisResult(option_name=option.name))
 
     @staticmethod
+    def _calculate_overall_score(result: AnalysisResult) -> float:
+        """Composite score penalizing risk, used by legacy scripts."""
+        return result.monte_carlo_score * (1.0 - result.risk_score)
+
+    @staticmethod
     def topsis_rank(alternatives: List[str], criteria: Dict[str, Any]) -> Dict[str, float]:
         names = list(criteria.keys())
         weights = [criteria[n]["weight"] for n in names]
