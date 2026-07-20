@@ -78,6 +78,8 @@ class GeneticOptimizer:
                     continue
                 f_min = global_bounds[f.name]["min"]
                 f_max = global_bounds[f.name]["max"]
+                if not (math.isfinite(f_min) and math.isfinite(f_max)):
+                    continue
                 
                 # Normalize exactly like the MonteCarloEngine
                 if f_max > f_min:

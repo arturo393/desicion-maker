@@ -76,6 +76,8 @@ class MonteCarloEngine:
                 sampled_data[var_name] = var.sample(self.num_simulations)
             
             sampled_data = self._apply_correlation(sampled_data)
+            for fn in sampled_data:
+                sampled_data[fn] = np.nan_to_num(sampled_data[fn], nan=0.0, posinf=1e10, neginf=-1e10)
             all_samples[option.name] = sampled_data
 
             # Update global bounds across all options

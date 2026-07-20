@@ -73,6 +73,11 @@ class DecisionRegistry:
         """)
         conn.commit()
 
+    def close(self) -> None:
+        if hasattr(self._local, "conn") and self._local.conn is not None:
+            self._local.conn.close()
+            self._local.conn = None
+
     # ── Decisions CRUD ───────────────────────────────────────────────
 
     def save_decision(

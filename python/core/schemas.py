@@ -19,13 +19,13 @@ class VariableConfig(BaseModel):
 
 
 class OptionConfig(BaseModel):
-    name: str
+    name: str = Field(min_length=1)
     description: str = ""
     variables: Dict[str, VariableConfig] = Field(default_factory=dict)
 
 
 class FactorConfig(BaseModel):
-    name: str
+    name: str = Field(min_length=1)
     weight: float = Field(ge=0)
     maximize: bool = True
     category: str = "General"
@@ -35,8 +35,8 @@ class DecisionConfig(BaseModel):
     name: str = "Untitled Decision"
     mode: str = "standard"
     simulations: int = Field(default=10000, ge=1)
-    factors: List[FactorConfig] = Field(default_factory=list)
-    options: List[OptionConfig] = Field(default_factory=list)
+    factors: List[FactorConfig] = Field(default_factory=list, min_length=1)
+    options: List[OptionConfig] = Field(default_factory=list, min_length=1)
     correlation: Optional[float] = Field(default=None, ge=0, le=1)
     promethee_pref_type: Optional[str] = None
 

@@ -4,6 +4,8 @@ __all__ = ["DecisionTheoryEngine"]
 
 from typing import Dict
 
+import numpy as np
+
 from python.core.models import Statistics
 
 
@@ -55,12 +57,27 @@ class DecisionTheoryEngine:
             f"{laplace[0]} (Avg: {laplace[1].mean_score:.2f})"
         )
 
-        means = {name: stats.mean_score for name, stats in mc_results.items()}
-        best_possible = max(means.values())
-        regrets = {name: best_possible - val for name, val in means.items()}
-        min_regret = min(regrets.items(), key=lambda x: x[1])
+        # Minimax Regret: per-simulation, find best score per scenario
+        first_stats = next(iter(mc_results.values()))
+        if first_stats.raw_scores is not None:
+            n_sims = len(first_stats.raw_scores)
+            regret_matrix = np.zeros((len(mc_results), n_sims))
+            for i, (name, stats) in enumerate(mc_results.items()):
+                regret_matrix[i] = stats.raw_scores
+            best_per_sim = np.max(regret_matrix, axis=0)
+            max_regrets = np.max(best_per_sim - regret_matrix, axis=1)
+            min_regret_idx = int(np.argmin(max_regrets))
+            min_regret_option = list(mc_results.keys())[min_regret_idx]
+            min_regret_val = float(max_regrets[min_regret_idx])
+        else:
+            means = {name: stats.mean_score for name, stats in mc_results.items()}
+            best_possible = max(means.values())
+            regrets = {name: best_possible - val for name, val in means.items()}
+            min_regret_option = min(regrets.items(), key=lambda x: x[1])[0]
+            min_regret_val = min(regrets.values())
+
         strategies["Minimax Regret"] = (
-            f"{min_regret[0]} (Regret: {min_regret[1]:.2f})"
+            f"{min_regret_option} (Max Regret: {min_regret_val:.2f})"
         )
 
         return strategies
