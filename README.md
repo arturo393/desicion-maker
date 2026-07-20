@@ -6,7 +6,7 @@ Generic Python library for multi-criteria decision analysis under uncertainty. C
 
 ```bash
 uv sync
-cp generic_template.py my_decision.py  # then edit
+cp python/analyses/_template.py my_decision.py  # then edit
 uv run python my_decision.py
 ```
 

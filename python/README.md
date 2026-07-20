@@ -64,11 +64,10 @@ python/
 │   ├── metadata.json                 # Tracking de todos los análisis
 │   └── ...
 ├── core/                              # 🧠 Motor principal
-│   ├── deep_research_decision_agent.py  # 13 metodologías + Gemini
-│   └── mining_career_analyzer.py     # Analizador especializado
+│   ├── deep_research_decision_agent.py  # Compat shim para scripts legacy
+│   └── ...                             # 30+ módulos (TOPSIS, PROMETHEE, Monte Carlo, etc.)
 ├── scripts/                           # 🛠️ Utilidades
 │   ├── gemini_query.py
-│   ├── validate_logic.py
 │   └── ...
 ├── api/                               # 🌐 FastAPI (futuro)
 ├── requirements.txt                   # Dependencias
@@ -94,34 +93,30 @@ python/
 ## 🤖 Gemini Integration
 
 ```python
-from core.deep_research_decision_agent import GeminiDeepResearchAgent
+from python.core.gemini_agent import GeminiDeepResearchAgent
 
 agent = GeminiDeepResearchAgent()
-result = await agent.research_option(option, context="Mining Chile")
+result = await agent.research(topic="Decision analysis", context="...")
 ```
 
 ## 📊 Ejemplo de Uso
 
 ```python
-from core.deep_research_decision_agent import CareerOption, DecisionAnalysisEngine
+from python.core.orchestrator import UnifiedDecisionFramework
+from python.core.models import DecisionOption, DistributionType, Factor
 
-# Definir opción
-option = CareerOption(
-    name="Mining Engineer Chile",
-    salary_expected=4_500_000,
-    probability_success=0.75,
-    tech_growth=6.5,
-    income_stability=8.0,
-    # ... más campos
-)
+# Definir factores y opciones
+framework = UnifiedDecisionFramework()
+framework.add_factor(Factor("Costo", 0.5, maximize=False))
+framework.add_factor(Factor("Beneficio", 0.5, maximize=True))
 
-# Analizar
-engine = DecisionAnalysisEngine()
-result = engine.analyze_option(option, all_options=[option])
+opt = DecisionOption("Opción A", "Descripción")
+opt.add_variable("Costo", DistributionType.NORMAL, 1000, 200)
+opt.add_variable("Beneficio", DistributionType.NORMAL, 5000, 1000)
+framework.add_option(opt)
 
-print(f"Score: {result.overall_score}/10")
-print(f"Confidence: {result.confidence*100}%")
-print(result.recommendation)
+import asyncio
+result = asyncio.run(framework.run_analysis(mode="standard"))
 ```
 
 ## 🔧 Development

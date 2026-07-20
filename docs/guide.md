@@ -3,7 +3,7 @@
 ## Step 1: Create Your Script
 
 ```bash
-cp generic_template.py my_decision.py
+cp python/analyses/_template.py my_decision.py
 ```
 
 ## Step 2: Define Factors
