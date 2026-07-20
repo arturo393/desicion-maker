@@ -14,7 +14,7 @@ MAX_IMPROVEMENT_PCT = 500.0
 
 class GeneticOptimizer:
     """
-    Calculates the 'Ideal Option' by harvesting the best traits (genes) 
+    Calculates the 'Ideal Option' by harvesting the best traits (genes)
     from all available options and computing the theoretical efficiency frontier.
     """
     @staticmethod
@@ -33,7 +33,7 @@ class GeneticOptimizer:
         # 1. Find the best raw value for each factor across all options
         ideal_genes = {}
         source_options = {}
-        
+
         # We also need the global min/max for each factor to normalize the 'Ideal'
         global_bounds = {f.name: {"min": float('inf'), "max": float('-inf')} for f in factors}
         for opt_stats in mc_results.values():
@@ -45,11 +45,11 @@ class GeneticOptimizer:
         for f in factors:
             best_raw_val = None
             best_opt = None
-            
+
             for opt_name, stats in mc_results.items():
                 if f.name in stats.factor_stats:
                     val = stats.factor_stats[f.name]["mean"]
-                    
+
                     if best_raw_val is None:
                         best_raw_val = val
                         best_opt = opt_name
@@ -64,7 +64,7 @@ class GeneticOptimizer:
                             if val < best_raw_val:
                                 best_raw_val = val
                                 best_opt = opt_name
-            
+
             if best_opt is not None:
                 ideal_genes[f.name] = best_raw_val
                 source_options[f.name] = best_opt
@@ -80,13 +80,13 @@ class GeneticOptimizer:
                 f_max = global_bounds[f.name]["max"]
                 if not (math.isfinite(f_min) and math.isfinite(f_max)):
                     continue
-                
+
                 # Normalize exactly like the MonteCarloEngine
                 if f_max > f_min:
                     norm_val = (raw_val - f_min) / (f_max - f_min)
                 else:
                     norm_val = 1.0
-                
+
                 # Apply maximization logic
                 score_contribution = norm_val if f.maximize else (1.0 - norm_val)
                 theoretical_max_score += score_contribution * f.weight
@@ -99,7 +99,7 @@ class GeneticOptimizer:
         # 4. Compare against the best actual performer
         best_actual_stats = max(mc_results.values(), key=lambda x: x.mean_score)
         current_best = best_actual_stats.mean_score
-        
+
         # Calculate improvement potential relative to current best
         # Ensure we don't divide by zero
         denominator = max(abs(current_best), EPSILON)

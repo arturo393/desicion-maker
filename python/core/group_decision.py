@@ -3,10 +3,9 @@ from __future__ import annotations
 __all__ = ["GroupDecisionEngine"]
 
 import logging
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List
 
 import numpy as np
-import pandas as pd
 
 from python.core.models import Factor
 

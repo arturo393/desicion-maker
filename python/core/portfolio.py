@@ -3,8 +3,7 @@ from __future__ import annotations
 __all__ = ["PortfolioOptimizer"]
 
 import logging
-from itertools import combinations
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict
 
 import numpy as np
 

@@ -3,7 +3,7 @@ from __future__ import annotations
 __all__ = ["RobustOptimizer"]
 
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 import numpy as np
 
@@ -75,18 +75,18 @@ class RobustOptimizer:
                 for delta in [weight_shock, -weight_shock]:
                     new_weight = f.weight * (1 + delta)
                     diff = (new_weight - f.weight) * eff_mean
-                    
+
                     shocked_score = stats.mean_score + diff
                     if shocked_score < worst_score:
                         worst_score = shocked_score
-                    
+
                     if abs(diff) > abs(stats.mean_score * 0.1): # 10% impact threshold
                         sensitive_factors.append({
                             "factor": f.name,
                             "impact": diff,
                             "shock": delta
                         })
-            
+
             results["weight_sensitivity"][opt_name] = sensitive_factors
 
         # 2. Distributionally Robust Optimization (DRO) Analysis
@@ -98,11 +98,11 @@ class RobustOptimizer:
                 samples = stats.raw_scores
                 mean = np.mean(samples)
                 variance = np.var(samples)
-                
-                # The DRO score represents the worst-case mean within a 
+
+                # The DRO score represents the worst-case mean within a
                 # Wasserstein ball of radius epsilon around the empirical distribution.
                 dro_score = mean - epsilon * np.sqrt(variance)
-                
+
                 # Confidence interval width penalty
                 stability = 1.0 - (np.sqrt(variance) / (abs(mean) + 1e-9))
             else:

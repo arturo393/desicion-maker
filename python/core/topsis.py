@@ -2,8 +2,8 @@ from __future__ import annotations
 
 __all__ = ["TOPSISEngine"]
 
-import math
 import logging
+import math
 from typing import Dict, List, Tuple
 
 import pandas as pd

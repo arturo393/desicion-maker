@@ -16,12 +16,10 @@ __all__ = [
 ]
 
 import math
-from typing import TYPE_CHECKING, Any, Dict, List, Tuple
-
-import numpy as np
+from typing import TYPE_CHECKING, Dict, List, Tuple
 
 if TYPE_CHECKING:
-    from python.core.models import Factor, Statistics
+    from python.core.models import Statistics
 
 # ── Re-export shared constants ──────────────────────────────────────
 

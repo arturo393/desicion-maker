@@ -3,7 +3,7 @@ from __future__ import annotations
 __all__ = ["ExplainabilityEngine"]
 
 import logging
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List
 
 import numpy as np
 import pandas as pd
@@ -214,7 +214,7 @@ class ExplainabilityEngine:
         winner_name = sorted_opts[0][0]
         winner_score = sorted_opts[0][1].mean_score
 
-        lines.append(f"**Decision Explanation**")
+        lines.append("**Decision Explanation**")
         lines.append("")
         lines.append(f"**{winner_name}** is the recommended option")
         lines.append(f"with a weighted score of **{winner_score:.3f}** ")

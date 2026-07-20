@@ -6,14 +6,13 @@ wrapping the current UnifiedDecisionFramework API.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional
+from dataclasses import dataclass
+from typing import Any, Dict, List
 
 import numpy as np
 
 from python.core.models import DecisionOption, DistributionType, Factor
 from python.core.orchestrator import UnifiedDecisionFramework
-from python.core.topsis import TOPSISEngine
 
 
 @dataclass

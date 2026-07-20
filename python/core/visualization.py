@@ -4,10 +4,9 @@ __all__ = ["VisualizationEngine"]
 
 import logging
 import os
-from typing import Dict, List, Optional
+from typing import Dict, List
 
 import matplotlib.pyplot as plt
-import numpy as np
 import pandas as pd
 import seaborn as sns
 
@@ -62,13 +61,13 @@ class VisualizationEngine:
         for name, stats in mc_results.items():
             if stats.raw_scores is not None:
                 sns.kdeplot(stats.raw_scores, label=f"{name}", fill=True, alpha=0.4, linewidth=2)
-        
+
         plt.title("Risk Profiles: How likely is each outcome?", pad=20, fontsize=14, fontweight='bold')
         plt.xlabel("Quality Score (0-1)", fontsize=12)
         plt.ylabel("Probability Density", fontsize=12)
         plt.legend(frameon=False, loc='upper left')
         plt.grid(True, alpha=0.1)
-        
+
         path = os.path.join(output_dir, f"risk_profiles_{timestamp}.png")
         plt.savefig(path, dpi=150, bbox_inches="tight")
         plt.close()
@@ -80,7 +79,7 @@ class VisualizationEngine:
             return ""
         first_opt = next(iter(info_theory_results))
         mi_data = info_theory_results[first_opt]
-        
+
         df = pd.DataFrame(list(mi_data.items()), columns=["Factor", "Importance"])
         df = df.sort_values("Importance", ascending=False)
 
@@ -89,7 +88,7 @@ class VisualizationEngine:
         plt.title(f"Non-linear Factor Importance (Mutual Information) - {first_opt}")
         plt.xlabel("Relative Information Gain (0-1)")
         plt.ylabel("Decision Factor")
-        
+
         path = os.path.join(output_dir, f"factor_importance_{timestamp}.png")
         plt.savefig(path, dpi=150, bbox_inches="tight")
         plt.close()
@@ -101,26 +100,26 @@ class VisualizationEngine:
         for opt, dro_score in robust_results.get("dro_scores", {}).items():
             stability = robust_results.get("stability_metrics", {}).get(opt, 0)
             data.append({"Option": opt, "DRO_Score": dro_score, "Stability": stability})
-        
+
         df = pd.DataFrame(data)
-        
+
         fig, ax1 = plt.subplots(figsize=(10, 6))
-        
+
         # Bar for DRO Score
-        bars = sns.barplot(x="Option", y="DRO_Score", data=df, ax=ax1, alpha=0.8, hue="Option", palette="viridis", legend=False)
+        sns.barplot(x="Option", y="DRO_Score", data=df, ax=ax1, alpha=0.8, hue="Option", palette="viridis", legend=False)
         ax1.set_ylabel("Defensive Score (Worst Case)", color="#58a6ff", fontsize=11)
         ax1.set_xlabel("")
         ax1.tick_params(axis='x', rotation=15)
-        
+
         # Line for Stability
         ax2 = ax1.twinx()
         sns.lineplot(x="Option", y="Stability", data=df, ax=ax2, marker="o", color="#f85149", linewidth=3, markersize=8)
         ax2.set_ylabel("Certainty Level (0-1)", color="#f85149", fontsize=11)
         ax2.set_ylim(0, 1.1)
         ax2.grid(False)
-        
+
         plt.title("Robustness Audit: Defense vs Consistency", pad=20, fontsize=14, fontweight='bold')
-        
+
         path = os.path.join(output_dir, f"robustness_audit_{timestamp}.png")
         plt.savefig(path, dpi=150, bbox_inches="tight")
         plt.close()

@@ -7,7 +7,7 @@ from typing import Dict, List, Optional
 
 import numpy as np
 
-from python.core.models import Factor, DecisionOption, Statistics
+from python.core.models import DecisionOption, Factor, Statistics
 
 logger = logging.getLogger(__name__)
 
@@ -74,7 +74,7 @@ class MonteCarloEngine:
             sampled_data = {}
             for var_name, var in option.variables.items():
                 sampled_data[var_name] = var.sample(self.num_simulations)
-            
+
             sampled_data = self._apply_correlation(sampled_data)
             for fn in sampled_data:
                 sampled_data[fn] = np.nan_to_num(sampled_data[fn], nan=0.0, posinf=1e10, neginf=-1e10)
@@ -96,11 +96,11 @@ class MonteCarloEngine:
             for factor in self.factors:
                 if factor.name in sampled_data:
                     raw_values = sampled_data[factor.name]
-                    
+
                     if normalize:
                         f_min = global_bounds[factor.name]["min"]
                         f_max = global_bounds[factor.name]["max"]
-                        
+
                         if f_max > f_min:
                             # Standard Min-Max Normalization to [0, 1]
                             norm_values = (raw_values - f_min) / (f_max - f_min)

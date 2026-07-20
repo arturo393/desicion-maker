@@ -4,7 +4,7 @@ __all__ = ["AntifragileEngine"]
 
 import logging
 from itertools import combinations
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List
 
 import numpy as np
 
@@ -91,7 +91,7 @@ class AntifragileEngine:
             beats_all = all(portfolio_score >= single_scores[n] for n in names)
 
             if beats_all:
-                diversification = (
+                (
                     f"{single_scores[a]:.3f} + {single_scores[b]:.3f} "
                     f"= {portfolio_score:.3f} (avg)"
                 )

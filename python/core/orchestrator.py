@@ -10,26 +10,27 @@ from typing import Any, Dict, List, Optional
 import numpy as np
 import pandas as pd
 
-from python.core.models import DecisionOption, Factor
-from python.core.utils import (
-    SCALE_MISMATCH_THRESHOLD, DEFAULT_BOOTSTRAP_ITERATIONS,
-)
-from python.core.monte_carlo import MonteCarloEngine
-from python.core.topsis import TOPSISEngine
-from python.core.promethee import PrometheeEngine
-from python.core.pareto import ParetoEngine
-from python.core.sensitivity import SensitivityEngine
-from python.core.bayesian import BayesianEngine
-from python.core.genetic import GeneticOptimizer
-from python.core.decision_theory import DecisionTheoryEngine
-from python.core.gemini_agent import GeminiDeepResearchAgent
-from python.core.robust import RobustOptimizer
 from python.core.aggregator import RankAggregator
-from python.core.bootstrap import BootstrapRanking
-from python.core.information_theory import InformationTheoryEngine
-from python.core.visualization import VisualizationEngine
-from python.core.explainability import ExplainabilityEngine
 from python.core.antifragile import AntifragileEngine
+from python.core.bayesian import BayesianEngine
+from python.core.bootstrap import BootstrapRanking
+from python.core.decision_theory import DecisionTheoryEngine
+from python.core.explainability import ExplainabilityEngine
+from python.core.gemini_agent import GeminiDeepResearchAgent
+from python.core.genetic import GeneticOptimizer
+from python.core.information_theory import InformationTheoryEngine
+from python.core.models import DecisionOption, Factor
+from python.core.monte_carlo import MonteCarloEngine
+from python.core.pareto import ParetoEngine
+from python.core.promethee import PrometheeEngine
+from python.core.robust import RobustOptimizer
+from python.core.sensitivity import SensitivityEngine
+from python.core.topsis import TOPSISEngine
+from python.core.utils import (
+    DEFAULT_BOOTSTRAP_ITERATIONS,
+    SCALE_MISMATCH_THRESHOLD,
+)
+from python.core.visualization import VisualizationEngine
 
 logger = logging.getLogger(__name__)
 
@@ -211,7 +212,7 @@ class UnifiedDecisionFramework:
             for opt, res in zip(self.mc_engine.options, results):
                 ai_reports[opt.name] = res
 
-        from python.core.reporting import print_report, save_report, ReportData
+        from python.core.reporting import ReportData, print_report, save_report
 
         report_data = ReportData(
             mode=mode, mc_results=mc_results, topsis_scores=topsis_scores,

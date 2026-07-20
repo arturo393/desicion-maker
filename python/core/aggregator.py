@@ -2,7 +2,7 @@ from __future__ import annotations
 
 __all__ = ["RankAggregator"]
 
-from typing import Any, Dict, List
+from typing import Any, Dict
 
 import pandas as pd
 

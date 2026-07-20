@@ -210,10 +210,10 @@ def save_json_report(
 def save_markdown_report(data: ReportData) -> str:
     bluf_winner, bluf_reason = resolve_winner(data.topsis_scores, data.mc_results)
 
-    md = f"# Decision Analysis Report\n\n"
+    md = "# Decision Analysis Report\n\n"
     md += f"**Date:** {datetime.now().strftime('%Y-%m-%d %H:%M')}\n"
     md += f"**Execution Tier:** {data.mode.upper()}\n\n"
-    
+
     md += "## Visual Insights\n\n"
     md += f"![Risk Profiles](risk_profiles_{data.timestamp}.png)\n\n"
     md += f"![Factor Importance](factor_importance_{data.timestamp}.png)\n\n"
@@ -270,7 +270,7 @@ def save_markdown_report(data: ReportData) -> str:
                 md += f"  - If **{change['factor']}** score changes by {change['change']} -> Winner flips to **{change['new_winner']}**\n"
         if not weight_changes and not score_changes:
             md += "- **Verdict:** Stable Decision.\n"
-        
+
         if data.future.get("robust_optimizer"):
             robust_data = data.future["robust_optimizer"]
             md += "\n### 1.5 Distributionally Robust Optimization (DRO)\n"
@@ -279,7 +279,7 @@ def save_markdown_report(data: ReportData) -> str:
                 stability = robust_data.get("stability_metrics", {}).get(opt, 0)
                 dro_rows.append([opt, f"{score:.2f}", f"{stability*100:.1f}%"])
             md += _md_table(["Option", "DRO Score (Worst-Case)", "Stability Index"], dro_rows)
-        
+
         if data.future.get("info_theory"):
             md += "\n### 1.6 Information Theory (Non-linear Importance)\n"
             for opt_name, mi_data in data.future["info_theory"].items():
@@ -505,14 +505,14 @@ def print_report(data: ReportData):
             print(f"Warning: {wc} weight-shock scenarios flip the winner.")
         if sc > 0:
             print(f"Warning: {sc} score-shock scenarios flip the winner.")
-        
+
         if data.future.get("robust_optimizer"):
             robust_data = data.future["robust_optimizer"]
             print("\nDistributionally Robust Analysis (DRO):")
             for opt, score in robust_data.get("dro_scores", {}).items():
                 stability = robust_data.get("stability_metrics", {}).get(opt, 0)
                 print(f"  - {opt:20}: Score={score:8.2f} | Stability={stability*100:5.1f}%")
-        
+
         if data.future.get("info_theory"):
             print("\nNon-linear Factor Importance (Information Theory):")
             for opt_name, mi_data in data.future["info_theory"].items():

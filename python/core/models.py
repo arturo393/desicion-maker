@@ -18,7 +18,6 @@ from typing import Callable, Dict, List, Optional
 
 import numpy as np
 
-
 EPSILON = 1e-9
 
 

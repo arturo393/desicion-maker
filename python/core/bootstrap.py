@@ -5,7 +5,6 @@ __all__ = ["BootstrapRanking"]
 from typing import Any, Dict, List, Tuple
 
 import numpy as np
-import pandas as pd
 
 from python.core.topsis import TOPSISEngine
 

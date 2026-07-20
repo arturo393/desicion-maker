@@ -5,7 +5,7 @@ __all__ = ["SensitivityEngine"]
 from typing import Any, Dict, List
 
 from python.core.models import Factor, Statistics
-from python.core.utils import WEIGHT_DELTA, SCORE_DELTAS
+from python.core.utils import SCORE_DELTAS, WEIGHT_DELTA
 
 
 class SensitivityEngine:
