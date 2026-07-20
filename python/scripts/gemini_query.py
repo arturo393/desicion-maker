@@ -96,10 +96,12 @@ class GeminiClient:
             if self.debug:
                 print(f"[DEBUG] Respuesta: {json.dumps(result, indent=2)}")
             
-            if 'contents' in result and len(result['contents']) > 0:
-                content = result['contents'][0]
-                if 'parts' in content and len(content['parts']) > 0:
-                    return content['parts'][0].get('text', '')
+            if 'candidates' in result and len(result['candidates']) > 0:
+                candidate = result['candidates'][0]
+                content = candidate.get('content', {})
+                parts = content.get('parts', [])
+                if parts:
+                    return parts[0].get('text', '')
             
             return "Sin respuesta de Gemini"
             
