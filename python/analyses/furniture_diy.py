@@ -43,7 +43,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent / 'core'))
 
 from deep_research_decision_agent import CareerOption, DecisionAnalysisEngine
 
-from python.core.gemini_helper import GEMINI_AVAILABLE, search_with_gemini
+from gemini_helper import GEMINI_AVAILABLE, search_with_gemini
 
 
 def research_diy_furniture():

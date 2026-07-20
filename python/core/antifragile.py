@@ -325,9 +325,6 @@ class AntifragileEngine:
     ) -> List[Dict[str, Any]]:
         """
         Identify factors that, if removed (weight → 0), improve all options.
-
-        This implements the 'Via Negativa' concept: what to stop doing
-        rather than start doing.
         """
         if not mc_results or not factors:
             return []
@@ -335,6 +332,19 @@ class AntifragileEngine:
         names = list(mc_results.keys())
         original_scores = {n: s.mean_score for n, s in mc_results.items()}
         original_winner = max(original_scores, key=original_scores.get)
+
+        # Compute global bounds per factor using all available data
+        factor_names = list({f.name for f in factors})
+        global_bounds: Dict[str, Dict[str, float]] = {}
+        for fn in factor_names:
+            vals = []
+            for stats in mc_results.values():
+                if stats.raw_factor_data and fn in stats.raw_factor_data:
+                    vals.extend(stats.raw_factor_data[fn].flatten().tolist())
+                elif fn in stats.factor_stats:
+                    vals.append(stats.factor_stats[fn]["mean"])
+            global_bounds[fn] = {"min": min(vals) if vals else 0.0, "max": max(vals) if vals else 1.0}
+
         candidates = []
 
         for factor_to_remove in factors:
@@ -360,10 +370,17 @@ class AntifragileEngine:
                 for f in remaining:
                     if f.name not in raw_data:
                         continue
-                    # Renormalize weights
                     w = f.weight / total_remaining_weight
                     vals = raw_data[f.name]
-                    total = (vals * w) if total is None else total + vals * w
+                    f_min = global_bounds[f.name]["min"]
+                    f_max = global_bounds[f.name]["max"]
+                    if f_max > f_min:
+                        norm_vals = (vals - f_min) / (f_max - f_min)
+                    else:
+                        norm_vals = np.ones_like(vals)
+                    if not f.maximize:
+                        norm_vals = 1.0 - norm_vals
+                    total = (norm_vals * w) if total is None else total + norm_vals * w
 
                 new_scores[name] = float(np.mean(total)) if total is not None else 0.0
 

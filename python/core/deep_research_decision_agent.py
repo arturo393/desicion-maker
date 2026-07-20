@@ -18,7 +18,7 @@ from python.core.topsis import TOPSISEngine
 
 @dataclass
 class CareerOption:
-    """Legacy CareerOption class — wraps DecisionOption."""
+    """Legacy CareerOption class."""
     name: str
     salary_expected: float = 0.0
     probability_success: float = 0.5
@@ -47,15 +47,28 @@ class CareerOption:
         return opt
 
 
-AnalysisResult = Dict[str, Any]
+@dataclass
+class AnalysisResult:
+    """Legacy analysis result with attribute-style access."""
+    option_name: str = ""
+    overall_score: float = 0.0
+    monte_carlo_score: float = 0.0
+    topsis_rank: int = 0
+    pareto_optimal: bool = False
+    regret_analysis: float = 0.0
+    risk_score: float = 0.0
+    scenario_robustness: float = 0.0
+    confidence: float = 0.0
+    recommendation: str = ""
 
 
 class DecisionAnalysisEngine:
     """Legacy DecisionAnalysisEngine — wraps UnifiedDecisionFramework."""
 
-    def __init__(self):
+    def __init__(self, debug: bool = False):
         self.framework = UnifiedDecisionFramework()
         self._options: List[CareerOption] = []
+        self._cached_results: Dict[str, AnalysisResult] = {}
 
     def add_option(self, option: CareerOption) -> None:
         self._options.append(option)
@@ -65,14 +78,51 @@ class DecisionAnalysisEngine:
     def add_factor(self, name: str, weight: float, maximize: bool = True) -> None:
         self.framework.add_factor(Factor(name, weight, maximize))
 
-    def run(self) -> AnalysisResult:
+    def _run_full_analysis(self) -> Dict[str, AnalysisResult]:
         import asyncio
         result = asyncio.run(self.framework.run_analysis(mode="standard"))
-        return result
+        mc_results = result.get("mc_results", {})
+        topsis = result.get("topsis_scores")
+        pareto = result.get("pareto", {})
+        sensitivity = result.get("sensitivity", {})
+
+        if topsis is not None and hasattr(topsis, 'empty') and not topsis.empty:
+            topsis_ranks = {name: rank + 1 for rank, name in enumerate(topsis.sort_values(ascending=False).index)}
+        else:
+            sorted_names = sorted(mc_results.keys(), key=lambda n: mc_results[n].mean_score, reverse=True)
+            topsis_ranks = {name: rank + 1 for rank, name in enumerate(sorted_names)}
+
+        efficient = set(pareto.get("efficient_frontier", []))
+        robustness = sensitivity.get("robustness_score", 1.0)
+
+        regret_values = {}
+        if mc_results:
+            max_score = max(s.mean_score for s in mc_results.values())
+            regret_values = {n: max_score - s.mean_score for n, s in mc_results.items()}
+
+        results = {}
+        for name, stats in mc_results.items():
+            results[name] = AnalysisResult(
+                option_name=name,
+                overall_score=stats.mean_score,
+                monte_carlo_score=stats.mean_score,
+                topsis_rank=topsis_ranks.get(name, 99),
+                pareto_optimal=name in efficient,
+                regret_analysis=regret_values.get(name, 0.0),
+                risk_score=stats.std_dev,
+                scenario_robustness=robustness * (1.0 - stats.std_dev / (abs(stats.mean_score) + 1e-9)),
+                confidence=stats.success_rate,
+                recommendation="Recommended" if name == (topsis.index[0] if topsis is not None and hasattr(topsis, 'empty') and not topsis.empty else (max(mc_results.items(), key=lambda x: x[1].mean_score)[0] if mc_results else "")) else "",
+            )
+        return results
+
+    def analyze_option(self, option: CareerOption, all_options: List[CareerOption]) -> AnalysisResult:
+        if not self._cached_results:
+            self._cached_results = self._run_full_analysis()
+        return self._cached_results.get(option.name, AnalysisResult(option_name=option.name))
 
     @staticmethod
     def topsis_rank(alternatives: List[str], criteria: Dict[str, Any]) -> Dict[str, float]:
-        """Simple TOPSIS ranking for legacy scripts."""
         names = list(criteria.keys())
         weights = [criteria[n]["weight"] for n in names]
         max_bools = [criteria[n].get("maximize", True) for n in names]
@@ -82,19 +132,15 @@ class DecisionAnalysisEngine:
             for j, name in enumerate(names):
                 matrix[i, j] = criteria[name].get(alt, 0)
 
-        # Normalize
         norms = np.sqrt((matrix ** 2).sum(axis=0))
         norms = np.where(norms == 0, 1, norms)
         normalized = matrix / norms
 
-        # Weighted
         weighted = normalized * weights
 
-        # Ideal / anti-ideal
         ideal = np.where(max_bools, weighted.max(axis=0), weighted.min(axis=0))
         anti_ideal = np.where(max_bools, weighted.min(axis=0), weighted.max(axis=0))
 
-        # Distances
         d_pos = np.sqrt(((weighted - ideal) ** 2).sum(axis=1))
         d_neg = np.sqrt(((weighted - anti_ideal) ** 2).sum(axis=1))
 
