@@ -1,0 +1,27 @@
+site_name: Decision Maker Framework (v3.0 Nivel Dios)
+theme:
+  name: material
+  features:
+    - navigation.tabs
+    - navigation.indexes
+    - content.code.annotate
+    - content.code.copy
+  palette:
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: blue
+      accent: cyan
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [src]
+
+nav:
+  - Home: index.md
+  - Guide: guide.md
+  - Architecture: ARCHITECTURE.md
+  - ADRs:
+    - 001: Rust Math Engine: adr/001-use-rust-for-math-engine.md

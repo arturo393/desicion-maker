@@ -1,0 +1,7 @@
+/home/arturo/development/lumina/desicion-maker/rust_core/target/release/deps/rawpointer-e5e7d2d33a111b2c.d: /home/arturo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/rawpointer-0.2.1/src/lib.rs
+
+/home/arturo/development/lumina/desicion-maker/rust_core/target/release/deps/librawpointer-e5e7d2d33a111b2c.rlib: /home/arturo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/rawpointer-0.2.1/src/lib.rs
+
+/home/arturo/development/lumina/desicion-maker/rust_core/target/release/deps/librawpointer-e5e7d2d33a111b2c.rmeta: /home/arturo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/rawpointer-0.2.1/src/lib.rs
+
+/home/arturo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/rawpointer-0.2.1/src/lib.rs:

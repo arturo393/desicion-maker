@@ -73,3 +73,5 @@ scratch/
 /language_evaluation.py
 /test_ahp.py
 /generic_template.py
+decision_maker.db
+decisions.db

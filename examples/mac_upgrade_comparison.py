@@ -5,13 +5,13 @@ Basado en el caso original mac_upgrade_example.py
 """
 
 import asyncio
-import sys
 import os
+import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
+from python.core.models import DecisionOption, DistributionType, Factor  # noqa: E402
 from python.core.orchestrator import UnifiedDecisionFramework
-from python.core.models import DecisionOption, Factor, DistributionType  # noqa: E402
 
 
 def cost_score(price):      return max(0, 100 - (price / 50))
@@ -88,52 +88,52 @@ async def main():
         topsis = result["topsis_scores"]
         future = result["future"]
 
-        print(f"\n  --- MC RANKING ---")
+        print("\n  --- MC RANKING ---")
         for name, s in sorted(mc.items(), key=lambda x: x[1].mean_score, reverse=True):
             print(f"    {name:<22s}  Mean={s.mean_score:7.2f}  SD={s.std_dev:.2f}  VaR={s.var_95:.2f}  CVaR={s.cvar_95:.2f}")
 
         if not topsis.empty:
-            print(f"\n  --- F-TOPSIS ---")
+            print("\n  --- F-TOPSIS ---")
             for name, score in topsis.items():
                 print(f"    {name:<22s}  Score={score:.4f}")
 
         if future:
             if "promethee_uncertainty" in future and not future["promethee_uncertainty"].empty:
-                print(f"\n  --- PROMETHEE (con incertidumbre) ---")
+                print("\n  --- PROMETHEE (con incertidumbre) ---")
                 for name, score in future["promethee_uncertainty"].items():
                     print(f"    {name:<22s}  NetFlow={score:.4f}")
 
             if "robust_optimizer" in future:
                 ro = future["robust_optimizer"]
-                print(f"\n  --- ROBUST OPTIMIZER ---")
+                print("\n  --- ROBUST OPTIMIZER ---")
                 print(f"    Winner: {ro.get('winner', 'N/A')}")
                 for name, score in ro.get("robust_ranking", {}).items():
                     print(f"    {name:<22s}  RobustScore={score:.2f}")
 
             if "rank_aggregation" in future:
                 ra = future["rank_aggregation"]
-                print(f"\n  --- RANK AGGREGATION (Borda) ---")
+                print("\n  --- RANK AGGREGATION (Borda) ---")
                 print(f"    Winner: {ra.get('winner', 'N/A')}")
                 print(f"    Ranking: {ra.get('ranking', [])}")
 
             if "promethee_scores" in future and not future["promethee_scores"].empty:
-                print(f"\n  --- PROMETHEE II (crisp) ---")
+                print("\n  --- PROMETHEE II (crisp) ---")
                 for name, score in future["promethee_scores"].items():
                     print(f"    {name:<22s}  NetFlow={score:.4f}")
 
             if "bayesian_probs" in future:
-                print(f"\n  --- BAYESIAN PROBS ---")
+                print("\n  --- BAYESIAN PROBS ---")
                 for name, prob in future["bayesian_probs"].items():
                     print(f"    {name:<22s}  Prob={prob:.1%}")
 
             if "ideal_option" in future:
                 ideal = future["ideal_option"]
-                print(f"\n  --- GENETIC IDEAL ---")
+                print("\n  --- GENETIC IDEAL ---")
                 print(f"    Improvement: {ideal.get('improvement_potential', 0):.1f}%")
                 print(f"    RawMax: {ideal.get('raw_max', 0):.2f}")
 
             if "bootstrap_ci" in future:
-                print(f"\n  --- BOOTSTRAP CI ---")
+                print("\n  --- BOOTSTRAP CI ---")
                 for name, ci in future["bootstrap_ci"].items():
                     print(f"    {name:<22s}  MeanRank={ci['mean_rank']:.2f}  CI=[{ci['ci_low']:.1f}, {ci['ci_high']:.1f}]  P(best)={ci['p_best']:.1%}")
 

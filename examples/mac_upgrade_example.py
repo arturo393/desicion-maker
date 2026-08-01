@@ -14,26 +14,27 @@ Factors:
 - Longevity (Years) (Maximize)
 """
 
-import sys
-import os
 import asyncio
+import os
+import sys
 
 # Fix path to import core logic
 sys.path.append(os.path.join(os.path.dirname(__file__), "../python"))
 
+from python.core.models import DecisionOption, DistributionType, Factor
 from python.core.orchestrator import UnifiedDecisionFramework
-from python.core.models import DecisionOption, Factor, DistributionType
+
 
 async def main():
     print("🍎 Setting up Mac Upgrade Decision...")
-    
+
     framework = UnifiedDecisionFramework()
     framework.mc_engine.num_simulations = 50000  # High precision
-    
+
     # =========================================================================
     # 1. DEFINE FACTORS (All standardized to 0-100 Utility Score)
     # =========================================================================
-    
+
     # Weights sum to 1.0 ideally
     framework.add_factor(Factor("Score_Performance", 0.30, maximize=True))
     framework.add_factor(Factor("Score_CostEfficiency", 0.20, maximize=True)) # Higher is better (Cheaper)
@@ -43,7 +44,7 @@ async def main():
     framework.add_factor(Factor("Score_Resale", 0.05, maximize=True))
     framework.add_factor(Factor("Score_Productivity", 0.05, maximize=True))
 
-    
+
     # =========================================================================
     # 2. DEFINE OPTIONS
     # =========================================================================
@@ -58,10 +59,10 @@ async def main():
     def comfort_score(val):     return val * 10                         # 10 = 100
     def resale_score(val):      return min(100, val / 25)               # $2500 = 100
     def prod_score(hours):      return min(100, hours * 10)             # 10h = 100
-    
+
     # --- Option A: Upgrade RAM (Keep Intel) ---
     opt_ram = DecisionOption("Upgrade RAM (Keep Intel)", "Low Cost, Low Performance")
-    
+
     # Cost: $450 -> Score ~91
     opt_ram.add_variable("Score_CostEfficiency", DistributionType.DETERMINISTIC, cost_score(450))
     # Performance: 1.1x -> Score ~11
@@ -76,12 +77,12 @@ async def main():
     opt_ram.add_variable("Score_Resale", DistributionType.NORMAL, resale_score(200), 2)
     # Productivity: 0.5h -> Score 5
     opt_ram.add_variable("Score_Productivity", DistributionType.NORMAL, prod_score(0.5), 2)
-    
+
     framework.add_option(opt_ram)
-    
+
     # --- Option B: Buy M4 Max (Powerhouse) ---
     opt_m4 = DecisionOption("New MacBook Pro M4 Max", "High Cost, Max Performance")
-    
+
     # Cost: $3800 -> Score ~24
     opt_m4.add_variable("Score_CostEfficiency", DistributionType.NORMAL, cost_score(3800), 5)
     # Performance: 6.0x -> Score 60
@@ -96,12 +97,12 @@ async def main():
     opt_m4.add_variable("Score_Resale", DistributionType.NORMAL, resale_score(1800), 5)
     # Productivity: 10h -> Score 100
     opt_m4.add_variable("Score_Productivity", DistributionType.NORMAL, prod_score(10.0), 5)
-    
+
     framework.add_option(opt_m4)
-    
+
     # --- Option C: Wait for M5 (Future) ---
     opt_m5 = DecisionOption("Wait for M5 (Late 2027)", "Higher Risk/Reward")
-    
+
     # Cost: $4500 -> Score ~10
     opt_m5.add_variable("Score_CostEfficiency", DistributionType.TRIANGULAR, cost_score(5000), cost_score(4500), cost_score(4000))
     # Performance: 7.5x -> Score 75
@@ -116,13 +117,13 @@ async def main():
     opt_m5.add_variable("Score_Resale", DistributionType.NORMAL, resale_score(2200), 5)
     # Productivity: 11h -> Score 100
     opt_m5.add_variable("Score_Productivity", DistributionType.NORMAL, prod_score(11.0), 5)
-    
+
     framework.add_option(opt_m5)
-    
+
     # =========================================================================
     # 3. RUN ANALYSIS
     # =========================================================================
-    
+
     # Check if user wants AI research
     use_ai = "--ai" in sys.argv
     await framework.run_analysis(use_ai=use_ai)
