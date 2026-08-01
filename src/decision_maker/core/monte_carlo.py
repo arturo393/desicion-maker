@@ -90,8 +90,8 @@ class MonteCarloEngine:
                 factor_stats=stats_dict["factor_stats"],
                 var_95=stats_dict["var_95"],
                 cvar_95=stats_dict["cvar_95"],
-                raw_scores=np.array([]), # TODO: Send full arrays from Rust if needed for Explainability
-                raw_factor_data={},
+                raw_scores=None,
+                raw_factor_data=None,
             )
             results[opt_name] = stats
 
