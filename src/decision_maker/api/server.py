@@ -7,9 +7,10 @@ import os
 from decision_maker.core.orchestrator import UnifiedDecisionFramework
 from decision_maker.core.models import Factor, DecisionOption, DistributionType
 from decision_maker.core.db import get_session
-from decision_maker.core.db_models import AnalysisSession
+from decision_maker.core.db_models import AnalysisSession, OutcomeRecord
 from sqlmodel import Session, select
 import uvicorn
+from decision_maker.api.templates import TEMPLATES
 
 app = FastAPI(title="Decision Maker God-Mode API", version="3.0.0")
 
@@ -26,6 +27,7 @@ class FactorSchema(BaseModel):
     weight: float
     maximize: bool = True
     category: str = "General"
+    stakeholder_weights: Optional[Dict[str, float]] = None
 
 class VariableSchema(BaseModel):
     distribution: str
@@ -55,7 +57,10 @@ async def analyze(req: AnalysisRequest):
         fw = UnifiedDecisionFramework()
         fw.mc_engine.num_simulations = 10000
         for f in req.factors:
-            fw.add_factor(Factor(name=f.name, weight=f.weight, maximize=f.maximize, category=f.category))
+            kwargs = {"name": f.name, "weight": f.weight, "maximize": f.maximize, "category": f.category}
+            if f.stakeholder_weights is not None:
+                kwargs["stakeholder_weights"] = f.stakeholder_weights
+            fw.add_factor(Factor(**kwargs))
         for o in req.options:
             opt = DecisionOption(name=o.name, description=o.description)
             for vname, vcfg in o.variables.items():
@@ -126,6 +131,37 @@ def get_session_data(session_id: str):
         "factors": db_session.factors_json,
         "options": db_session.options_json
     }
+
+class OutcomeRequest(BaseModel):
+    actual_winner: str
+    actual_score: float
+    notes: Optional[str] = None
+
+@app.get("/templates")
+def list_templates():
+    return TEMPLATES
+
+@app.post("/sessions/{session_id}/outcome")
+def register_outcome(session_id: str, req: OutcomeRequest):
+    session = next(get_session())
+    db_session = session.get(AnalysisSession, session_id)
+    if not db_session:
+        raise HTTPException(status_code=404, detail="Session not found")
+        
+    # Super simple accuracy calculation (just for demonstration)
+    accuracy = 100.0 if req.actual_winner else 0.0 # Logic can be expanded
+    
+    outcome = OutcomeRecord(
+        session_id=session_id,
+        actual_winner=req.actual_winner,
+        actual_score=req.actual_score,
+        accuracy_percentage=accuracy,
+        notes=req.notes
+    )
+    session.add(outcome)
+    session.commit()
+    session.refresh(outcome)
+    return outcome
 
 def run_server(host="0.0.0.0", port=8001):
     uvicorn.run(app, host=host, port=port)

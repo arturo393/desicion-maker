@@ -40,6 +40,7 @@ from decision_maker.core.visualization import VisualizationEngine
 from decision_maker.core.game_theory import GameTheoryEngine
 from decision_maker.core.roa import RealOptionsEngine
 from decision_maker.core.ml_surrogate import MLSurrogateEngine
+from decision_maker.core.portfolio import PortfolioOptimizer
 
 logger = logging.getLogger(__name__)
 
@@ -136,6 +137,7 @@ class UnifiedDecisionFramework:
         self.game_theory_engine = GameTheoryEngine()
         self.roa_engine = RealOptionsEngine()
         self.ml_surrogate_engine = MLSurrogateEngine()
+        self.portfolio_optimizer = PortfolioOptimizer()
         self.promethee_pref_types = promethee_pref_types
         self.promethee_pref_params = promethee_pref_params
 
@@ -265,6 +267,7 @@ class UnifiedDecisionFramework:
             future_metrics["game_theory"] = self.game_theory_engine.analyze(mc_results)
             future_metrics["real_options"] = self.roa_engine.analyze(mc_results)
             future_metrics["ml_surrogate"] = self.ml_surrogate_engine.analyze(mc_results, self.mc_engine.factors)
+            future_metrics["portfolio_allocation"] = self.portfolio_optimizer.optimize_allocation(mc_results)
 
         waterfall = self.explain_engine.factor_waterfall(mc_results, self.mc_engine.factors)
         counterfactual = self.explain_engine.counterfactual(mc_results, self.mc_engine.factors)

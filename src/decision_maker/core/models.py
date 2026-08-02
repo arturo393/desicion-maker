@@ -145,6 +145,16 @@ class Factor(BaseModel):
     weight: float = Field(..., gt=0.0)
     maximize: bool = True
     category: str = "General"
+    stakeholder_weights: Optional[Dict[str, float]] = None
+
+    @model_validator(mode='before')
+    @classmethod
+    def compute_weight(cls, data: Any) -> Any:
+        if isinstance(data, dict):
+            sw = data.get("stakeholder_weights")
+            if sw and isinstance(sw, dict) and len(sw) > 0:
+                data["weight"] = sum(sw.values()) / len(sw)
+        return data
 
 
 class Statistics(BaseModel):
