@@ -14,7 +14,7 @@ import os
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
 # Agregar path para imports
 sys.path.insert(0, str(Path(__file__).parent))
@@ -211,7 +211,7 @@ Sé específico y práctico, pensando en aplicabilidad al proyecto.
         print(f"❌ Error en investigación: {e}")
         return f"Error: {str(e)}"
 
-async def run_full_research() -> Dict[str, Any]:
+async def run_full_research() -> dict[str, Any]:
     """
     Ejecuta la investigación completa
     """

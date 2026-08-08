@@ -7,7 +7,7 @@ Does NOT: Execute local shell commands or modify system settings.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, Dict, List
+from typing import Any
 
 import numpy as np
 
@@ -69,8 +69,8 @@ class DecisionAnalysisEngine:
 
     def __init__(self, debug: bool = False):
         self.framework = UnifiedDecisionFramework()
-        self._options: List[CareerOption] = []
-        self._cached_results: Dict[str, AnalysisResult] = {}
+        self._options: list[CareerOption] = []
+        self._cached_results: dict[str, AnalysisResult] = {}
 
     def add_option(self, option: CareerOption) -> None:
         self._options.append(option)
@@ -80,7 +80,7 @@ class DecisionAnalysisEngine:
     def add_factor(self, name: str, weight: float, maximize: bool = True) -> None:
         self.framework.add_factor(Factor(name, weight, maximize))
 
-    def _run_full_analysis(self) -> Dict[str, AnalysisResult]:
+    def _run_full_analysis(self) -> dict[str, AnalysisResult]:
         import asyncio
 
         result = asyncio.run(self.framework.run_analysis(mode="standard"))
@@ -126,7 +126,7 @@ class DecisionAnalysisEngine:
             )
         return results
 
-    def analyze_option(self, option: CareerOption, all_options: List[CareerOption]) -> AnalysisResult:
+    def analyze_option(self, option: CareerOption, all_options: list[CareerOption]) -> AnalysisResult:
         if not self._cached_results:
             self._cached_results = self._run_full_analysis()
         return self._cached_results.get(option.name, AnalysisResult(option_name=option.name))
@@ -137,7 +137,7 @@ class DecisionAnalysisEngine:
         return result.monte_carlo_score * (1.0 - result.risk_score)
 
     @staticmethod
-    def topsis_rank(alternatives: List[str], criteria: Dict[str, Any]) -> Dict[str, float]:
+    def topsis_rank(alternatives: list[str], criteria: dict[str, Any]) -> dict[str, float]:
         names = list(criteria.keys())
         weights = [criteria[n]["weight"] for n in names]
         max_bools = [criteria[n].get("maximize", True) for n in names]

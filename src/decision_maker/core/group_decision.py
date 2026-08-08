@@ -9,7 +9,7 @@ from __future__ import annotations
 __all__ = ["GroupDecisionEngine"]
 
 import logging
-from typing import Any, Dict, List
+from typing import Any
 
 import numpy as np
 
@@ -28,9 +28,9 @@ class GroupDecisionEngine:
 
     @staticmethod
     def aggregate_weights(
-        stakeholders: Dict[str, Dict[str, float]],
+        stakeholders: dict[str, dict[str, float]],
         method: str = "mean",
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Aggregate multiple stakeholders' factor weights into consensus.
 
@@ -137,10 +137,10 @@ class GroupDecisionEngine:
 
     @staticmethod
     def aggregate_scores(
-        stakeholders: Dict[str, Dict[str, float]],
-        factors: List[Factor],
+        stakeholders: dict[str, dict[str, float]],
+        factors: list[Factor],
         method: str = "mean",
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Convenience: aggregate weights and compute factor objects.
         """

@@ -9,7 +9,6 @@ from __future__ import annotations
 __all__ = ["GeminiDeepResearchAgent"]
 
 import os
-from typing import Optional
 
 from dotenv import load_dotenv
 
@@ -17,7 +16,7 @@ from dotenv import load_dotenv
 class GeminiDeepResearchAgent:
     DEFAULT_MODEL = "gemini-2.0-flash"
 
-    def __init__(self, api_key: Optional[str] = None, model: Optional[str] = None):
+    def __init__(self, api_key: str | None = None, model: str | None = None):
         load_dotenv()
         self.api_key = api_key or os.getenv("GEMINI_API_KEY")
         self.model = model or os.getenv("GEMINI_MODEL", self.DEFAULT_MODEL)
@@ -63,11 +62,11 @@ class GeminiDeepResearchAgent:
             )
             import json
             import re
-            
+
             text = response.text
             match = re.search(r"\{.*\}", text, re.DOTALL)
             if match:
                 return json.loads(match.group(0))
             return {}
-        except Exception as e:
+        except Exception:
             return {}

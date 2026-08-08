@@ -1,19 +1,21 @@
-from typing import Protocol, List, Optional, Any, Dict
+from typing import Any, Protocol
+
 import pandas as pd
+
 
 class DecisionEngine(Protocol):
     """
     Protocol defining the strategy for a decision analysis engine.
     Every algorithm (TOPSIS, PROMETHEE, Decision Theory, etc.) must implement this interface.
     """
-    
+
     def analyze(
-        self, 
-        data: pd.DataFrame | Dict[str, Any], 
-        weights: List[float], 
-        max_bools: List[bool], 
+        self,
+        data: pd.DataFrame | dict[str, Any],
+        weights: list[float],
+        max_bools: list[bool],
         **kwargs: Any
-    ) -> pd.Series | Dict[str, Any]:
+    ) -> pd.Series | dict[str, Any]:
         """
         Execute the decision analysis algorithm.
         

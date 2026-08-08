@@ -10,7 +10,7 @@ __all__ = ["generate_html_inline"]
 
 import os
 from datetime import datetime
-from typing import Any, Dict
+from typing import Any
 
 from decision_maker.core.models import Statistics
 from decision_maker.core.utils import resolve_winner
@@ -20,15 +20,15 @@ def generate_html_inline(
     results_dir: str,
     timestamp: str,
     mode: str,
-    mc_results: Dict[str, Statistics],
+    mc_results: dict[str, Statistics],
     topsis_scores: Any,
-    strategies: Dict[str, str],
-    pareto: Dict[str, Any],
-    sensitivity: Dict[str, Any],
-    future: Dict[str, Any],
-    ai_reports: Dict[str, str],
-    algo_comp: Dict[str, Any],
-    decision_matrix: Dict[str, Any],
+    strategies: dict[str, str],
+    pareto: dict[str, Any],
+    sensitivity: dict[str, Any],
+    future: dict[str, Any],
+    ai_reports: dict[str, str],
+    algo_comp: dict[str, Any],
+    decision_matrix: dict[str, Any],
     factors: Any,
     explanation: str = "",
 ) -> str:

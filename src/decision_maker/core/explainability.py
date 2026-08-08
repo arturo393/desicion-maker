@@ -9,7 +9,7 @@ from __future__ import annotations
 __all__ = ["ExplainabilityEngine"]
 
 import logging
-from typing import Any, Dict, List
+from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -32,9 +32,9 @@ class ExplainabilityEngine:
 
     def factor_waterfall(
         self,
-        mc_results: Dict[str, Statistics],
-        factors: List[Factor],
-    ) -> Dict[str, Any]:
+        mc_results: dict[str, Statistics],
+        factors: list[Factor],
+    ) -> dict[str, Any]:
         """
         Returns a detailed breakdown of how each factor contributed to each
         option's total score.
@@ -58,7 +58,7 @@ class ExplainabilityEngine:
 
         global_bounds = compute_global_bounds(mc_results, [f.name for f in factors])
         max_possible = sum(f.weight for f in factors)
-        result: Dict[str, Any] = {"options": {}, "max_possible": max_possible}
+        result: dict[str, Any] = {"options": {}, "max_possible": max_possible}
 
         for opt_name, stats in mc_results.items():
             option_factors = []
@@ -105,9 +105,9 @@ class ExplainabilityEngine:
 
     def counterfactual(
         self,
-        mc_results: Dict[str, Statistics],
-        factors: List[Factor],
-    ) -> Dict[str, Any]:
+        mc_results: dict[str, Statistics],
+        factors: list[Factor],
+    ) -> dict[str, Any]:
         """
         For each losing option, finds the minimal change needed to flip the winner.
 
@@ -146,7 +146,7 @@ class ExplainabilityEngine:
         gap = winner_stats.mean_score - runner_stats.mean_score
 
         global_bounds = compute_global_bounds(mc_results, [f.name for f in factors])
-        flip_scenarios: Dict[str, List[Dict]] = {}
+        flip_scenarios: dict[str, list[dict]] = {}
 
         for opt_name, stats in mc_results.items():
             if opt_name == winner_name:
@@ -205,10 +205,10 @@ class ExplainabilityEngine:
 
     def narrative(
         self,
-        mc_results: Dict[str, Statistics],
-        factors: List[Factor],
-        waterfall: Dict[str, Any],
-        counterfactual: Dict[str, Any],
+        mc_results: dict[str, Statistics],
+        factors: list[Factor],
+        waterfall: dict[str, Any],
+        counterfactual: dict[str, Any],
         topsis_scores: pd.Series,
         mode: str = "standard",
         use_ai: bool = False,
@@ -217,7 +217,7 @@ class ExplainabilityEngine:
         if not mc_results:
             return "No data to analyze."
 
-        lines: List[str] = []
+        lines: list[str] = []
         sorted_opts = sorted(mc_results.items(), key=lambda x: x[1].mean_score, reverse=True)
         winner_name = sorted_opts[0][0]
         winner_score = sorted_opts[0][1].mean_score

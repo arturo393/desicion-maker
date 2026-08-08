@@ -10,7 +10,6 @@ __all__ = ["WhatIfEngine"]
 
 import copy
 import logging
-from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 
@@ -19,9 +18,9 @@ from decision_maker.core.models import Factor, Statistics
 logger = logging.getLogger(__name__)
 
 
-def _compute_raw_bounds(mc_results: Dict[str, Statistics], factor_names: list) -> Dict[str, Dict[str, float]]:
+def _compute_raw_bounds(mc_results: dict[str, Statistics], factor_names: list) -> dict[str, dict[str, float]]:
     """Compute bounds using raw per-simulation data for accurate What-If ranges."""
-    bounds: Dict[str, Dict[str, float]] = {fn: {"min": float("inf"), "max": float("-inf")} for fn in factor_names}
+    bounds: dict[str, dict[str, float]] = {fn: {"min": float("inf"), "max": float("-inf")} for fn in factor_names}
     for stats in mc_results.values():
         if stats.raw_factor_data is not None:
             for fn in factor_names:
@@ -54,8 +53,8 @@ class WhatIfEngine:
 
     def __init__(
         self,
-        mc_results: Dict[str, Statistics],
-        factors: List[Factor],
+        mc_results: dict[str, Statistics],
+        factors: list[Factor],
     ):
         if not mc_results or not factors:
             raise ValueError("mc_results and factors must not be empty")
@@ -75,7 +74,7 @@ class WhatIfEngine:
                 return True
         return False
 
-    def toggle_maximize(self, factor_name: str) -> Optional[bool]:
+    def toggle_maximize(self, factor_name: str) -> bool | None:
         """Toggle maximize/minimize. Returns new value or None if not found."""
         for f in self.current_factors:
             if f.name == factor_name:
@@ -83,7 +82,7 @@ class WhatIfEngine:
                 return f.maximize
         return None
 
-    def set_all_weights(self, weights: Dict[str, float]) -> List[str]:
+    def set_all_weights(self, weights: dict[str, float]) -> list[str]:
         """Set multiple weights at once. Returns list of names not found."""
         not_found = []
         for name, w in weights.items():
@@ -97,7 +96,7 @@ class WhatIfEngine:
 
     # ── Recomputation ────────────────────────────────────────────────
 
-    def recompute(self) -> List[Tuple[str, float]]:
+    def recompute(self) -> list[tuple[str, float]]:
         """
         Recompute scores with current factor settings.
 
@@ -107,7 +106,7 @@ class WhatIfEngine:
 
         Returns: [(option_name, score), ...] sorted descending by score.
         """
-        results: Dict[str, float] = {}
+        results: dict[str, float] = {}
 
         for opt_name, stats in self.original_mc_results.items():
             # Prefer raw per-simulation data
@@ -116,7 +115,7 @@ class WhatIfEngine:
             else:
                 raw_data = {fn: np.array([fstats["mean"]]) for fn, fstats in stats.factor_stats.items()}
 
-            total_scores: Optional[np.ndarray] = None
+            total_scores: np.ndarray | None = None
 
             for f in self.current_factors:
                 if f.name not in raw_data:
@@ -148,7 +147,7 @@ class WhatIfEngine:
 
         return sorted(results.items(), key=lambda x: x[1], reverse=True)
 
-    def recompute_with_weights(self, weights: Dict[str, float]) -> List[Tuple[str, float]]:
+    def recompute_with_weights(self, weights: dict[str, float]) -> list[tuple[str, float]]:
         """
         Convenience: set weights, recompute, restore previous state.
 
@@ -164,7 +163,7 @@ class WhatIfEngine:
 
     # ── Introspection ────────────────────────────────────────────────
 
-    def diff(self) -> List[str]:
+    def diff(self) -> list[str]:
         """List changes between current and original configuration."""
         changes = []
         original_map = {f.name: f for f in self.original_factors}
@@ -179,7 +178,7 @@ class WhatIfEngine:
                 changes.append(f"{cf.name}: direction -> {direction}")
         return changes
 
-    def original_ranking(self) -> List[Tuple[str, float]]:
+    def original_ranking(self) -> list[tuple[str, float]]:
         """Return the original ranking from mc_results."""
         sorted_opts = sorted(
             self.original_mc_results.items(),
@@ -191,7 +190,7 @@ class WhatIfEngine:
     # ── Pretty printing ──────────────────────────────────────────────
 
     @staticmethod
-    def summary_table(scores: List[Tuple[str, float]]) -> str:
+    def summary_table(scores: list[tuple[str, float]]) -> str:
         """Pretty-print ranking table."""
         if not scores:
             return "No results."
@@ -205,7 +204,7 @@ class WhatIfEngine:
         return "\n".join(lines)
 
     @staticmethod
-    def factor_table(factors: List[Factor]) -> str:
+    def factor_table(factors: list[Factor]) -> str:
         """Pretty-print factor configuration."""
         lines = [
             f"{'Factor':<25} {'Weight':<8} {'Direction':<12}",
@@ -218,8 +217,8 @@ class WhatIfEngine:
 
     @staticmethod
     def comparison_table(
-        original: List[Tuple[str, float]],
-        current: List[Tuple[str, float]],
+        original: list[tuple[str, float]],
+        current: list[tuple[str, float]],
     ) -> str:
         """Show side-by-side comparison of original vs current rankings."""
         orig_map = {name: score for name, score in original}
@@ -353,7 +352,7 @@ class WhatIfEngine:
 
         self._show_final()
 
-    def _suggest(self) -> List[str]:
+    def _suggest(self) -> list[str]:
         scores = self.recompute()
         if len(scores) < 2:
             return []

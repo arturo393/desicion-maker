@@ -301,11 +301,11 @@ def main():
     print("\n  --- Por perfil de cliente ---")
 
     profiles = {
-        "Supervisor que quiere ver manana": [x for x in ranked if "CSV" in x["name"] or "API REST" == x["name"]][:2],
+        "Supervisor que quiere ver manana": [x for x in ranked if "CSV" in x["name"] or x["name"] == "API REST"][:2],
         "SCADA Schneider/Wonderware": [x for x in ranked if x["name"] in ["Bridge OPC UA (nuevo modulo)", "Bridge MQTT (nuevo modulo)", "Exportacion CSV programada"]],
         "PI System AVEVA": [x for x in ranked if x["name"] in ["Exportacion CSV programada", "MongoDB directo (lectura)", "API REST (HTTP GET)"]],
         "Ya tienen developers": [x for x in ranked if x["name"] in ["RabbitMQ (cola de mensajes)", "WebSocket (Socket.IO)", "API REST (HTTP GET)"]],
-        "Solo quieren alertas (no datos)": [x for x in ranked if "Webhook" in x["name"] or "API REST" == x["name"]],
+        "Solo quieren alertas (no datos)": [x for x in ranked if "Webhook" in x["name"] or x["name"] == "API REST"],
     }
 
     for profile, options in profiles.items():

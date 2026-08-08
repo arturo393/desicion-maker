@@ -8,14 +8,14 @@ from __future__ import annotations
 
 __all__ = ["RankAggregator"]
 
-from typing import Any, Dict
+from typing import Any
 
 import pandas as pd
 
 
 class RankAggregator:
     @staticmethod
-    def borda_count(rankings: Dict[str, pd.Series]) -> pd.Series:
+    def borda_count(rankings: dict[str, pd.Series]) -> pd.Series:
         if not rankings:
             return pd.Series()
         all_options = set()
@@ -31,7 +31,7 @@ class RankAggregator:
         return pd.Series(borda_scores).sort_values(ascending=False)
 
     @staticmethod
-    def copeland(rankings: Dict[str, pd.Series]) -> pd.Series:
+    def copeland(rankings: dict[str, pd.Series]) -> pd.Series:
         if not rankings:
             return pd.Series()
         all_options = set()
@@ -67,9 +67,9 @@ class RankAggregator:
 
     @staticmethod
     def aggregate(
-        rankings: Dict[str, pd.Series],
+        rankings: dict[str, pd.Series],
         method: str = "borda",
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         if method == "borda":
             result = RankAggregator.borda_count(rankings)
         elif method == "copeland":

@@ -3,14 +3,15 @@ Game Theory Engine.
 Calculates Nash Equilibrium strategies given a payoff matrix for multi-agent dynamic markets.
 """
 
-from typing import Dict, List, Tuple
+
 import numpy as np
+
 
 class GameTheoryEngine:
     def __init__(self):
         pass
 
-    def find_pure_nash_equilibria(self, payoff_matrix: np.ndarray) -> List[Tuple[int, int]]:
+    def find_pure_nash_equilibria(self, payoff_matrix: np.ndarray) -> list[tuple[int, int]]:
         """
         Finds pure strategy Nash Equilibria for a 2-player bimatrix game.
         payoff_matrix shape: (num_actions_p1, num_actions_p2, 2)
@@ -42,7 +43,7 @@ class GameTheoryEngine:
 
         return equilibria
 
-    def analyze(self, mc_results: Dict) -> Dict[str, str]:
+    def analyze(self, mc_results: dict) -> dict[str, str]:
         """
         Simulates a game against a hypothetical competitor.
         Returns a string categorization of the option's robustness in a Nash Equilibrium.
@@ -61,7 +62,7 @@ class GameTheoryEngine:
                 [[base_val * 0.8, base_val * 1.2], [base_val * 1.1, base_val * 0.9]],
                 [[base_val * 0.9, base_val * 1.1], [base_val * 1.0, base_val * 1.0]]
             ])
-            
+
             eqs = self.find_pure_nash_equilibria(matrix)
             if eqs:
                 results[name] = f"Stable in {len(eqs)} pure Nash Equilibrium(s)"

@@ -9,25 +9,25 @@ __all__ = ["MonteCarloEngine"]
 
 import json
 import logging
-from typing import Dict, List, Optional
+
 import numpy as np
 
-from decision_maker_core import MonteCarloEngine as RustMonteCarloEngine
 from decision_maker.core.models import DecisionOption, Factor, Statistics
+from decision_maker_core import MonteCarloEngine as RustMonteCarloEngine
 
 logger = logging.getLogger(__name__)
 
 
 class MonteCarloEngine:
-    def __init__(self, num_simulations: int = 10000, correlation_matrix: Optional[np.ndarray] = None):
+    def __init__(self, num_simulations: int = 10000, correlation_matrix: np.ndarray | None = None):
         if num_simulations < 1:
             raise ValueError(f"num_simulations must be >= 1, got {num_simulations}")
         self.num_simulations = num_simulations
-        self.factors: List[Factor] = []
-        self.options: List[DecisionOption] = []
+        self.factors: list[Factor] = []
+        self.options: list[DecisionOption] = []
         self._option_names: set = set()
         self.correlation_matrix = correlation_matrix
-        
+
         # Initialize the Rust Native Engine
         self._rust_engine = RustMonteCarloEngine()
 
@@ -40,59 +40,77 @@ class MonteCarloEngine:
         self._option_names.add(option.name)
         self.options.append(option)
 
-    def run(self, normalize: bool = True) -> Dict[str, Statistics]:
+    def run(self, normalize: bool = True) -> dict[str, Statistics]:
         if not self.options or not self.factors:
             return {}
 
-        logger.info(f"Delegating {self.num_simulations} Monte Carlo simulations to Rust Core Engine...")
+        logger.info(f"Running {self.num_simulations} Monte Carlo simulations in Python...")
 
-        # 1. Serialize definitions to JSON for Rust
-        payload = {
-            "num_simulations": self.num_simulations,
-            "factors": [
-                {"name": f.name, "weight": f.weight, "maximize": f.maximize}
-                for f in self.factors
-            ],
-            "options": [
-                {
-                    "name": opt.name,
-                    "variables": {
-                        v_name: {"dist_type": v.dist_type.value, "params": v.params}
-                        for v_name, v in opt.variables.items()
+        sampled_data = {}
+        for opt in self.options:
+            opt_data = {}
+            for v_name, var in opt.variables.items():
+                opt_data[v_name] = var.sample(self.num_simulations)
+            sampled_data[opt.name] = opt_data
+
+        global_bounds = {}
+        if normalize:
+            for f in self.factors:
+                all_vals = []
+                for opt in self.options:
+                    if f.name in sampled_data[opt.name]:
+                        all_vals.append(sampled_data[opt.name][f.name])
+                if all_vals:
+                    conc = np.concatenate(all_vals)
+                    global_bounds[f.name] = (np.min(conc), np.max(conc))
+
+        results: dict[str, Statistics] = {}
+        for opt in self.options:
+            opt_data = sampled_data[opt.name]
+            total_scores = np.zeros(self.num_simulations)
+            factor_stats = {}
+            
+            for f in self.factors:
+                if f.name in opt_data:
+                    vals = opt_data[f.name]
+                    factor_stats[f.name] = {
+                        "mean": float(np.mean(vals)),
+                        "std": float(np.std(vals)),
+                        "p5": float(np.percentile(vals, 5)),
+                        "p95": float(np.percentile(vals, 95))
                     }
-                }
-                for opt in self.options
-            ]
-        }
-        
-        json_payload = json.dumps(payload)
+                    
+                    if normalize and f.name in global_bounds:
+                        vmin, vmax = global_bounds[f.name]
+                        if vmax > vmin:
+                            norm_vals = (vals - vmin) / (vmax - vmin)
+                        else:
+                            norm_vals = np.ones_like(vals)
+                            
+                        if f.maximize:
+                            total_scores += norm_vals * f.weight
+                        else:
+                            total_scores += (1.0 - norm_vals) * f.weight
+                    else:
+                        if f.maximize:
+                            total_scores += vals * f.weight
+                        else:
+                            total_scores -= vals * f.weight
 
-        # 2. Execute Rust Engine
-        try:
-            results_json = self._rust_engine.run_simulation(json_payload)
-            raw_results = json.loads(results_json)
-        except Exception as e:
-            logger.error(f"Rust Engine Execution Failed: {e}")
-            return {}
-
-        # 3. Deserialize Rust JSON back into Pydantic Statistics models
-        results: Dict[str, Statistics] = {}
-        for opt_name, stats_dict in raw_results.items():
-            stats = Statistics(
-                option_name=stats_dict["option_name"],
-                mean_score=stats_dict["mean_score"],
-                std_dev=stats_dict["std_dev"],
-                min_score=stats_dict["min_score"],
-                max_score=stats_dict["max_score"],
-                percentile_5=stats_dict["percentile_5"],
-                percentile_95=stats_dict["percentile_95"],
-                success_rate=stats_dict["success_rate"],
-                factor_stats=stats_dict["factor_stats"],
-                var_95=stats_dict["var_95"],
-                cvar_95=stats_dict["cvar_95"],
-                raw_scores=None,
-                raw_factor_data=None,
+            results[opt.name] = Statistics(
+                option_name=opt.name,
+                mean_score=float(np.mean(total_scores)),
+                std_dev=float(np.std(total_scores)),
+                min_score=float(np.min(total_scores)),
+                max_score=float(np.max(total_scores)),
+                percentile_5=float(np.percentile(total_scores, 5)),
+                percentile_95=float(np.percentile(total_scores, 95)),
+                success_rate=float(np.mean(total_scores > 0)),
+                factor_stats=factor_stats,
+                var_95=float(np.percentile(total_scores, 5)),
+                cvar_95=float(np.mean(total_scores[total_scores <= np.percentile(total_scores, 5)]) if len(total_scores[total_scores <= np.percentile(total_scores, 5)]) > 0 else np.percentile(total_scores, 5)),
+                raw_scores=total_scores,
+                raw_factor_data=opt_data,
             )
-            results[opt_name] = stats
 
         return results

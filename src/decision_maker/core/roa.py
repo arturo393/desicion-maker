@@ -3,9 +3,10 @@ Real Options Analysis (ROA) Engine.
 Calculates the value of flexibility (Option to Expand, Delay, or Abandon) using the Black-Scholes framework.
 """
 
-from typing import Dict, Optional
 import math
+
 import scipy.stats as st
+
 
 class RealOptionsEngine:
     @staticmethod
@@ -34,7 +35,7 @@ class RealOptionsEngine:
         else:
             raise ValueError(f"Unknown option_type: {option_type}")
 
-    def analyze(self, mc_results: Dict) -> Dict[str, float]:
+    def analyze(self, mc_results: dict) -> dict[str, float]:
         """
         Estimates the intrinsic 'Flexibility Value' of each decision option 
         based on its volatility (std_dev) from the Monte Carlo results.
@@ -47,7 +48,7 @@ class RealOptionsEngine:
             K = S * 0.8
             # Volatility derived from coefficient of variation
             sigma = stats.std_dev / S if S > 0 else 0.1
-            
+
             # Calculate option to delay (Call option)
             roa = self.calculate_option_value('call', S, K, T=1.0, r=0.05, sigma=sigma)
             roa_values[name] = roa

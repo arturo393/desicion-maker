@@ -8,7 +8,7 @@ from __future__ import annotations
 
 __all__ = ["PrometheeEngine"]
 
-from typing import Callable, List, Optional
+from collections.abc import Callable
 
 import numpy as np
 import pandas as pd
@@ -37,10 +37,10 @@ class PrometheeEngine:
     def analyze(
         self,
         decision_matrix: pd.DataFrame,
-        weights: List[float],
-        maximize: List[bool],
-        pref_types: Optional[List[str]] = None,
-        pref_params: Optional[List[dict]] = None,
+        weights: list[float],
+        maximize: list[bool],
+        pref_types: list[str] | None = None,
+        pref_params: list[dict] | None = None,
     ) -> pd.Series:
         if decision_matrix.empty:
             return pd.Series()

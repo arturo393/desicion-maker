@@ -12,9 +12,9 @@ import json
 import logging
 import sqlite3
 import threading
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import numpy as np
 
@@ -29,7 +29,7 @@ class DecisionRegistry:
     comparison, and outcome tracking over time.
     """
 
-    def __init__(self, db_path: Optional[str] = None):
+    def __init__(self, db_path: str | None = None):
         if db_path is None:
             db_path = str(Path.home() / ".decision_maker" / "registry.db")
         self.db_path = db_path
@@ -91,15 +91,15 @@ class DecisionRegistry:
         name: str,
         mode: str,
         num_simulations: int,
-        factors: List[Dict[str, Any]],
-        options: List[Dict[str, Any]],
-        results: Dict[str, Any],
+        factors: list[dict[str, Any]],
+        options: list[dict[str, Any]],
+        results: dict[str, Any],
         description: str = "",
-        tags: Optional[List[str]] = None,
+        tags: list[str] | None = None,
         notes: str = "",
     ) -> int:
         conn = self._conn
-        now = datetime.now(timezone.utc).isoformat()
+        now = datetime.now(UTC).isoformat()
         conn.execute(
             """INSERT INTO decisions
                (name, description, mode, num_simulations, created_at, updated_at,
@@ -128,11 +128,11 @@ class DecisionRegistry:
         self,
         limit: int = 20,
         offset: int = 0,
-        tag: Optional[str] = None,
-        search: Optional[str] = None,
-    ) -> List[Dict[str, Any]]:
+        tag: str | None = None,
+        search: str | None = None,
+    ) -> list[dict[str, Any]]:
         query = "SELECT id, name, description, mode, num_simulations, created_at, tags, status FROM decisions"
-        params: List[Any] = []
+        params: list[Any] = []
         conditions = []
         if tag:
             conditions.append("tags LIKE ?")
@@ -147,7 +147,7 @@ class DecisionRegistry:
         rows = self._conn.execute(query, params).fetchall()
         return [dict(r) for r in rows]
 
-    def get_decision(self, decision_id: int) -> Optional[Dict[str, Any]]:
+    def get_decision(self, decision_id: int) -> dict[str, Any] | None:
         row = self._conn.execute("SELECT * FROM decisions WHERE id = ?", (decision_id,)).fetchone()
         if row is None:
             return None
@@ -174,7 +174,7 @@ class DecisionRegistry:
         updates = {k: v for k, v in fields.items() if k in allowed}
         if not updates:
             return False
-        updates["updated_at"] = datetime.now(timezone.utc).isoformat()
+        updates["updated_at"] = datetime.now(UTC).isoformat()
         if "tags" in updates and isinstance(updates["tags"], list):
             updates["tags"] = json.dumps(updates["tags"])
         set_clause = ", ".join(f"{k} = ?" for k in updates)
@@ -188,10 +188,10 @@ class DecisionRegistry:
     def save_template(
         self,
         name: str,
-        factors: List[Dict[str, Any]],
+        factors: list[dict[str, Any]],
         description: str = "",
         category: str = "",
-        options: Optional[List[Dict[str, Any]]] = None,
+        options: list[dict[str, Any]] | None = None,
     ) -> int:
         try:
             cur = self._conn.execute(
@@ -211,7 +211,7 @@ class DecisionRegistry:
             self._conn.commit()
             return cur.lastrowid
 
-    def list_templates(self, category: Optional[str] = None) -> List[Dict[str, Any]]:
+    def list_templates(self, category: str | None = None) -> list[dict[str, Any]]:
         if category:
             rows = self._conn.execute(
                 "SELECT id, name, description, category, created_at FROM templates WHERE category = ? ORDER BY name",
@@ -223,7 +223,7 @@ class DecisionRegistry:
             ).fetchall()
         return [dict(r) for r in rows]
 
-    def _hydrate_template(self, row: Optional[sqlite3.Row]) -> Optional[Dict[str, Any]]:
+    def _hydrate_template(self, row: sqlite3.Row | None) -> dict[str, Any] | None:
         if row is None:
             return None
         result = dict(row)
@@ -235,11 +235,11 @@ class DecisionRegistry:
                     pass
         return result
 
-    def get_template(self, template_id: int) -> Optional[Dict[str, Any]]:
+    def get_template(self, template_id: int) -> dict[str, Any] | None:
         row = self._conn.execute("SELECT * FROM templates WHERE id = ?", (template_id,)).fetchone()
         return self._hydrate_template(row)
 
-    def get_template_by_name(self, name: str) -> Optional[Dict[str, Any]]:
+    def get_template_by_name(self, name: str) -> dict[str, Any] | None:
         row = self._conn.execute("SELECT * FROM templates WHERE name = ?", (name,)).fetchone()
         return self._hydrate_template(row)
 

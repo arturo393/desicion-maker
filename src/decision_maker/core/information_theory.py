@@ -9,7 +9,6 @@ from __future__ import annotations
 __all__ = ["InformationTheoryEngine"]
 
 import logging
-from typing import Dict, List
 
 import numpy as np
 from sklearn.feature_selection import mutual_info_regression
@@ -25,7 +24,7 @@ class InformationTheoryEngine:
     Specifically uses Mutual Information to quantify non-linear dependencies.
     """
 
-    def analyze(self, mc_results: Dict[str, Statistics], factors: List[Factor]) -> Dict[str, Dict[str, float]]:
+    def analyze(self, mc_results: dict[str, Statistics], factors: list[Factor]) -> dict[str, dict[str, float]]:
         """
         Calculates Mutual Information (MI) between each input factor and the resulting total score.
         This captures non-linear relationships that standard correlation ignores.

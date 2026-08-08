@@ -1,16 +1,15 @@
+
+import uvicorn
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from typing import List, Dict, Any, Optional
-import os
+from sqlmodel import select
 
-from decision_maker.core.orchestrator import UnifiedDecisionFramework
-from decision_maker.core.models import Factor, DecisionOption, DistributionType
+from decision_maker.api.templates import TEMPLATES
 from decision_maker.core.db import get_session
 from decision_maker.core.db_models import AnalysisSession, OutcomeRecord
-from sqlmodel import Session, select
-import uvicorn
-from decision_maker.api.templates import TEMPLATES
+from decision_maker.core.models import DecisionOption, DistributionType, Factor
+from decision_maker.core.orchestrator import UnifiedDecisionFramework
 
 app = FastAPI(title="Decision Maker God-Mode API", version="3.0.0")
 
@@ -27,22 +26,22 @@ class FactorSchema(BaseModel):
     weight: float
     maximize: bool = True
     category: str = "General"
-    stakeholder_weights: Optional[Dict[str, float]] = None
+    stakeholder_weights: dict[str, float] | None = None
 
 class VariableSchema(BaseModel):
     distribution: str
-    params: List[float]
+    params: list[float]
 
 class OptionSchema(BaseModel):
     name: str
     description: str = ""
-    variables: Dict[str, VariableSchema]
+    variables: dict[str, VariableSchema]
 
 class AnalysisRequest(BaseModel):
     name: str = "New Analysis"
     description: str = ""
-    factors: List[FactorSchema]
-    options: List[OptionSchema]
+    factors: list[FactorSchema]
+    options: list[OptionSchema]
     mode: str = "advanced"
     use_ai: bool = False
 
@@ -67,15 +66,15 @@ async def analyze(req: AnalysisRequest):
                 dt = DISTRIBUTION_MAP.get(vcfg.distribution, DistributionType.DETERMINISTIC)
                 opt.add_variable(vname, dt, *vcfg.params)
             fw.add_option(opt)
-            
+
         result = await fw.run_analysis(mode=req.mode, use_ai=req.use_ai)
         session_id = fw.save_session(req.name, req.description)
-        
+
         # Format the output for the UI
         topsis = result.get("topsis_scores", {})
         if hasattr(topsis, "to_dict"):
             topsis = topsis.to_dict()
-            
+
         future = result.get("future", {})
         serialized_future = {}
         for k, v in future.items():
@@ -93,7 +92,7 @@ async def analyze(req: AnalysisRequest):
                 "percentile_5": float(stats.percentile_5),
                 "percentile_95": float(stats.percentile_95)
             }
-            
+
         winner = None
         if topsis:
             winner = list(topsis.keys())[0]
@@ -135,7 +134,7 @@ def get_session_data(session_id: str):
 class OutcomeRequest(BaseModel):
     actual_winner: str
     actual_score: float
-    notes: Optional[str] = None
+    notes: str | None = None
 
 @app.get("/templates")
 def list_templates():
@@ -147,10 +146,10 @@ def register_outcome(session_id: str, req: OutcomeRequest):
     db_session = session.get(AnalysisSession, session_id)
     if not db_session:
         raise HTTPException(status_code=404, detail="Session not found")
-        
+
     # Super simple accuracy calculation (just for demonstration)
     accuracy = 100.0 if req.actual_winner else 0.0 # Logic can be expanded
-    
+
     outcome = OutcomeRecord(
         session_id=session_id,
         actual_winner=req.actual_winner,

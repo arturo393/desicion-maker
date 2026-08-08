@@ -10,7 +10,6 @@ __all__ = ["TOPSISEngine"]
 
 import logging
 import math
-from typing import Dict, List, Tuple
 
 import pandas as pd
 
@@ -20,9 +19,9 @@ logger = logging.getLogger(__name__)
 class TOPSISEngine:
     def analyze(
         self,
-        decision_matrix_fuzzy: Dict[str, Dict[str, Tuple[float, float, float]]],
-        weights: List[float],
-        maximize: List[bool],
+        decision_matrix_fuzzy: dict[str, dict[str, tuple[float, float, float]]],
+        weights: list[float],
+        maximize: list[bool],
     ) -> pd.Series:
         if not decision_matrix_fuzzy:
             return pd.Series()
@@ -41,7 +40,7 @@ class TOPSISEngine:
             logger.warning(f"Maximize count ({len(maximize)}) != factor count ({len(factor_names)}). Truncating.")
             maximize = maximize[: len(factor_names)]
 
-        norm_matrix: Dict[str, Dict[str, Tuple[float, float, float]]] = {}
+        norm_matrix: dict[str, dict[str, tuple[float, float, float]]] = {}
         for factor_idx, factor in enumerate(factor_names):
             is_max = maximize[factor_idx]
 
@@ -64,7 +63,7 @@ class TOPSISEngine:
                         (max_c - a) / divisor,
                     )
 
-        weighted_matrix: Dict[str, Dict[str, Tuple[float, float, float]]] = {}
+        weighted_matrix: dict[str, dict[str, tuple[float, float, float]]] = {}
         for opt in norm_matrix:
             weighted_matrix[opt] = {}
             for i, factor in enumerate(factor_names):

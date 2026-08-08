@@ -9,7 +9,7 @@ from __future__ import annotations
 __all__ = ["TopologicalDataAnalysis"]
 
 import logging
-from typing import Any, Dict, List
+from typing import Any
 
 import numpy as np
 from sklearn import manifold
@@ -32,9 +32,9 @@ class TopologicalDataAnalysis:
 
     @staticmethod
     def analyze(
-        mc_results: Dict[str, Statistics],
-        factors: List[Factor],
-    ) -> Dict[str, Any]:
+        mc_results: dict[str, Statistics],
+        factors: list[Factor],
+    ) -> dict[str, Any]:
         if not mc_results or len(mc_results) < 2:
             return {"error": "Need at least 2 options for TDA"}
 
@@ -162,7 +162,7 @@ class TopologicalDataAnalysis:
         }
 
     @staticmethod
-    def _single_linkage(dist_matrix: np.ndarray) -> List[float]:
+    def _single_linkage(dist_matrix: np.ndarray) -> list[float]:
         """Compute single-linkage dendrogram heights."""
         dim = dist_matrix.shape[0]
         # Start with each point as its own cluster

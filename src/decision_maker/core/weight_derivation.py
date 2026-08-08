@@ -10,7 +10,7 @@ __all__ = ["WeightDerivationEngine"]
 
 import itertools
 import logging
-from typing import Any, Dict, List, Tuple
+from typing import Any
 
 import numpy as np
 
@@ -32,8 +32,8 @@ class WeightDerivationEngine:
 
     @staticmethod
     def swing_weights(
-        ratings: Dict[str, float],
-    ) -> Dict[str, Any]:
+        ratings: dict[str, float],
+    ) -> dict[str, Any]:
         """
         Derive weights from swing importance ratings (0-100 scale).
 
@@ -69,10 +69,10 @@ class WeightDerivationEngine:
 
     @staticmethod
     def swing_from_ranking(
-        ranked_factors: List[str],
+        ranked_factors: list[str],
         top_weight: float = 100.0,
         decay: str = "linear",
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Derive weights from a simple ranked list.
 
@@ -109,9 +109,9 @@ class WeightDerivationEngine:
 
     @staticmethod
     def pairwise_weights(
-        comparisons: Dict[Tuple[str, str], float],
-        labels: List[str],
-    ) -> Dict[str, Any]:
+        comparisons: dict[tuple[str, str], float],
+        labels: list[str],
+    ) -> dict[str, Any]:
         """
         Derive weights from pairwise comparison judgments.
 
@@ -149,7 +149,7 @@ class WeightDerivationEngine:
         return result
 
     @staticmethod
-    def pairwise_interactive_prompt(labels: List[str]) -> List[str]:
+    def pairwise_interactive_prompt(labels: list[str]) -> list[str]:
         """
         Generate the list of pairwise comparison questions to ask.
 
@@ -171,9 +171,9 @@ class WeightDerivationEngine:
 
     @staticmethod
     def paprika_weights(
-        factors: List[str],
-        tradeoff_answers: Dict[Tuple[str, str], str],
-    ) -> Dict[str, Any]:
+        factors: list[str],
+        tradeoff_answers: dict[tuple[str, str], str],
+    ) -> dict[str, Any]:
         """
         Derive weights from PAPRIKA-style tradeoff questions.
 
@@ -237,9 +237,9 @@ class WeightDerivationEngine:
 
     @staticmethod
     def paprika_generate_questions(
-        factors: List[str],
+        factors: list[str],
         max_questions: int = 10,
-    ) -> List[Tuple[str, str, str]]:
+    ) -> list[tuple[str, str, str]]:
         """
         Generate PAPRIKA tradeoff questions.
 
@@ -273,7 +273,7 @@ class WeightDerivationEngine:
     def derive(
         method: str,
         **kwargs,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         methods = {
             "swing": WeightDerivationEngine.swing_weights,
             "swing_ranked": lambda **kw: WeightDerivationEngine.swing_from_ranking(

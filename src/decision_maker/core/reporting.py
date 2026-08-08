@@ -22,7 +22,7 @@ import logging
 import os
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import pandas as pd
 
@@ -37,21 +37,21 @@ class ReportData:
     """Bundles all data needed for report generation."""
 
     mode: str
-    mc_results: Dict[str, Statistics]
+    mc_results: dict[str, Statistics]
     topsis_scores: pd.Series
-    strategies: Dict[str, str]
-    pareto: Dict[str, Any]
-    sensitivity: Dict[str, Any]
-    future: Dict[str, Any]
-    ai_reports: Dict[str, str]
-    factors: List[Factor]
+    strategies: dict[str, str]
+    pareto: dict[str, Any]
+    sensitivity: dict[str, Any]
+    future: dict[str, Any]
+    ai_reports: dict[str, str]
+    factors: list[Factor]
     results_dir: str = ""
     timestamp: str = ""
     explanation: str = ""
-    waterfall: Optional[Dict] = None
-    counterfactual: Optional[Dict] = None
-    decision_matrix: Dict[str, Any] = field(default_factory=dict)
-    algo_comp: Dict[str, Any] = field(default_factory=dict)
+    waterfall: dict | None = None
+    counterfactual: dict | None = None
+    decision_matrix: dict[str, Any] = field(default_factory=dict)
+    algo_comp: dict[str, Any] = field(default_factory=dict)
 
     def prepare(self) -> ReportData:
         """Compute derived fields from raw input data."""
@@ -70,9 +70,9 @@ class ReportData:
 
 
 def _md_table(
-    headers: List[str],
-    rows: List[List[str]],
-    alignments: Optional[List[str]] = None,
+    headers: list[str],
+    rows: list[list[str]],
+    alignments: list[str] | None = None,
 ) -> str:
     """Build a complete markdown table string."""
     if alignments is None:
@@ -86,7 +86,7 @@ def _md_table(
     return "\n".join(lines) + "\n"
 
 
-def _mc_context(mc_results: Dict[str, Statistics]) -> Dict[str, Any]:
+def _mc_context(mc_results: dict[str, Statistics]) -> dict[str, Any]:
     """Extract common MC statistics used across report functions."""
     best_name, best_stats = max(mc_results.items(), key=lambda x: x[1].mean_score)
     return {
@@ -97,7 +97,7 @@ def _mc_context(mc_results: Dict[str, Statistics]) -> Dict[str, Any]:
     }
 
 
-def _bar_chart(mc_results: Dict[str, Statistics], width: int = 40) -> str:
+def _bar_chart(mc_results: dict[str, Statistics], width: int = 40) -> str:
     """Build an ASCII bar chart string from MC results."""
     ctx = _mc_context(mc_results)
     lines = []
@@ -108,14 +108,14 @@ def _bar_chart(mc_results: Dict[str, Statistics], width: int = 40) -> str:
     return "\n".join(lines)
 
 
-def _has_promethee(mode: str, future: Optional[Dict[str, Any]]) -> bool:
+def _has_promethee(mode: str, future: dict[str, Any] | None) -> bool:
     """Check if PROMETHEE data is available."""
     return bool(mode == "advanced" and future and "promethee_scores" in future and not future["promethee_scores"].empty)
 
 
-def _rank_scores(scores: pd.Series, prefix: str) -> Dict[str, Dict[str, Any]]:
+def _rank_scores(scores: pd.Series, prefix: str) -> dict[str, dict[str, Any]]:
     """Rank a Series and return dict with rank/score per option."""
-    result: Dict[str, Dict[str, Any]] = {}
+    result: dict[str, dict[str, Any]] = {}
     for rank, (name, score) in enumerate(scores.sort_values(ascending=False).items(), 1):
         result.setdefault(name, {})
         result[name][f"{prefix}_rank"] = rank
@@ -123,7 +123,7 @@ def _rank_scores(scores: pd.Series, prefix: str) -> Dict[str, Dict[str, Any]]:
     return result
 
 
-def prepare_decision_matrix(mc_results: Dict[str, Statistics], factors: List[Factor]) -> Dict[str, Any]:
+def prepare_decision_matrix(mc_results: dict[str, Statistics], factors: list[Factor]) -> dict[str, Any]:
     decision_matrix = {}
     for name, stats in mc_results.items():
         decision_matrix[name] = {"total_score": stats.mean_score}
@@ -142,11 +142,11 @@ def prepare_decision_matrix(mc_results: Dict[str, Statistics], factors: List[Fac
 
 
 def build_algorithm_comparison(
-    mc_results: Dict[str, Statistics],
+    mc_results: dict[str, Statistics],
     topsis_scores: pd.Series,
-    future: Optional[Dict[str, Any]] = None,
-) -> Dict[str, Any]:
-    algo_comp: Dict[str, Any] = {}
+    future: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    algo_comp: dict[str, Any] = {}
     sorted_mc = sorted(mc_results.items(), key=lambda x: x[1].mean_score, reverse=True)
     for rank, (name, stats) in enumerate(sorted_mc, 1):
         algo_comp.setdefault(name, {})
@@ -168,11 +168,11 @@ def build_algorithm_comparison(
 def save_json_report(
     results_dir: str,
     timestamp: str,
-    mc_results: Dict[str, Statistics],
+    mc_results: dict[str, Statistics],
     topsis_scores: pd.Series,
-    decision_matrix: Dict[str, Any],
-    algo_comp: Dict[str, Any],
-    ai_reports: Dict[str, str],
+    decision_matrix: dict[str, Any],
+    algo_comp: dict[str, Any],
+    ai_reports: dict[str, str],
 ) -> str:
     json_data = {
         "timestamp": timestamp,
@@ -395,19 +395,19 @@ def print_report(data: ReportData):
 
 def save_report(
     mode: str,
-    mc_results: Dict[str, Statistics],
+    mc_results: dict[str, Statistics],
     topsis_scores: pd.Series,
-    strategies: Dict[str, str],
-    pareto: Dict[str, Any],
-    sensitivity: Dict[str, Any],
-    future: Dict[str, Any],
-    ai_reports: Dict[str, str],
-    factors: List[Factor],
-    results_dir: Optional[str] = None,
+    strategies: dict[str, str],
+    pareto: dict[str, Any],
+    sensitivity: dict[str, Any],
+    future: dict[str, Any],
+    ai_reports: dict[str, str],
+    factors: list[Factor],
+    results_dir: str | None = None,
     explanation: str = "",
-    waterfall: Optional[Dict] = None,
-    counterfactual: Optional[Dict] = None,
-) -> Dict[str, str]:
+    waterfall: dict | None = None,
+    counterfactual: dict | None = None,
+) -> dict[str, str]:
     data = ReportData(
         mode=mode,
         mc_results=mc_results,

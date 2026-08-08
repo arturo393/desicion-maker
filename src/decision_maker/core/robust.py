@@ -9,7 +9,7 @@ from __future__ import annotations
 __all__ = ["RobustOptimizer"]
 
 import logging
-from typing import Any, Dict, List
+from typing import Any
 
 import numpy as np
 
@@ -26,11 +26,11 @@ class RobustOptimizer:
 
     def analyze(
         self,
-        mc_results: Dict[str, Statistics],
-        factors: List[Factor],
+        mc_results: dict[str, Statistics],
+        factors: list[Factor],
         epsilon: float = 0.05,  # Wasserstein ambiguity radius
         weight_shock: float = 0.2,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Performs a dual robustness analysis:
         1. Weight Shock Sensitivity (Local)

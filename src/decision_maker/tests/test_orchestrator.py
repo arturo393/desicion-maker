@@ -62,15 +62,14 @@ class TestUnifiedDecisionFramework:
 
     @pytest.mark.asyncio
     async def test_validation_warnings(self):
+        from pydantic import ValidationError
         fw = UnifiedDecisionFramework()
         fw.mc_engine.num_simulations = 100
         fw.add_factor(Factor("Bad", 1.0, maximize=True))
         opt = DecisionOption("BadOpt")
-        opt.add_variable("Bad", DistributionType.NORMAL, 0)
-        fw.add_option(opt)
-
-        result = await fw.run_analysis(mode="express")
-        assert "mc_results" in result
+        
+        with pytest.raises(ValidationError):
+            opt.add_variable("Bad", DistributionType.NORMAL, 0)
 
     @pytest.mark.asyncio
     async def test_zero_options_returns_empty(self):

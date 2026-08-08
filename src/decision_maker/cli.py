@@ -11,10 +11,9 @@ import asyncio
 import logging
 import sys
 from pathlib import Path
-from typing import Optional
+from typing import Annotated
 
 import typer
-from typing_extensions import Annotated
 
 # Add project root to path so imports work
 _project_root = str(Path(__file__).resolve().parent.parent)
@@ -43,7 +42,7 @@ logging.basicConfig(
 @app.command()
 def run(
     config: Annotated[
-        Optional[str],
+        str | None,
         typer.Option("--config", "-c", help="Path to YAML config file"),
     ] = None,
     mode: Annotated[
@@ -59,7 +58,7 @@ def run(
         typer.Option("--ai", help="Enable Gemini AI deep research"),
     ] = False,
     output: Annotated[
-        Optional[str],
+        str | None,
         typer.Option("--output", "-o", help="Results output directory"),
     ] = None,
     verbose: Annotated[
@@ -67,11 +66,11 @@ def run(
         typer.Option("--verbose", "-v", help="Enable debug logging"),
     ] = False,
     correlation: Annotated[
-        Optional[float],
+        float | None,
         typer.Option("--correlation", help="Pairwise correlation between factors (0-1)"),
     ] = None,
     pref_type: Annotated[
-        Optional[str],
+        str | None,
         typer.Option("--pref-type", help="PROMETHEE preference type: usual, ushape, vshape, level, linear, gaussian"),
     ] = None,
     what_if: Annotated[
@@ -135,9 +134,9 @@ async def _run_interactive(
     mode: str,
     simulations: int,
     use_ai: bool,
-    output: Optional[str],
-    correlation_matrix: Optional[np.ndarray] = None,
-    pref_types: Optional[list[str]] = None,
+    output: str | None,
+    correlation_matrix: np.ndarray | None = None,
+    pref_types: list[str] | None = None,
 ):
     framework = UnifiedDecisionFramework(
         correlation_matrix=correlation_matrix,

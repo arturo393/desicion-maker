@@ -14,7 +14,7 @@ OUTPUT_DIR = Path("../../docs/docs/sw-diagnosticoremoto/05-power-supply/investig
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 # Cargar resultados
-with open(RESEARCH_FILE, "r", encoding="utf-8") as f:
+with open(RESEARCH_FILE, encoding="utf-8") as f:
     results = json.load(f)
 
 # =============================================================================

@@ -10,7 +10,7 @@ __all__ = ["AntifragileEngine"]
 
 import logging
 from itertools import combinations
-from typing import Any, Dict, List
+from typing import Any
 
 import numpy as np
 
@@ -49,9 +49,9 @@ class AntifragileEngine:
 
     @staticmethod
     def analyze(
-        mc_results: Dict[str, Statistics],
-        factors: List[Factor],
-    ) -> Dict[str, Any]:
+        mc_results: dict[str, Statistics],
+        factors: list[Factor],
+    ) -> dict[str, Any]:
         if not mc_results or not factors:
             return {
                 "barbell": {},
@@ -71,9 +71,9 @@ class AntifragileEngine:
 
     @staticmethod
     def barbell_analysis(
-        mc_results: Dict[str, Statistics],
-        factors: List[Factor],
-    ) -> Dict[str, Any]:
+        mc_results: dict[str, Statistics],
+        factors: list[Factor],
+    ) -> dict[str, Any]:
         """
         Test all pairs of options as a 50/50 barbell portfolio.
 
@@ -124,9 +124,9 @@ class AntifragileEngine:
 
     @staticmethod
     def convexity_analysis(
-        mc_results: Dict[str, Statistics],
-        factors: List[Factor],
-    ) -> Dict[str, Any]:
+        mc_results: dict[str, Statistics],
+        factors: list[Factor],
+    ) -> dict[str, Any]:
         """
         Measure each option's convexity by perturbing factor variances.
 
@@ -142,7 +142,7 @@ class AntifragileEngine:
         if not mc_results or not factors:
             return {}
 
-        result: Dict[str, Any] = {}
+        result: dict[str, Any] = {}
         perturbations = CONVEXITY_PERTURBATIONS
 
         for opt_name, stats in mc_results.items():
@@ -155,7 +155,7 @@ class AntifragileEngine:
                 continue
 
             original_score = stats.mean_score
-            convexity_scores: Dict[str, Any] = {}
+            convexity_scores: dict[str, Any] = {}
 
             for f in factors:
                 if f.name not in raw_data:
@@ -169,7 +169,7 @@ class AntifragileEngine:
                     continue
 
                 centered = vals - f_mean
-                deltas: Dict[str, float] = {}
+                deltas: dict[str, float] = {}
 
                 for p in perturbations:
                     new_vals = centered * p + f_mean
@@ -212,17 +212,17 @@ class AntifragileEngine:
 
     @staticmethod
     def _compute_option_score(
-        mc_results: Dict[str, Statistics],
-        factors: List[Factor],
+        mc_results: dict[str, Statistics],
+        factors: list[Factor],
         opt_name: str,
         target_factor: str,
         new_factor_vals: np.ndarray,
-        raw_data: Dict[str, np.ndarray],
+        raw_data: dict[str, np.ndarray],
     ) -> float:
         """Recompute an option's score with one factor's data replaced."""
         # Build global bounds from all options' raw data, using perturbed
         # values for the target option × factor
-        bounds: Dict[str, Dict[str, float]] = {}
+        bounds: dict[str, dict[str, float]] = {}
         for name, stats in mc_results.items():
             src = stats.raw_factor_data or {}
             for fn, vals in src.items():
@@ -258,8 +258,8 @@ class AntifragileEngine:
 
     @staticmethod
     def fragility_index(
-        mc_results: Dict[str, Statistics],
-    ) -> Dict[str, Any]:
+        mc_results: dict[str, Statistics],
+    ) -> dict[str, Any]:
         """
         Quantify fragility per option based on tail-risk metrics.
 
@@ -273,7 +273,7 @@ class AntifragileEngine:
         if not mc_results:
             return {}
 
-        scores: Dict[str, Dict] = {}
+        scores: dict[str, dict] = {}
         all_fragilities = []
 
         for name, stats in mc_results.items():
@@ -334,9 +334,9 @@ class AntifragileEngine:
 
     @staticmethod
     def via_negativa(
-        mc_results: Dict[str, Statistics],
-        factors: List[Factor],
-    ) -> List[Dict[str, Any]]:
+        mc_results: dict[str, Statistics],
+        factors: list[Factor],
+    ) -> list[dict[str, Any]]:
         """
         Identify factors that, if removed (weight → 0), improve all options.
         """
@@ -349,7 +349,7 @@ class AntifragileEngine:
 
         # Compute global bounds per factor using all available data
         factor_names = list({f.name for f in factors})
-        global_bounds: Dict[str, Dict[str, float]] = {}
+        global_bounds: dict[str, dict[str, float]] = {}
         for fn in factor_names:
             vals = []
             for stats in mc_results.values():

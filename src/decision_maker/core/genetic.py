@@ -9,7 +9,7 @@ from __future__ import annotations
 __all__ = ["GeneticOptimizer"]
 
 import math
-from typing import Any, Dict, List
+from typing import Any
 
 from decision_maker.core.models import Factor, Statistics
 from decision_maker.core.utils import EPSILON
@@ -26,10 +26,10 @@ class GeneticOptimizer:
 
     @staticmethod
     def evolve_ideal(
-        mc_results: Dict[str, Statistics],
-        factors: List[Factor],
+        mc_results: dict[str, Statistics],
+        factors: list[Factor],
         penalty_variance: float = 0.05,  # Reduced penalty for more realistic gap
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         if not mc_results or not factors:
             return {
                 "ideal_composition": {},

@@ -10,7 +10,6 @@ __all__ = ["VisualizationEngine"]
 
 import logging
 import os
-from typing import Dict, List
 
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -36,12 +35,12 @@ class VisualizationEngine:
 
     def generate_all_plots(
         self,
-        mc_results: Dict[str, Statistics],
-        factors: List[Factor],
-        future_metrics: Dict,
+        mc_results: dict[str, Statistics],
+        factors: list[Factor],
+        future_metrics: dict,
         output_dir: str,
         timestamp: str,
-    ) -> List[str]:
+    ) -> list[str]:
         """Generates a suite of plots and returns their paths."""
         os.makedirs(output_dir, exist_ok=True)
         paths = []
@@ -62,7 +61,7 @@ class VisualizationEngine:
 
         return paths
 
-    def plot_risk_distributions(self, mc_results: Dict[str, Statistics], output_dir: str, timestamp: str) -> str:
+    def plot_risk_distributions(self, mc_results: dict[str, Statistics], output_dir: str, timestamp: str) -> str:
         plt.figure(figsize=(10, 6))
         for name, stats in mc_results.items():
             if stats.raw_scores is not None:
@@ -79,7 +78,7 @@ class VisualizationEngine:
         plt.close()
         return path
 
-    def plot_factor_importance(self, info_theory_results: Dict, output_dir: str, timestamp: str) -> str:
+    def plot_factor_importance(self, info_theory_results: dict, output_dir: str, timestamp: str) -> str:
         if not info_theory_results:
             logger.warning("No information theory results to plot")
             return ""
@@ -100,7 +99,7 @@ class VisualizationEngine:
         plt.close()
         return path
 
-    def plot_robustness(self, robust_results: Dict, output_dir: str, timestamp: str) -> str:
+    def plot_robustness(self, robust_results: dict, output_dir: str, timestamp: str) -> str:
         # Comparison of DRO scores vs Mean scores
         data = []
         for opt, dro_score in robust_results.get("dro_scores", {}).items():

@@ -8,14 +8,14 @@ from __future__ import annotations
 
 __all__ = ["ParetoEngine"]
 
-from typing import Any, Dict, List
+from typing import Any
 
 from decision_maker.core.models import Factor, Statistics
 
 
 class ParetoEngine:
     @staticmethod
-    def analyze(mc_results: Dict[str, Statistics], factors: List[Factor]) -> Dict[str, Any]:
+    def analyze(mc_results: dict[str, Statistics], factors: list[Factor]) -> dict[str, Any]:
         if not mc_results:
             return {"efficient_frontier": [], "dominated_options": []}
 

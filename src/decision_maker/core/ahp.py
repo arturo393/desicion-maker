@@ -8,7 +8,7 @@ from __future__ import annotations
 
 __all__ = ["AHPHelper"]
 
-from typing import Dict, List, Optional
+from typing import Optional
 
 import numpy as np
 
@@ -17,7 +17,7 @@ class AHPHelper:
     RI_TABLE = {1: 0, 2: 0, 3: 0.58, 4: 0.9, 5: 1.12, 6: 1.24, 7: 1.32, 8: 1.41, 9: 1.45}
 
     @staticmethod
-    def calculate_weights(matrix: np.ndarray, labels: List[str]) -> Dict[str, Optional[float]]:
+    def calculate_weights(matrix: np.ndarray, labels: list[str]) -> dict[str, float | None]:
         try:
             n = len(labels)
             if n != matrix.shape[0] or n != matrix.shape[1]:
@@ -53,7 +53,7 @@ class AHPHelper:
             ri = AHPHelper.RI_TABLE.get(n, 1.49)
             cr = ci / ri if ri != 0 else 0
 
-            result: Dict[str, Optional] = {
+            result: dict[str, Optional] = {
                 "weights": dict(zip(labels, weights)),
                 "consistency_ratio": float(cr),
                 "is_consistent": cr <= 0.1,

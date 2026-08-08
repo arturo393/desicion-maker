@@ -1,10 +1,9 @@
-import urllib.request
-import urllib.parse
-import json
 import base64
-import sys
-
+import json
 import os
+import sys
+import urllib.parse
+import urllib.request
 
 URL_BASE = "https://averas-1744767979220.atlassian.net/rest/api/3"
 EMAIL = os.getenv("JIRA_EMAIL", "a.veras@gmail.com")
@@ -36,12 +35,12 @@ def create_issue(summary, description, issue_type="Task"):
             "issuetype": {"name": issue_type}
         }
     }
-    
+
     req = urllib.request.Request(url, data=json.dumps(payload).encode("utf-8"), method="POST")
     req.add_header("Authorization", get_auth_header())
     req.add_header("Content-Type", "application/json")
     req.add_header("Accept", "application/json")
-    
+
     try:
         with urllib.request.urlopen(req) as response:
             res = json.loads(response.read().decode())

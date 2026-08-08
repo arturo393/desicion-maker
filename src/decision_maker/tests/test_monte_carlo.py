@@ -109,14 +109,13 @@ class TestMonteCarloEngine:
             MonteCarloEngine(num_simulations=0)
 
     def test_negative_weights(self):
+        from pydantic import ValidationError
+        import pytest
         engine = MonteCarloEngine(num_simulations=100)
         opt = DecisionOption("Weird")
         opt.add_variable("X", DistributionType.DETERMINISTIC, 100)
-        engine.add_factor(Factor("X", -0.5, maximize=True))
-        engine.add_option(opt)
-
-        results = engine.run()
-        assert results["Weird"].mean_score == -0.5
+        with pytest.raises(ValidationError):
+            engine.add_factor(Factor("X", -0.5, maximize=True))
 
     def test_stats_structure(self):
         engine = MonteCarloEngine(num_simulations=1000)
@@ -165,13 +164,13 @@ class TestMonteCarloEngine:
         assert results["Partial"].mean_score == 0.5
 
     def test_factor_with_zero_weight(self):
+        from pydantic import ValidationError
+        import pytest
         engine = MonteCarloEngine(num_simulations=10)
         opt = DecisionOption("ZeroWeight")
         opt.add_variable("X", DistributionType.DETERMINISTIC, 100)
-        engine.add_factor(Factor("X", 0.0, maximize=True))
-        engine.add_option(opt)
-        results = engine.run()
-        assert results["ZeroWeight"].mean_score == 0.0
+        with pytest.raises(ValidationError):
+            engine.add_factor(Factor("X", 0.0, maximize=True))
 
     def test_weight_sum_zero(self):
         engine = MonteCarloEngine(num_simulations=10)

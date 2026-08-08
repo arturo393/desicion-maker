@@ -16,7 +16,7 @@ __all__ = [
 ]
 
 import math
-from typing import TYPE_CHECKING, Dict, List, Tuple
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from decision_maker.core.models import Statistics
@@ -38,20 +38,20 @@ HURWICZ_ALPHA_DEFAULT = 0.5
 
 from decision_maker.core.models import DistributionType  # noqa: E402
 
-DISTRIBUTION_MAP: Dict[str, DistributionType] = {dt.value: dt for dt in DistributionType}
+DISTRIBUTION_MAP: dict[str, DistributionType] = {dt.value: dt for dt in DistributionType}
 
 # ── Utility Functions ───────────────────────────────────────────────
 
 
 def compute_global_bounds(
-    mc_results: Dict[str, Statistics],
-    factor_names: List[str],
-) -> Dict[str, Dict[str, float]]:
+    mc_results: dict[str, Statistics],
+    factor_names: list[str],
+) -> dict[str, dict[str, float]]:
     """Compute min/max bounds across all options for each factor.
 
     Uses factor_stats means for normalization-compatible bounds.
     """
-    bounds: Dict[str, Dict[str, float]] = {fn: {"min": math.inf, "max": -math.inf} for fn in factor_names}
+    bounds: dict[str, dict[str, float]] = {fn: {"min": math.inf, "max": -math.inf} for fn in factor_names}
     for stats in mc_results.values():
         for fn in factor_names:
             if fn in stats.factor_stats:
@@ -61,7 +61,7 @@ def compute_global_bounds(
     return bounds
 
 
-def resolve_winner(topsis_scores, mc_results) -> Tuple[str, str]:
+def resolve_winner(topsis_scores, mc_results) -> tuple[str, str]:
     """Determine the winner and the reason from TOPSIS or MC results."""
     if not topsis_scores.empty:
         return topsis_scores.index[0], "F-TOPSIS risk-adjusted distance to ideal"

@@ -15,7 +15,7 @@ __all__ = [
 
 import logging
 import os
-from typing import Any, Dict, Optional
+from typing import Any
 
 import numpy as np
 import yaml
@@ -28,17 +28,17 @@ from decision_maker.core.utils import DISTRIBUTION_MAP
 logger = logging.getLogger(__name__)
 
 
-def load_decision_config(path: str) -> Dict[str, Any]:
-    with open(path, "r") as f:
+def load_decision_config(path: str) -> dict[str, Any]:
+    with open(path) as f:
         return yaml.safe_load(f)
 
 
-def validate_config(config: Dict[str, Any]) -> DecisionConfig:
+def validate_config(config: dict[str, Any]) -> DecisionConfig:
     root = RootConfig.model_validate(config)
     return root.decision
 
 
-def build_framework_from_config(config: Dict[str, Any]) -> UnifiedDecisionFramework:
+def build_framework_from_config(config: dict[str, Any]) -> UnifiedDecisionFramework:
     decision = validate_config(config)
 
     corr_matrix = None
@@ -86,8 +86,8 @@ async def run_from_config(
     config_path: str,
     mode: str = "standard",
     use_ai: bool = False,
-    results_dir: Optional[str] = None,
-) -> Dict[str, Any]:
+    results_dir: str | None = None,
+) -> dict[str, Any]:
     if not os.path.exists(config_path):
         raise FileNotFoundError(f"Config file not found: {config_path}")
 

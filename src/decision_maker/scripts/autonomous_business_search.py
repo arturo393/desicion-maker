@@ -3,7 +3,6 @@ import asyncio
 import json
 import os
 import sys
-from typing import Dict, List
 
 # Ensure we can import from core and scripts
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -16,7 +15,7 @@ from decision_maker.core.models import DecisionOption, DistributionType, Factor
 from decision_maker.core.orchestrator import UnifiedDecisionFramework
 
 
-def parse_gemini_response(response_text: str) -> List[Dict]:
+def parse_gemini_response(response_text: str) -> list[dict]:
     """
     Parses the Gemini response to extract business ideas.
     Expected format is JSON or a structured list.

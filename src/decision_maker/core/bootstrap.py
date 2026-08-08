@@ -8,7 +8,7 @@ from __future__ import annotations
 
 __all__ = ["BootstrapRanking"]
 
-from typing import Any, Dict, List, Tuple
+from typing import Any
 
 import numpy as np
 
@@ -21,12 +21,12 @@ BOOTSTRAP_NOISE_SCALE = 0.1
 class BootstrapRanking:
     @staticmethod
     def confidence_intervals(
-        decision_matrix_fuzzy: Dict[str, Dict[str, Tuple[float, float, float]]],
-        weights: List[float],
-        maximize: List[bool],
+        decision_matrix_fuzzy: dict[str, dict[str, tuple[float, float, float]]],
+        weights: list[float],
+        maximize: list[bool],
         n_bootstrap: int = 1000,
         alpha: float = 0.05,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         if not decision_matrix_fuzzy:
             return {}
         if len(decision_matrix_fuzzy) <= 1:
@@ -42,7 +42,7 @@ class BootstrapRanking:
         rank_matrix = np.zeros((n_bootstrap, n_opts), dtype=int)
 
         for b in range(n_bootstrap):
-            boot_data: Dict[str, Dict[str, Tuple[float, float, float]]] = {}
+            boot_data: dict[str, dict[str, tuple[float, float, float]]] = {}
             for opt in opt_names:
                 boot_data[opt] = {}
                 for f in factor_names:

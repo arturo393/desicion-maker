@@ -11,7 +11,7 @@ __all__ = ["UnifiedDecisionFramework"]
 import asyncio
 import logging
 import os
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -22,13 +22,17 @@ from decision_maker.core.bayesian import BayesianEngine
 from decision_maker.core.bootstrap import BootstrapRanking
 from decision_maker.core.decision_theory import DecisionTheoryEngine
 from decision_maker.core.explainability import ExplainabilityEngine
+from decision_maker.core.game_theory import GameTheoryEngine
 from decision_maker.core.gemini_agent import GeminiDeepResearchAgent
 from decision_maker.core.genetic import GeneticOptimizer
 from decision_maker.core.information_theory import InformationTheoryEngine
+from decision_maker.core.ml_surrogate import MLSurrogateEngine
 from decision_maker.core.models import DecisionOption, Factor
 from decision_maker.core.monte_carlo import MonteCarloEngine
 from decision_maker.core.pareto import ParetoEngine
+from decision_maker.core.portfolio import PortfolioOptimizer
 from decision_maker.core.promethee import PrometheeEngine
+from decision_maker.core.roa import RealOptionsEngine
 from decision_maker.core.robust import RobustOptimizer
 from decision_maker.core.sensitivity import SensitivityEngine
 from decision_maker.core.topsis import TOPSISEngine
@@ -37,10 +41,6 @@ from decision_maker.core.utils import (
     SCALE_MISMATCH_THRESHOLD,
 )
 from decision_maker.core.visualization import VisualizationEngine
-from decision_maker.core.game_theory import GameTheoryEngine
-from decision_maker.core.roa import RealOptionsEngine
-from decision_maker.core.ml_surrogate import MLSurrogateEngine
-from decision_maker.core.portfolio import PortfolioOptimizer
 
 logger = logging.getLogger(__name__)
 
@@ -57,9 +57,9 @@ def _normalize_dataframe(df: pd.DataFrame) -> pd.DataFrame:
     return result
 
 
-def _check_scale_mismatch(factors: List[Factor], mc_results: Dict) -> None:
+def _check_scale_mismatch(factors: list[Factor], mc_results: dict) -> None:
     factor_names = [f.name for f in factors]
-    means_per_factor: Dict[str, List[float]] = {fn: [] for fn in factor_names}
+    means_per_factor: dict[str, list[float]] = {fn: [] for fn in factor_names}
     for stats in mc_results.values():
         for fn in factor_names:
             if fn in stats.factor_stats:
@@ -76,12 +76,12 @@ def _check_scale_mismatch(factors: List[Factor], mc_results: Dict) -> None:
 
 def _promethee_with_uncertainty(
     engine: PrometheeEngine,
-    mc_results: Dict,
-    factor_names: List[str],
-    weights: List[float],
-    max_bools: List[bool],
-    pref_types: Optional[List[str]] = None,
-    pref_params: Optional[List[dict]] = None,
+    mc_results: dict,
+    factor_names: list[str],
+    weights: list[float],
+    max_bools: list[bool],
+    pref_types: list[str] | None = None,
+    pref_params: list[dict] | None = None,
 ) -> pd.Series:
     def _df_for_percentile(key: str) -> pd.DataFrame:
         rows = {}
@@ -112,10 +112,10 @@ def _promethee_with_uncertainty(
 class UnifiedDecisionFramework:
     def __init__(
         self,
-        correlation_matrix: Optional[np.ndarray] = None,
-        promethee_pref_types: Optional[List[str]] = None,
-        promethee_pref_params: Optional[List[dict]] = None,
-        session_id: Optional[str] = None,
+        correlation_matrix: np.ndarray | None = None,
+        promethee_pref_types: list[str] | None = None,
+        promethee_pref_params: list[dict] | None = None,
+        session_id: str | None = None,
     ):
         self.session_id = session_id
         self.mc_engine = MonteCarloEngine(correlation_matrix=correlation_matrix)
@@ -148,15 +148,15 @@ class UnifiedDecisionFramework:
         self.mc_engine.add_factor(factor)
 
     def save_session(self, name: str, description: str = "") -> str:
+
         from decision_maker.core.db import get_session
         from decision_maker.core.db_models import AnalysisSession
-        import json
-        
+
         factors_json = [f.model_dump() for f in self.mc_engine.factors]
         options_json = [o.model_dump() for o in self.mc_engine.options]
-        
+
         session = next(get_session())
-        
+
         if self.session_id:
             db_session = session.get(AnalysisSession, self.session_id)
             if db_session:
@@ -181,30 +181,30 @@ class UnifiedDecisionFramework:
         return self.session_id
 
     @classmethod
-    def load_session(cls, session_id: str) -> "UnifiedDecisionFramework":
+    def load_session(cls, session_id: str) -> UnifiedDecisionFramework:
         from decision_maker.core.db import get_session
         from decision_maker.core.db_models import AnalysisSession
-        
+
         session = next(get_session())
         db_session = session.get(AnalysisSession, session_id)
         if not db_session:
             raise ValueError(f"Session {session_id} not found in database.")
-            
+
         instance = cls(session_id=session_id)
         for f_dict in db_session.factors_json:
             instance.add_factor(Factor(**f_dict))
-            
+
         for o_dict in db_session.options_json:
             instance.add_option(DecisionOption(**o_dict))
-            
+
         return instance
 
     async def run_analysis(
         self,
         mode: str = "standard",
         use_ai: bool = False,
-        results_dir: Optional[str] = None,
-    ) -> Dict[str, Any]:
+        results_dir: str | None = None,
+    ) -> dict[str, Any]:
         if mode not in ("express", "standard", "advanced"):
             logger.warning(f"Unknown mode '{mode}', falling back to 'standard'")
             mode = "standard"
@@ -224,7 +224,7 @@ class UnifiedDecisionFramework:
         pareto_results = self.pareto_engine.analyze(mc_results, self.mc_engine.factors)
         strategies = {}
         sensitivity_results = {}
-        future_metrics: Dict[str, Any] = {}
+        future_metrics: dict[str, Any] = {}
 
         if mode in ("standard", "advanced"):
             strategies = self.dt_engine.analyze(mc_results)
@@ -243,7 +243,7 @@ class UnifiedDecisionFramework:
             robust = self.robust_engine.analyze(mc_results, self.mc_engine.factors)
             info_theory = self.info_theory_engine.analyze(mc_results, self.mc_engine.factors)
 
-            rankings: Dict[str, pd.Series] = {
+            rankings: dict[str, pd.Series] = {
                 "TOPSIS": topsis_scores,
                 "MC": pd.Series({n: s.mean_score for n, s in mc_results.items()}).sort_values(ascending=False),
             }
@@ -262,7 +262,7 @@ class UnifiedDecisionFramework:
             self._run_advanced_analysis(
                 mc_results, factor_names, weights, max_bools, data_fuzzy, future_metrics, topsis_scores
             )
-            
+
             # God-Mode Additions
             future_metrics["game_theory"] = self.game_theory_engine.analyze(mc_results)
             future_metrics["real_options"] = self.roa_engine.analyze(mc_results)
@@ -289,7 +289,7 @@ class UnifiedDecisionFramework:
             results = await asyncio.gather(*tasks)
             for opt, res in zip(self.mc_engine.options, results):
                 ai_reports[opt.name] = res
-            
+
             # Phase 4: Self-updating Priors via LLM
             future_metrics["llm_priors"] = await self.ai_agent.calibrate_priors("Market volatility is high.")
 
@@ -385,7 +385,7 @@ class UnifiedDecisionFramework:
             pref_params=self.promethee_pref_params,
         )
 
-        rankings_advanced: Dict[str, pd.Series] = {
+        rankings_advanced: dict[str, pd.Series] = {
             "TOPSIS": topsis_scores,
             "MC": pd.Series({n: s.mean_score for n, s in mc_results.items()}).sort_values(ascending=False),
         }

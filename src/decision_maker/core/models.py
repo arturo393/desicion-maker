@@ -3,9 +3,11 @@ Data models and type definitions for decision options, factors, distributions, a
 Uses Pydantic V2 for rigorous runtime validation.
 """
 
-from enum import Enum
-from typing import Dict, List, Optional, Callable
 import math
+from collections.abc import Callable
+from enum import Enum
+from typing import Any
+
 import numpy as np
 from pydantic import BaseModel, Field, model_validator
 
@@ -37,43 +39,43 @@ VALIDATION_RULES = {
     DistributionType.POISSON: (1, ("rate",)),
 }
 
-def _sample_deterministic(params: List[float], size: int) -> np.ndarray:
+def _sample_deterministic(params: list[float], size: int) -> np.ndarray:
     return np.full(size, params[0])
 
-def _sample_normal(params: List[float], size: int) -> np.ndarray:
+def _sample_normal(params: list[float], size: int) -> np.ndarray:
     return np.random.normal(params[0], max(params[1], EPSILON), size)
 
-def _sample_uniform(params: List[float], size: int) -> np.ndarray:
+def _sample_uniform(params: list[float], size: int) -> np.ndarray:
     low, high = min(params[0], params[1]), max(params[0], params[1])
     return np.random.uniform(low, high, size)
 
-def _sample_triangular(params: List[float], size: int) -> np.ndarray:
+def _sample_triangular(params: list[float], size: int) -> np.ndarray:
     left, mode, right = params[0], params[1], params[2]
     if not (left <= mode <= right):
         left, right = min(left, right), max(left, right)
         mode = np.clip(mode, left, right)
     return np.random.triangular(left, mode, right, size)
 
-def _sample_bernoulli(params: List[float], size: int) -> np.ndarray:
+def _sample_bernoulli(params: list[float], size: int) -> np.ndarray:
     return np.random.binomial(1, np.clip(params[0], 0.0, 1.0), size).astype(float)
 
-def _sample_exponential(params: List[float], size: int) -> np.ndarray:
+def _sample_exponential(params: list[float], size: int) -> np.ndarray:
     return np.random.exponential(max(params[0], EPSILON), size)
 
-def _sample_beta(params: List[float], size: int) -> np.ndarray:
+def _sample_beta(params: list[float], size: int) -> np.ndarray:
     return np.random.beta(max(params[0], EPSILON), max(params[1], EPSILON), size)
 
-def _sample_lognormal(params: List[float], size: int) -> np.ndarray:
+def _sample_lognormal(params: list[float], size: int) -> np.ndarray:
     return np.random.lognormal(params[0], max(params[1], EPSILON), size)
 
-def _sample_gamma(params: List[float], size: int) -> np.ndarray:
+def _sample_gamma(params: list[float], size: int) -> np.ndarray:
     return np.random.gamma(max(params[0], EPSILON), max(params[1], EPSILON), size)
 
-def _sample_poisson(params: List[float], size: int) -> np.ndarray:
+def _sample_poisson(params: list[float], size: int) -> np.ndarray:
     return np.random.poisson(max(params[0], 0.0), size).astype(float)
 
 
-SAMPLE_DISPATCH: Dict[DistributionType, Callable] = {
+SAMPLE_DISPATCH: dict[DistributionType, Callable] = {
     DistributionType.DETERMINISTIC: _sample_deterministic,
     DistributionType.NORMAL: _sample_normal,
     DistributionType.UNIFORM: _sample_uniform,
@@ -90,7 +92,12 @@ SAMPLE_DISPATCH: Dict[DistributionType, Callable] = {
 class UncertainVariable(BaseModel):
     name: str = Field(..., min_length=1)
     dist_type: DistributionType
-    params: List[float] = Field(default_factory=list)
+    params: list[float] = Field(default_factory=list)
+
+    def __init__(self, name: str, dist_type: DistributionType, params: list[float] = None, **kwargs):
+        if params is None:
+            params = []
+        super().__init__(name=name, dist_type=dist_type, params=params, **kwargs)
 
     @model_validator(mode='after')
     def validate_params(self) -> 'UncertainVariable':
@@ -105,7 +112,7 @@ class UncertainVariable(BaseModel):
 
         if self.dist_type == DistributionType.NORMAL and len(self.params) >= 2 and self.params[1] < 0:
             raise ValueError(f"NORMAL std must be >= 0, got {self.params[1]}")
-            
+
         return self
 
     def sample(self, size: int = 1) -> np.ndarray:
@@ -123,7 +130,7 @@ class UncertainVariable(BaseModel):
             DistributionType.POISSON: [1.0],
         }
         defaults = defaults_map.get(self.dist_type, [0.0])
-        
+
         sanitized = []
         for i in range(len(defaults)):
             if i < len(self.params) and not (math.isnan(self.params[i]) or math.isinf(self.params[i])):
@@ -145,7 +152,10 @@ class Factor(BaseModel):
     weight: float = Field(..., gt=0.0)
     maximize: bool = True
     category: str = "General"
-    stakeholder_weights: Optional[Dict[str, float]] = None
+    stakeholder_weights: dict[str, float] | None = None
+
+    def __init__(self, name: str, weight: float, maximize: bool = True, category: str = "General", stakeholder_weights: dict[str, float] | None = None, **kwargs):
+        super().__init__(name=name, weight=weight, maximize=maximize, category=category, stakeholder_weights=stakeholder_weights, **kwargs)
 
     @model_validator(mode='before')
     @classmethod
@@ -166,11 +176,14 @@ class Statistics(BaseModel):
     percentile_5: float
     percentile_95: float
     success_rate: float
-    factor_stats: Dict[str, Dict[str, float]]
+    factor_stats: dict[str, dict[str, float]]
     var_95: float
     cvar_95: float
-    raw_scores: Optional[np.ndarray] = Field(default=None, exclude=True) # Exclude from JSON dump
-    raw_factor_data: Optional[Dict[str, np.ndarray]] = Field(default=None, exclude=True)
+    raw_scores: np.ndarray | None = Field(default=None, exclude=True) # Exclude from JSON dump
+    raw_factor_data: dict[str, np.ndarray] | None = Field(default=None, exclude=True)
+
+    def __init__(self, option_name: str, mean_score: float, std_dev: float, min_score: float, max_score: float, percentile_5: float, percentile_95: float, success_rate: float, factor_stats: dict[str, dict[str, float]], var_95: float, cvar_95: float, raw_scores: np.ndarray | None = None, raw_factor_data: dict[str, np.ndarray] | None = None, **kwargs):
+        super().__init__(option_name=option_name, mean_score=mean_score, std_dev=std_dev, min_score=min_score, max_score=max_score, percentile_5=percentile_5, percentile_95=percentile_95, success_rate=success_rate, factor_stats=factor_stats, var_95=var_95, cvar_95=cvar_95, raw_scores=raw_scores, raw_factor_data=raw_factor_data, **kwargs)
 
     class Config:
         arbitrary_types_allowed = True
@@ -179,7 +192,12 @@ class Statistics(BaseModel):
 class DecisionOption(BaseModel):
     name: str = Field(..., min_length=1)
     description: str = ""
-    variables: Dict[str, UncertainVariable] = Field(default_factory=dict)
+    variables: dict[str, UncertainVariable] = Field(default_factory=dict)
+
+    def __init__(self, name: str, description: str = "", variables: dict[str, UncertainVariable] = None, **kwargs):
+        if variables is None:
+            variables = {}
+        super().__init__(name=name, description=description, variables=variables, **kwargs)
 
     def add_variable(self, name: str, dist_type: DistributionType, *params: float) -> None:
         self.variables[name] = UncertainVariable(

@@ -1,5 +1,6 @@
-from sqlmodel import SQLModel, create_engine, Session
 import os
+
+from sqlmodel import Session, SQLModel, create_engine
 
 DATABASE_URL = os.environ.get("DATABASE_URL", "sqlite:///decision_maker.db")
 

@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import json
 import logging
-from typing import Any, Dict, List
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -117,8 +117,8 @@ def _execute_analysis(
     name: str,
     mode: str,
     sims: int,
-    factors: List[Dict],
-    options: List[Dict],
+    factors: list[dict],
+    options: list[dict],
 ):
     import asyncio
 
@@ -193,7 +193,7 @@ def _execute_analysis(
             st.json(antifragile)
 
 
-def _simplify_result(result: Dict[str, Any]) -> Dict[str, Any]:
+def _simplify_result(result: dict[str, Any]) -> dict[str, Any]:
     """Remove large arrays for JSON storage."""
     from copy import deepcopy
 

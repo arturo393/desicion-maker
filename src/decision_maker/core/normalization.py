@@ -9,7 +9,6 @@ from __future__ import annotations
 __all__ = ["NormalizationEngine", "NormalizationMethod"]
 
 from enum import Enum
-from typing import Dict, List, Union
 
 import numpy as np
 
@@ -26,7 +25,7 @@ class NormalizationEngine:
 
     @staticmethod
     def normalize_array(
-        values: Union[List[float], np.ndarray],
+        values: list[float] | np.ndarray,
         method: NormalizationMethod = NormalizationMethod.MIN_MAX,
         maximize: bool = True,
         epsilon: float = 1e-9,
@@ -65,10 +64,10 @@ class NormalizationEngine:
 
     @staticmethod
     def normalize_matrix(
-        matrix: Dict[str, Dict[str, float]],
-        maximize_map: Dict[str, bool],
+        matrix: dict[str, dict[str, float]],
+        maximize_map: dict[str, bool],
         method: NormalizationMethod = NormalizationMethod.MIN_MAX,
-    ) -> Dict[str, Dict[str, float]]:
+    ) -> dict[str, dict[str, float]]:
         """Normalize a nested decision matrix {option_name: {factor_name: value}}."""
         if not matrix:
             return {}
@@ -76,7 +75,7 @@ class NormalizationEngine:
         options = list(matrix.keys())
         factors = list(next(iter(matrix.values())).keys())
 
-        result: Dict[str, Dict[str, float]] = {opt: {} for opt in options}
+        result: dict[str, dict[str, float]] = {opt: {} for opt in options}
 
         for factor in factors:
             raw_vals = [matrix[opt].get(factor, 0.0) for opt in options]

@@ -8,7 +8,6 @@ from __future__ import annotations
 
 __all__ = ["DecisionTheoryEngine"]
 
-from typing import Dict
 
 import numpy as np
 
@@ -21,9 +20,9 @@ class DecisionTheoryEngine:
 
     @staticmethod
     def analyze(
-        mc_results: Dict[str, Statistics],
+        mc_results: dict[str, Statistics],
         hurwicz_alpha: float = 0.5,
-    ) -> Dict[str, str]:
+    ) -> dict[str, str]:
         if not mc_results:
             return {}
         if len(mc_results) == 1:

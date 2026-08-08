@@ -4,10 +4,12 @@ Trains lightweight Neural/Tree surrogates to predict fitness in microsecond late
 bypassing expensive full Monte Carlo evaluation for genetic optimization passes.
 """
 
-from typing import Dict, List, Any
-import numpy as np
+from typing import Any
+
 from sklearn.ensemble import RandomForestRegressor
+
 from decision_maker.core.models import Factor
+
 
 class MLSurrogateEngine:
     def __init__(self):
@@ -15,7 +17,7 @@ class MLSurrogateEngine:
         self.is_trained = False
         self.feature_names = []
 
-    def train(self, mc_results: Dict, factors: List[Factor]) -> None:
+    def train(self, mc_results: dict, factors: list[Factor]) -> None:
         """
         Trains the surrogate model on the Monte Carlo results dataset.
         X = Factor Means
@@ -39,30 +41,30 @@ class MLSurrogateEngine:
             self.model.fit(X, y)
             self.is_trained = True
 
-    def predict_fitness(self, factor_values: List[float]) -> float:
+    def predict_fitness(self, factor_values: list[float]) -> float:
         """
         Microsecond-latency fitness prediction.
         """
         if not self.is_trained:
             return sum(factor_values) # fallback
-            
+
         prediction = self.model.predict([factor_values])
         return float(prediction[0])
 
-    def analyze(self, mc_results: Dict, factors: List[Factor]) -> Dict[str, Any]:
+    def analyze(self, mc_results: dict, factors: list[Factor]) -> dict[str, Any]:
         self.train(mc_results, factors)
         if not self.is_trained:
             return {"status": "Insufficient data to train ML Surrogate"}
-        
+
         # Test self-prediction accuracy
         mse = 0.0
         for name, stats in mc_results.items():
             f_vals = [stats.factor_stats.get(f.name, {}).get("mean", 0.0) for f in factors]
             pred = self.predict_fitness(f_vals)
             mse += (pred - stats.mean_score) ** 2
-            
+
         mse /= len(mc_results)
-        
+
         return {
             "status": "Trained successfully",
             "features": self.feature_names,
