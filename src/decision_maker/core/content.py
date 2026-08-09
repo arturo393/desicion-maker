@@ -6,7 +6,7 @@ Does NOT: Query any model directly or render reports.
 
 from __future__ import annotations
 
-__all__ = ["REPORT_CSS", "NarrativeContext", "research_prompt", "calibration_prompt", "narrative_prompt"]
+__all__ = ["REPORT_CSS", "NarrativeContext", "ChallengeContext", "research_prompt", "calibration_prompt", "narrative_prompt", "challenge_prompt"]
 
 from dataclasses import dataclass, field
 from typing import Any
@@ -193,4 +193,31 @@ def narrative_prompt(ctx: NarrativeContext) -> str:
         f"- Waterfall: {ctx.waterfall}\n"
         f"- Counterfactual: {ctx.counterfactual}\n"
         "Provide a short paragraph a business executive would understand."
+    )
+
+
+@dataclass
+class ChallengeContext:
+    """Bundles the decision facts the devil's advocate should attack."""
+
+    winner: str
+    options: list[str] = field(default_factory=list)
+    factors: list[str] = field(default_factory=list)
+    mc_summary: dict[str, Any] = field(default_factory=dict)
+    explanation: str = ""
+
+
+def challenge_prompt(ctx: ChallengeContext) -> str:
+    """Build the prompt asking the model to challenge the decision model's assumptions."""
+    return (
+        "You are a devil's advocate reviewing a multi-criteria decision analysis. "
+        "Your job is to find weaknesses in the model, not to agree with it.\n"
+        f"- Recommended winner: {ctx.winner}\n"
+        f"- Options considered: {ctx.options}\n"
+        f"- Factors: {ctx.factors}\n"
+        f"- Monte Carlo summary (mean/std): {ctx.mc_summary}\n"
+        f"- Existing explanation: {ctx.explanation}\n"
+        "Attack the assumptions: are the weights justified? Are any important factors missing? "
+        "Are the distribution assumptions reasonable? Could the ranking reverse under plausible changes? "
+        'Respond with ONLY a JSON array of 3-5 short challenge strings, e.g. ["...", "..."]'
     )

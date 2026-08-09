@@ -26,4 +26,6 @@ class OutcomeRecord(SQLModel, table=True):
     actual_winner: str
     actual_score: float
     accuracy_percentage: float
+    predicted_winner: str | None = None
+    confidence: float | None = None
     notes: str | None = None

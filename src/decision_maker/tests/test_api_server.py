@@ -117,3 +117,34 @@ class TestApiServer:
             json={"actual_winner": "A", "actual_score": 0.5},
         )
         assert resp.status_code == 404
+
+    def test_calibration_endpoint(self, client):
+        session_id = self._create_session(client, "Calib Test")
+
+        # Register two outcomes: one hit, one miss, with predicted winner + confidence.
+        client.post(
+            f"/sessions/{session_id}/outcome",
+            json={
+                "actual_winner": "A",
+                "actual_score": 0.9,
+                "predicted_winner": "A",
+                "confidence": 0.8,
+            },
+        )
+        client.post(
+            f"/sessions/{session_id}/outcome",
+            json={
+                "actual_winner": "B",
+                "actual_score": 0.5,
+                "predicted_winner": "A",
+                "confidence": 0.9,
+            },
+        )
+
+        resp = client.get("/calibration")
+        assert resp.status_code == 200
+        body = resp.json()
+        assert body["n_outcomes"] == 2
+        assert body["hit_rate"] == 0.5
+        assert body["mean_confidence"] == pytest.approx(0.85)
+        assert body["verdict"] in ("moderately_calibrated", "poorly_calibrated", "overconfident")

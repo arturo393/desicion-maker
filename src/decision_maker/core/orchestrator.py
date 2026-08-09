@@ -350,7 +350,54 @@ class UnifiedDecisionFramework:
             "counterfactual": counterfactual,
             "antifragile": antifragile,
             "factors": self.mc_engine.factors,
+            "uncertainty": self._analyze_uncertainty(mc_results),
+            "challenges": self._analyze_challenges(
+                mc_results=mc_results,
+                sensitivity_results=sensitivity_results,
+                explanation=explanation,
+                use_ai=use_ai,
+            ),
         }
+
+    def _analyze_uncertainty(self, mc_results: dict[str, Statistics]) -> dict[str, Any]:
+        """Confidence-weighted winner + bootstrap ranking confidence intervals."""
+        from decision_maker.core.uncertainty import confidence_weighted_winner, ranking_confidence
+
+        return {
+            "confidence_weighted_winner": confidence_weighted_winner(mc_results),
+            "ranking_confidence": ranking_confidence(mc_results),
+        }
+
+    def _analyze_challenges(
+        self,
+        mc_results: dict[str, Statistics],
+        sensitivity_results: dict[str, Any],
+        explanation: str,
+        use_ai: bool,
+    ) -> dict[str, Any]:
+        """Devil's advocate challenges to the model's assumptions."""
+        from decision_maker.core.devils_advocate import ChallengeRequest, DevilsAdvocate
+
+        options = [o.name for o in self.mc_engine.options]
+        winner = (
+            max(mc_results.items(), key=lambda x: x[1].mean_score)[0]
+            if mc_results
+            else None
+        )
+        factors = [
+            {"name": f.name, "weight": f.weight, "maximize": f.maximize}
+            for f in self.mc_engine.factors
+        ]
+        return DevilsAdvocate(use_ai=use_ai).challenge(
+            ChallengeRequest(
+                winner=winner or "",
+                options=options,
+                factors=factors,
+                mc_results=mc_results,
+                sensitivity=sensitivity_results,
+                explanation=explanation,
+            )
+        )
 
     def _generate_plots(
         self,

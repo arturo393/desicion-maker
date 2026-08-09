@@ -104,12 +104,32 @@ async def analyze(req: AnalysisRequest):
             "topsis_scores": topsis,
             "future_metrics": serialized_future,
             "explanation": result.get("explanation", ""),
-            "winner": winner
+            "winner": winner,
+            "uncertainty": _serialize(result.get("uncertainty", {})),
+            "challenges": _serialize(result.get("challenges", {})),
         }
     except Exception as e:
         import traceback
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e)) from e
+
+
+def _serialize(obj):
+    """Best-effort JSON-friendly serialization for API responses."""
+    import numpy as np
+    import pandas as pd
+
+    if isinstance(obj, dict):
+        return {k: _serialize(v) for k, v in obj.items()}
+    if isinstance(obj, (list, tuple)):
+        return [_serialize(v) for v in obj]
+    if isinstance(obj, (np.integer, np.floating)):
+        return float(obj)
+    if isinstance(obj, np.ndarray):
+        return obj.tolist()
+    if isinstance(obj, pd.Series):
+        return _serialize(obj.to_dict())
+    return obj
 
 @app.get("/sessions")
 def list_sessions():
@@ -134,6 +154,8 @@ def get_session_data(session_id: str):
 class OutcomeRequest(BaseModel):
     actual_winner: str
     actual_score: float
+    predicted_winner: str | None = None
+    confidence: float | None = None
     notes: str | None = None
 
 @app.get("/templates")
@@ -147,20 +169,41 @@ def register_outcome(session_id: str, req: OutcomeRequest):
     if not db_session:
         raise HTTPException(status_code=404, detail="Session not found")
 
-    # Super simple accuracy calculation (just for demonstration)
-    accuracy = 100.0 if req.actual_winner else 0.0 # Logic can be expanded
+    # Hit/miss based on the system's own prediction when provided.
+    if req.predicted_winner:
+        accuracy = 100.0 if req.predicted_winner == req.actual_winner else 0.0
+    else:
+        accuracy = 100.0 if req.actual_winner else 0.0
 
     outcome = OutcomeRecord(
         session_id=session_id,
         actual_winner=req.actual_winner,
         actual_score=req.actual_score,
         accuracy_percentage=accuracy,
+        predicted_winner=req.predicted_winner,
+        confidence=req.confidence,
         notes=req.notes
     )
     session.add(outcome)
     session.commit()
     session.refresh(outcome)
     return outcome
+
+@app.get("/calibration")
+def get_calibration():
+    from decision_maker.core.calibration import DecisionOutcome, compute_calibration
+
+    session = next(create_session())
+    results = session.exec(select(OutcomeRecord)).all()
+    outcomes = [
+        DecisionOutcome(
+            predicted_winner=r.predicted_winner or r.actual_winner,
+            actual_winner=r.actual_winner,
+            confidence=r.confidence or 0.5,
+        )
+        for r in results
+    ]
+    return compute_calibration(outcomes)
 
 def run_server(host="0.0.0.0", port=8001):
     uvicorn.run(app, host=host, port=port)
