@@ -6,9 +6,10 @@ Does NOT: Conduct deep research queries.
 
 from __future__ import annotations
 
-__all__ = ["PortfolioOptimizer"]
+__all__ = ["PortfolioOptimizer", "SearchConfig"]
 
 import logging
+from dataclasses import dataclass
 from typing import Any
 
 import numpy as np
@@ -23,6 +24,17 @@ RISK_AVERSION_GRID = [0.0, 0.5, 1.0, 2.0, 5.0, 10.0]
 RANDOM_SEARCH_ITERATIONS = 10000
 
 
+@dataclass
+class SearchConfig:
+    """Bundles portfolio search parameters (Parameter Object pattern)."""
+
+    budget: float = 1.0
+    risk_aversion: float = 1.0
+    min_allocation: float = 0.0
+    max_allocation: float = 1.0
+    iterations: int = RANDOM_SEARCH_ITERATIONS
+
+
 class PortfolioOptimizer:
     """
     Allocates budget/resources across decision options.
@@ -32,37 +44,37 @@ class PortfolioOptimizer:
     """
 
     @staticmethod
-    def _grid_search_2d(returns, cov_matrix, budget, risk_aversion, min_allocation, max_allocation):
+    def _grid_search_2d(returns, cov_matrix, config: SearchConfig):
         """Exhaustive grid search for 2-option portfolios."""
         best_obj = -np.inf
         best_w = None
-        grid = np.linspace(0, budget, 101)
+        grid = np.linspace(0, config.budget, 101)
         for w0 in grid:
-            if w0 < min_allocation * budget or w0 > max_allocation * budget:
+            if w0 < config.min_allocation * config.budget or w0 > config.max_allocation * config.budget:
                 continue
-            w1 = budget - w0
-            if w1 < min_allocation * budget or w1 > max_allocation * budget:
+            w1 = config.budget - w0
+            if w1 < config.min_allocation * config.budget or w1 > config.max_allocation * config.budget:
                 continue
             w = np.array([w0, w1])
-            obj = np.dot(w, returns) - risk_aversion * (w @ cov_matrix @ w)
+            obj = np.dot(w, returns) - config.risk_aversion * (w @ cov_matrix @ w)
             if obj > best_obj:
                 best_obj = obj
                 best_w = w.copy()
         return best_obj, best_w
 
     @staticmethod
-    def _random_search(returns, cov_matrix, budget, risk_aversion, n, min_allocation, max_allocation, iterations=10000):
+    def _random_search(returns, cov_matrix, n, config: SearchConfig):
         """Random search for 3+ option portfolios."""
         best_obj = -np.inf
         best_w = None
         rng = np.random.default_rng(42)
-        for _ in range(iterations):
+        for _ in range(config.iterations):
             raw = rng.uniform(0, 1, n)
-            w = raw / raw.sum() * budget
-            w = np.clip(w, min_allocation * budget, max_allocation * budget)
-            w = w / w.sum() * budget
-            w = np.clip(w, min_allocation * budget, max_allocation * budget)
-            obj = np.dot(w, returns) - risk_aversion * (w @ cov_matrix @ w)
+            w = raw / raw.sum() * config.budget
+            w = np.clip(w, config.min_allocation * config.budget, config.max_allocation * config.budget)
+            w = w / w.sum() * config.budget
+            w = np.clip(w, config.min_allocation * config.budget, config.max_allocation * config.budget)
+            obj = np.dot(w, returns) - config.risk_aversion * (w @ cov_matrix @ w)
             if obj > best_obj:
                 best_obj = obj
                 best_w = w.copy()
@@ -71,10 +83,7 @@ class PortfolioOptimizer:
     @staticmethod
     def optimize(
         mc_results: dict[str, Statistics],
-        budget: float = 1.0,
-        risk_aversion: float = 1.0,
-        min_allocation: float = 0.0,
-        max_allocation: float = 1.0,
+        config: SearchConfig | None = None,
     ) -> dict[str, Any]:
         """
         Find optimal budget allocation across options.
@@ -85,15 +94,16 @@ class PortfolioOptimizer:
 
         Args:
             mc_results: from Monte Carlo analysis
-            budget: total budget to allocate (default 1.0 = 100%)
-            risk_aversion: higher = more conservative (default 1.0)
-            min_allocation: minimum per option (default 0.0)
-            max_allocation: maximum per option (default 1.0)
+            config: SearchConfig with budget, risk_aversion, allocation bounds
 
         Returns:
             {allocations: {name: weight}, expected_return, portfolio_risk,
              efficient_frontier: [{return, risk}]}
         """
+        config = config or SearchConfig()
+        budget = config.budget
+        risk_aversion = config.risk_aversion
+
         names = list(mc_results.keys())
         n = len(names)
         if n == 0:
@@ -117,24 +127,9 @@ class PortfolioOptimizer:
 
         # Search for optimal allocation
         if n == 2:
-            best_obj, best_weights = PortfolioOptimizer._grid_search_2d(
-                returns,
-                cov_matrix,
-                budget,
-                risk_aversion,
-                min_allocation,
-                max_allocation,
-            )
+            best_obj, best_weights = PortfolioOptimizer._grid_search_2d(returns, cov_matrix, config)
         else:
-            best_obj, best_weights = PortfolioOptimizer._random_search(
-                returns,
-                cov_matrix,
-                budget,
-                risk_aversion,
-                n,
-                min_allocation,
-                max_allocation,
-            )
+            best_obj, best_weights = PortfolioOptimizer._random_search(returns, cov_matrix, n, config)
 
         if best_weights is None:
             best_weights = np.full(n, budget / n)
@@ -145,25 +140,16 @@ class PortfolioOptimizer:
         # Efficient frontier (vary risk_aversion)
         frontier = []
         for ra in RISK_AVERSION_GRID:
+            frontier_config = SearchConfig(
+                budget=budget,
+                risk_aversion=ra,
+                min_allocation=config.min_allocation,
+                max_allocation=config.max_allocation,
+            )
             if n == 2:
-                _, best_w = PortfolioOptimizer._grid_search_2d(
-                    returns,
-                    cov_matrix,
-                    budget,
-                    ra,
-                    min_allocation,
-                    max_allocation,
-                )
+                _, best_w = PortfolioOptimizer._grid_search_2d(returns, cov_matrix, frontier_config)
             else:
-                _, best_w = PortfolioOptimizer._random_search(
-                    returns,
-                    cov_matrix,
-                    budget,
-                    ra,
-                    n,
-                    min_allocation,
-                    max_allocation,
-                )
+                _, best_w = PortfolioOptimizer._random_search(returns, cov_matrix, n, frontier_config)
 
             if best_w is not None:
                 frontier.append(
@@ -202,7 +188,7 @@ class PortfolioOptimizer:
         self.risk_aversion = risk_aversion
 
     def optimize_allocation(self, mc_results: dict[str, Any], budget: float = 100.0) -> dict[str, float]:
-        result = self.optimize(mc_results, budget=budget, risk_aversion=self.risk_aversion)
+        result = self.optimize(mc_results, SearchConfig(budget=budget, risk_aversion=self.risk_aversion))
         if "allocations" in result:
             return {k: round(v, 2) for k, v in result["allocations"].items()}
         return {}

@@ -6,12 +6,23 @@
 
 from __future__ import annotations
 
-__all__ = ["PrometheeEngine"]
+__all__ = ["PrometheeEngine", "PrometheeConfig"]
 
 from collections.abc import Callable
+from dataclasses import dataclass, field
 
 import numpy as np
 import pandas as pd
+
+
+@dataclass
+class PrometheeConfig:
+    """Bundles PROMETHEE criteria preferences (Parameter Object)."""
+
+    weights: list[float]
+    maximize: list[bool]
+    pref_types: list[str] | None = None
+    pref_params: list[dict] | None = field(default_factory=list)
 
 
 class PrometheeEngine:
@@ -37,10 +48,7 @@ class PrometheeEngine:
     def analyze(
         self,
         decision_matrix: pd.DataFrame,
-        weights: list[float],
-        maximize: list[bool],
-        pref_types: list[str] | None = None,
-        pref_params: list[dict] | None = None,
+        config: PrometheeConfig,
     ) -> pd.Series:
         if decision_matrix.empty:
             return pd.Series()
@@ -49,9 +57,14 @@ class PrometheeEngine:
         n_options = len(options)
         n_factors = len(decision_matrix.columns)
 
+        weights = config.weights
+        maximize = config.maximize
+        pref_types = config.pref_types
+        pref_params = config.pref_params
+
         if pref_types is None:
             pref_types = ["usual"] * n_factors
-        if pref_params is None:
+        if not pref_params:
             pref_params = [{} for _ in range(n_factors)]
 
         pref_funcs = [PrometheeEngine._build_pref_func(pt, **pp) for pt, pp in zip(pref_types, pref_params, strict=False)]

@@ -6,12 +6,22 @@ Does NOT: Execute AHP or PROMETHEE comparisons directly.
 
 from __future__ import annotations
 
-__all__ = ["SensitivityEngine"]
+__all__ = ["SensitivityEngine", "ShockConfig"]
 
+from dataclasses import dataclass
 from typing import Any
 
 from decision_maker.core.models import Factor, Statistics
 from decision_maker.core.utils import SCORE_DELTAS, WEIGHT_DELTA
+
+
+@dataclass
+class ShockConfig:
+    """Bundles a weight/score perturbation applied to one factor (Parameter Object)."""
+
+    target_factor: Factor | None = None
+    target_delta: float = 0.0
+    modify_weight: bool = False
 
 
 class SensitivityEngine:
@@ -19,11 +29,14 @@ class SensitivityEngine:
     def _compute_scores(
         raw_scores: dict[str, dict[str, float]],
         factors: list[Factor],
-        target_factor: Factor = None,
-        target_delta: float = 0.0,
-        modify_weight: bool = False,
+        shock: ShockConfig | None = None,
     ) -> dict[str, float]:
         """Compute composite scores with normalization, matching Monte Carlo logic."""
+        shock = shock or ShockConfig()
+        target_factor = shock.target_factor
+        target_delta = shock.target_delta
+        modify_weight = shock.modify_weight
+
         # Compute global bounds per factor across all options
         bounds: dict[str, dict[str, float]] = {}
         for f in factors:
@@ -80,9 +93,7 @@ class SensitivityEngine:
                 new_ranking = SensitivityEngine._compute_scores(
                     raw_scores,
                     factors,
-                    target_factor=f,
-                    target_delta=delta,
-                    modify_weight=True,
+                    ShockConfig(target_factor=f, target_delta=delta, modify_weight=True),
                 )
                 total_checks += 1
                 if compute_winner(new_ranking) != base_winner:
@@ -101,9 +112,7 @@ class SensitivityEngine:
                 new_ranking = SensitivityEngine._compute_scores(
                     raw_scores,
                     factors,
-                    target_factor=f,
-                    target_delta=delta,
-                    modify_weight=False,
+                    ShockConfig(target_factor=f, target_delta=delta, modify_weight=False),
                 )
                 total_checks += 1
                 if compute_winner(new_ranking) != base_winner:

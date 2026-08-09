@@ -68,6 +68,6 @@ class GeminiDeepResearchAgent:
             if match:
                 return json.loads(match.group(0))
             return {}
-        except Exception as e:
+        except (ConnectionError, TimeoutError, ValueError, json.JSONDecodeError) as e:
             logger.error(f"Gemini API Error: {e}")
             return {}

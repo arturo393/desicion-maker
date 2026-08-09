@@ -6,9 +6,10 @@ Does NOT: Calculate standard linear multi-criteria decision matrices.
 
 from __future__ import annotations
 
-__all__ = ["AntifragileEngine"]
+__all__ = ["AntifragileEngine", "Perturbation"]
 
 import logging
+from dataclasses import dataclass
 from itertools import combinations
 from typing import Any
 
@@ -18,6 +19,15 @@ from decision_maker.core.models import Factor, Statistics
 from decision_maker.core.utils import EPSILON
 
 logger = logging.getLogger(__name__)
+
+
+@dataclass
+class Perturbation:
+    """Bundles a factor perturbation applied to one option (Parameter Object)."""
+
+    target_factor: str
+    new_factor_vals: np.ndarray
+    raw_data: dict[str, np.ndarray]
 
 # Fragility index weights
 FRAGILITY_CVAR_WEIGHT = 0.4
@@ -177,9 +187,7 @@ class AntifragileEngine:
                         mc_results,
                         factors,
                         opt_name,
-                        f.name,
-                        new_vals,
-                        raw_data,
+                        Perturbation(target_factor=f.name, new_factor_vals=new_vals, raw_data=raw_data),
                     )
                     deltas[f"{p:.1f}x"] = score - original_score
 
@@ -212,11 +220,13 @@ class AntifragileEngine:
         mc_results: dict[str, Statistics],
         factors: list[Factor],
         opt_name: str,
-        target_factor: str,
-        new_factor_vals: np.ndarray,
-        raw_data: dict[str, np.ndarray],
+        perturbation: Perturbation,
     ) -> float:
         """Recompute an option's score with one factor's data replaced."""
+        target_factor = perturbation.target_factor
+        new_factor_vals = perturbation.new_factor_vals
+        raw_data = perturbation.raw_data
+
         # Build global bounds from all options' raw data, using perturbed
         # values for the target option × factor
         bounds: dict[str, dict[str, float]] = {}

@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 
 from decision_maker.core.models import Statistics
-from decision_maker.core.portfolio import PortfolioOptimizer
+from decision_maker.core.portfolio import PortfolioOptimizer, SearchConfig
 
 
 @pytest.fixture
@@ -37,7 +37,7 @@ class TestPortfolioOptimizer:
         assert "error" in result
 
     def test_optimize_with_budget(self, two_options):
-        result = PortfolioOptimizer.optimize(two_options, budget=100)
+        result = PortfolioOptimizer.optimize(two_options, SearchConfig(budget=100))
         assert abs(sum(result["allocations"].values()) - 100) < 1e-6
 
     def test_sharpe_ratio_returned(self, two_options):

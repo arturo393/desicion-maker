@@ -31,7 +31,7 @@ from decision_maker.core.models import DecisionOption, Factor
 from decision_maker.core.monte_carlo import MonteCarloEngine
 from decision_maker.core.pareto import ParetoEngine
 from decision_maker.core.portfolio import PortfolioOptimizer
-from decision_maker.core.promethee import PrometheeEngine
+from decision_maker.core.promethee import PrometheeConfig, PrometheeEngine
 from decision_maker.core.roa import RealOptionsEngine
 from decision_maker.core.robust import RobustOptimizer
 from decision_maker.core.sensitivity import SensitivityEngine
@@ -77,11 +77,8 @@ def _check_scale_mismatch(factors: list[Factor], mc_results: dict) -> None:
 def _promethee_with_uncertainty(
     engine: PrometheeEngine,
     mc_results: dict,
+    config: PrometheeConfig,
     factor_names: list[str],
-    weights: list[float],
-    max_bools: list[bool],
-    pref_types: list[str] | None = None,
-    pref_params: list[dict] | None = None,
 ) -> pd.Series:
     def _df_for_percentile(key: str) -> pd.DataFrame:
         rows = {}
@@ -100,7 +97,7 @@ def _promethee_with_uncertainty(
         if df.empty:
             continue
         df = _normalize_dataframe(df)
-        scores = engine.analyze(df, weights, max_bools, pref_types=pref_types, pref_params=pref_params)
+        scores = engine.analyze(df, config)
         all_scores.append(scores)
     if not all_scores:
         return pd.Series()
@@ -233,11 +230,13 @@ class UnifiedDecisionFramework:
             promethee_uncertainty = _promethee_with_uncertainty(
                 self.promethee_engine,
                 mc_results,
+                PrometheeConfig(
+                    weights=weights,
+                    maximize=max_bools,
+                    pref_types=self.promethee_pref_types,
+                    pref_params=self.promethee_pref_params,
+                ),
                 factor_names,
-                weights,
-                max_bools,
-                pref_types=self.promethee_pref_types,
-                pref_params=self.promethee_pref_params,
             )
 
             robust = self.robust_engine.analyze(mc_results, self.mc_engine.factors)
@@ -368,10 +367,12 @@ class UnifiedDecisionFramework:
 
         promethee_scores = self.promethee_engine.analyze(
             df_crisp,
-            weights,
-            max_bools,
-            pref_types=self.promethee_pref_types,
-            pref_params=self.promethee_pref_params,
+            PrometheeConfig(
+                weights=weights,
+                maximize=max_bools,
+                pref_types=self.promethee_pref_types,
+                pref_params=self.promethee_pref_params,
+            ),
         )
 
         rankings_advanced: dict[str, pd.Series] = {

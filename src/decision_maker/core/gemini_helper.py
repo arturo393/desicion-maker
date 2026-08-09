@@ -41,5 +41,5 @@ def search_with_gemini(query: str, model_name: str = "gemini-2.0-flash") -> str:
             model = _old_genai.GenerativeModel(model_name)
             response = model.generate_content(query)
             return response.text
-    except Exception as e:
+    except (ConnectionError, TimeoutError, ValueError) as e:
         return f"Gemini error: {e}"
