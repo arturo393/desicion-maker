@@ -1,7 +1,7 @@
 """
-TOPSIS and Fuzzy TOPSIS decision engine ranking options by distance to ideal solutions.
-Usage: from decision_maker.core.topsis import TOPSISEngine
-Does NOT: Perform genetic strategy search or Bayesian updating.
+[What it does] TOPSIS multi-criteria decision making algorithm.
+[How to use it] Instantiate TOPSISEngine and call analyze(data, weights, maximize_flags).
+[What it DOESN'T do] Does not handle missing values automatically.
 """
 
 from __future__ import annotations

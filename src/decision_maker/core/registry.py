@@ -148,7 +148,7 @@ class DecisionRegistry:
         rows = self._conn.execute(query, params).fetchall()
         return [dict(r) for r in rows]
 
-    def get_decision(self, decision_id: int) -> dict[str, Any] | None:
+    def fetch_decision(self, decision_id: int) -> dict[str, Any] | None:
         row = self._conn.execute("SELECT * FROM decisions WHERE id = ?", (decision_id,)).fetchone()
         if row is None:
             return None
@@ -232,11 +232,11 @@ class DecisionRegistry:
                     result[key] = json.loads(result[key])
         return result
 
-    def get_template(self, template_id: int) -> dict[str, Any] | None:
+    def fetch_template(self, template_id: int) -> dict[str, Any] | None:
         row = self._conn.execute("SELECT * FROM templates WHERE id = ?", (template_id,)).fetchone()
         return self._hydrate_template(row)
 
-    def get_template_by_name(self, name: str) -> dict[str, Any] | None:
+    def fetch_template_by_name(self, name: str) -> dict[str, Any] | None:
         row = self._conn.execute("SELECT * FROM templates WHERE name = ?", (name,)).fetchone()
         return self._hydrate_template(row)
 

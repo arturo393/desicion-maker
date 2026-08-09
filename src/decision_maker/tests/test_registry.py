@@ -27,7 +27,7 @@ class TestDecisionRegistry:
             tags=["test"],
         )
         assert fid > 0
-        got = registry.get_decision(fid)
+        got = registry.fetch_decision(fid)
         assert got is not None
         assert got["name"] == "Test Decision"
         assert got["tags"] == ["test"]
@@ -54,17 +54,17 @@ class TestDecisionRegistry:
     def test_delete_decision(self, registry):
         fid = registry.save_decision("ToDelete", "express", 100, [], [], {})
         assert registry.delete_decision(fid) is True
-        assert registry.get_decision(fid) is None
+        assert registry.fetch_decision(fid) is None
 
     def test_update_decision(self, registry):
         fid = registry.save_decision("OldName", "express", 100, [], [], {})
         assert registry.update_decision(fid, name="NewName", status="archived") is True
-        got = registry.get_decision(fid)
+        got = registry.fetch_decision(fid)
         assert got["name"] == "NewName"
         assert got["status"] == "archived"
 
     def test_get_nonexistent(self, registry):
-        assert registry.get_decision(99999) is None
+        assert registry.fetch_decision(99999) is None
 
     def test_save_and_get_template(self, registry):
         tid = registry.save_template(
@@ -74,12 +74,12 @@ class TestDecisionRegistry:
             category="Test",
         )
         assert tid > 0
-        got = registry.get_template(tid)
+        got = registry.fetch_template(tid)
         assert got["name"] == "Test Template"
 
     def test_get_template_by_name(self, registry):
         registry.save_template("UniqueName", [{"name": "X", "weight": 1.0}])
-        got = registry.get_template_by_name("UniqueName")
+        got = registry.fetch_template_by_name("UniqueName")
         assert got is not None
         assert got["name"] == "UniqueName"
 

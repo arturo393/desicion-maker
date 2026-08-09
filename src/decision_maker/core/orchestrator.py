@@ -149,13 +149,13 @@ class UnifiedDecisionFramework:
 
     def save_session(self, name: str, description: str = "") -> str:
 
-        from decision_maker.core.db import get_session
+        from decision_maker.core.db import create_session
         from decision_maker.core.db_models import AnalysisSession
 
         factors_json = [f.model_dump() for f in self.mc_engine.factors]
         options_json = [o.model_dump() for o in self.mc_engine.options]
 
-        session = next(get_session())
+        session = next(create_session())
 
         if self.session_id:
             db_session = session.get(AnalysisSession, self.session_id)
@@ -182,10 +182,10 @@ class UnifiedDecisionFramework:
 
     @classmethod
     def load_session(cls, session_id: str) -> UnifiedDecisionFramework:
-        from decision_maker.core.db import get_session
+        from decision_maker.core.db import create_session
         from decision_maker.core.db_models import AnalysisSession
 
-        session = next(get_session())
+        session = next(create_session())
         db_session = session.get(AnalysisSession, session_id)
         if not db_session:
             raise ValueError(f"Session {session_id} not found in database.")

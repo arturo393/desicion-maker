@@ -1,6 +1,7 @@
 """
-Data models and type definitions for decision options, factors, distributions, and statistics.
-Uses Pydantic V2 for rigorous runtime validation.
+[What it does] Data models and type definitions for decision options, factors, distributions, and statistics.
+[How to use it] Import necessary models (e.g., from decision_maker.core.models import DecisionOption)
+[What it DOESN'T do] Does not implement execution logic or orchestration.
 """
 
 import math

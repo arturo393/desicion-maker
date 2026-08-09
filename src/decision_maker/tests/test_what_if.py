@@ -128,15 +128,15 @@ class TestWhatIfEngine:
 
     def test_set_weight_changes_ranking(self, engine):
         scores_before = {n: s for n, s in engine.recompute()}
-        engine.set_weight("Cost", 0.9)
-        engine.set_weight("Quality", 0.05)
-        engine.set_weight("Speed", 0.05)
+        engine.assign_weight("Cost", 0.9)
+        engine.assign_weight("Quality", 0.05)
+        engine.assign_weight("Speed", 0.05)
         scores_after = {n: s for n, s in engine.recompute()}
         # Weights changed — scores should differ
         assert not np.allclose(list(scores_before.values()), list(scores_after.values()))
 
     def test_set_weight_unknown_factor(self, engine):
-        result = engine.set_weight("NonExistent", 0.5)
+        result = engine.assign_weight("NonExistent", 0.5)
         assert result is False
 
     def test_toggle_maximize_flips_direction(self, engine):
@@ -149,7 +149,7 @@ class TestWhatIfEngine:
         assert result is None
 
     def test_reset_restores_original(self, engine):
-        engine.set_weight("Cost", 0.9)
+        engine.assign_weight("Cost", 0.9)
         engine.toggle_maximize("Cost")
         engine.reset()
         for cf, of in zip(engine.current_factors, engine.original_factors, strict=False):
@@ -157,7 +157,7 @@ class TestWhatIfEngine:
             assert cf.maximize == of.maximize
 
     def test_diff_shows_changes(self, engine):
-        engine.set_weight("Cost", 0.6)
+        engine.assign_weight("Cost", 0.6)
         engine.toggle_maximize("Speed")
         changes = engine.diff()
         change_text = "\n".join(changes)
@@ -168,12 +168,12 @@ class TestWhatIfEngine:
         assert engine.diff() == []
 
     def test_set_all_weights(self, engine):
-        not_found = engine.set_all_weights({"Cost": 0.5, "Quality": 0.3, "Speed": 0.2})
+        not_found = engine.assign_all_weights({"Cost": 0.5, "Quality": 0.3, "Speed": 0.2})
         assert not_found == []
         assert abs(engine.current_factors[0].weight - 0.5) < 1e-9
 
     def test_set_all_weights_partial(self, engine):
-        not_found = engine.set_all_weights({"Cost": 0.5, "Fake": 0.5})
+        not_found = engine.assign_all_weights({"Cost": 0.5, "Fake": 0.5})
         assert not_found == ["Fake"]
 
     def test_recompute_with_weights_temporary(self, engine):
@@ -216,9 +216,9 @@ class TestWhatIfEngine:
         assert "Δ" in table
 
     def test_suggest_returns_suggestions(self, engine):
-        engine.set_weight("Cost", 0.1)
-        engine.set_weight("Quality", 0.8)
-        engine.set_weight("Speed", 0.1)
+        engine.assign_weight("Cost", 0.1)
+        engine.assign_weight("Quality", 0.8)
+        engine.assign_weight("Speed", 0.1)
         suggestions = engine._suggest()
         assert isinstance(suggestions, list)
         if suggestions:
@@ -261,9 +261,9 @@ class TestWhatIfEngine:
         assert scores[0][1] > 0
 
     def test_original_ranking_order(self, engine):
-        engine.set_weight("Cost", 0.9)
-        engine.set_weight("Quality", 0.05)
-        engine.set_weight("Speed", 0.05)
+        engine.assign_weight("Cost", 0.9)
+        engine.assign_weight("Quality", 0.05)
+        engine.assign_weight("Speed", 0.05)
         # original_ranking should still return original order
         orig = engine.original_ranking()
         for i in range(len(orig) - 1):

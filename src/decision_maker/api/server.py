@@ -6,7 +6,7 @@ from pydantic import BaseModel
 from sqlmodel import select
 
 from decision_maker.api.templates import TEMPLATES
-from decision_maker.core.db import get_session
+from decision_maker.core.db import create_session
 from decision_maker.core.db_models import AnalysisSession, OutcomeRecord
 from decision_maker.core.models import DecisionOption, DistributionType, Factor
 from decision_maker.core.orchestrator import UnifiedDecisionFramework
@@ -113,14 +113,14 @@ async def analyze(req: AnalysisRequest):
 
 @app.get("/sessions")
 def list_sessions():
-    session = next(get_session())
+    session = next(create_session())
     statements = select(AnalysisSession)
     results = session.exec(statements).all()
     return [{"id": s.id, "name": s.name, "description": s.description} for s in results]
 
 @app.get("/sessions/{session_id}")
 def get_session_data(session_id: str):
-    session = next(get_session())
+    session = next(create_session())
     db_session = session.get(AnalysisSession, session_id)
     if not db_session:
         raise HTTPException(status_code=404, detail="Session not found")
@@ -142,7 +142,7 @@ def list_templates():
 
 @app.post("/sessions/{session_id}/outcome")
 def register_outcome(session_id: str, req: OutcomeRequest):
-    session = next(get_session())
+    session = next(create_session())
     db_session = session.get(AnalysisSession, session_id)
     if not db_session:
         raise HTTPException(status_code=404, detail="Session not found")

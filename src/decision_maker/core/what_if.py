@@ -66,7 +66,7 @@ class WhatIfEngine:
 
     # ── Public mutation API ──────────────────────────────────────────
 
-    def set_weight(self, factor_name: str, weight: float) -> bool:
+    def assign_weight(self, factor_name: str, weight: float) -> bool:
         """Set a factor's weight. Returns True if found, False otherwise."""
         for f in self.current_factors:
             if f.name == factor_name:
@@ -82,11 +82,11 @@ class WhatIfEngine:
                 return f.maximize
         return None
 
-    def set_all_weights(self, weights: dict[str, float]) -> list[str]:
+    def assign_all_weights(self, weights: dict[str, float]) -> list[str]:
         """Set multiple weights at once. Returns list of names not found."""
         not_found = []
         for name, w in weights.items():
-            if not self.set_weight(name, w):
+            if not self.assign_weight(name, w):
                 not_found.append(name)
         return not_found
 
@@ -145,7 +145,7 @@ class WhatIfEngine:
         Returns same as recompute() without permanently changing state.
         """
         saved = {f.name: f.weight for f in self.current_factors}
-        self.set_all_weights(weights)
+        self.assign_all_weights(weights)
         scores = self.recompute()
         for f in self.current_factors:
             if f.name in saved:
@@ -278,7 +278,7 @@ class WhatIfEngine:
                 fname = parts[1]
                 try:
                     w = float(parts[2])
-                    if self.set_weight(fname, w):
+                    if self.assign_weight(fname, w):
                         scores = self.recompute()
                         print(f"Set {fname} weight to {w:.2f}")
                         print(self.summary_table(scores))
@@ -318,7 +318,7 @@ class WhatIfEngine:
                         print(f"Expected name=weight format, got '{part}'")
                 if weights:
                     saved = {f.name: f.weight for f in self.current_factors}
-                    self.set_all_weights(weights)
+                    self.assign_all_weights(weights)
                     scores = self.recompute()
                     print("Temporary weights applied:")
                     print(self.summary_table(scores))

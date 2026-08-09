@@ -1,7 +1,7 @@
 """
-Pareto efficiency analyzer identifying non-dominated decision options.
-Usage: from decision_maker.core.pareto import ParetoAnalyzer
-Does NOT: Compute weighted composite scores or rank orders.
+[What it does] Pareto efficiency analyzer to filter optimal combinations.
+[How to use it] Instantiate ParetoEngine and pass Monte Carlo results to analyze().
+[What it DOESN'T do] Does not aggregate weights; purely dominates based on raw coordinates.
 """
 
 from __future__ import annotations
