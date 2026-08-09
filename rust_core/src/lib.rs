@@ -134,12 +134,13 @@ impl MonteCarloEngine {
         })?;
         
         let n = input.num_simulations;
+        if n == 0 {
+            return Err(pyo3::exceptions::PyValueError::new_err("num_simulations must be >= 1"));
+        }
 
-        // Parallel map across options
-        let results: HashMap<String, OptionStats> = input.options.into_par_iter().map(|opt| {
+        // Phase 1: sample all variables for every option (parallel across options).
+        let sampled: Vec<(String, HashMap<String, Vec<f64>>)> = input.options.par_iter().map(|opt| {
             let mut rng = rand::thread_rng();
-            
-            // 1. Sample all variables
             let mut sampled_data: HashMap<String, Vec<f64>> = HashMap::new();
             for (var_name, var_def) in &opt.variables {
                 let mut samples = Vec::with_capacity(n);
@@ -148,56 +149,80 @@ impl MonteCarloEngine {
                 }
                 sampled_data.insert(var_name.clone(), samples);
             }
+            (opt.name.clone(), sampled_data)
+        }).collect();
 
-            // 2. Compute factor statistics
-            let mut factor_stats = HashMap::new();
-            for (vname, mut samples) in sampled_data.iter().map(|(k, v)| (k.clone(), v.clone())) {
-                let mean = samples.iter().sum::<f64>() / n as f64;
-                let var = samples.iter().map(|x| (x - mean).powi(2)).sum::<f64>() / n as f64;
-                let std = var.sqrt();
-                let p5 = percentile(&mut samples, 5.0);
-                let p95 = percentile(&mut samples, 95.0);
-                factor_stats.insert(vname, FactorStats { mean, std, p5, p95 });
+        // Phase 2: compute global bounds per factor across all options.
+        let mut global_bounds: HashMap<String, (f64, f64)> = HashMap::new();
+        for (_name, data) in &sampled {
+            for factor in &input.factors {
+                if let Some(samples) = data.get(&factor.name) {
+                    let (mut lo, mut hi) = (f64::INFINITY, f64::NEG_INFINITY);
+                    for &v in samples {
+                        if v < lo { lo = v; }
+                        if v > hi { hi = v; }
+                    }
+                    if lo.is_finite() && hi.is_finite() {
+                        let entry = global_bounds.entry(factor.name.clone()).or_insert((lo, hi));
+                        entry.0 = entry.0.min(lo);
+                        entry.1 = entry.1.max(hi);
+                    }
+                }
             }
+        }
 
-            // 3. Compute total scores (simplified raw sum for now since global bounds need multi-option pass)
-            // A full implementation would need 2 passes over options to normalize.
-            // For now, doing raw calculation to prove the pipeline.
+        // Phase 3: compute scores (normalized per-factor) and statistics (parallel).
+        let results: HashMap<String, OptionStats> = sampled.into_par_iter().map(|(name, sampled_data)| {
             let mut total_scores = vec![0.0; n];
             for factor in &input.factors {
                 if let Some(samples) = sampled_data.get(&factor.name) {
-                    for i in 0..n {
-                        if factor.maximize {
-                            total_scores[i] += samples[i] * factor.weight;
+                    let bounds = global_bounds.get(&factor.name);
+                    let norm_vals: Vec<f64> = if let Some(&(lo, hi)) = bounds {
+                        if hi > lo {
+                            samples.iter().map(|&v| (v - lo) / (hi - lo)).collect()
                         } else {
-                            total_scores[i] -= samples[i] * factor.weight;
+                            vec![1.0; n]
+                        }
+                    } else {
+                        samples.clone()
+                    };
+                    for i in 0..n {
+                        let nv = norm_vals[i];
+                        if factor.maximize {
+                            total_scores[i] += nv * factor.weight;
+                        } else {
+                            total_scores[i] += (1.0 - nv) * factor.weight;
                         }
                     }
                 }
             }
 
             let mut sorted_scores = total_scores.clone();
-            
             let mean_score = total_scores.iter().sum::<f64>() / n as f64;
             let std_dev = (total_scores.iter().map(|x| (x - mean_score).powi(2)).sum::<f64>() / n as f64).sqrt();
             let p5 = percentile(&mut sorted_scores, 5.0);
             let p95 = percentile(&mut sorted_scores, 95.0);
-            
             let min_score = sorted_scores.first().copied().unwrap_or(0.0);
             let max_score = sorted_scores.last().copied().unwrap_or(0.0);
-            
-            // Success threshold simplified
-            let total_weight: f64 = input.factors.iter().map(|f| f.weight).sum();
-            let success_threshold = 0.0; // Raw scores threshold
-            let success_count = total_scores.iter().filter(|&&x| x > success_threshold).count();
+            let success_count = total_scores.iter().filter(|&&x| x > 0.0).count();
             let success_rate = success_count as f64 / n as f64;
-
             let var_95 = p5;
             let tail: Vec<f64> = total_scores.iter().copied().filter(|&x| x <= p5).collect();
             let cvar_95 = if tail.is_empty() { p5 } else { tail.iter().sum::<f64>() / tail.len() as f64 };
 
-            (opt.name.clone(), OptionStats {
-                option_name: opt.name,
+            let mut factor_stats = HashMap::new();
+            for (vname, samples) in &sampled_data {
+                let mut s = samples.clone();
+                let fmean = samples.iter().sum::<f64>() / n as f64;
+                let fvar = samples.iter().map(|x| (x - fmean).powi(2)).sum::<f64>() / n as f64;
+                let fstd = fvar.sqrt();
+                let fp5 = percentile(&mut s, 5.0);
+                let fp95 = percentile(&mut s, 95.0);
+                factor_stats.insert(vname.clone(), FactorStats { mean: fmean, std: fstd, p5: fp5, p95: fp95 });
+            }
+
+            (name.clone(), OptionStats {
+                option_name: name,
                 mean_score,
                 std_dev,
                 min_score,

@@ -28,7 +28,7 @@ from decision_maker.core.gemini_agent import GeminiDeepResearchAgent
 from decision_maker.core.genetic import GeneticOptimizer
 from decision_maker.core.information_theory import InformationTheoryEngine
 from decision_maker.core.ml_surrogate import MLSurrogateEngine
-from decision_maker.core.models import DecisionOption, Factor
+from decision_maker.core.models import DecisionOption, Factor, Statistics
 from decision_maker.core.monte_carlo import MonteCarloEngine
 from decision_maker.core.pareto import ParetoEngine
 from decision_maker.core.portfolio import PortfolioOptimizer
@@ -283,12 +283,7 @@ class UnifiedDecisionFramework:
                     topsis_scores=topsis_scores,
                 )
             )
-
-            # God-Mode Additions
-            future_metrics["game_theory"] = self.game_theory_engine.analyze(mc_results)
-            future_metrics["real_options"] = self.roa_engine.analyze(mc_results)
-            future_metrics["ml_surrogate"] = self.ml_surrogate_engine.analyze(mc_results, self.mc_engine.factors)
-            future_metrics["portfolio_allocation"] = self.portfolio_optimizer.optimize_allocation(mc_results)
+            self._add_god_mode_metrics(future_metrics, mc_results)
 
         waterfall = self.explain_engine.factor_waterfall(mc_results, self.mc_engine.factors)
         counterfactual = self.explain_engine.counterfactual(mc_results, self.mc_engine.factors)
@@ -338,17 +333,7 @@ class UnifiedDecisionFramework:
         saved = save_report(report_data)
 
         if mode in ("standard", "advanced"):
-            timestamp = saved["timestamp"]
-            plots = self.viz_engine.generate_all_plots(
-                PlotContext(
-                    mc_results=mc_results,
-                    factors=self.mc_engine.factors,
-                    future_metrics=future_metrics,
-                    output_dir=os.path.dirname(saved["json"]),
-                    timestamp=timestamp,
-                )
-            )
-            saved["plots"] = plots
+            saved["plots"] = self._generate_plots(saved, mc_results, future_metrics)
 
         return {
             "mode": mode,
@@ -366,6 +351,23 @@ class UnifiedDecisionFramework:
             "antifragile": antifragile,
             "factors": self.mc_engine.factors,
         }
+
+    def _generate_plots(
+        self,
+        saved: dict[str, Any],
+        mc_results: dict[str, Statistics],
+        future_metrics: dict[str, Any],
+    ) -> list[str]:
+        """Generate the plot suite for standard/advanced modes."""
+        return self.viz_engine.generate_all_plots(
+            PlotContext(
+                mc_results=mc_results,
+                factors=self.mc_engine.factors,
+                future_metrics=future_metrics,
+                output_dir=os.path.dirname(saved["json"]),
+                timestamp=saved["timestamp"],
+            )
+        )
 
     def _build_analysis_inputs(self, mc_results):
         """Build fuzzy decision matrix and extract weights/directions from factors."""
@@ -385,6 +387,13 @@ class UnifiedDecisionFramework:
             max_bools.append(f.maximize if f else True)
 
         return data_fuzzy, weights, max_bools, factor_names
+
+    def _add_god_mode_metrics(self, future_metrics: dict[str, Any], mc_results: dict[str, Statistics]) -> None:
+        """Populate advanced-mode metrics: game theory, real options, surrogate, portfolio."""
+        future_metrics["game_theory"] = self.game_theory_engine.analyze(mc_results)
+        future_metrics["real_options"] = self.roa_engine.analyze(mc_results)
+        future_metrics["ml_surrogate"] = self.ml_surrogate_engine.analyze(mc_results, self.mc_engine.factors)
+        future_metrics["portfolio_allocation"] = self.portfolio_optimizer.optimize_allocation(mc_results)
 
     def _run_advanced_analysis(self, ctx: AdvancedAnalysis):
         """Run advanced mode analyses: crisp PROMETHEE, bootstrap, Bayesian, genetic."""

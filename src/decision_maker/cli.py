@@ -112,11 +112,22 @@ def run(
         typer.echo(f"Error: {e}", err=True)
         raise typer.Exit(code=1) from e
 
+    _show_result_files(result)
+
     if explain and result:
         _generate_explanation(result)
 
     if what_if and result:
         _launch_what_if(result)
+
+
+def _show_result_files(result: dict) -> None:
+    """Print the generated report paths from an analysis result."""
+    files = result.get("files", {})
+    if files:
+        typer.echo("\nReports saved:")
+        for fmt, path in files.items():
+            typer.echo(f"  {fmt.upper()}: {path}")
 
 
 @app.command()
@@ -169,11 +180,7 @@ async def _run_interactive(
     typer.echo(f"Running {mode} analysis with {simulations} simulations...")
     result = await framework.run_analysis(mode=mode, use_ai=use_ai, results_dir=output)
 
-    files = result.get("files", {})
-    if files:
-        typer.echo("\nReports saved:")
-        for fmt, path in files.items():
-            typer.echo(f"  {fmt.upper()}: {path}")
+    _show_result_files(result)
 
     return result
 

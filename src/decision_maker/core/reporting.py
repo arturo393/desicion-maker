@@ -28,6 +28,7 @@ import pandas as pd
 
 from decision_maker.core.content import REPORT_CSS
 from decision_maker.core.models import Factor, Statistics
+from decision_maker.core.report_schema import validate_report
 from decision_maker.core.utils import resolve_winner
 
 logger = logging.getLogger(__name__)
@@ -188,6 +189,7 @@ def save_json_report(data: ReportData) -> str:
         "algorithm_comparison": data.algo_comp,
         "ai_insights": data.ai_reports,
     }
+    validate_report(json_data)
     json_path = os.path.join(data.results_dir, f"analysis_{data.timestamp}.json")
     with open(json_path, "w") as f:
         json.dump(json_data, f, indent=2)

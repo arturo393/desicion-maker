@@ -5,6 +5,7 @@ import pandas as pd
 import pytest
 
 from decision_maker.core.models import Factor, Statistics
+from decision_maker.core.report_schema import REPORT_SCHEMA, validate_report
 from decision_maker.core.reporting import (
     ReportData,
     build_algorithm_comparison,
@@ -120,3 +121,43 @@ class TestReporting:
             assert os.path.exists(paths["json"])
             assert os.path.exists(paths["md"])
             assert os.path.exists(paths["html"])
+
+    def test_json_report_conforms_to_schema(self):
+        results = {
+            "A": Statistics("A", 100, 10, 80, 120, 85, 115, 0.9, {"X": {"mean": 50}}, 85, 80),
+            "B": Statistics("B", 80, 10, 60, 100, 65, 95, 0.7, {"X": {"mean": 30}}, 65, 60),
+        }
+        factors = [Factor("X", 0.5, maximize=True)]
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            report_data = ReportData(
+                mode="standard",
+                mc_results=results,
+                topsis_scores=pd.Series({"A": 0.8, "B": 0.2}),
+                strategies={},
+                pareto={"efficient_frontier": ["A"], "dominated_options": []},
+                sensitivity={"base_winner": "A", "changes": [], "robustness_score": 1.0},
+                future={},
+                ai_reports={},
+                factors=factors,
+                results_dir=tmpdir,
+            ).prepare()
+            paths = save_report(report_data)
+            import json
+
+            with open(paths["json"]) as f:
+                data = json.load(f)
+            validate_report(data)  # should not raise
+
+    def test_schema_rejects_missing_required_field(self):
+        from jsonschema import ValidationError
+
+        bad = {
+            "timestamp": "x",
+            "decision_matrix": {},
+            "topsis": {},
+            "algorithm_comparison": {},
+            "ai_insights": {},
+        }
+        with pytest.raises(ValidationError):
+            validate_report(bad)

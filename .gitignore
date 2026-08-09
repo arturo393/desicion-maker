@@ -68,6 +68,9 @@ core/examples/
 # Scratch/exploratory
 scratch/
 
+# Rust build artifacts
+rust_core/target/
+
 # Root-level exploratory scripts (not part of library)
 /bank_evaluation*.py
 /device_evaluation*.py

@@ -48,6 +48,11 @@ jobs:
       - name: Run tests
         run: pytest --tb=short -q
 
+      - name: Coverage gate (core >= 80%)
+        run: |
+          coverage run --source=src/decision_maker/core -m pytest --tb=short -q
+          coverage report --fail-under=80
+
   build-wheel:
     name: Build wheel (maturin sdist + wheel)
     runs-on: ubuntu-latest

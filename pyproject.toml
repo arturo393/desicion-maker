@@ -36,6 +36,7 @@ dependencies = [
     "seaborn>=0.12.0",
     "sqlmodel>=0.0.16",
     "alembic>=1.13.0",
+    "jsonschema>=4.20.0",
 ]
 
 [project.optional-dependencies]
