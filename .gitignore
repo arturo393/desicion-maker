@@ -58,6 +58,9 @@ config.local.json
 # Generated reports
 results/
 .benchmarks/
+.coverage
+htmlcov/
+coverage.xml
 
 # Stray files from other projects
 core/examples/

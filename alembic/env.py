@@ -1,4 +1,5 @@
 from logging.config import fileConfig
+import os
 
 from sqlalchemy import engine_from_config, pool
 
@@ -13,8 +14,8 @@ config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-# add your model's MetaData object here
-# for 'autogenerate' support
+# Load models so their tables are registered on SQLModel.metadata.
+from decision_maker.core import db_models  # noqa: F401
 from sqlmodel import SQLModel
 
 target_metadata = SQLModel.metadata
@@ -37,7 +38,7 @@ def run_migrations_offline() -> None:
     script output.
 
     """
-    url = config.get_main_option("sqlalchemy.url")
+    url = os.environ.get("DATABASE_URL") or config.get_main_option("sqlalchemy.url")
     context.configure(
         url=url,
         target_metadata=target_metadata,
@@ -56,6 +57,9 @@ def run_migrations_online() -> None:
     and associate a connection with the context.
 
     """
+    env_url = os.environ.get("DATABASE_URL")
+    if env_url:
+        config.set_main_option("sqlalchemy.url", env_url)
     connectable = engine_from_config(
         config.get_section(config.config_ini_section, {}),
         prefix="sqlalchemy.",
