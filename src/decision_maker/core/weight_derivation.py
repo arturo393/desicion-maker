@@ -1,5 +1,5 @@
 """
-Weight derivation engine calculating criterion weights using Entropy, CRITIC, and Equal Weight methods.
+Weight derivation engine calculating criterion weights from judgment: Swing, Pairwise (AHP), and PAPRIKA.
 Usage: from decision_maker.core.weight_derivation import WeightDerivationEngine
 Does NOT: Produce output report files or interactive visualizations.
 """
