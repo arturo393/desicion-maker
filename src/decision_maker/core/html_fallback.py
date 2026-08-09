@@ -12,6 +12,7 @@ import os
 from datetime import datetime
 from typing import Any
 
+from decision_maker.core.content import REPORT_CSS
 from decision_maker.core.models import Statistics
 from decision_maker.core.reporting import ReportData
 from decision_maker.core.utils import resolve_winner
@@ -25,43 +26,15 @@ def generate_html_inline(data: ReportData) -> str:
     pareto_count = len(data.pareto.get("efficient_frontier", [])) if data.pareto else 0
     max_score = max(s.mean_score for s in data.mc_results.values()) if data.mc_results else 1
 
-    html = f"""<!DOCTYPE html>
-<html lang="en">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Decision Analysis Report</title>
-<style>
-* {{ box-sizing: border-box; }}
-body {{ font-family: system-ui, -apple-system, sans-serif; background: #0d1117; color: #e6edf3; margin: 0; padding: 1.5rem; font-size: 14px; }}
-.dashboard {{ display: grid; grid-template-columns: repeat(12, 1fr); gap: 1.5rem; max-width: 1600px; margin: 0 auto; }}
-.header {{ grid-column: span 12; display: flex; justify-content: space-between; align-items: center; padding-bottom: 1rem; border-bottom: 1px solid #30363d; }}
-.header h1 {{ margin: 0; font-size: 1.5rem; color: #58a6ff; }}
-.badge {{ background: #1f6feb; color: white; padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.75rem; font-weight: bold; }}
-.kpi-card {{ grid-column: span 3; background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 1.25rem; }}
-.kpi-title {{ font-size: 0.75rem; color: #8b949e; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; margin-bottom: 0.5rem; }}
-.kpi-value {{ font-size: 1.5rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }}
-.kpi-sub {{ font-size: 0.75rem; color: #8b949e; margin-top: 0.25rem; }}
-.kpi-value.success {{ color: #3fb950; }}
-.kpi-value.accent {{ color: #a371f7; }}
-.panel {{ background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 1.5rem; }}
-.panel-title {{ margin: 0 0 1rem 0; font-size: 1.1rem; border-bottom: 1px solid #30363d; padding-bottom: 0.75rem; }}
-.col-8 {{ grid-column: span 8; }}
-.col-4 {{ grid-column: span 4; }}
-.col-6 {{ grid-column: span 6; }}
-.col-12 {{ grid-column: span 12; }}
-table {{ width: 100%; border-collapse: collapse; }}
-th, td {{ padding: 0.75rem; text-align: left; border-bottom: 1px solid #30363d; font-size: 0.875rem; }}
-th {{ color: #8b949e; font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; }}
-.bar-track {{ width: 100%; background: #0d1117; border-radius: 4px; height: 1.75rem; position: relative; border: 1px solid #30363d; }}
-.bar-fill {{ height: 100%; background: linear-gradient(90deg, #1f6feb 0%, #388bfd 100%); position: absolute; left: 0; top: 0; border-radius: 3px; }}
-.bar-label {{ position: relative; z-index: 2; font-size: 0.8rem; font-weight: 600; margin-left: 0.75rem; color: #fff; line-height: 1.75rem; }}
-.stats-grid {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; }}
-.stat-box {{ background: #0d1117; border: 1px solid #30363d; border-radius: 6px; padding: 1rem; }}
-.stat-row {{ display: flex; justify-content: space-between; margin-bottom: 0.5rem; padding-bottom: 0.5rem; border-bottom: 1px dashed #21262d; }}
-.stat-label {{ color: #8b949e; }}
-.stat-val {{ font-family: monospace; font-weight: 600; }}
-@media (max-width: 1200px) {{ .kpi-card {{ grid-column: span 6; }} .col-8, .col-4 {{ grid-column: span 12; }} }}
-</style></head><body><div class="dashboard">
-<header class="header"><h1>Decision Intelligence Report</h1><div><span style="color:#8b949e;margin-right:1rem">{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}</span><span class="badge">{data.mode.upper()} TIER</span></div></header>
+    html_head = (
+        "<!DOCTYPE html>\n<html lang=\"en\">\n"
+        "<head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n"
+        "<title>Decision Analysis Report</title>\n<style>\n"
+        + REPORT_CSS
+        + "\n</style></head>\n<body><div class=\"dashboard\">\n"
+    )
+
+    html = html_head + f"""<header class="header"><h1>Decision Intelligence Report</h1><div><span style="color:#8b949e;margin-right:1rem">{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}</span><span class="badge">{data.mode.upper()} TIER</span></div></header>
 <div class="kpi-card"><div class="kpi-title">Optimal Recommendation</div><div class="kpi-value success">{bluf_winner}</div><div class="kpi-sub">{bluf_reason}</div></div>
 <div class="kpi-card"><div class="kpi-title">Max Expected Value</div><div class="kpi-value">{best_mc}</div><div class="kpi-sub">Highest MC mean</div></div>
 <div class="kpi-card"><div class="kpi-title">Robustness</div><div class="kpi-value accent">{robustness}</div><div class="kpi-sub">Weight shock stability</div></div>

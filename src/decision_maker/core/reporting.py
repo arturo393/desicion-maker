@@ -26,6 +26,7 @@ from typing import Any
 
 import pandas as pd
 
+from decision_maker.core.content import REPORT_CSS
 from decision_maker.core.models import Factor, Statistics
 from decision_maker.core.utils import resolve_winner
 
@@ -339,6 +340,7 @@ def save_html_report(data: ReportData) -> str:
         timestamp=data.timestamp,
         mode=data.mode,
         date=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        report_css=REPORT_CSS,
         kpi_cards=kpi_cards,
         criteria=criteria,
         mc_data=mc_data,

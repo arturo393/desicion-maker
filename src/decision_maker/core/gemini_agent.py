@@ -13,6 +13,8 @@ import os
 
 from dotenv import load_dotenv
 
+from decision_maker.core.content import calibration_prompt, research_prompt
+
 logger = logging.getLogger(__name__)
 
 
@@ -43,7 +45,7 @@ class GeminiDeepResearchAgent:
         try:
             response = client.models.generate_content(
                 model=self.model,
-                contents=f"Research Topic: {topic}\nContext: {context}\nProvide analysis.",
+                contents=research_prompt(topic, context),
             )
             return response.text
         except (ConnectionError, TimeoutError, ValueError) as e:
@@ -58,10 +60,9 @@ class GeminiDeepResearchAgent:
         if client is None:
             return {}
         try:
-            prompt = f"Given this context: {context_data}\nReturn ONLY a JSON dictionary where keys are variables and values are multiplier adjustments for their standard deviation. E.g. {{\"Cost\": 1.2}}"
             response = client.models.generate_content(
                 model=self.model,
-                contents=prompt,
+                contents=calibration_prompt(context_data),
             )
             import json
             import re

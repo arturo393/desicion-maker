@@ -281,19 +281,20 @@ class ExplainabilityEngine:
 
         if use_ai:
             try:
+                from decision_maker.core.content import NarrativeContext, narrative_prompt
                 from decision_maker.core.gemini_agent import GeminiDeepResearchAgent
 
                 agent = GeminiDeepResearchAgent()
                 if agent.is_available:
-                    prompt = (
-                        f"Explain this multi-criteria decision analysis in simple terms:\n"
-                        f"- Winner: {winner_name}\n"
-                        f"- Score: {winner_score:.3f}\n"
-                        f"- Options: {list(mc_results.keys())}\n"
-                        f"- Factors: {[f'{f.name} (w={f.weight})' for f in factors]}\n"
-                        f"- Waterfall: {waterfall}\n"
-                        f"- Counterfactual: {counterfactual}\n"
-                        f"Provide a short paragraph a business executive would understand."
+                    prompt = narrative_prompt(
+                        NarrativeContext(
+                            winner_name=winner_name,
+                            winner_score=winner_score,
+                            options=list(mc_results.keys()),
+                            factors=[f"{f.name} (w={f.weight})" for f in factors],
+                            waterfall=waterfall,
+                            counterfactual=counterfactual,
+                        )
                     )
                     ai_text = agent.research("Explain decision", prompt)
                     lines.append("**AI-Generated Analysis:**")
