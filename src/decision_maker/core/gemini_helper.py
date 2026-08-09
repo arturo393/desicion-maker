@@ -1,4 +1,8 @@
-"""Shared Gemini helper for analysis scripts — handles both old and new SDK."""
+"""
+Core gemini_helper module.
+Provides gemini_helper capabilities.
+Does NOT perform UI rendering.
+"""
 
 from __future__ import annotations
 

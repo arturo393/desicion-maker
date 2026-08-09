@@ -1,6 +1,7 @@
 """
-Bayesian updating engine for updating option probability distributions given evidence.
-Includes advanced Causal Graph support (Bayesian Networks).
+Core bayesian module.
+Provides bayesian capabilities.
+Does NOT perform UI rendering.
 """
 
 from __future__ import annotations

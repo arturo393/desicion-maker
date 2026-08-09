@@ -1,4 +1,8 @@
-"""Shared constants and utility functions for the Decision Maker framework."""
+"""
+Core utils module.
+Provides utils capabilities.
+Does NOT perform UI rendering.
+"""
 
 from __future__ import annotations
 

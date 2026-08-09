@@ -1,6 +1,7 @@
 """
-Game Theory Engine.
-Calculates Nash Equilibrium strategies given a payoff matrix for multi-agent dynamic markets.
+Core game_theory module.
+Provides game_theory capabilities.
+Does NOT perform UI rendering.
 """
 
 

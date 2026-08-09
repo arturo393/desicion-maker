@@ -405,7 +405,7 @@ class WhatIfEngine:
         logger.info("=" * 64)
 
     def _show_help(self) -> None:
-        print(
+        logger.info(
             """
 Commands:
   show                           Show current rankings

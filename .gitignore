@@ -75,3 +75,4 @@ scratch/
 /generic_template.py
 decision_maker.db
 decisions.db
+violations*.txt

@@ -1,3 +1,8 @@
+"""
+Core engine_protocol module.
+Provides engine_protocol capabilities.
+Does NOT perform UI rendering.
+"""
 from typing import Any, Protocol
 
 import pandas as pd

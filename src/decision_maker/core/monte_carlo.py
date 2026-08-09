@@ -1,6 +1,7 @@
 """
-Monte Carlo simulation engine sampling uncertain variables across decision options.
-Uses the Rust `decision_maker_core` native extension for maximum performance.
+Core monte_carlo module.
+Provides monte_carlo capabilities.
+Does NOT perform UI rendering.
 """
 
 from __future__ import annotations

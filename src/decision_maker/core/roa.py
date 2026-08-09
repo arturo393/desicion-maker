@@ -1,6 +1,7 @@
 """
-Real Options Analysis (ROA) Engine.
-Calculates the value of flexibility (Option to Expand, Delay, or Abandon) using the Black-Scholes framework.
+Core roa module.
+Provides roa capabilities.
+Does NOT perform UI rendering.
 """
 
 import math

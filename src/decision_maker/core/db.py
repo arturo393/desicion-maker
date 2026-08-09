@@ -1,3 +1,8 @@
+"""
+Core db module.
+Provides db capabilities.
+Does NOT perform UI rendering.
+"""
 import os
 
 from sqlmodel import Session, SQLModel, create_engine

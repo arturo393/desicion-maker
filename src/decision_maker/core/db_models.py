@@ -1,3 +1,8 @@
+"""
+Core db_models module.
+Provides db_models capabilities.
+Does NOT perform UI rendering.
+"""
 import uuid
 
 from sqlalchemy import Column

@@ -14,29 +14,15 @@ from typing import Any
 
 from decision_maker.core.data.models import Statistics
 from decision_maker.core.utils import resolve_winner
+from decision_maker.core.reporting import ReportData
 
 
-def generate_html_inline(
-    results_dir: str,
-    data.timestamp: str,
-    data.mode: str,
-    data.mc_results: dict[str, Statistics],
-    topsis_scores: Any,
-    strategies: dict[str, str],
-    pareto: dict[str, Any],
-    sensitivity: dict[str, Any],
-    data.future: dict[str, Any],
-    ai_reports: dict[str, str],
-    data.algo_comp: dict[str, Any],
-    data.decision_matrix: dict[str, Any],
-    factors: Any,
-    data.explanation: str = "",
-) -> str:
-    bluf_winner, bluf_reason = resolve_winner(topsis_scores, data.mc_results)
+def generate_html_inline(data: ReportData) -> str:
+    bluf_winner, bluf_reason = resolve_winner(data.topsis_scores, data.mc_results)
 
     best_mc = max(data.mc_results.items(), key=lambda x: x[1].mean_score)[0]
-    robustness = f"{sensitivity.get('robustness_score', 0) * 100:.0f}%" if sensitivity else "N/A"
-    pareto_count = len(pareto.get("efficient_frontier", [])) if pareto else 0
+    robustness = f"{data.sensitivity.get('robustness_score', 0) * 100:.0f}%" if data.sensitivity else "N/A"
+    pareto_count = len(data.pareto.get("efficient_frontier", [])) if data.pareto else 0
     max_score = max(s.mean_score for s in data.mc_results.values()) if data.mc_results else 1
 
     html = f"""<!DOCTYPE html>
@@ -148,7 +134,7 @@ th {{ color: #8b949e; font-weight: 600; font-size: 0.75rem; text-transform: uppe
 
     html += "</div></div></div></body></html>"
 
-    html_path = os.path.join(results_dir, f"report_{data.timestamp}.html")
+    html_path = os.path.join(data.results_dir, f"report_{data.timestamp}.html")
     with open(html_path, "w", encoding="utf-8") as f:
         f.write(html)
     return html_path
