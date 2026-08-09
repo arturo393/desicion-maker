@@ -1,7 +1,7 @@
 """
-Core db_models module.
-Provides db_models capabilities.
-Does NOT perform UI rendering.
+SQLModel table definitions for analysis sessions and outcome records.
+Usage: from decision_maker.core.db_models import AnalysisSession, OutcomeRecord
+Does NOT: Open database connections or run migrations.
 """
 import uuid
 

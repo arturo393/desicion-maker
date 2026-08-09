@@ -1,7 +1,7 @@
 """
-Core game_theory module.
-Provides game_theory capabilities.
-Does NOT perform UI rendering.
+Game theory engine finding pure Nash equilibria and competitive-robustness labels.
+Usage: from decision_maker.core.game_theory import GameTheoryEngine
+Does NOT: Solve mixed-strategy equilibria or build payoff matrices from real competitors.
 """
 
 

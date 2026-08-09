@@ -1,7 +1,7 @@
 """
-Core db module.
-Provides db capabilities.
-Does NOT perform UI rendering.
+SQLAlchemy engine, session factory, and idempotent schema initialization.
+Usage: from decision_maker.core.db import create_session, ensure_initialized
+Does NOT: Define table schemas (see db_models) or run Alembic migrations.
 """
 import os
 import threading

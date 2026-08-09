@@ -1,7 +1,7 @@
 """
-Core utils module.
-Provides utils capabilities.
-Does NOT perform UI rendering.
+Shared constants, distribution mapping, and small helpers for the decision framework.
+Usage: from decision_maker.core.utils import DISTRIBUTION_MAP, resolve_winner, compute_global_bounds
+Does NOT: Run simulations or perform multi-criteria algorithm computations.
 """
 
 from __future__ import annotations

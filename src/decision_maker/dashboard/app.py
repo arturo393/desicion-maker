@@ -1,6 +1,6 @@
 """
 Interactive Streamlit web dashboard for building models, running analyses, and viewing reports.
-Usage: streamlit run python/dashboard/app.py
+Usage: streamlit run src/decision_maker/dashboard/app.py
 Does NOT: Host REST API endpoints for external service integration.
 """
 

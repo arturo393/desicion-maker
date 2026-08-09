@@ -1,6 +1,6 @@
 """
 Command-line interface for executing decision analysis workflows and viewing reports.
-Usage: python -m python.cli run --config config.json
+Usage: python -m decision_maker.cli run --config config.json
 Does NOT: Host persistent web service endpoints.
 """
 

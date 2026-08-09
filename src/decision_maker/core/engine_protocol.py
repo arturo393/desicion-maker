@@ -1,7 +1,7 @@
 """
-Core engine_protocol module.
-Provides engine_protocol capabilities.
-Does NOT perform UI rendering.
+Protocol interface describing the analyze() contract shared by decision engines.
+Usage: from decision_maker.core.engine_protocol import DecisionEngine
+Does NOT: Implement any algorithm or import concrete engine implementations.
 """
 from typing import Any, Protocol
 

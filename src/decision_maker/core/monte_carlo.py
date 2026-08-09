@@ -1,7 +1,7 @@
 """
-Core monte_carlo module.
-Provides monte_carlo capabilities.
-Does NOT perform UI rendering.
+Monte Carlo simulation engine producing per-option score distributions and statistics.
+Usage: from decision_maker.core.monte_carlo import MonteCarloEngine
+Does NOT: Rank options (use TOPSIS/PROMETHEE) or persist results (see reporting/registry).
 """
 
 from __future__ import annotations

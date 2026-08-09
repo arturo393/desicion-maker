@@ -1,6 +1,6 @@
 """
 Unit tests for the NormalizationEngine module.
-Usage: pytest python/tests/test_normalization.py
+Usage: pytest src/decision_maker/tests/test_normalization.py
 Does NOT: Run full decision pipeline integration tests.
 """
 

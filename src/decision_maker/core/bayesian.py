@@ -1,7 +1,7 @@
 """
-Core bayesian module.
-Provides bayesian capabilities.
-Does NOT perform UI rendering.
+Bayesian inference engine computing posterior probabilities each option is optimal.
+Usage: from decision_maker.core.bayesian import BayesianEngine
+Does NOT: Build full belief-network inference or calibrate from historical data.
 """
 
 from __future__ import annotations

@@ -1,7 +1,7 @@
 """
-Core gemini_helper module.
-Provides gemini_helper capabilities.
-Does NOT perform UI rendering.
+SDK-agnostic Gemini search helper for analyses that query Google Generative AI.
+Usage: from decision_maker.core.gemini_helper import search_with_gemini, GEMINI_AVAILABLE
+Does NOT: Manage API keys for the framework agent (see gemini_agent) or run decision algorithms.
 """
 
 from __future__ import annotations
