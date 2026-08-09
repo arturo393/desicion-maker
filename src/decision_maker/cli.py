@@ -101,10 +101,16 @@ def run(
 
     pref_types = [pref_type] if pref_type else None
 
-    if config:
-        result = asyncio.run(run_from_config(config, mode, ai, output))
-    else:
-        result = asyncio.run(_run_interactive(mode or "standard", simulations, ai, output, corr_matrix, pref_types))
+    try:
+        if config:
+            result = asyncio.run(run_from_config(config, mode, ai, output))
+        else:
+            result = asyncio.run(
+                _run_interactive(mode or "standard", simulations, ai, output, corr_matrix, pref_types)
+            )
+    except FileNotFoundError as e:
+        typer.echo(f"Error: {e}", err=True)
+        raise typer.Exit(code=1) from e
 
     if explain and result:
         _generate_explanation(result)

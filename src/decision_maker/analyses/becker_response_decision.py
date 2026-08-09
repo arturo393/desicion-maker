@@ -1,7 +1,7 @@
 """
 Decision model evaluating response strategies for the Becker Varis compatibility project,
 explicitly considering developer time overhead (Hands-on Engineering vs Reporting Overhead).
-Usage: python python/analyses/becker_response_decision.py
+Usage: python src/decision_maker/analyses/becker_response_decision.py
 Does NOT: Execute external network calls.
 """
 

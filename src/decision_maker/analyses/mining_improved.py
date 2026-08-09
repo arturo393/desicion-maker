@@ -15,7 +15,7 @@ Analiza 3 escenarios diferentes:
 3. Minería Híbrida (balance faena/oficina)
 
 CAMBIOS EN ESTA VERSIÓN (2.0):
-- Movido a python/analyses/ directory
+- Movido a src/decision_maker/analyses/
 - Actualizado import paths
 - Análisis de riesgo más robusto con VaR
 - Comparación con baseline (trabajo actual)

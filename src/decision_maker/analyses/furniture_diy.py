@@ -14,7 +14,7 @@ DESCRIPCIÓN:
 - Similar a rack TV con cajones/cajas
 
 CAMBIOS EN ESTA VERSIÓN (1.2):
-- Movido a python/analyses/ directory
+- Movido a src/decision_maker/analyses/
 - Actualizado import paths
 - Mantiene integración con Gemini API para búsqueda de precios
 

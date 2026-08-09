@@ -282,7 +282,6 @@ class TestMonteCarloEngine:
         sys.modules.pop("decision_maker.core.monte_carlo", None)
 
         module = importlib.import_module("decision_maker.core.monte_carlo")
-        assert module.RustMonteCarloEngine is None
 
         engine = module.MonteCarloEngine(num_simulations=100)
         opt = DecisionOption("Safe")

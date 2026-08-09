@@ -19,7 +19,7 @@ PREGUNTA CLAVE:
 ¿Vale la pena invertir tiempo en terminar la refactorización?
 
 CAMBIOS EN ESTA VERSIÓN (1.0):
-- Movido a python/analyses/ directory
+- Movido a src/decision_maker/analyses/
 - Actualizado import paths
 - Análisis completado (decisión tomada)
 

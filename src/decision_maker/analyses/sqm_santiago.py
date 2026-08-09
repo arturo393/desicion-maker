@@ -21,7 +21,7 @@ Análisis específico de oportunidad en SQM Santiago comparando con:
 - Otras empresas del sector
 
 CAMBIOS EN ESTA VERSIÓN (1.0):
-- Movido a python/analyses/ directory
+- Movido a src/decision_maker/analyses/
 - Actualizado import paths
 - Primera versión del análisis SQM
 

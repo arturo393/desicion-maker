@@ -14,7 +14,7 @@ DESCRIPCIÓN:
 - Primera iteración del análisis de carrera minera
 
 CAMBIOS EN ESTA VERSIÓN (1.0):
-- Movido a python/analyses/ directory
+- Movido a src/decision_maker/analyses/
 - Actualizado import paths
 - Versión original archivada para referencia
 

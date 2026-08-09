@@ -14,11 +14,6 @@ import numpy as np
 
 from decision_maker.core.models import DecisionOption, Factor, Statistics
 
-try:
-    from decision_maker_core import MonteCarloEngine as RustMonteCarloEngine
-except ImportError:
-    RustMonteCarloEngine = None  # type: ignore[assignment]
-
 logger = logging.getLogger(__name__)
 
 

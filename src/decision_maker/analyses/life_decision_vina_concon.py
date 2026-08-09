@@ -1,6 +1,6 @@
 """
 Life Decision Analysis: Financial Upfront Costs and Savings Plan for Viña Move.
-Usage: python python/analyses/life_decision_vina_concon.py
+Usage: python src/decision_maker/analyses/life_decision_vina_concon.py
 Does NOT: Access external APIs.
 """
 
