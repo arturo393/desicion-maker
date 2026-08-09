@@ -298,8 +298,8 @@ def save_html_report(data: ReportData) -> str:
 
         env = Environment(loader=FileSystemLoader(os.path.join(os.path.dirname(__file__), "templates")))
         template = env.get_template("report.html.j2")
-    except Exception:
-        logger.warning("Jinja2 not available, falling back to inline HTML generation")
+    except (ImportError, Exception) as e:
+        logger.warning(f"Jinja2 not available ({e}), falling back to inline HTML generation")
         return _generate_html_inline(data)
 
     bluf_winner, _ = resolve_winner(data.topsis_scores, data.mc_results)
@@ -363,11 +363,11 @@ def _generate_html_inline(data: ReportData) -> str:
 
 def print_report(data: ReportData):
     if data.explanation:
-        print("\n" + "-" * 70 + "\nDECISION EXPLANATION\n" + "-" * 70 + f"\n{data.explanation}")
+        logger.info("\n" + "-" * 70 + "\nDECISION EXPLANATION\n" + "-" * 70 + f"\n{data.explanation}")
     bluf_winner, bluf_reason = resolve_winner(data.topsis_scores, data.mc_results)
-    print("\n" + "=" * 70 + f"\nDECISION ANALYSIS REPORT ({data.mode.upper()} TIER)\n" + "=" * 70 + "\n")
-    print(f"RECOMMENDATION: {bluf_winner} is optimal based on {bluf_reason}.\n")
-    print(_bar_chart(data.mc_results))
+    logger.info("\n" + "=" * 70 + f"\nDECISION ANALYSIS REPORT ({data.mode.upper()} TIER)\n" + "=" * 70 + "\n")
+    logger.info(f"RECOMMENDATION: {bluf_winner} is optimal based on {bluf_reason}.\n")
+    logger.info("\n" + _bar_chart(data.mc_results))
 
 
 def save_report(data: ReportData) -> dict[str, str]:

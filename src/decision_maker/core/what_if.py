@@ -233,11 +233,11 @@ class WhatIfEngine:
 
     def repl(self) -> None:
         """Interactive What-If REPL — explore weight changes live."""
-        print("\n" + "=" * 64)
-        print("  WHAT-IF ANALYSIS MODE")
-        print("  Adjust factor weights and directions to see how rankings change.")
-        print("  Type 'help' for commands, 'quit' to exit.")
-        print("=" * 64)
+        logger.info("\n" + "=" * 64)
+        logger.info("  WHAT-IF ANALYSIS MODE")
+        logger.info("  Adjust factor weights and directions to see how rankings change.")
+        logger.info("  Type 'help' for commands, 'quit' to exit.")
+        logger.info("=" * 64)
 
         self._show_initial()
 
@@ -245,7 +245,7 @@ class WhatIfEngine:
             try:
                 raw = input("\nwhat-if> ").strip()
             except (EOFError, KeyboardInterrupt):
-                print()
+                logger.info()
                 break
 
             if not raw:
@@ -260,51 +260,51 @@ class WhatIfEngine:
                 self._show_help()
             elif cmd == "show":
                 scores = self.recompute()
-                print(self.summary_table(scores))
+                logger.info(self.summary_table(scores))
             elif cmd in ("factors", "factor"):
-                print(self.factor_table(self.current_factors))
+                logger.info(self.factor_table(self.current_factors))
             elif cmd == "diff":
                 changes = self.diff()
                 if changes:
-                    print("Changes from original:")
+                    logger.info("Changes from original:")
                     for c in changes:
-                        print(f"  • {c}")
+                        logger.info(f"  • {c}")
                 else:
-                    print("No changes from original configuration")
+                    logger.info("No changes from original configuration")
             elif cmd == "reset":
                 self.reset()
-                print("Reset to original weights and directions")
+                logger.info("Reset to original weights and directions")
             elif cmd == "weight" and len(parts) >= 3:
                 fname = parts[1]
                 try:
                     w = float(parts[2])
                     if self.assign_weight(fname, w):
                         scores = self.recompute()
-                        print(f"Set {fname} weight to {w:.2f}")
-                        print(self.summary_table(scores))
+                        logger.info(f"Set {fname} weight to {w:.2f}")
+                        logger.info(self.summary_table(scores))
                     else:
                         available = [f.name for f in self.current_factors]
-                        print(f"Unknown factor: {fname}. Available: {available}")
+                        logger.info(f"Unknown factor: {fname}. Available: {available}")
                 except ValueError:
-                    print(f"Invalid weight: {parts[2]}")
+                    logger.info(f"Invalid weight: {parts[2]}")
             elif cmd == "toggle" and len(parts) >= 2:
                 fname = parts[1]
                 result = self.toggle_maximize(fname)
                 if result is not None:
                     direction = "maximize" if result else "minimize"
                     scores = self.recompute()
-                    print(f"Toggled {fname} to {direction}")
-                    print(self.summary_table(scores))
+                    logger.info(f"Toggled {fname} to {direction}")
+                    logger.info(self.summary_table(scores))
                 else:
                     available = [f.name for f in self.current_factors]
-                    print(f"Unknown factor: {fname}. Available: {available}")
+                    logger.info(f"Unknown factor: {fname}. Available: {available}")
             elif cmd == "compare":
                 original = self.original_ranking()
                 current = self.recompute()
-                print(self.comparison_table(original, current))
+                logger.info(self.comparison_table(original, current))
             elif cmd == "try":
                 if len(parts) < 2:
-                    print("Usage: try <name1>=<w1> <name2>=<w2> ...")
+                    logger.info("Usage: try <name1>=<w1> <name2>=<w2> ...")
                     continue
                 weights = {}
                 for part in parts[1:]:
@@ -313,33 +313,33 @@ class WhatIfEngine:
                         try:
                             weights[fname.strip()] = float(wstr.strip())
                         except ValueError:
-                            print(f"Invalid weight in '{part}'")
+                            logger.info(f"Invalid weight in '{part}'")
                     else:
-                        print(f"Expected name=weight format, got '{part}'")
+                        logger.info(f"Expected name=weight format, got '{part}'")
                 if weights:
                     saved = {f.name: f.weight for f in self.current_factors}
                     self.assign_all_weights(weights)
                     scores = self.recompute()
-                    print("Temporary weights applied:")
-                    print(self.summary_table(scores))
-                    print("\nWhat changed?")
+                    logger.info("Temporary weights applied:")
+                    logger.info(self.summary_table(scores))
+                    logger.info("\nWhat changed?")
                     for c in self.diff():
-                        print(f"  • {c}")
+                        logger.info(f"  • {c}")
                     for f in self.current_factors:
                         if f.name in saved:
                             f.weight = saved[f.name]
-                    print("(weights restored)")
+                    logger.info("(weights restored)")
             elif cmd == "suggest":
                 suggestions = self._suggest()
                 if suggestions:
-                    print("Suggestions — factors whose weight sensitivity could flip rankings:")
+                    logger.info("Suggestions — factors whose weight sensitivity could flip rankings:")
                     for s in suggestions:
-                        print(f"  • {s}")
+                        logger.info(f"  • {s}")
                 else:
-                    print("No sensitivity-driven suggestions found.")
+                    logger.info("No sensitivity-driven suggestions found.")
             else:
-                print(f"Unknown command: {cmd}")
-                print("Type 'help' for available commands")
+                logger.info(f"Unknown command: {cmd}")
+                logger.info("Type 'help' for available commands")
 
         self._show_final()
 
@@ -382,27 +382,27 @@ class WhatIfEngine:
         return suggestions
 
     def _show_initial(self) -> None:
-        print("\nCurrent factors:")
-        print(self.factor_table(self.current_factors))
-        print("\nOriginal ranking:")
-        print(self.summary_table(self.original_ranking()))
+        logger.info("\nCurrent factors:")
+        logger.info(self.factor_table(self.current_factors))
+        logger.info("\nOriginal ranking:")
+        logger.info(self.summary_table(self.original_ranking()))
 
     def _show_final(self) -> None:
         original = self.original_ranking()
         current = self.recompute()
-        print("\n" + "=" * 64)
-        print("  FINAL WHAT-IF SUMMARY")
-        print("=" * 64)
-        print("\nComparison (before → after):")
-        print(self.comparison_table(original, current))
-        print("\nFactors:")
-        print(self.factor_table(self.current_factors))
+        logger.info("\n" + "=" * 64)
+        logger.info("  FINAL WHAT-IF SUMMARY")
+        logger.info("=" * 64)
+        logger.info("\nComparison (before → after):")
+        logger.info(self.comparison_table(original, current))
+        logger.info("\nFactors:")
+        logger.info(self.factor_table(self.current_factors))
         changes = self.diff()
         if changes:
-            print("What changed:")
+            logger.info("What changed:")
             for c in changes:
-                print(f"  • {c}")
-        print("=" * 64)
+                logger.info(f"  • {c}")
+        logger.info("=" * 64)
 
     def _show_help(self) -> None:
         print(
