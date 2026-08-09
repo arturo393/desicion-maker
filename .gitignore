@@ -76,3 +76,4 @@ scratch/
 decision_maker.db
 decisions.db
 violations*.txt
+.agents/
