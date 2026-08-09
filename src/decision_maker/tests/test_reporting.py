@@ -63,3 +63,60 @@ class TestReporting:
             assert os.path.exists(paths["json"])
             assert os.path.exists(paths["md"])
             assert os.path.exists(paths["html"])
+
+    def test_generate_html_inline_imports_and_renders(self):
+        from decision_maker.core.html_fallback import generate_html_inline
+
+        results = {
+            "A": Statistics("A", 100, 10, 80, 120, 85, 115, 0.9, {"X": {"mean": 50}}, 85, 80),
+            "B": Statistics("B", 80, 10, 60, 100, 65, 95, 0.7, {"X": {"mean": 30}}, 65, 60),
+        }
+        factors = [Factor("X", 0.5, maximize=True)]
+        topsis = pd.Series({"A": 0.8, "B": 0.2}).sort_values(ascending=False)
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            report_data = ReportData(
+                mode="advanced",
+                mc_results=results,
+                topsis_scores=topsis,
+                strategies={},
+                pareto={"efficient_frontier": ["A"], "dominated_options": []},
+                sensitivity={"base_winner": "A", "changes": [], "robustness_score": 1.0},
+                future={"bayesian_probs": {"A": 0.9, "B": 0.1}, "ideal_option": {"improvement_potential": 5.0}},
+                ai_reports={},
+                factors=factors,
+                results_dir=tmpdir,
+            ).prepare()
+            html_path = generate_html_inline(report_data)
+            assert os.path.exists(html_path)
+            with open(html_path, encoding="utf-8") as f:
+                html = f.read()
+            assert "Decision Intelligence Report" in html
+            assert "A" in html
+            assert "B" in html
+            assert html_path == os.path.join(tmpdir, f"report_{report_data.timestamp}.html")
+
+    def test_save_report_creates_missing_results_dir(self):
+        results = {
+            "A": Statistics("A", 100, 10, 80, 120, 85, 115, 0.9, {"X": {"mean": 50}}, 85, 80),
+        }
+        factors = [Factor("X", 0.5, maximize=True)]
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            nested = os.path.join(tmpdir, "does", "not", "exist")
+            report_data = ReportData(
+                mode="standard",
+                mc_results=results,
+                topsis_scores=pd.Series(),
+                strategies={},
+                pareto={"efficient_frontier": ["A"], "dominated_options": []},
+                sensitivity={"base_winner": "A", "changes": [], "robustness_score": 1.0},
+                future={},
+                ai_reports={},
+                factors=factors,
+                results_dir=nested,
+            ).prepare()
+            paths = save_report(report_data)
+            assert os.path.exists(paths["json"])
+            assert os.path.exists(paths["md"])
+            assert os.path.exists(paths["html"])

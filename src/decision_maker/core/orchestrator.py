@@ -389,7 +389,6 @@ class UnifiedDecisionFramework:
     def _run_advanced_analysis(self, ctx: AdvancedAnalysis):
         """Run advanced mode analyses: crisp PROMETHEE, bootstrap, Bayesian, genetic."""
         mc_results = ctx.mc_results
-        factor_names = ctx.factor_names
         weights = ctx.weights
         max_bools = ctx.max_bools
         data_fuzzy = ctx.data_fuzzy

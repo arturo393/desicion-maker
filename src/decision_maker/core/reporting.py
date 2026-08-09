@@ -371,8 +371,11 @@ def print_report(data: ReportData):
 
 
 def save_report(data: ReportData) -> dict[str, str]:
-    if not data.results_dir: data.results_dir = os.path.join(os.getcwd(), "results")
-    if not data.timestamp: data.timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    if not data.results_dir:
+        data.results_dir = os.path.join(os.getcwd(), "results")
+    if not data.timestamp:
+        data.timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    os.makedirs(data.results_dir, exist_ok=True)
 
     json_path = save_json_report(data)
     md_path = save_markdown_report(data)

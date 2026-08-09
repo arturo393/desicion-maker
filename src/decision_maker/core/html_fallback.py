@@ -4,7 +4,7 @@ Usage: from decision_maker.core.html_fallback import generate_html_inline
 Does NOT: Perform decision matrix computations or stochastic sampling.
 """
 
-from __data.future__ import annotations
+from __future__ import annotations
 
 __all__ = ["generate_html_inline"]
 
@@ -12,9 +12,9 @@ import os
 from datetime import datetime
 from typing import Any
 
-from decision_maker.core.data.models import Statistics
-from decision_maker.core.utils import resolve_winner
+from decision_maker.core.models import Statistics
 from decision_maker.core.reporting import ReportData
+from decision_maker.core.utils import resolve_winner
 
 
 def generate_html_inline(data: ReportData) -> str:
@@ -87,19 +87,19 @@ th {{ color: #8b949e; font-weight: 600; font-size: 0.75rem; text-transform: uppe
     if has_prom:
         html += "<th>PROM</th>"
     html += "</tr></thead><tbody>"
-    for name, data in data.algo_comp.items():
-        mc_r = f"#{data.get('mc_rank', '-')}"
-        top_r = f"#{data.get('topsis_rank', '-')}"
-        mc_r = f'<span style="color:#3fb950;font-weight:bold">{mc_r}</span>' if data.get("mc_rank") == 1 else mc_r
+    for name, algo in data.algo_comp.items():
+        mc_r = f"#{algo.get('mc_rank', '-')}"
+        top_r = f"#{algo.get('topsis_rank', '-')}"
+        mc_r = f'<span style="color:#3fb950;font-weight:bold">{mc_r}</span>' if algo.get("mc_rank") == 1 else mc_r
         top_r = (
-            f'<span style="color:#3fb950;font-weight:bold">{top_r}</span>' if data.get("topsis_rank") == 1 else top_r
+            f'<span style="color:#3fb950;font-weight:bold">{top_r}</span>' if algo.get("topsis_rank") == 1 else top_r
         )
         html += f"<tr><td>{name}</td><td>{mc_r}</td><td>{top_r}</td>"
         if has_prom:
-            prom_r = f"#{data.get('promethee_rank', '-')}"
+            prom_r = f"#{algo.get('promethee_rank', '-')}"
             prom_r = (
                 f'<span style="color:#3fb950;font-weight:bold">{prom_r}</span>'
-                if data.get("promethee_rank") == 1
+                if algo.get("promethee_rank") == 1
                 else prom_r
             )
             html += f"<td>{prom_r}</td>"

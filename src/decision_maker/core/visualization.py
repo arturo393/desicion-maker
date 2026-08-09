@@ -8,10 +8,9 @@ from __future__ import annotations
 
 __all__ = ["VisualizationEngine", "PlotContext"]
 
-from dataclasses import dataclass
-
 import logging
 import os
+from dataclasses import dataclass
 
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -49,7 +48,6 @@ class VisualizationEngine:
     def generate_all_plots(self, ctx: PlotContext) -> list[str]:
         """Generates a suite of plots and returns their paths."""
         mc_results = ctx.mc_results
-        factors = ctx.factors
         future_metrics = ctx.future_metrics
         output_dir = ctx.output_dir
         timestamp = ctx.timestamp
