@@ -6,13 +6,14 @@ Does NOT: Execute decision calculations or generate reports.
 
 from __future__ import annotations
 
-__all__ = ["DecisionRegistry"]
+__all__ = ["DecisionRegistry", "SaveDecisionRequest", "SaveTemplateRequest"]
 
 import contextlib
 import json
 import logging
 import sqlite3
 import threading
+from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -20,6 +21,32 @@ from typing import Any
 import numpy as np
 
 logger = logging.getLogger(__name__)
+
+
+@dataclass
+class SaveDecisionRequest:
+    """Bundles a decision record for persistence (Parameter Object)."""
+
+    name: str
+    mode: str
+    num_simulations: int
+    factors: list[dict[str, Any]]
+    options: list[dict[str, Any]]
+    results: dict[str, Any]
+    description: str = ""
+    tags: list[str] | None = None
+    notes: str = ""
+
+
+@dataclass
+class SaveTemplateRequest:
+    """Bundles a template record for persistence (Parameter Object)."""
+
+    name: str
+    factors: list[dict[str, Any]]
+    description: str = ""
+    category: str = ""
+    options: list[dict[str, Any]] | None = None
 
 
 class DecisionRegistry:
@@ -87,18 +114,7 @@ class DecisionRegistry:
 
     # ── Decisions CRUD ───────────────────────────────────────────────
 
-    def save_decision(
-        self,
-        name: str,
-        mode: str,
-        num_simulations: int,
-        factors: list[dict[str, Any]],
-        options: list[dict[str, Any]],
-        results: dict[str, Any],
-        description: str = "",
-        tags: list[str] | None = None,
-        notes: str = "",
-    ) -> int:
+    def save_decision(self, req: SaveDecisionRequest) -> int:
         conn = self._conn
         now = datetime.now(UTC).isoformat()
         conn.execute(
@@ -107,22 +123,22 @@ class DecisionRegistry:
                 tags, notes, results_json, factors_json, options_json)
                VALUES (?,?,?,?,?,?,?,?,?,?,?)""",
             (
-                name,
-                description,
-                mode,
-                num_simulations,
+                req.name,
+                req.description,
+                req.mode,
+                req.num_simulations,
                 now,
                 now,
-                json.dumps(tags or []),
-                notes,
-                json.dumps(results, default=str, cls=_Encoder),
-                json.dumps(factors, default=str),
-                json.dumps(options, default=str),
+                json.dumps(req.tags or []),
+                req.notes,
+                json.dumps(req.results, default=str, cls=_Encoder),
+                json.dumps(req.factors, default=str),
+                json.dumps(req.options, default=str),
             ),
         )
         conn.commit()
         decision_id = conn.execute("SELECT last_insert_rowid()").fetchone()[0]
-        logger.info(f"Saved decision #{decision_id}: {name}")
+        logger.info(f"Saved decision #{decision_id}: {req.name}")
         return decision_id
 
     def list_decisions(
@@ -184,28 +200,33 @@ class DecisionRegistry:
 
     # ── Templates CRUD ───────────────────────────────────────────────
 
-    def save_template(
-        self,
-        name: str,
-        factors: list[dict[str, Any]],
-        description: str = "",
-        category: str = "",
-        options: list[dict[str, Any]] | None = None,
-    ) -> int:
+    def save_template(self, req: SaveTemplateRequest) -> int:
         try:
             cur = self._conn.execute(
                 """INSERT INTO templates (name, description, category, factors_json, options_json)
                    VALUES (?,?,?,?,?)""",
-                (name, description, category, json.dumps(factors, default=str), json.dumps(options or [], default=str)),
+                (
+                    req.name,
+                    req.description,
+                    req.category,
+                    json.dumps(req.factors, default=str),
+                    json.dumps(req.options or [], default=str),
+                ),
             )
             self._conn.commit()
             return cur.lastrowid
         except sqlite3.IntegrityError:
-            logger.warning(f"Template '{name}' already exists, updating")
+            logger.warning(f"Template '{req.name}' already exists, updating")
             cur = self._conn.execute(
                 """UPDATE templates SET description=?, category=?, factors_json=?, options_json=?
                    WHERE name=?""",
-                (description, category, json.dumps(factors, default=str), json.dumps(options or [], default=str), name),
+                (
+                    req.description,
+                    req.category,
+                    json.dumps(req.factors, default=str),
+                    json.dumps(req.options or [], default=str),
+                    req.name,
+                ),
             )
             self._conn.commit()
             return cur.lastrowid
@@ -295,7 +316,7 @@ class DecisionRegistry:
         ]
         for t in defaults:
             try:
-                self.save_template(**t)
+                self.save_template(SaveTemplateRequest(**t))
             except (sqlite3.Error, ValueError) as e:
                 logger.warning(f"Could not seed template '{t['name']}': {e}")
 

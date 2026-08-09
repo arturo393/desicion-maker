@@ -6,9 +6,10 @@ Does NOT: Render HTML or save reports directly to disk.
 
 from __future__ import annotations
 
-__all__ = ["ExplainabilityEngine"]
+__all__ = ["ExplainabilityEngine", "NarrativeContext"]
 
 import logging
+from dataclasses import dataclass
 from typing import Any
 
 import numpy as np
@@ -18,6 +19,17 @@ from decision_maker.core.models import Factor, Statistics
 from decision_maker.core.utils import compute_global_bounds
 
 logger = logging.getLogger(__name__)
+
+
+@dataclass
+class NarrativeContext:
+    """Bundles inputs needed to generate a decision narrative (Parameter Object)."""
+
+    mc_results: dict[str, Statistics]
+    factors: list[Factor]
+    waterfall: dict[str, Any]
+    counterfactual: dict[str, Any]
+    topsis_scores: pd.Series
 
 
 class ExplainabilityEngine:
@@ -193,15 +205,17 @@ class ExplainabilityEngine:
 
     def narrative(
         self,
-        mc_results: dict[str, Statistics],
-        factors: list[Factor],
-        waterfall: dict[str, Any],
-        counterfactual: dict[str, Any],
-        topsis_scores: pd.Series,
+        ctx: NarrativeContext,
         mode: str = "standard",
         use_ai: bool = False,
     ) -> str:
         """Generates a human-readable explanation of the decision."""
+        mc_results = ctx.mc_results
+        factors = ctx.factors
+        waterfall = ctx.waterfall
+        counterfactual = ctx.counterfactual
+        topsis_scores = ctx.topsis_scores
+
         if not mc_results:
             return "No data to analyze."
 

@@ -6,7 +6,9 @@ Does NOT: Perform raw statistical simulation or decision calculations.
 
 from __future__ import annotations
 
-__all__ = ["VisualizationEngine"]
+__all__ = ["VisualizationEngine", "PlotContext"]
+
+from dataclasses import dataclass
 
 import logging
 import os
@@ -18,6 +20,17 @@ import seaborn as sns
 from decision_maker.core.models import Factor, Statistics
 
 logger = logging.getLogger(__name__)
+
+
+@dataclass
+class PlotContext:
+    """Bundles data needed to generate the plot suite (Parameter Object)."""
+
+    mc_results: dict[str, Statistics]
+    factors: list[Factor]
+    future_metrics: dict
+    output_dir: str
+    timestamp: str
 
 
 class VisualizationEngine:
@@ -33,15 +46,14 @@ class VisualizationEngine:
         plt.rcParams["font.size"] = 10
         plt.rcParams["figure.figsize"] = (12, 7)
 
-    def generate_all_plots(
-        self,
-        mc_results: dict[str, Statistics],
-        factors: list[Factor],
-        future_metrics: dict,
-        output_dir: str,
-        timestamp: str,
-    ) -> list[str]:
+    def generate_all_plots(self, ctx: PlotContext) -> list[str]:
         """Generates a suite of plots and returns their paths."""
+        mc_results = ctx.mc_results
+        factors = ctx.factors
+        future_metrics = ctx.future_metrics
+        output_dir = ctx.output_dir
+        timestamp = ctx.timestamp
+
         os.makedirs(output_dir, exist_ok=True)
         paths = []
 

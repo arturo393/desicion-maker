@@ -1,4 +1,4 @@
-from decision_maker.core.bootstrap import BootstrapRanking
+from decision_maker.core.bootstrap import BootstrapConfig, BootstrapRanking
 
 
 class TestBootstrapRanking:
@@ -7,7 +7,9 @@ class TestBootstrapRanking:
             "A": {"X": (1, 2, 3), "Y": (4, 5, 6)},
             "B": {"X": (2, 3, 4), "Y": (3, 4, 5)},
         }
-        result = BootstrapRanking.confidence_intervals(data, [0.5, 0.5], [True, True], n_bootstrap=50)
+        result = BootstrapRanking.confidence_intervals(
+            data, BootstrapConfig(weights=[0.5, 0.5], maximize=[True, True], n_bootstrap=50)
+        )
         assert "A" in result
         assert "B" in result
         assert "mean_rank" in result["A"]
@@ -18,9 +20,9 @@ class TestBootstrapRanking:
 
     def test_single_option(self):
         data = {"Only": {"X": (1, 2, 3)}}
-        result = BootstrapRanking.confidence_intervals(data, [1.0], [True], n_bootstrap=10)
+        result = BootstrapRanking.confidence_intervals(data, BootstrapConfig(weights=[1.0], maximize=[True], n_bootstrap=10))
         assert result["Only"]["p_best"] == 1.0
 
     def test_empty_data(self):
-        result = BootstrapRanking.confidence_intervals({}, [], [])
+        result = BootstrapRanking.confidence_intervals({}, BootstrapConfig(weights=[], maximize=[]))
         assert result == {}

@@ -6,8 +6,9 @@ Does NOT: Generate synthetic scenario samples without empirical input distributi
 
 from __future__ import annotations
 
-__all__ = ["BootstrapRanking"]
+__all__ = ["BootstrapRanking", "BootstrapConfig"]
 
+from dataclasses import dataclass
 from typing import Any
 
 import numpy as np
@@ -18,14 +19,21 @@ from decision_maker.core.topsis import TOPSISEngine
 BOOTSTRAP_NOISE_SCALE = 0.1
 
 
+@dataclass
+class BootstrapConfig:
+    """Bundles bootstrap parameters (Parameter Object)."""
+
+    weights: list[float]
+    maximize: list[bool]
+    n_bootstrap: int = 1000
+    alpha: float = 0.05
+
+
 class BootstrapRanking:
     @staticmethod
     def confidence_intervals(
         decision_matrix_fuzzy: dict[str, dict[str, tuple[float, float, float]]],
-        weights: list[float],
-        maximize: list[bool],
-        n_bootstrap: int = 1000,
-        alpha: float = 0.05,
+        config: BootstrapConfig,
     ) -> dict[str, Any]:
         if not decision_matrix_fuzzy:
             return {}
@@ -36,6 +44,10 @@ class BootstrapRanking:
         opt_names = list(decision_matrix_fuzzy.keys())
         n_opts = len(opt_names)
         factor_names = list(list(decision_matrix_fuzzy.values())[0].keys())
+        weights = config.weights
+        maximize = config.maximize
+        n_bootstrap = config.n_bootstrap
+        alpha = config.alpha
 
         engine = TOPSISEngine()
 

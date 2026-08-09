@@ -2,22 +2,41 @@ import ast
 import os
 import sys
 
+# Pydantic data models are their own Parameter Object; skip __init__ param count.
+PYDANTIC_BASE = "BaseModel"
+
+
 class DevAgentsVisitor(ast.NodeVisitor):
     def __init__(self, filename):
         self.filename = filename
         self.violations = []
+        self._in_pydantic_model = False
 
     def add_violation(self, line, rule, message):
         self.violations.append(f"{self.filename}:{line} - [{rule}] {message}")
 
+    def visit_ClassDef(self, node):
+        is_model = any(
+            isinstance(base, ast.Name) and base.id == PYDANTIC_BASE
+            for base in node.bases
+        ) or any(
+            isinstance(base, ast.Attribute) and base.attr == PYDANTIC_BASE
+            for base in node.bases
+        )
+        prev = self._in_pydantic_model
+        self._in_pydantic_model = is_model
+        self.generic_visit(node)
+        self._in_pydantic_model = prev
+
     def visit_FunctionDef(self, node):
-        # Rule: Max 4 parameters
+        # Rule: Max 4 parameters (skip data-model __init__)
+        is_model_init = self._in_pydantic_model and node.name == "__init__"
         num_args = len(node.args.args) + len(node.args.kwonlyargs)
         # Exclude 'self' and 'cls' from the count if it's a method
         if node.args.args and node.args.args[0].arg in ('self', 'cls'):
             num_args -= 1
-            
-        if num_args > 4:
+
+        if not is_model_init and num_args > 4:
             self.add_violation(node.lineno, "UX-01", f"Function '{node.name}' has {num_args} parameters (Max 4). Use Parameter Object.")
 
         # Rule: No get_/set_ prefixes

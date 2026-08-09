@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from decision_maker.core.explainability import ExplainabilityEngine
+from decision_maker.core.explainability import ExplainabilityEngine, NarrativeContext
 from decision_maker.core.models import Factor, Statistics
 
 
@@ -150,16 +150,22 @@ class TestExplainabilityEngine:
     def test_narrative_includes_winner(self, mc_results, factors, topsis_scores):
         waterfall = self.engine.factor_waterfall(mc_results, factors)
         counterfactual = self.engine.counterfactual(mc_results, factors)
-        text = self.engine.narrative(mc_results, factors, waterfall, counterfactual, topsis_scores)
+        text = self.engine.narrative(
+            NarrativeContext(mc_results, factors, waterfall, counterfactual, topsis_scores)
+        )
         assert "OptionA" in text
         assert "recommended" in text.lower()
 
     def test_narrative_includes_key_drivers(self, mc_results, factors, topsis_scores):
         waterfall = self.engine.factor_waterfall(mc_results, factors)
         counterfactual = self.engine.counterfactual(mc_results, factors)
-        text = self.engine.narrative(mc_results, factors, waterfall, counterfactual, topsis_scores)
+        text = self.engine.narrative(
+            NarrativeContext(mc_results, factors, waterfall, counterfactual, topsis_scores)
+        )
         assert "key drivers" in text.lower() or "contributed" in text.lower()
 
     def test_narrative_empty(self, factors, topsis_scores):
-        text = self.engine.narrative({}, factors, {"options": {}, "max_possible": 0}, {}, topsis_scores)
+        text = self.engine.narrative(
+            NarrativeContext({}, factors, {"options": {}, "max_possible": 0}, {}, topsis_scores)
+        )
         assert "No data" in text

@@ -11,6 +11,7 @@ __all__ = ["UnifiedDecisionFramework"]
 import asyncio
 import logging
 import os
+from dataclasses import dataclass
 from typing import Any
 
 import numpy as np
@@ -19,9 +20,9 @@ import pandas as pd
 from decision_maker.core.aggregator import RankAggregator
 from decision_maker.core.antifragile import AntifragileEngine
 from decision_maker.core.bayesian import BayesianEngine
-from decision_maker.core.bootstrap import BootstrapRanking
+from decision_maker.core.bootstrap import BootstrapConfig, BootstrapRanking
 from decision_maker.core.decision_theory import DecisionTheoryEngine
-from decision_maker.core.explainability import ExplainabilityEngine
+from decision_maker.core.explainability import ExplainabilityEngine, NarrativeContext
 from decision_maker.core.game_theory import GameTheoryEngine
 from decision_maker.core.gemini_agent import GeminiDeepResearchAgent
 from decision_maker.core.genetic import GeneticOptimizer
@@ -40,9 +41,22 @@ from decision_maker.core.utils import (
     DEFAULT_BOOTSTRAP_ITERATIONS,
     SCALE_MISMATCH_THRESHOLD,
 )
-from decision_maker.core.visualization import VisualizationEngine
+from decision_maker.core.visualization import PlotContext, VisualizationEngine
 
 logger = logging.getLogger(__name__)
+
+
+@dataclass
+class AdvancedAnalysis:
+    """Bundles data needed for advanced mode analyses (Parameter Object)."""
+
+    mc_results: dict
+    factor_names: list[str]
+    weights: list[float]
+    max_bools: list[bool]
+    data_fuzzy: dict
+    future_metrics: dict[str, Any]
+    topsis_scores: Any
 
 
 def _normalize_dataframe(df: pd.DataFrame) -> pd.DataFrame:
@@ -259,7 +273,15 @@ class UnifiedDecisionFramework:
 
         if mode == "advanced":
             self._run_advanced_analysis(
-                mc_results, factor_names, weights, max_bools, data_fuzzy, future_metrics, topsis_scores
+                AdvancedAnalysis(
+                    mc_results=mc_results,
+                    factor_names=factor_names,
+                    weights=weights,
+                    max_bools=max_bools,
+                    data_fuzzy=data_fuzzy,
+                    future_metrics=future_metrics,
+                    topsis_scores=topsis_scores,
+                )
             )
 
             # God-Mode Additions
@@ -271,11 +293,13 @@ class UnifiedDecisionFramework:
         waterfall = self.explain_engine.factor_waterfall(mc_results, self.mc_engine.factors)
         counterfactual = self.explain_engine.counterfactual(mc_results, self.mc_engine.factors)
         explanation = self.explain_engine.narrative(
-            mc_results,
-            self.mc_engine.factors,
-            waterfall,
-            counterfactual,
-            topsis_scores,
+            NarrativeContext(
+                mc_results=mc_results,
+                factors=self.mc_engine.factors,
+                waterfall=waterfall,
+                counterfactual=counterfactual,
+                topsis_scores=topsis_scores,
+            ),
             mode,
             use_ai=False,
         )
@@ -316,7 +340,13 @@ class UnifiedDecisionFramework:
         if mode in ("standard", "advanced"):
             timestamp = saved["timestamp"]
             plots = self.viz_engine.generate_all_plots(
-                mc_results, self.mc_engine.factors, future_metrics, os.path.dirname(saved["json"]), timestamp
+                PlotContext(
+                    mc_results=mc_results,
+                    factors=self.mc_engine.factors,
+                    future_metrics=future_metrics,
+                    output_dir=os.path.dirname(saved["json"]),
+                    timestamp=timestamp,
+                )
             )
             saved["plots"] = plots
 
@@ -356,10 +386,16 @@ class UnifiedDecisionFramework:
 
         return data_fuzzy, weights, max_bools, factor_names
 
-    def _run_advanced_analysis(
-        self, mc_results, factor_names, weights, max_bools, data_fuzzy, future_metrics, topsis_scores
-    ):
+    def _run_advanced_analysis(self, ctx: AdvancedAnalysis):
         """Run advanced mode analyses: crisp PROMETHEE, bootstrap, Bayesian, genetic."""
+        mc_results = ctx.mc_results
+        factor_names = ctx.factor_names
+        weights = ctx.weights
+        max_bools = ctx.max_bools
+        data_fuzzy = ctx.data_fuzzy
+        future_metrics = ctx.future_metrics
+        topsis_scores = ctx.topsis_scores
+
         data_crisp = {}
         for name, stats in mc_results.items():
             data_crisp[name] = {f_name: stats.factor_stats[f_name]["mean"] for f_name in stats.factor_stats}
@@ -388,9 +424,11 @@ class UnifiedDecisionFramework:
 
         bootstrap_ci = self.bootstrap_engine.confidence_intervals(
             data_fuzzy,
-            weights,
-            max_bools,
-            n_bootstrap=DEFAULT_BOOTSTRAP_ITERATIONS,
+            BootstrapConfig(
+                weights=weights,
+                maximize=max_bools,
+                n_bootstrap=DEFAULT_BOOTSTRAP_ITERATIONS,
+            ),
         )
 
         future_metrics.update(

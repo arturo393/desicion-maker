@@ -146,16 +146,18 @@ def _execute_analysis(
         loop.close()
 
     # Save to registry
-    from decision_maker.core.registry import DecisionRegistry
+    from decision_maker.core.registry import DecisionRegistry, SaveDecisionRequest
 
     registry = DecisionRegistry()
     registry.save_decision(
-        name=name,
-        mode=mode,
-        num_simulations=sims,
-        factors=factors,
-        options=options,
-        results=_simplify_result(result),
+        SaveDecisionRequest(
+            name=name,
+            mode=mode,
+            num_simulations=sims,
+            factors=factors,
+            options=options,
+            results=_simplify_result(result),
+        )
     )
 
     # Display results

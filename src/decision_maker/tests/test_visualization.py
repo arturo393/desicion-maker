@@ -5,7 +5,7 @@ import numpy as np
 import pytest
 
 from decision_maker.core.models import Factor, Statistics
-from decision_maker.core.visualization import VisualizationEngine
+from decision_maker.core.visualization import PlotContext, VisualizationEngine
 
 
 @pytest.fixture
@@ -68,11 +68,7 @@ class TestVisualizationEngine:
         with tempfile.TemporaryDirectory() as tmpdir:
             engine = VisualizationEngine()
             paths = engine.generate_all_plots(
-                mock_mc_results,
-                factors,
-                future_metrics,
-                tmpdir,
-                "test_timestamp",
+                PlotContext(mock_mc_results, factors, future_metrics, tmpdir, "test_timestamp")
             )
             assert len(paths) == 3
             for p in paths:
@@ -82,11 +78,7 @@ class TestVisualizationEngine:
         with tempfile.TemporaryDirectory() as tmpdir:
             engine = VisualizationEngine()
             paths = engine.generate_all_plots(
-                mock_mc_results,
-                factors,
-                {},
-                tmpdir,
-                "test_timestamp",
+                PlotContext(mock_mc_results, factors, {}, tmpdir, "test_timestamp")
             )
             assert len(paths) == 1
 
