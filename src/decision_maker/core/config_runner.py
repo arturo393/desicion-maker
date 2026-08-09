@@ -84,7 +84,7 @@ def build_framework_from_config(config: dict[str, Any]) -> UnifiedDecisionFramew
 
 async def run_from_config(
     config_path: str,
-    mode: str = "standard",
+    mode: str | None = None,
     use_ai: bool = False,
     results_dir: str | None = None,
 ) -> dict[str, Any]:
@@ -97,7 +97,7 @@ async def run_from_config(
     framework = build_framework_from_config(config)
 
     return await framework.run_analysis(
-        mode=decision.mode,
+        mode=mode or decision.mode,
         use_ai=use_ai,
         results_dir=results_dir,
     )

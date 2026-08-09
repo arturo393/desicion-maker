@@ -3,7 +3,7 @@
 ## Step 1: Create Your Script
 
 ```bash
-cp python/analyses/_template.py my_decision.py
+cp src/decision_maker/analyses/_template.py my_decision.py
 ```
 
 ## Step 2: Define Factors
@@ -11,7 +11,7 @@ cp python/analyses/_template.py my_decision.py
 Factors are what you care about. Each has a name, weight (importance), and direction (maximize or minimize).
 
 ```python
-from python.core.models import Factor
+from decision_maker.core.models import Factor
 
 fw.add_factor(Factor("Cost",       0.30, maximize=False))
 fw.add_factor(Factor("Quality",    0.40, maximize=True))
@@ -26,7 +26,7 @@ Weights should sum to 1.0 for interpretability but the framework normalizes inte
 Each option has variables matching your factor names. Choose a distribution type for uncertainty:
 
 ```python
-from python.core.models import DecisionOption, DistributionType
+from decision_maker.core.models import DecisionOption, DistributionType
 
 opt = DecisionOption("Option A", "description")
 opt.add_variable("Cost",        DistributionType.NORMAL,       1000, 200)     # mean=1000, std=200
@@ -91,12 +91,12 @@ See [`examples/mac_upgrade_comparison.py`](../examples/mac_upgrade_comparison.py
 ## Using YAML Config
 
 ```bash
-# Edit python/config/decision_config.yaml
+# Edit config/decision_config.yaml
 uv run python -c "
-from python.core.config_runner import build_framework_from_config, load_decision_config
+from decision_maker.core.config_runner import build_framework_from_config, load_decision_config
 import yaml
 
-with open('python/config/decision_config.yaml') as f:
+with open('config/decision_config.yaml') as f:
     config = yaml.safe_load(f)
 fw = build_framework_from_config(config)
 import asyncio

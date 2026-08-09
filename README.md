@@ -6,7 +6,7 @@ Generic Python library for multi-criteria decision analysis under uncertainty. C
 
 ```bash
 uv sync
-cp python/analyses/_template.py my_decision.py  # then edit
+cp src/decision_maker/analyses/_template.py my_decision.py  # then edit
 uv run python my_decision.py
 ```
 
@@ -53,8 +53,8 @@ uv run decision-maker list-distributions
 
 ## API & Dashboard
 
-- **REST API** — `uv run uvicorn python.api.server:app` for programmatic access
-- **Dashboard** — `uv run streamlit run python/dashboard/app.py` for interactive web UI
+- **REST API** — `uv run uvicorn src.decision_maker.api.server:app` for programmatic access
+- **Dashboard** — `uv run streamlit run src/decision_maker/dashboard/app.py` for interactive web UI
 
 ## CLI
 

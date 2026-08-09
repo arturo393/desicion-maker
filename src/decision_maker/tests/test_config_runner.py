@@ -1,3 +1,4 @@
+import asyncio
 import os
 import tempfile
 
@@ -5,7 +6,11 @@ import pytest
 import yaml
 from pydantic import ValidationError
 
-from decision_maker.core.config_runner import build_framework_from_config, load_decision_config
+from decision_maker.core.config_runner import (
+    build_framework_from_config,
+    load_decision_config,
+    run_from_config,
+)
 
 
 class TestConfigRunner:
@@ -104,3 +109,40 @@ class TestConfigRunner:
         }
         framework = build_framework_from_config(config)
         assert framework.mc_engine.num_simulations == 10000
+
+    def _write_config(self, mode: str):
+        config_data = {
+            "decision": {
+                "name": "Mode Test",
+                "mode": mode,
+                "simulations": 10,
+                "factors": [{"name": "Cost", "weight": 1.0, "maximize": False}],
+                "options": [
+                    {
+                        "name": "Option A",
+                        "variables": {"Cost": {"distribution": "deterministic", "params": [100]}},
+                    }
+                ],
+            }
+        }
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as f:
+            yaml.dump(config_data, f)
+            return f.name
+
+    @pytest.mark.asyncio
+    async def test_run_from_config_respects_cli_mode_override(self):
+        config_path = self._write_config(mode="advanced")
+        try:
+            result = await run_from_config(config_path, mode="express")
+            assert result.get("mode") == "express"
+        finally:
+            os.unlink(config_path)
+
+    @pytest.mark.asyncio
+    async def test_run_from_config_uses_config_mode_when_no_override(self):
+        config_path = self._write_config(mode="advanced")
+        try:
+            result = await run_from_config(config_path)
+            assert result.get("mode") == "advanced"
+        finally:
+            os.unlink(config_path)

@@ -7,7 +7,7 @@ Python framework for multi-criteria decision analysis under uncertainty. 22+ eng
 ### Entry Point: `UnifiedDecisionFramework`
 
 ```python
-from python.core.orchestrator import UnifiedDecisionFramework
+from decision_maker.core.orchestrator import UnifiedDecisionFramework
 fw = UnifiedDecisionFramework(correlation_matrix=None)
 fw.add_factor(Factor(...))
 fw.add_option(DecisionOption(...))
@@ -112,8 +112,8 @@ Statistics (per option after MC)
 
 ## Test Coverage
 
-322+ tests across all engines. Run with:
+331+ tests across all engines. Run with:
 
 ```bash
-uv run pytest python/tests/ -v
+uv run pytest src/decision_maker/tests/ -v
 ```

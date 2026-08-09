@@ -46,9 +46,9 @@ def run(
         typer.Option("--config", "-c", help="Path to YAML config file"),
     ] = None,
     mode: Annotated[
-        str,
+        str | None,
         typer.Option("--mode", "-m", help="Execution tier: express, standard, advanced"),
-    ] = "standard",
+    ] = None,
     simulations: Annotated[
         int,
         typer.Option("--sims", "-s", help="Number of Monte Carlo simulations"),
@@ -104,7 +104,7 @@ def run(
     if config:
         result = asyncio.run(run_from_config(config, mode, ai, output))
     else:
-        result = asyncio.run(_run_interactive(mode, simulations, ai, output, corr_matrix, pref_types))
+        result = asyncio.run(_run_interactive(mode or "standard", simulations, ai, output, corr_matrix, pref_types))
 
     if explain and result:
         _generate_explanation(result)
