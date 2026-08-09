@@ -5,7 +5,7 @@ usando Google Gemini Deep Research Model
 
 Contexto:
 - Sistema de diagnóstico remoto actual (sw-diagnosticoremoto)
-- Firmware gateway LoRa dual (fw-gateway2lora) 
+- Firmware gateway LoRa dual (fw-gateway2lora)
 - Nueva funcionalidad: generadores de tono distribuidos en red leaky feeder
 - Métricas: ID generador, potencia TX, potencia RX, SNR, timestamp
 """
@@ -52,7 +52,7 @@ def research_leaky_feeder_monitoring():
 
     # Prompt de investigación detallado
     research_prompt = """
-    Investiga y analiza en profundidad sistemas de monitoreo para redes leaky feeder (radiantes) 
+    Investiga y analiza en profundidad sistemas de monitoreo para redes leaky feeder (radiantes)
     con las siguientes características:
 
     CONTEXTO DEL SISTEMA ACTUAL:

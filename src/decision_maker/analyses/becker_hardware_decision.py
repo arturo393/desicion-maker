@@ -129,7 +129,7 @@ CRITERIA = {
 def topsis_analysis(alternatives: list, criteria: dict) -> list:
     """TOPSIS: ranking multicriterio. Mayor score = mejor."""
     alts = [{k: v for k, v in a.items() if k in criteria} for a in alternatives]
-    for a, orig in zip(alts, alternatives):
+    for a, orig in zip(alts, alternatives, strict=False):
         a["name"] = orig["name"]
 
     # Normalizar y calcular distancia a ideal/nadir
@@ -146,10 +146,7 @@ def topsis_analysis(alternatives: list, criteria: dict) -> list:
             if nadir == ideal:
                 norm = 0.5
             else:
-                if params["type"] == "min":
-                    norm = (val - ideal) / (nadir - ideal)
-                else:
-                    norm = (ideal - val) / (ideal - nadir)
+                norm = (val - ideal) / (nadir - ideal) if params["type"] == "min" else (ideal - val) / (ideal - nadir)
 
             norm = max(0.0, min(1.0, norm))
             d_ideal += (w * norm) ** 2
@@ -197,7 +194,7 @@ def research_hardware_options() -> str:
     query = """
     Evaluacion de opciones hardware para recibir senal FSK en 174.925 MHz con SX1276.
     Contexto: sistema leaky feeder con STM32G474 y 2x SX1276 existentes.
-    
+
     Responde especificamente:
     1. Cual es la sensibilidad del SX1276 en modo FSK a 174.925 MHz comparado con un CC1125?
     2. Es viable usar un solo SX1276 alternando entre LoRa y FSK? Que latencia introduce?

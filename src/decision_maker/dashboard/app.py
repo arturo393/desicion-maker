@@ -200,7 +200,7 @@ def _simplify_result(result: dict[str, Any]) -> dict[str, Any]:
     simple = deepcopy(result)
     mc = simple.get("mc_results", {})
     if mc:
-        for n, s in mc.items():
+        for _n, s in mc.items():
             s.raw_scores = None
             s.raw_factor_data = None
     return simple

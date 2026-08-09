@@ -58,10 +58,10 @@ class GeminiClient:
     def query(self, prompt):
         """
         Envía un prompt a Gemini y retorna la respuesta
-        
+
         Args:
             prompt (str): El prompt/pregunta para Gemini
-            
+
         Returns:
             str: Respuesta de Gemini
         """

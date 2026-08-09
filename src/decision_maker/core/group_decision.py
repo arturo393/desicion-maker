@@ -84,12 +84,12 @@ class GroupDecisionEngine:
         per_stakeholder = {}
         for i, s in enumerate(names):
             ranked = sorted(
-                zip(factor_names, matrix[i].tolist()),
+                zip(factor_names, matrix[i].tolist(), strict=False),
                 key=lambda x: x[1],
                 reverse=True,
             )
             per_stakeholder[s] = {
-                "weights": dict(zip(factor_names, matrix[i].tolist())),
+                "weights": dict(zip(factor_names, matrix[i].tolist(), strict=False)),
                 "ranking": [r[0] for r in ranked],
             }
 
@@ -105,7 +105,7 @@ class GroupDecisionEngine:
         mean_divergence = float(np.mean(divergences)) if divergences else 0.0
 
         return {
-            "consensus_weights": dict(zip(factor_names, consensus.tolist())),
+            "consensus_weights": dict(zip(factor_names, consensus.tolist(), strict=False)),
             "method": method,
             "stakeholder_count": n_stakeholders,
             "stakeholders": per_stakeholder,

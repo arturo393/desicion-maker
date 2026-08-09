@@ -275,7 +275,7 @@ def print_results(options: list[CareerOption], results: list) -> None:
     sorted_results = sorted(results, key=lambda r: r.overall_score, reverse=True)
 
     for i, result in enumerate(sorted_results, 1):
-        option = next(o for o in options if o.name == result.option_name)
+        next(o for o in options if o.name == result.option_name)
         pareto = "✅ Pareto" if result.pareto_optimal else "   "
         print(f"\n{'─'*70}")
         print(f"  #{i} [{pareto}] {result.option_name}")

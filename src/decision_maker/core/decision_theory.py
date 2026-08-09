@@ -59,7 +59,7 @@ class DecisionTheoryEngine:
         if first_stats.raw_scores is not None:
             n_sims = len(first_stats.raw_scores)
             regret_matrix = np.zeros((len(mc_results), n_sims))
-            for i, (name, stats) in enumerate(mc_results.items()):
+            for i, (_name, stats) in enumerate(mc_results.items()):
                 regret_matrix[i] = stats.raw_scores
             best_per_sim = np.max(regret_matrix, axis=0)
             max_regrets = np.max(best_per_sim - regret_matrix, axis=1)

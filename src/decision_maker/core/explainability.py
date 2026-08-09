@@ -70,15 +70,9 @@ class ExplainabilityEngine:
                 f_min = global_bounds[f.name]["min"]
                 f_max = global_bounds[f.name]["max"]
 
-                if f_max > f_min:
-                    normalized = (raw_mean - f_min) / (f_max - f_min)
-                else:
-                    normalized = 1.0
+                normalized = (raw_mean - f_min) / (f_max - f_min) if f_max > f_min else 1.0
 
-                if f.maximize:
-                    contribution = normalized * f.weight
-                else:
-                    contribution = (1.0 - normalized) * f.weight
+                contribution = normalized * f.weight if f.maximize else (1.0 - normalized) * f.weight
 
                 option_factors.append(
                     {
@@ -167,19 +161,13 @@ class ExplainabilityEngine:
                 f_min = global_bounds[f.name]["min"]
                 f_max = global_bounds[f.name]["max"]
 
-                if f_max > f_min:
-                    norm_val = (raw_val - f_min) / (f_max - f_min)
-                else:
-                    norm_val = 1.0
+                norm_val = (raw_val - f_min) / (f_max - f_min) if f_max > f_min else 1.0
 
                 weight_adjustment = f.weight
 
                 if weight_adjustment > 0:
                     effective = norm_val if f.maximize else (1.0 - norm_val)
-                    if effective < 1e-9:
-                        extra_weight_needed = float("inf")
-                    else:
-                        extra_weight_needed = score_deficit / effective
+                    extra_weight_needed = float("inf") if effective < 1e-09 else score_deficit / effective
                     if np.isfinite(extra_weight_needed) and extra_weight_needed > 0:
                         pct_change_weight = (extra_weight_needed / weight_adjustment) * 100
                         scenarios.append(

@@ -95,7 +95,7 @@ def _promethee_with_uncertainty(
         return pd.DataFrame.from_dict(rows, orient="index") if rows else pd.DataFrame()
 
     all_scores = []
-    for label, key in [("p5", "p5"), ("mean", "mean"), ("p95", "p95")]:
+    for _label, key in [("p5", "p5"), ("mean", "mean"), ("p95", "p95")]:
         df = _df_for_percentile(key)
         if df.empty:
             continue
@@ -287,7 +287,7 @@ class UnifiedDecisionFramework:
         if use_ai and self.ai_agent.is_available:
             tasks = [self.ai_agent.research(opt.name, opt.description) for opt in self.mc_engine.options]
             results = await asyncio.gather(*tasks)
-            for opt, res in zip(self.mc_engine.options, results):
+            for opt, res in zip(self.mc_engine.options, results, strict=False):
                 ai_reports[opt.name] = res
 
             # Phase 4: Self-updating Priors via LLM

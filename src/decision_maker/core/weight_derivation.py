@@ -59,7 +59,7 @@ class WeightDerivationEngine:
                 "note": "All ratings were zero; using equal weights",
             }
 
-        weights = {n: float(v / total) for n, v in zip(names, values)}
+        weights = {n: float(v / total) for n, v in zip(names, values, strict=False)}
 
         return {
             "weights": weights,
@@ -90,7 +90,7 @@ class WeightDerivationEngine:
         n = len(ranked_factors)
         values = np.zeros(n)
 
-        for i, name in enumerate(ranked_factors):
+        for i, _name in enumerate(ranked_factors):
             if decay == "exponential":
                 values[i] = top_weight * (0.5**i)
             else:
@@ -219,10 +219,7 @@ class WeightDerivationEngine:
         max_wins = max(wins.values()) if wins else 1
 
         # Convert win counts to weights via normalized score
-        if max_wins > 0:
-            weights = {f: float(wins[f] / max_wins) for f in factors}
-        else:
-            weights = {f: 1.0 for f in factors}
+        weights = {f: float(wins[f] / max_wins) for f in factors} if max_wins > 0 else {f: 1.0 for f in factors}
 
         total = sum(weights.values())
         weights = {f: w / total for f, w in weights.items()}

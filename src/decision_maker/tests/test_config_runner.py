@@ -90,7 +90,7 @@ class TestConfigRunner:
             f.write("invalid: yaml: [broken\n  bad")
             config_path = f.name
         try:
-            with pytest.raises(Exception):
+            with pytest.raises(Exception, match=".*"):
                 load_decision_config(config_path)
         finally:
             os.unlink(config_path)

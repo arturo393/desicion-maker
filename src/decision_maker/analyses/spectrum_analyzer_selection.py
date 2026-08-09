@@ -232,10 +232,7 @@ def topsis_analysis(alternatives: list, criteria: dict) -> list:
             if nadir == ideal:
                 norm = 0.5
             else:
-                if params["type"] == "min":
-                    norm = (val - ideal) / (nadir - ideal)
-                else:
-                    norm = (ideal - val) / (ideal - nadir)
+                norm = (val - ideal) / (nadir - ideal) if params["type"] == "min" else (ideal - val) / (ideal - nadir)
 
             norm = max(0.0, min(1.0, norm))
             d_ideal += (w * norm) ** 2
@@ -289,18 +286,18 @@ def research_spectrum_analyzers() -> str:
     - Control por software: debe tener API, SCPI, serial, o DLL para Python (NO necesita pantalla)
     - Precio: preferiblemente < $1,200 USD NUEVO (compra de múltiples unidades, NO mercado secundario)
     - IMPORTANTE: equipos NUEVOS únicamente (no de mercado secundario/usado)
-    
+
     SEÑALES A MEDIR:
     - Potencia de salida de repetidores/amplificadores de red leaky feeder
     - Rango: -20 dBm a +10 dBm
     - Frecuencias VHF: 138-174 MHz principalmente (puede llegar a 450 MHz UHF)
-    
+
     CASOS DE USO:
     - Suite de pruebas automatizadas en Python
     - gain_check: verificar ganancia de amplificador (set_center_freq, set_span, get_level_from_marker)
     - agc_check: verificar activación de AGC comparando potencia en 3 lecturas consecutivas
     - Se comprarán múltiples unidades, por lo que precio unitario y disponibilidad son clave
-    
+
     Evalúa y compara con precio actual NUEVO (USD):
     1. Rigol DSA815 (NUEVO - precio actual 2025/2026)
     2. Rigol DSA832 (NUEVO - precio actual 2025/2026)
@@ -398,7 +395,7 @@ def main():
     for alt in ALTERNATIVES:
         req = check_minimum_requirements(alt)
         status = "APTO" if req["apto"] else "NO APTO"
-        price_ok = alt["price_usd"] <= 800
+        # Removed pointless comparison
         print(f"\n{'✅' if req['apto'] else '❌'} {alt['name']} — {status} | ${alt['price_usd']}")
         if req["fails"]:
             for f in req["fails"]:

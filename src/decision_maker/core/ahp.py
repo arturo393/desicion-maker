@@ -54,7 +54,7 @@ class AHPHelper:
             cr = ci / ri if ri != 0 else 0
 
             result: dict[str, Optional] = {
-                "weights": dict(zip(labels, weights)),
+                "weights": dict(zip(labels, weights, strict=False)),
                 "consistency_ratio": float(cr),
                 "is_consistent": cr <= 0.1,
                 "correction_advice": None,

@@ -4,81 +4,69 @@ Unit Tests for Unified Decision Framework
 Issue #3: Comprehensive Utility Testing
 """
 
-import unittest
-
 import numpy as np
+import pytest
 
 from decision_maker.core.models import DecisionOption, DistributionType, Factor, UncertainVariable
 from decision_maker.core.monte_carlo import MonteCarloEngine
 from decision_maker.core.topsis import TOPSISEngine
 
 
-class TestDistributions(unittest.TestCase):
-    def setUp(self):
-        # Set seed for reproducibility
+class TestDistributions:
+    def setup_method(self):
         np.random.seed(42)
 
     def test_deterministic(self):
         var = UncertainVariable("Const", DistributionType.DETERMINISTIC, [10])
         samples = var.sample(100)
-        self.assertTrue(np.all(samples == 10))
+        assert np.all(samples == 10)
 
     def test_triangular_bug_fix(self):
-        """Verify Triangular dist handles unordered params correctly"""
-        # Bug case: left=10, mode=5, right=20 (mode < left)
-        # Should be auto-sorted to: 5, 10, 20
         var = UncertainVariable("TriBug", DistributionType.TRIANGULAR, [10, 5, 20])
         try:
             samples = var.sample(100)
-            self.assertTrue(np.all(samples >= 5))
-            self.assertTrue(np.all(samples <= 20))
+            assert np.all(samples >= 5)
+            assert np.all(samples <= 20)
         except ValueError:
-            self.fail("Triangular distribution raised ValueError with unordered params")
+            pytest.fail("Triangular distribution raised ValueError with unordered params")
 
     def test_normal_stats(self):
-        """Verify Normal distribution mean and stddev"""
         mean, std = 100, 15
         var = UncertainVariable("Norm", DistributionType.NORMAL, [mean, std])
         samples = var.sample(10000)
-
-        self.assertAlmostEqual(np.mean(samples), mean, delta=1.0)
-        self.assertAlmostEqual(np.std(samples), std, delta=1.0)
+        assert abs(np.mean(samples) - mean) < 1.0
+        assert abs(np.std(samples) - std) < 1.0
 
     def test_beta_range(self):
-        """Verify Beta distribution stays within [0, 1]"""
         var = UncertainVariable("Beta", DistributionType.BETA, [2, 5])
         samples = var.sample(1000)
-        self.assertTrue(np.all((samples >= 0) & (samples <= 1)))
+        assert np.all((samples >= 0) & (samples <= 1))
 
     def test_lognormal(self):
-        """Verify LogNormal is always positive"""
         var = UncertainVariable("LogNorm", DistributionType.LOGNORMAL, [0, 0.5])
         samples = var.sample(1000)
-        self.assertTrue(np.all(samples > 0))
+        assert np.all(samples > 0)
 
     def test_gamma(self):
-        """Verify Gamma mean = shape * scale"""
         shape, scale = 2.0, 3.0
         var = UncertainVariable("Gamma", DistributionType.GAMMA, [shape, scale])
         samples = var.sample(10000)
-        self.assertAlmostEqual(np.mean(samples), shape * scale, delta=1.0)
+        assert abs(np.mean(samples) - (shape * scale)) < 1.0
 
     def test_poisson(self):
-        """Verify Poisson handles integer counts"""
         lam = 5
         var = UncertainVariable("Pois", DistributionType.POISSON, [lam])
         samples = var.sample(10000)
-        self.assertTrue(np.all(samples >= 0))
-        self.assertAlmostEqual(np.mean(samples), lam, delta=0.5)
+        assert np.all(samples >= 0)
+        assert abs(np.mean(samples) - lam) < 0.5
 
 
-class TestMonteCarlo(unittest.TestCase):
-    def setUp(self):
+class TestMonteCarlo:
+    def setup_method(self):
         self.engine = MonteCarloEngine(num_simulations=1000)
         np.random.seed(42)
 
     def test_simple_simulation(self):
-        # Option A: Deterministic 100, single factor
         opt = DecisionOption("Safe")
         opt.add_variable("Income", DistributionType.DETERMINISTIC, 100)
 
@@ -88,16 +76,12 @@ class TestMonteCarlo(unittest.TestCase):
         results = self.engine.run()
         stats = results["Safe"]
 
-        # With normalization, single deterministic value maps to 1.0
-        self.assertEqual(stats.mean_score, 1.0)
-        self.assertEqual(stats.min_score, 1.0)
-        self.assertEqual(stats.max_score, 1.0)
-        self.assertEqual(stats.std_dev, 0.0)
+        assert stats.mean_score == 1.0
+        assert stats.min_score == 1.0
+        assert stats.max_score == 1.0
+        assert stats.std_dev == 0.0
 
     def test_weighted_simulation(self):
-        # Option: Cost (50) and Benefit (150)
-        # Cost (minimize, w=0.2): both options identical so norm=1.0 → (1-1)*0.2 = 0
-        # Benefit (maximize, w=0.8): both options identical so norm=1.0 → 1*0.8 = 0.8
         opt = DecisionOption("Project")
         opt.add_variable("Cost", DistributionType.DETERMINISTIC, 50)
         opt.add_variable("Benefit", DistributionType.DETERMINISTIC, 150)
@@ -109,10 +93,10 @@ class TestMonteCarlo(unittest.TestCase):
         results = self.engine.run()
         stats = results["Project"]
 
-        self.assertAlmostEqual(stats.mean_score, 0.8)
+        assert abs(stats.mean_score - 0.8) < 1e-6
 
 
-class TestTOPSIS(unittest.TestCase):
+class TestTOPSIS:
     def test_ranking(self):
         data = {
             "OptA": {"Price": (100, 100, 100), "Quality": (10, 10, 10)},
@@ -125,9 +109,6 @@ class TestTOPSIS(unittest.TestCase):
         engine = TOPSISEngine()
         scores = engine.analyze(data, weights, maximize)
 
-        self.assertEqual(len(scores), 3)
-        self.assertEqual(scores.idxmax(), scores.index[0])
+        assert len(scores) == 3
+        assert scores.idxmax() == scores.index[0]
 
-
-if __name__ == "__main__":
-    unittest.main()

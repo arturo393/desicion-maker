@@ -59,10 +59,7 @@ def mc_results():
         for f in factors:
             vals = raw_data[f.name]
             b = global_bounds[f.name]
-            if b["max"] > b["min"]:
-                norm = (vals - b["min"]) / (b["max"] - b["min"])
-            else:
-                norm = np.ones_like(vals)
+            norm = (vals - b["min"]) / (b["max"] - b["min"]) if b["max"] > b["min"] else np.ones_like(vals)
             if f.maximize:
                 total += norm * f.weight
             else:
@@ -125,7 +122,7 @@ class TestWhatIfEngine:
         recomputed = engine.recompute()
         original = engine.original_ranking()
         assert len(recomputed) == len(original)
-        for (rn, rs), (on, os_) in zip(recomputed, original):
+        for (rn, rs), (on, os_) in zip(recomputed, original, strict=False):
             assert rn == on
             assert abs(rs - os_) < 1e-6
 
@@ -155,7 +152,7 @@ class TestWhatIfEngine:
         engine.set_weight("Cost", 0.9)
         engine.toggle_maximize("Cost")
         engine.reset()
-        for cf, of in zip(engine.current_factors, engine.original_factors):
+        for cf, of in zip(engine.current_factors, engine.original_factors, strict=False):
             assert abs(cf.weight - of.weight) < 1e-9
             assert cf.maximize == of.maximize
 

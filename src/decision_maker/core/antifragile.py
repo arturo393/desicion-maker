@@ -186,10 +186,7 @@ class AntifragileEngine:
                 # Convexity coefficient: regression slope of score ~ variance_mult
                 xs = np.array(perturbations)
                 ys = np.array([original_score + deltas.get(f"{p:.1f}x", 0.0) for p in perturbations])
-                if np.std(xs) > EPSILON:
-                    coeff = np.polyfit(xs, ys, 2)[0]  # quadratic coefficient
-                else:
-                    coeff = 0.0
+                coeff = np.polyfit(xs, ys, 2)[0] if np.std(xs) > EPSILON else 0.0
 
                 convexity_scores[f.name] = {
                     "mean": f_mean,
@@ -243,10 +240,7 @@ class AntifragileEngine:
                 continue
             vals = modified_data[f.name]
             b = bounds.get(f.name, {"min": 0.0, "max": 1.0})
-            if b["max"] > b["min"]:
-                norm = (vals - b["min"]) / (b["max"] - b["min"])
-            else:
-                norm = np.ones_like(vals)
+            norm = (vals - b["min"]) / (b["max"] - b["min"]) if b["max"] > b["min"] else np.ones_like(vals)
             if f.maximize:
                 total += norm * f.weight
             else:
@@ -385,10 +379,7 @@ class AntifragileEngine:
                     vals = raw_data[f.name]
                     f_min = global_bounds[f.name]["min"]
                     f_max = global_bounds[f.name]["max"]
-                    if f_max > f_min:
-                        norm_vals = (vals - f_min) / (f_max - f_min)
-                    else:
-                        norm_vals = np.ones_like(vals)
+                    norm_vals = (vals - f_min) / (f_max - f_min) if f_max > f_min else np.ones_like(vals)
                     if not f.maximize:
                         norm_vals = 1.0 - norm_vals
                     total = (norm_vals * w) if total is None else total + norm_vals * w

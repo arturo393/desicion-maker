@@ -5,7 +5,7 @@ Uses Pydantic V2 for rigorous runtime validation.
 
 import math
 from collections.abc import Callable
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 import numpy as np
@@ -13,7 +13,7 @@ from pydantic import BaseModel, Field, model_validator
 
 EPSILON = 1e-9
 
-class DistributionType(str, Enum):
+class DistributionType(StrEnum):
     DETERMINISTIC = "deterministic"
     NORMAL = "normal"
     UNIFORM = "uniform"

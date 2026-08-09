@@ -36,7 +36,7 @@ class TestRankAggregator:
         assert result["scores"] == {}
 
     def test_unknown_method_raises(self):
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match=".*"):
             RankAggregator.aggregate({"A": pd.Series([1], index=["X"])}, method="unknown")
 
     def test_borda_count_empty_series(self):

@@ -37,7 +37,7 @@ class RealOptionsEngine:
 
     def analyze(self, mc_results: dict) -> dict[str, float]:
         """
-        Estimates the intrinsic 'Flexibility Value' of each decision option 
+        Estimates the intrinsic 'Flexibility Value' of each decision option
         based on its volatility (std_dev) from the Monte Carlo results.
         Assumes a standard 1-year delay option for demonstration.
         """

@@ -58,12 +58,9 @@ class InformationTheoryEngine:
 
                 # Normalize scores to provide "Relative Importance"
                 total_mi = np.sum(mi_scores)
-                if total_mi > 0:
-                    normalized_mi = mi_scores / total_mi
-                else:
-                    normalized_mi = mi_scores
+                normalized_mi = mi_scores / total_mi if total_mi > 0 else mi_scores
 
-                results[name] = {fn: float(val) for fn, val in zip(available_factors, normalized_mi)}
+                results[name] = {fn: float(val) for fn, val in zip(available_factors, normalized_mi, strict=False)}
             except ValueError as e:
                 logger.error(f"Error calculating Mutual Information for '{name}': {e}")
                 continue

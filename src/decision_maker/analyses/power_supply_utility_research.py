@@ -39,32 +39,32 @@ genai.configure(api_key=API_KEY)
 # Queries enfocadas en UTILIDAD
 UTILITY_QUERIES = {
     "metricas_criticas_mineria": """
-    CONTEXTO: Sistema de minería subterránea con amplificadores en leaky feeder alimentados 
+    CONTEXTO: Sistema de minería subterránea con amplificadores en leaky feeder alimentados
     por fuentes de poder en headend (cabecera de la red).
-    
-    PREGUNTA: ¿Cuáles son las MÉTRICAS MÁS CRÍTICAS de fuentes de poder que impactan 
+
+    PREGUNTA: ¿Cuáles son las MÉTRICAS MÁS CRÍTICAS de fuentes de poder que impactan
     directamente la operación minera? Enfócate en:
-    
+
     1. UPTIME y DISPONIBILIDAD: ¿Qué datos predecirían fallos antes de ocurrir?
     2. SEGURIDAD: ¿Qué alertas evitan daños a equipamiento o personal?
     3. EFICIENCIA: ¿Qué métricas optimizan consumo energético y costos?
     4. DIAGNÓSTICO REMOTO: ¿Qué datos permiten resolver problemas sin ir al sitio?
     5. CUMPLIMIENTO: ¿Qué mediciones requieren regulaciones minería?
-    
+
     Dame análisis detallado de ROI de cada métrica (costo de no tenerla vs beneficio de tenerla).
     """,
 
     "utilidad_competencia_soluciones": """
     CONTEXTO: Evaluando soluciones de monitoreo power supply para minería subterránea.
-    
+
     PREGUNTA: Comparar UTILIDAD PRÁCTICA de estas soluciones:
-    
+
     1. GRAFANA + Prometheus (open source)
     2. Schneider Electric PowerLogic (enterprise)
     3. Victron Energy Venus OS (especializado baterías)
     4. ABB MicroSCADA (industrial)
     5. Solución CUSTOM (desarrollo propio)
-    
+
     Para CADA UNA analizar:
     - ¿Qué problemas operacionales REALES resuelve?
     - ¿Costo total de propiedad (TCO) realista?
@@ -72,53 +72,53 @@ UTILITY_QUERIES = {
     - ¿Capacidad diagnóstico remoto (sin ir al sitio)?
     - ¿Casos reales en minería subterránea?
     - ¿Qué NO hace que sí necesitaríamos?
-    
+
     Usa ejemplos reales si existen.
     """,
 
     "datos_criticos_leaky_feeder_headend": """
-    CONTEXTO: Red leaky feeder con amplificadores distribuidos alimentados desde fuentes 
-    en headend. Necesitamos entender qué datos de power supply son ESENCIALES para 
+    CONTEXTO: Red leaky feeder con amplificadores distribuidos alimentados desde fuentes
+    en headend. Necesitamos entender qué datos de power supply son ESENCIALES para
     mantener la red operativa.
-    
-    PREGUNTA: Para un sistema leaky feeder + headend, ¿cuál es el SET MÍNIMO de datos 
+
+    PREGUNTA: Para un sistema leaky feeder + headend, ¿cuál es el SET MÍNIMO de datos
     de fuente de poder que permitiría:
-    
+
     1. Detectar caídas de amplificador en tiempo real
     2. Diagnosticar "no hay señal" sin ir al sitio
     3. Planificar mantenimiento preventivo
     4. Cumplir SLAs de operación minería
     5. Optimizar eficiencia energética
-    
+
     Estructura respuesta como:
     - Datos CRÍTICOS (sin estos no funciona diagnóstico)
     - Datos IMPORTANTES (mejoran mucho la operación)
     - Datos OPCIONALES (nice to have)
-    
+
     Incluye cómo correlacionar datos power con eventos leaky feeder.
     """,
 
     "analisis_costo_beneficio_monitoreo": """
-    CONTEXTO: Sistema minería subterránea, costo promedio de downtime = $50k-200k por hora, 
+    CONTEXTO: Sistema minería subterránea, costo promedio de downtime = $50k-200k por hora,
     costo reparación sitio remoto = $5k-15k (personal, transporte).
-    
+
     PREGUNTA: Análisis costo-beneficio de implementar monitoreo predictivo de power supply:
-    
+
     1. ¿Cuántos problemas de downtime son causados por power supply? (% realista)
     2. ¿Cuál es el ROI de detectar fallo 24h antes vs 1h después?
     3. ¿Costo de implementar monitoreo remoto vs costo downtime anual?
     4. ¿Payback period realista para solución?
     5. ¿Qué KPIs deberían trackear para demostrar valor?
-    
+
     Dame números reales si existen, o estimaciones conservadoras.
     """,
 
     "mejor_solucion_mineria_subterranea": """
-    CONTEXTO: Minería subterránea, infraestructura existente (serial/TCP → MongoDB → 
+    CONTEXTO: Minería subterránea, infraestructura existente (serial/TCP → MongoDB →
     Backend/Frontend similar a sw-diagnosticoremoto), presupuesto limitado, team pequeño.
-    
+
     PREGUNTA: ¿Cuál es la MEJOR SOLUCIÓN para monitoreo power supply en este contexto?
-    
+
     Considerar:
     1. Extensión sistema existente vs nueva solución
     2. Costo implementación realista (horas dev)
@@ -126,7 +126,7 @@ UTILITY_QUERIES = {
     4. Escalabilidad a múltiples headends
     5. Mantenimiento y soporte a largo plazo
     6. Uptime SLA alcanzable (99%, 99.5%, 99.9%?)
-    
+
     Proponer arquitectura ESPECÍFICA para minería subterránea, no genérica.
     """
 }

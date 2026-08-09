@@ -109,7 +109,7 @@ async def analyze(req: AnalysisRequest):
     except Exception as e:
         import traceback
         traceback.print_exc()
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 @app.get("/sessions")
 def list_sessions():

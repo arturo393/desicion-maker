@@ -16,4 +16,5 @@ class TestGeminiDeepResearchAgent:
         agent = GeminiDeepResearchAgent(api_key="test-key")
         if agent.is_available:
             result = asyncio.run(agent.research("topic"))
-            assert result is not None and len(result) > 0
+            assert result is not None
+            assert len(result) > 0

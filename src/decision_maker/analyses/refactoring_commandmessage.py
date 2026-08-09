@@ -85,7 +85,7 @@ except ImportError as e:
 def create_refactoring_options():
     """
     Crear las 4 opciones de refactorización como CareerOptions
-    
+
     NOTA: Adaptamos CareerOption para modelar decisiones de refactoring:
     - salary_expected = valor/beneficio (0-10 scale)
     - probability_success = probabilidad de completar sin bugs

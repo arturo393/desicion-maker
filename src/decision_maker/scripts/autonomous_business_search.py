@@ -46,7 +46,7 @@ async def main():
     prompt = """
     I need 5 concrete, automated business ideas that leverage 'Antigravity' (an advanced AI coding agent) and Google Cloud Platform (GCP).
     The goal is to build a "passive income" or "automated service" business.
-    
+
     For each idea, provide:
     1. 'name': A catchy title.
     2. 'description': Brief explanation of how it works.
@@ -55,7 +55,7 @@ async def main():
     5. 'technical_difficulty': 1 to 10 (10 is hardest).
     6. 'maintenance_effort': 1 to 10 (10 is highest effort).
     7. 'success_probability': 0.0 to 1.0.
-    
+
     Output purely as a JSON list of objects. No intro text.
     """
 

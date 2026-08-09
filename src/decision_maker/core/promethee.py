@@ -54,7 +54,7 @@ class PrometheeEngine:
         if pref_params is None:
             pref_params = [{} for _ in range(n_factors)]
 
-        pref_funcs = [PrometheeEngine._build_pref_func(pt, **pp) for pt, pp in zip(pref_types, pref_params)]
+        pref_funcs = [PrometheeEngine._build_pref_func(pt, **pp) for pt, pp in zip(pref_types, pref_params, strict=False)]
 
         pi_matrix = np.zeros((n_options, n_options))
 

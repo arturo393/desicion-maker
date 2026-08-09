@@ -8,6 +8,7 @@ from __future__ import annotations
 
 __all__ = ["DecisionRegistry"]
 
+import contextlib
 import json
 import logging
 import sqlite3
@@ -154,10 +155,8 @@ class DecisionRegistry:
         result = dict(row)
         for key in ("tags", "results_json", "factors_json", "options_json"):
             if result.get(key):
-                try:
+                with contextlib.suppress(json.JSONDecodeError, TypeError):
                     result[key] = json.loads(result[key])
-                except (json.JSONDecodeError, TypeError):
-                    pass
         return result
 
     def delete_decision(self, decision_id: int) -> bool:
@@ -229,10 +228,8 @@ class DecisionRegistry:
         result = dict(row)
         for key in ("factors_json", "options_json"):
             if result.get(key):
-                try:
+                with contextlib.suppress(json.JSONDecodeError, TypeError):
                     result[key] = json.loads(result[key])
-                except (json.JSONDecodeError, TypeError):
-                    pass
         return result
 
     def get_template(self, template_id: int) -> dict[str, Any] | None:

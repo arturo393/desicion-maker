@@ -109,8 +109,8 @@ class TestMonteCarloEngine:
             MonteCarloEngine(num_simulations=0)
 
     def test_negative_weights(self):
-        from pydantic import ValidationError
         import pytest
+        from pydantic import ValidationError
         engine = MonteCarloEngine(num_simulations=100)
         opt = DecisionOption("Weird")
         opt.add_variable("X", DistributionType.DETERMINISTIC, 100)
@@ -135,7 +135,7 @@ class TestMonteCarloEngine:
         assert 0 <= stats.success_rate <= 1
         assert "A" in stats.factor_stats
         assert "B" in stats.factor_stats
-        for fname, fstats in stats.factor_stats.items():
+        for _fname, fstats in stats.factor_stats.items():
             assert "mean" in fstats
             assert "std" in fstats
             assert "p5" in fstats
@@ -164,8 +164,8 @@ class TestMonteCarloEngine:
         assert results["Partial"].mean_score == 0.5
 
     def test_factor_with_zero_weight(self):
-        from pydantic import ValidationError
         import pytest
+        from pydantic import ValidationError
         engine = MonteCarloEngine(num_simulations=10)
         opt = DecisionOption("ZeroWeight")
         opt.add_variable("X", DistributionType.DETERMINISTIC, 100)

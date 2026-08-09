@@ -62,10 +62,10 @@ class TestUncertainVariable:
         class FakeDist:
             value = "fake"
 
-        from pydantic import ValidationError
         import pytest
+        from pydantic import ValidationError
         with pytest.raises(ValidationError):
-            var = UncertainVariable("Fake", FakeDist(), [1, 2, 3])
+            UncertainVariable("Fake", FakeDist(), [1, 2, 3])
 
     def test_sample_size_zero(self):
         var = UncertainVariable("Empty", DistributionType.DETERMINISTIC, [5])
@@ -78,19 +78,19 @@ class TestUncertainVariable:
         assert len(samples) == 100000
 
     def test_validate_normal_negative_std(self):
-        from pydantic import ValidationError
         import pytest
+        from pydantic import ValidationError
         with pytest.raises(ValidationError):
-            var = UncertainVariable("Bad", DistributionType.NORMAL, [0, -1])
+            UncertainVariable("Bad", DistributionType.NORMAL, [0, -1])
 
     def test_validate_too_few_params(self):
-        from pydantic import ValidationError
         import pytest
+        from pydantic import ValidationError
         with pytest.raises(ValidationError):
-            var = UncertainVariable("Bad", DistributionType.NORMAL, [0])
+            UncertainVariable("Bad", DistributionType.NORMAL, [0])
 
     def test_validate_ok(self):
-        var = UncertainVariable("Ok", DistributionType.NORMAL, [0, 1])
+        UncertainVariable("Ok", DistributionType.NORMAL, [0, 1])
 
     def test_nan_params_sanitized(self):
         var = UncertainVariable("NaN", DistributionType.NORMAL, [float("nan"), float("nan")])
@@ -108,10 +108,10 @@ class TestUncertainVariable:
         assert np.all(np.isfinite(samples))
 
     def test_empty_params_defaults_used(self):
-        from pydantic import ValidationError
         import pytest
+        from pydantic import ValidationError
         with pytest.raises(ValidationError):
-            var = UncertainVariable("Empty", DistributionType.NORMAL, [])
+            UncertainVariable("Empty", DistributionType.NORMAL, [])
 
     def test_nan_deterministic(self):
         var = UncertainVariable("NaN", DistributionType.DETERMINISTIC, [float("nan")])

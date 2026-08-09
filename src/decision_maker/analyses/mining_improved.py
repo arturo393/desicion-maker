@@ -163,7 +163,7 @@ def main():
     print("   📊 RESULTADOS COMPARATIVOS")
     print("="*70 + "\n")
 
-    sorted_results = sorted(zip(options, results),
+    sorted_results = sorted(zip(options, results, strict=False),
                           key=lambda x: x[1].overall_score,
                           reverse=True)
 

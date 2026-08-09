@@ -24,7 +24,7 @@ def analyze_utility_focus():
         sys.exit(1)
 
     with open(results_file, encoding="utf-8") as f:
-        original_research = json.load(f)
+        json.load(f)
 
     print("=" * 90)
     print("🔍 REINTERPRETACIÓN: ENFOQUE EN UTILIDAD PARA MINERÍA")

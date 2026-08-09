@@ -57,7 +57,7 @@ def search_furniture_prices():
             - 60cm alto × 60cm ancho × 1.8m largo
             - Material: MDF o melamina
             - Incluye: tableros, tornillos, bisagras, pegamento, lija
-            
+
             Busca precios aproximados en tiendas chilenas como Sodimac, Easy, Homecenter en diciembre 2024.
             Dame un rango de precio total en CLP considerando que soy principiante.
             """
@@ -69,7 +69,7 @@ def search_furniture_prices():
             - Medidas aproximadas: 60cm alto × 60-80cm ancho × 180cm largo
             - Tiendas: Sodimac, Easy, Falabella, Ripley, Homy
             - Rango de precios bajo, medio y alto
-            
+
             Dame precios específicos con nombres de modelos si es posible.
             """
         },
@@ -80,7 +80,7 @@ def search_furniture_prices():
             - Tamaño similar a rack TV: ~60cm alto × 180cm largo
             - Tiendas que vendan kits: Sodimac, Easy, IKEA Chile (si existe)
             - Precio aproximado en CLP
-            
+
             Menciona marcas/modelos disponibles en Chile.
             """
         },
@@ -92,7 +92,7 @@ def search_furniture_prices():
             - Material: MDF/melamina
             - Ubicación: Santiago, Chile
             - Incluye: materiales + mano de obra
-            
+
             Dame un rango de precios (bajo, medio, alto) considerando diferentes niveles de carpinteros.
             """
         },
@@ -106,7 +106,7 @@ def search_furniture_prices():
             - Tiempo estimado
             - Riesgos comunes
             - ¿Vale la pena para un principiante?
-            
+
             Sé honesto sobre las dificultades reales.
             """
         }

@@ -30,11 +30,11 @@ load_dotenv(_base / ".env")
 load_dotenv(_base / ".env.gemini", override=True)
 
 
-def create_samba_strategy_options() -> list[CareerOption]:
+def create_samba_strategy_options() -> list[DecisionOption]:
     """
     6 estrategias para resolver lentitud Samba en dataserver.
 
-    Mapeo de campos CareerOption -> criterios tecnicos:
+    Mapeo de campos DecisionOption -> criterios tecnicos:
       salary_expected       -> performance ganada (score 0-10M)
       probability_success   -> probabilidad de exito sin efectos secundarios
       timeline_months       -> esfuerzo de implementacion (dias ficticios como meses)
@@ -54,7 +54,7 @@ def create_samba_strategy_options() -> list[CareerOption]:
     # OPCION A: Quick Wins (matar backup + tuning Samba)
     # Matar rsync, optimizar smb.conf, cambiar I/O scheduler
     # -------------------------------------------------------------------------
-    option_a = CareerOption(
+    option_a = DecisionOption(
         name="A: Quick Wins (matar backup + tuning Samba + I/O scheduler)",
         salary_expected=8_500_000,   # Alto impacto inmediato
         probability_success=0.95,     # Muy seguro, cambios en caliente
@@ -103,7 +103,7 @@ def create_samba_strategy_options() -> list[CareerOption]:
     # OPCION B: Reorganizar archivos por subdirectorios anio/cliente
     # Mover archivos sueltos y organizar /home/server por anio + cliente
     # -------------------------------------------------------------------------
-    option_b = CareerOption(
+    option_b = DecisionOption(
         name="B: Reorganizar archivos en subdirectorios por anio/cliente",
         salary_expected=5_000_000,
         probability_success=0.80,
@@ -148,7 +148,7 @@ def create_samba_strategy_options() -> list[CareerOption]:
     # OPCION C: Migrar a NFSv4 (reemplazar Samba)
     # Clientes Linux usan NFSv4, mejor performance nativa
     # -------------------------------------------------------------------------
-    option_c = CareerOption(
+    option_c = DecisionOption(
         name="C: Migrar a NFSv4 para clientes Linux (reemplazar Samba)",
         salary_expected=6_500_000,
         probability_success=0.65,
@@ -192,7 +192,7 @@ def create_samba_strategy_options() -> list[CareerOption]:
     # OPCION D: Separar shares en multiples discos
     # Distribuir departamentos entre /hdd1, /hdd2, /backup
     # -------------------------------------------------------------------------
-    option_d = CareerOption(
+    option_d = DecisionOption(
         name="D: Separar shares en discos independientes (balance I/O)",
         salary_expected=7_500_000,
         probability_success=0.85,
@@ -236,7 +236,7 @@ def create_samba_strategy_options() -> list[CareerOption]:
     # OPCION E: Actualizar Samba + migrar a SSD
     # Solucion definitiva: Samba moderno + datos en SSD
     # -------------------------------------------------------------------------
-    option_e = CareerOption(
+    option_e = DecisionOption(
         name="E: Actualizar Samba + migrar datos a SSD (solucion definitiva)",
         salary_expected=9_500_000,
         probability_success=0.90,
@@ -283,7 +283,7 @@ def create_samba_strategy_options() -> list[CareerOption]:
     # OPCION F: Caching local con sync (like Dropbox)
     # Cada workstation tiene copia local, sync en background
     # -------------------------------------------------------------------------
-    option_f = CareerOption(
+    option_f = DecisionOption(
         name="F: Caching local con rsync sincronizado (modo Dropbox local)",
         salary_expected=6_000_000,
         probability_success=0.60,
@@ -339,7 +339,7 @@ def safe_print(text: str) -> None:
         print(clean)
 
 
-def print_results(options: list[CareerOption], results: list) -> None:
+def print_results(options: list[DecisionOption], results: list) -> None:
     """Imprime el analisis comparativo"""
     safe_print("\n" + "="*80)
     safe_print("   RESULTADOS DEL ANALISIS - Estrategia Samba Performance")
@@ -348,7 +348,7 @@ def print_results(options: list[CareerOption], results: list) -> None:
     sorted_results = sorted(results, key=lambda r: r.overall_score, reverse=True)
 
     for i, result in enumerate(sorted_results, 1):
-        option = next(o for o in options if o.name == result.option_name)
+        next(o for o in options if o.name == result.option_name)
         pareto = "Pareto" if result.pareto_optimal else "   "
         safe_print(f"\n{'-'*80}")
         safe_print(f"  #{i} [{pareto}] {result.option_name}")
@@ -380,7 +380,7 @@ def print_results(options: list[CareerOption], results: list) -> None:
     safe_print("")
 
 
-async def run_with_gemini(options: list[CareerOption]) -> None:
+async def run_with_gemini(options: list[DecisionOption]) -> None:
     """Ejecuta analisis completo con Gemini IA"""
     from deep_research_decision_agent import GeminiDeepResearchAgent
 
@@ -392,7 +392,7 @@ async def run_with_gemini(options: list[CareerOption]) -> None:
 
     print("\nGemini IA habilitado - ejecutando deep research...\n")
 
-    engine = DecisionAnalysisEngine(debug=True)
+    engine = UnifiedDecisionFramework(debug=True)
     agent = GeminiDeepResearchAgent(debug=True)
 
     context = """
@@ -439,11 +439,11 @@ async def run_with_gemini(options: list[CareerOption]) -> None:
     print_results(options, results)
 
 
-def run_offline(options: list[CareerOption]) -> None:
+def run_offline(options: list[DecisionOption]) -> None:
     """Ejecuta solo las 13 metodologias sin Gemini"""
     print("\nEjecutando 13 metodologias de decision (modo offline)...\n")
 
-    engine = DecisionAnalysisEngine(debug=False)
+    engine = UnifiedDecisionFramework(debug=False)
     results = []
 
     for option in options:

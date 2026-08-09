@@ -79,7 +79,7 @@ RESEARCH_QUERIES = [
         1. Monitoreo y diagnóstico de fuentes de poder industriales
         2. Sistemas de diagnóstico remoto de baterías y UPS
         3. Dashboards en tiempo real para sistemas de energía
-        
+
         Para cada solución incluye:
         - Nombre y fabricante
         - Año de lanzamiento
@@ -88,7 +88,7 @@ RESEARCH_QUERIES = [
         - Coste aproximado
         - Ventajas y desventajas para aplicación industrial
         - Casos de uso relevantes
-        
+
         Enfócate en soluciones que:
         - Sean escalables
         - Soporten control remoto
@@ -100,12 +100,12 @@ RESEARCH_QUERIES = [
         "nombre": "Estado del Arte Vistas",
         "query": """
         Haz una investigación sobre las mejores prácticas actuales (2025-2026) en:
-        
+
         1. UI/UX para dashboards de monitoreo industrial
         2. Componentes visuales para sistemas de energía
         3. Patrones de diseño para control remoto de equipos
         4. Mobile-first design en aplicaciones SCADA
-        
+
         Específicamente busca:
         - Ejemplos de dashboards exitosos en industria (energía, telecomunicaciones)
         - Patrones de alertas y notificaciones
@@ -118,12 +118,12 @@ RESEARCH_QUERIES = [
         "nombre": "Protocolos y Tecnologías",
         "query": """
         Investiga las tecnologías más adecuadas para sistema de diagnóstico remoto:
-        
+
         1. MQTT vs REST API: cuál es mejor para datos en tiempo real
         2. Leaky feeder vs Ethernet: coexistencia y mejores prácticas
         3. InfluxDB vs otras bases de datos serie temporal
         4. Grafana vs alternativas open-source para dashboards
-        
+
         Busca:
         - Comparativas técnicas 2025
         - Casos de éxito en infraestructura crítica
@@ -139,15 +139,15 @@ RESEARCH_QUERIES = [
         - Team: 5-6 personas (frontend, backend, hardware, QA)
         - Requisito: web-based + responsive
         - Objetivo: MVP escalable
-        
+
         ¿Cuál es el mejor stack en 2026?
-        
+
         Evalúa:
         1. React.js + Node.js + InfluxDB vs alternativas
         2. Grafana para dashboards vs custom development
         3. Docker/Kubernetes vs simple deployment
         4. Testing frameworks recomendados
-        
+
         Incluye:
         - Tiempo estimado por componente
         - Equipo necesario
@@ -159,11 +159,11 @@ RESEARCH_QUERIES = [
         "nombre": "Análisis Competencia Específica",
         "query": """
         Investiga detalladamente 3 soluciones específicas que podrían ser referencias:
-        
+
         1. Victron Venus OS (battery monitoring)
         2. Grafana + InfluxDB (dashboards industriales)
         3. Schneider Electric EcoStruxure (enterprise energy management)
-        
+
         Para cada una:
         - Cómo es su UI/UX (capturas si es posible)
         - Funcionalidades de monitoreo
@@ -263,7 +263,7 @@ async def main():
         print("="*80)
         print(f"\n📁 Resultados guardados en: {output_file}")
         print("\n📋 Investigaciones realizadas:")
-        for nombre in research_results["investigaciones"].keys():
+        for nombre in research_results["investigaciones"]:
             print(f"   ✓ {nombre}")
 
         # Imprimir resumen

@@ -89,10 +89,7 @@ class GeneticOptimizer:
                     continue
 
                 # Normalize exactly like the MonteCarloEngine
-                if f_max > f_min:
-                    norm_val = (raw_val - f_min) / (f_max - f_min)
-                else:
-                    norm_val = 1.0
+                norm_val = (raw_val - f_min) / (f_max - f_min) if f_max > f_min else 1.0
 
                 # Apply maximization logic
                 score_contribution = norm_val if f.maximize else (1.0 - norm_val)

@@ -67,7 +67,7 @@ class TestUnifiedDecisionFramework:
         fw.mc_engine.num_simulations = 100
         fw.add_factor(Factor("Bad", 1.0, maximize=True))
         opt = DecisionOption("BadOpt")
-        
+
         with pytest.raises(ValidationError):
             opt.add_variable("Bad", DistributionType.NORMAL, 0)
 

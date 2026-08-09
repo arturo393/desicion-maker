@@ -9,7 +9,7 @@ from __future__ import annotations
 __all__ = ["PortfolioOptimizer"]
 
 import logging
-from typing import Any, Dict
+from typing import Any
 
 import numpy as np
 
@@ -70,12 +70,12 @@ class PortfolioOptimizer:
 
     @staticmethod
     def optimize(
-        mc_results: Dict[str, Statistics],
+        mc_results: dict[str, Statistics],
         budget: float = 1.0,
         risk_aversion: float = 1.0,
         min_allocation: float = 0.0,
         max_allocation: float = 1.0,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Find optimal budget allocation across options.
 
@@ -171,7 +171,7 @@ class PortfolioOptimizer:
                         "risk_aversion": ra,
                         "return": float(np.dot(best_w, returns)),
                         "risk": float(np.sqrt(best_w @ cov_matrix @ best_w)),
-                        "allocations": dict(zip(names, best_w.tolist())),
+                        "allocations": dict(zip(names, best_w.tolist(), strict=False)),
                     }
                 )
 
@@ -180,7 +180,7 @@ class PortfolioOptimizer:
         div_ratio = weighted_risk / (port_risk + EPSILON)
 
         return {
-            "allocations": dict(zip(names, best_weights.tolist())),
+            "allocations": dict(zip(names, best_weights.tolist(), strict=False)),
             "expected_return": port_return,
             "portfolio_risk": port_risk,
             "sharpe_ratio": port_return / (port_risk + EPSILON),
@@ -192,7 +192,7 @@ class PortfolioOptimizer:
         }
 
     @staticmethod
-    def equal_weight(mc_results: Dict[str, Statistics]) -> Dict[str, float]:
+    def equal_weight(mc_results: dict[str, Statistics]) -> dict[str, float]:
         """Equal-weight allocation across all options."""
         names = list(mc_results.keys())
         w = 1.0 / len(names) if names else 0
@@ -201,7 +201,7 @@ class PortfolioOptimizer:
     def __init__(self, risk_aversion: float = 0.5):
         self.risk_aversion = risk_aversion
 
-    def optimize_allocation(self, mc_results: Dict[str, Any], budget: float = 100.0) -> Dict[str, float]:
+    def optimize_allocation(self, mc_results: dict[str, Any], budget: float = 100.0) -> dict[str, float]:
         result = self.optimize(mc_results, budget=budget, risk_aversion=self.risk_aversion)
         if "allocations" in result:
             return {k: round(v, 2) for k, v in result["allocations"].items()}

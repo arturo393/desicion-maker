@@ -259,7 +259,7 @@ def main():
     print("   📊 RESULTADOS CON SQM SANTIAGO")
     print("="*70 + "\n")
 
-    sorted_results = sorted(zip(options, results),
+    sorted_results = sorted(zip(options, results, strict=False),
                           key=lambda x: x[1].overall_score,
                           reverse=True)
 
@@ -340,7 +340,7 @@ def main():
 
     # Comparación SQM vs otras minería
     print("   📊 SQM vs Otras opciones minería:\n")
-    mining_options = [(opt.name, res.overall_score) for opt, res in zip(options, results)
+    mining_options = [(opt.name, res.overall_score) for opt, res in zip(options, results, strict=False)
                       if 'Minería' in opt.name or 'SQM' in opt.name]
 
     for name, score in sorted(mining_options, key=lambda x: x[1], reverse=True):

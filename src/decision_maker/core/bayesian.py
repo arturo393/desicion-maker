@@ -62,7 +62,7 @@ class BayesianEngine:
                     best_idx = i
             best_counts[best_idx] += 1
 
-        posteriors = {name: float(count / num_posterior_samples) for name, count in zip(names, best_counts)}
+        posteriors = {name: float(count / num_posterior_samples) for name, count in zip(names, best_counts, strict=False)}
 
         # Attach Causal Graph structural metadata to the output if nodes exist
         if self.nodes:

@@ -197,7 +197,7 @@ def main():
     print("="*70 + "\n")
 
     # Ordenar por overall_score
-    sorted_results = sorted(zip(options, results),
+    sorted_results = sorted(zip(options, results, strict=False),
                           key=lambda x: x[1].overall_score,
                           reverse=True)
 

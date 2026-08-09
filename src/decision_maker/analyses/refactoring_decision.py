@@ -53,7 +53,7 @@ from deep_research_decision_agent import CareerOption, DecisionAnalysisEngine
 
 def create_refactoring_options():
     """Crear las 3 opciones como CareerOptions
-    
+
     NOTA: salary_expected = valor/beneficio (mayor = mejor)
           NO es tiempo invertido
     """
@@ -92,14 +92,14 @@ def create_refactoring_options():
         3. Test compilación (15 min)
         4. Fix linker errors si existen (30 min)
         5. Commit refactorización (10 min)
-        
+
         PROS:
         + Código 60% hecho (sunk cost positivo)
         + FskModem clase limpia creada (600 líneas)
         + Lora clase limpia (FSK removido ~540 líneas)
         + SRP aplicado correctamente
         + Próximo dev hereda código limpio
-        
+
         CONS:
         - 2-4 horas trabajo (debugging posible)
         - Compilación puede fallar (linker)
@@ -136,12 +136,12 @@ def create_refactoring_options():
 
         description="""
         Revertir todos los cambios con git reset:
-        
+
         PROS:
         + 5 minutos de trabajo
         + Código vuelve a estado funcional conocido
         + Cero riesgo de bugs nuevos
-        
+
         CONS:
         - Pérdida de 2-3 horas trabajo (FskModem creado, Lora limpiado)
         - Deuda técnica permanece (Lora 1500+ líneas)
@@ -184,13 +184,13 @@ def create_refactoring_options():
         1. git add FskModem.hpp/cpp Lora.hpp/cpp (10 min)
         2. Crear TODO.md con pasos pendientes (15 min)
         3. git commit "WIP: FSK refactoring 60% complete" (5 min)
-        
+
         PROS:
         + Trabajo no se pierde
         + Documentas intención
         + 30 minutos trabajo
         + Próximo dev puede continuar
-        
+
         CONS:
         - Código NO COMPILA (bloqueante)
         - Próximo dev debe debugear tu trabajo

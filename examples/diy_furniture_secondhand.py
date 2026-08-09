@@ -38,7 +38,7 @@ Necesito información sobre precios en Chile (CLP) para el año 2024-2025:
    - Yapo.cl
    - Marketplace Facebook
    - Mercado Libre Chile
-   
+
 2. Precio de muebles NUEVOS similares en Sodimac, Easy, Falabella
 
 3. Costo de MATERIALES DIY en Chile para mueble de 180x60x60cm:

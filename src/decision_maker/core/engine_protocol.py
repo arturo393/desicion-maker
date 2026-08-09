@@ -18,13 +18,13 @@ class DecisionEngine(Protocol):
     ) -> pd.Series | dict[str, Any]:
         """
         Execute the decision analysis algorithm.
-        
+
         Args:
             data: The decision matrix (crisp or fuzzy).
             weights: List of weights corresponding to each factor.
             max_bools: List of booleans indicating if a factor is to be maximized (True) or minimized (False).
             **kwargs: Additional parameters specific to the engine (e.g., preference types for PROMETHEE).
-            
+
         Returns:
             A pandas Series containing the scores/rankings, or a Dictionary with detailed results.
         """

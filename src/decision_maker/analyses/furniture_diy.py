@@ -56,13 +56,13 @@ def research_diy_furniture():
         {
             "name": "Precio materiales MDF/melamina Chile",
             "query": """
-            ¿Cuánto cuesta en Chile (pesos chilenos) comprar materiales para construir 
+            ¿Cuánto cuesta en Chile (pesos chilenos) comprar materiales para construir
             un mueble de 60cm alto × 60cm ancho × 1.8m largo?
             - Plancha MDF o melamina
             - Tornillos, bisagras
             - Ruedas o patas
             - Herramientas básicas (si no las tengo)
-            
+
             Dame estimación realista de costos 2024.
             """
         },
@@ -71,10 +71,10 @@ def research_diy_furniture():
             "query": """
             ¿Cuánto cuesta en Chile (pesos chilenos) comprar un rack para TV o mueble similar de:
             - 60cm alto
-            - 60cm ancho  
+            - 60cm ancho
             - 1.8m largo
             - Con espacio para almacenar abajo
-            
+
             Busca en tiendas chilenas: Falabella, Sodimac, Easy, Homecenter.
             Dame rango de precios 2024.
             """
@@ -82,14 +82,14 @@ def research_diy_furniture():
         {
             "name": "Dificultad construcción DIY",
             "query": """
-            ¿Qué tan difícil es construir un mueble de melamina/MDF de 60cm×60cm×1.8m 
+            ¿Qué tan difícil es construir un mueble de melamina/MDF de 60cm×60cm×1.8m
             para alguien con CERO experiencia en carpintería?
-            
+
             - ¿Cuánto tiempo toma?
             - ¿Qué herramientas necesito?
             - ¿Hay tutoriales YouTube buenos?
             - Riesgos de que salga mal
-            
+
             Sé realista sobre dificultad.
             """
         },
@@ -100,7 +100,7 @@ def research_diy_furniture():
             - 60cm alto × 60cm ancho × 1.8m largo
             - Melamina o MDF
             - Con espacio almacenamiento
-            
+
             Rango de precios típico 2024 para mueble encargado.
             """
         }
@@ -267,7 +267,7 @@ def main():
     print("   📊 RESULTADOS PYTHON")
     print("="*70 + "\n")
 
-    sorted_results = sorted(zip(options, results),
+    sorted_results = sorted(zip(options, results, strict=False),
                            key=lambda x: x[1].overall_score,
                            reverse=True)
 

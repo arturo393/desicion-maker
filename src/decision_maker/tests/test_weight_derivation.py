@@ -95,9 +95,12 @@ class TestPairwiseWeights:
     def test_interactive_prompt_generation(self):
         questions = WeightDerivationEngine.pairwise_interactive_prompt(["A", "B", "C"])
         assert len(questions) == 3
-        assert "A" in questions[0] and "B" in questions[0]
-        assert "A" in questions[1] and "C" in questions[1]
-        assert "B" in questions[2] and "C" in questions[2]
+        assert "A" in questions[0]
+        assert "B" in questions[0]
+        assert "A" in questions[1]
+        assert "C" in questions[1]
+        assert "B" in questions[2]
+        assert "C" in questions[2]
 
 
 class TestPaprikaWeights:

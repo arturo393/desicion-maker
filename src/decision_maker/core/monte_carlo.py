@@ -7,7 +7,6 @@ from __future__ import annotations
 
 __all__ = ["MonteCarloEngine"]
 
-import json
 import logging
 
 import numpy as np
@@ -69,7 +68,7 @@ class MonteCarloEngine:
             opt_data = sampled_data[opt.name]
             total_scores = np.zeros(self.num_simulations)
             factor_stats = {}
-            
+
             for f in self.factors:
                 if f.name in opt_data:
                     vals = opt_data[f.name]
@@ -79,14 +78,11 @@ class MonteCarloEngine:
                         "p5": float(np.percentile(vals, 5)),
                         "p95": float(np.percentile(vals, 95))
                     }
-                    
+
                     if normalize and f.name in global_bounds:
                         vmin, vmax = global_bounds[f.name]
-                        if vmax > vmin:
-                            norm_vals = (vals - vmin) / (vmax - vmin)
-                        else:
-                            norm_vals = np.ones_like(vals)
-                            
+                        norm_vals = (vals - vmin) / (vmax - vmin) if vmax > vmin else np.ones_like(vals)
+
                         if f.maximize:
                             total_scores += norm_vals * f.weight
                         else:

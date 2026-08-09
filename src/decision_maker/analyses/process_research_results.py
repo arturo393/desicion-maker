@@ -173,7 +173,7 @@ with open(output_file4, "w", encoding="utf-8") as f:
 ## Timeline Propuesto (7 Semanas)
 
 ### Semana 1: Investigación & Setup
-**Duración**: 5 días  
+**Duración**: 5 días
 **Equipo**: 1 Arq. + 1 DevOps + 1 UX Designer
 
 Tareas:
@@ -187,7 +187,7 @@ Tareas:
 ---
 
 ### Semana 2: Backend MVP
-**Duración**: 5 días  
+**Duración**: 5 días
 **Equipo**: 2 Backend + 1 DevOps
 
 Tareas:
@@ -201,7 +201,7 @@ Tareas:
 ---
 
 ### Semana 3: Frontend MVP
-**Duración**: 5 días  
+**Duración**: 5 días
 **Equipo**: 2 Frontend + 1 Designer
 
 Tareas:
@@ -214,7 +214,7 @@ Tareas:
 ---
 
 ### Semana 4: Integración Hardware
-**Duración**: 5 días  
+**Duración**: 5 días
 **Equipo**: 2 Backend + 1 Hardware + 1 QA
 
 Tareas:
@@ -227,7 +227,7 @@ Tareas:
 ---
 
 ### Semana 5: Extensiones Fase 1
-**Duración**: 5 días  
+**Duración**: 5 días
 **Equipo**: Full stack + QA
 
 Tareas:
@@ -240,7 +240,7 @@ Tareas:
 ---
 
 ### Semana 6: Performance & Testing
-**Duración**: 5 días  
+**Duración**: 5 días
 **Equipo**: QA + Backend
 
 Tareas:
@@ -253,7 +253,7 @@ Tareas:
 ---
 
 ### Semana 7: Release
-**Duración**: 5 días  
+**Duración**: 5 días
 **Equipo**: DevOps + PM + Tech Writer
 
 Tareas:
@@ -276,7 +276,7 @@ Tareas:
 | Documentación | 15 | Muy Bajo | MEDIA |
 | **TOTAL** | **140 horas** | | |
 
-**Equipo necesario**: 5-6 personas  
+**Equipo necesario**: 5-6 personas
 **Costo estimado**: Equipo + DevOps ~3-4 meses
 
 ---

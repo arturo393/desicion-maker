@@ -24,7 +24,7 @@ class RankAggregator:
         all_options = sorted(all_options)
         n = len(all_options)
         borda_scores = {opt: 0.0 for opt in all_options}
-        for method_name, series in rankings.items():
+        for _method_name, series in rankings.items():
             ranked = series.index.tolist()
             for rank_pos, opt in enumerate(ranked):
                 borda_scores[opt] += n - rank_pos - 1
@@ -45,7 +45,7 @@ class RankAggregator:
                     continue
                 wins_a = 0
                 wins_b = 0
-                for method_name, series in rankings.items():
+                for _method_name, series in rankings.items():
                     pos_a = series.index.get_indexer([a])[0]
                     if pos_a < 0:
                         pos_a = len(series)

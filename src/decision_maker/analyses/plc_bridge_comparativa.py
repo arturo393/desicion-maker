@@ -96,10 +96,7 @@ for a in ALTERNATIVES:
         if nadir == ideal:
             norm = 0.5
         else:
-            if params["type"] == "min":
-                norm = (val - ideal) / (nadir - ideal)
-            else:
-                norm = (ideal - val) / (ideal - nadir)
+            norm = (val - ideal) / (nadir - ideal) if params["type"] == "min" else (ideal - val) / (ideal - nadir)
         norm = max(0.0, min(1.0, norm))
         d_ideal += (w * norm) ** 2
         d_nadir += (w * (1 - norm)) ** 2

@@ -48,7 +48,7 @@ class GeminiDeepResearchAgent:
 
     async def calibrate_priors(self, context_data: str) -> dict:
         """
-        Uses the LLM to dynamically adjust probability distribution priors 
+        Uses the LLM to dynamically adjust probability distribution priors
         (e.g., standard deviation and mean adjustments) based on real-world context.
         """
         client = self._client

@@ -81,7 +81,7 @@ class NormalizationEngine:
             raw_vals = [matrix[opt].get(factor, 0.0) for opt in options]
             maximize = maximize_map.get(factor, True)
             normed_vals = NormalizationEngine.normalize_array(raw_vals, method=method, maximize=maximize)
-            for opt, normed in zip(options, normed_vals):
+            for opt, normed in zip(options, normed_vals, strict=False):
                 result[opt][factor] = float(normed)
 
         return result

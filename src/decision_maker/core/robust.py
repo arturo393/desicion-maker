@@ -71,10 +71,7 @@ class RobustOptimizer:
                 f_min = global_bounds[f.name]["min"]
                 f_max = global_bounds[f.name]["max"]
                 raw_mean = f_stats[f.name]["mean"]
-                if f_max > f_min:
-                    norm_mean = (raw_mean - f_min) / (f_max - f_min)
-                else:
-                    norm_mean = 1.0
+                norm_mean = (raw_mean - f_min) / (f_max - f_min) if f_max > f_min else 1.0
                 eff_mean = norm_mean if f.maximize else (1.0 - norm_mean)
 
                 # Apply positive and negative shocks to the weight

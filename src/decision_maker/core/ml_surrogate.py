@@ -27,7 +27,7 @@ class MLSurrogateEngine:
         X = []
         y = []
 
-        for name, stats in mc_results.items():
+        for _name, stats in mc_results.items():
             features = []
             for fname in self.feature_names:
                 if fname in stats.factor_stats:
@@ -58,7 +58,7 @@ class MLSurrogateEngine:
 
         # Test self-prediction accuracy
         mse = 0.0
-        for name, stats in mc_results.items():
+        for _name, stats in mc_results.items():
             f_vals = [stats.factor_stats.get(f.name, {}).get("mean", 0.0) for f in factors]
             pred = self.predict_fitness(f_vals)
             mse += (pred - stats.mean_score) ** 2

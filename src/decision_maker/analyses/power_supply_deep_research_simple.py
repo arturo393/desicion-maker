@@ -52,7 +52,7 @@ QUERIES = {
     - Control remoto de encendido/apagado
     - Histórico de eventos y tendencias
     - Dashboard industrial intuitivo
-    
+
     Para cada uno: nombre, ventajas, protocolo (MQTT/REST/Modbus), costo aproximado.
     """,
 
@@ -67,7 +67,7 @@ QUERIES = {
     - Backend: Node.js vs Python vs Go?
     - Database: InfluxDB vs Prometheus vs TimescaleDB?
     - Dashboards: Grafana vs custom?
-    
+
     Recomendación final con justificación.
     """,
 
@@ -77,7 +77,7 @@ QUERIES = {
     - Escalable a 10+ fuentes
     - Histórico 30 días mínimo
     - Alertas en tiempo real
-    
+
     Incluye: componentes, flujos de datos, APIs.
     """
 }

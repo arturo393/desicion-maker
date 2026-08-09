@@ -110,8 +110,8 @@ class TestConvexityAnalysis:
     def test_returns_convexity_scores(self, mc_results, factors):
         result = AntifragileEngine.convexity_analysis(mc_results, factors)
         assert len(result) > 0
-        for opt_name, scores in result.items():
-            for fn, info in scores.items():
+        for _opt_name, scores in result.items():
+            for _fn, info in scores.items():
                 assert "convexity_coefficient" in info
                 assert "verdict" in info
                 assert "deltas" in info

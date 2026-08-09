@@ -160,7 +160,7 @@ class DecisionAnalysisEngine:
         d_neg = np.sqrt(((weighted - anti_ideal) ** 2).sum(axis=1))
 
         scores = d_neg / (d_pos + d_neg + 1e-9)
-        return dict(zip(alternatives, scores))
+        return dict(zip(alternatives, scores, strict=False))
 
 
 class GeminiDeepResearchAgent:

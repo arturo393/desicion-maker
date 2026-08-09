@@ -128,7 +128,7 @@ COMPETITIVE_ANALYSIS = {
     - PATRÓN UI: Inspirado en Victron Venus OS (tu imagen)
     - CONTROL REMOTO: REST API simple + MQTT
     - ESCALABILIDAD: Preparar para Kafka etapa 2+
-    
+
     JUSTIFICACIÓN:
     1. Bajo costo de desarrollo
     2. Patrón reconocido (similar a Noise Analyzer existente)
@@ -308,12 +308,12 @@ PROPOSED_VIEWS = {
     - V1: Dashboard Principal
     - V2: Control Remoto (básico)
     - V3: Historial de Eventos
-    
+
     VERSIÓN 1.0 (Fase 2 - Semanas 3-4):
     - V4: Tendencias
     - V5: Configuración
     - Integración MQTT completa
-    
+
     VERSIÓN 2.0 (Fase 3):
     - V6: Mobile responsive
     - Predicción ML

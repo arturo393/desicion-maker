@@ -125,20 +125,11 @@ class WhatIfEngine:
                 bounds = self._global_bounds.get(f.name, {"min": 0.0, "max": 1.0})
                 f_min, f_max = bounds["min"], bounds["max"]
 
-                if f_max > f_min:
-                    norm_values = (raw_values - f_min) / (f_max - f_min)
-                else:
-                    norm_values = np.full_like(raw_values, 1.0)
+                norm_values = (raw_values - f_min) / (f_max - f_min) if f_max > f_min else np.full_like(raw_values, 1.0)
 
-                if f.maximize:
-                    weighted = norm_values * f.weight
-                else:
-                    weighted = (1.0 - norm_values) * f.weight
+                weighted = norm_values * f.weight if f.maximize else (1.0 - norm_values) * f.weight
 
-                if total_scores is None:
-                    total_scores = weighted.copy()
-                else:
-                    total_scores = total_scores + weighted
+                total_scores = weighted.copy() if total_scores is None else total_scores + weighted
 
             if total_scores is None:
                 continue
