@@ -306,24 +306,13 @@ class UnifiedDecisionFramework:
             ai_reports=ai_reports,
             factors=self.mc_engine.factors,
             explanation=explanation,
-        )
-
-        print_report(report_data)
-        saved = save_report(
-            mode,
-            mc_results,
-            topsis_scores,
-            strategies,
-            pareto_results,
-            sensitivity_results,
-            future_metrics,
-            ai_reports,
-            self.mc_engine.factors,
-            results_dir,
-            explanation=explanation,
             waterfall=waterfall,
             counterfactual=counterfactual,
-        )
+            results_dir=results_dir,
+        ).prepare()
+
+        print_report(report_data)
+        saved = save_report(report_data)
 
         if mode in ("standard", "advanced"):
             timestamp = saved["timestamp"]

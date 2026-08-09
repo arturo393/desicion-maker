@@ -2,9 +2,11 @@ import os
 import tempfile
 
 import pandas as pd
+import pytest
 
 from decision_maker.core.models import Factor, Statistics
 from decision_maker.core.reporting import (
+    ReportData,
     build_algorithm_comparison,
     prepare_decision_matrix,
     save_report,
@@ -45,7 +47,7 @@ class TestReporting:
         factors = [Factor("X", 0.5, maximize=True)]
 
         with tempfile.TemporaryDirectory() as tmpdir:
-            paths = save_report(
+            report_data = ReportData(
                 mode="standard",
                 mc_results=results,
                 topsis_scores=pd.Series(),
@@ -56,7 +58,8 @@ class TestReporting:
                 ai_reports={},
                 factors=factors,
                 results_dir=tmpdir,
-            )
+            ).prepare()
+            paths = save_report(report_data)
             assert os.path.exists(paths["json"])
             assert os.path.exists(paths["md"])
             assert os.path.exists(paths["html"])

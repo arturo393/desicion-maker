@@ -165,18 +165,10 @@ def build_algorithm_comparison(
     return algo_comp
 
 
-def save_json_report(
-    results_dir: str,
-    timestamp: str,
-    mc_results: dict[str, Statistics],
-    topsis_scores: pd.Series,
-    decision_matrix: dict[str, Any],
-    algo_comp: dict[str, Any],
-    ai_reports: dict[str, str],
-) -> str:
+def save_json_report(data: ReportData) -> str:
     json_data = {
-        "timestamp": timestamp,
-        "decision_matrix": decision_matrix,
+        "timestamp": data.timestamp,
+        "decision_matrix": data.decision_matrix,
         "monte_carlo": {
             name: {
                 "mean": stats.mean_score,
@@ -189,13 +181,13 @@ def save_json_report(
                 "cvar_95": stats.cvar_95,
                 "success_rate": stats.success_rate,
             }
-            for name, stats in mc_results.items()
+            for name, stats in data.mc_results.items()
         },
-        "topsis": topsis_scores.to_dict() if not topsis_scores.empty else {},
-        "algorithm_comparison": algo_comp,
-        "ai_insights": ai_reports,
+        "topsis": data.topsis_scores.to_dict() if not data.topsis_scores.empty else {},
+        "algorithm_comparison": data.algo_comp,
+        "ai_insights": data.ai_reports,
     }
-    json_path = os.path.join(results_dir, f"analysis_{timestamp}.json")
+    json_path = os.path.join(data.results_dir, f"analysis_{data.timestamp}.json")
     with open(json_path, "w") as f:
         json.dump(json_data, f, indent=2)
     logger.debug(f"JSON report saved to {json_path}")
@@ -366,22 +358,7 @@ def save_html_report(data: ReportData) -> str:
 def _generate_html_inline(data: ReportData) -> str:
     from decision_maker.core.html_fallback import generate_html_inline
 
-    return generate_html_inline(
-        data.results_dir,
-        data.timestamp,
-        data.mode,
-        data.mc_results,
-        data.topsis_scores,
-        data.strategies,
-        data.pareto,
-        data.sensitivity,
-        data.future,
-        data.ai_reports,
-        data.algo_comp,
-        data.decision_matrix,
-        data.factors,
-        explanation=data.explanation,
-    )
+    return generate_html_inline(data)
 
 
 def print_report(data: ReportData):
@@ -393,47 +370,11 @@ def print_report(data: ReportData):
     print(_bar_chart(data.mc_results))
 
 
-def save_report(
-    mode: str,
-    mc_results: dict[str, Statistics],
-    topsis_scores: pd.Series,
-    strategies: dict[str, str],
-    pareto: dict[str, Any],
-    sensitivity: dict[str, Any],
-    future: dict[str, Any],
-    ai_reports: dict[str, str],
-    factors: list[Factor],
-    results_dir: str | None = None,
-    explanation: str = "",
-    waterfall: dict | None = None,
-    counterfactual: dict | None = None,
-) -> dict[str, str]:
-    data = ReportData(
-        mode=mode,
-        mc_results=mc_results,
-        topsis_scores=topsis_scores,
-        strategies=strategies,
-        pareto=pareto,
-        sensitivity=sensitivity,
-        future=future,
-        ai_reports=ai_reports,
-        factors=factors,
-        results_dir=results_dir or os.path.join(os.getcwd(), "results"),
-        timestamp=datetime.now().strftime("%Y%m%d_%H%M%S"),
-        explanation=explanation,
-        waterfall=waterfall,
-        counterfactual=counterfactual,
-    ).prepare()
+def save_report(data: ReportData) -> dict[str, str]:
+    if not data.results_dir: data.results_dir = os.path.join(os.getcwd(), "results")
+    if not data.timestamp: data.timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
-    json_path = save_json_report(
-        data.results_dir,
-        data.timestamp,
-        data.mc_results,
-        data.topsis_scores,
-        data.decision_matrix,
-        data.algo_comp,
-        data.ai_reports,
-    )
+    json_path = save_json_report(data)
     md_path = save_markdown_report(data)
     html_path = save_html_report(data)
     return {"json": json_path, "md": md_path, "html": html_path, "timestamp": data.timestamp}
