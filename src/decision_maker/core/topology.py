@@ -65,13 +65,16 @@ class TopologicalDataAnalysis:
         embedding_2d = None
         stress = None
         if n_opts >= 2:
-            mds = manifold.MDS(
-                n_components=2,
-                dissimilarity="precomputed",
-                init="classical_mds",
-                random_state=42,
-                normalized_stress=False,
-            )
+            mds_kwargs: dict = {
+                "n_components": 2,
+                "init": "classical_mds",
+                "random_state": 42,
+                "normalized_stress": False,
+            }
+            try:
+                mds = manifold.MDS(metric="precomputed", **mds_kwargs)
+            except TypeError:
+                mds = manifold.MDS(dissimilarity="precomputed", **mds_kwargs)
             embedding_2d = mds.fit_transform(dist_matrix)
             stress = float(mds.stress_)
 

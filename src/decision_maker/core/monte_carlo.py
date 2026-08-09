@@ -13,7 +13,11 @@ import logging
 import numpy as np
 
 from decision_maker.core.models import DecisionOption, Factor, Statistics
-from decision_maker_core import MonteCarloEngine as RustMonteCarloEngine
+
+try:
+    from decision_maker_core import MonteCarloEngine as RustMonteCarloEngine
+except ImportError:
+    RustMonteCarloEngine = None  # type: ignore[assignment]
 
 logger = logging.getLogger(__name__)
 
@@ -27,9 +31,6 @@ class MonteCarloEngine:
         self.options: list[DecisionOption] = []
         self._option_names: set = set()
         self.correlation_matrix = correlation_matrix
-
-        # Initialize the Rust Native Engine
-        self._rust_engine = RustMonteCarloEngine()
 
     def add_factor(self, factor: Factor) -> None:
         self.factors.append(factor)

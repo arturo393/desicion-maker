@@ -263,3 +263,32 @@ class TestMonteCarloEngine:
         engine.add_option(opt)
         results = engine.run()
         assert results["A"].mean_score == 1.0
+
+    def test_engine_runs_without_rust_module(self, monkeypatch):
+        """The Monte Carlo engine must work when the Rust extension is absent."""
+        import builtins
+        import importlib
+        import sys
+
+        real_import = builtins.__import__
+
+        def fake_import(name, *args, **kwargs):
+            if name == "decision_maker_core":
+                raise ImportError("No module named decision_maker_core")
+            return real_import(name, *args, **kwargs)
+
+        monkeypatch.setattr(builtins, "__import__", fake_import)
+        monkeypatch.setitem(sys.modules, "decision_maker_core", None)
+        sys.modules.pop("decision_maker.core.monte_carlo", None)
+
+        module = importlib.import_module("decision_maker.core.monte_carlo")
+        assert module.RustMonteCarloEngine is None
+
+        engine = module.MonteCarloEngine(num_simulations=100)
+        opt = DecisionOption("Safe")
+        opt.add_variable("Income", DistributionType.DETERMINISTIC, 100)
+        engine.add_factor(Factor("Income", 1.0, maximize=True))
+        engine.add_option(opt)
+
+        results = engine.run()
+        assert results["Safe"].mean_score == 1.0
