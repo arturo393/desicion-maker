@@ -102,7 +102,15 @@ class AntifragileEngine:
         barbells = []
         for a, b in combinations(names, 2):
             portfolio_score = (single_scores[a] + single_scores[b]) / 2.0
-            portfolio_risk = np.sqrt(single_risk[a] ** 2 + single_risk[b] ** 2) / 2.0
+            
+            # Use empirical covariance instead of assuming zero correlation (Taleb filter)
+            if mc_results[a].raw_scores is not None and mc_results[b].raw_scores is not None:
+                cov_matrix = np.cov(mc_results[a].raw_scores, mc_results[b].raw_scores)
+                cov_ab = cov_matrix[0, 1] if cov_matrix.shape == (2, 2) else 0.0
+            else:
+                cov_ab = 0.0
+            
+            portfolio_risk = float(np.sqrt(0.25 * single_risk[a]**2 + 0.25 * single_risk[b]**2 + 2 * 0.25 * cov_ab))
 
             beats_all = all(portfolio_score >= single_scores[n] for n in names)
 
@@ -387,12 +395,9 @@ class AntifragileEngine:
                         continue
                     w = f.weight / total_remaining_weight
                     vals = raw_data[f.name]
-                    f_min = global_bounds[f.name]["min"]
-                    f_max = global_bounds[f.name]["max"]
-                    norm_vals = (vals - f_min) / (f_max - f_min) if f_max > f_min else np.ones_like(vals)
-                    if not f.maximize:
-                        norm_vals = 1.0 - norm_vals
-                    total = (norm_vals * w) if total is None else total + norm_vals * w
+                    # Removed Min-Max normalization to capture true unbounded convexity (Taleb filter)
+                    raw_w_vals = (vals * w) if f.maximize else (-vals * w)
+                    total = raw_w_vals if total is None else total + raw_w_vals
 
                 new_scores[name] = float(np.mean(total)) if total is not None else 0.0
 

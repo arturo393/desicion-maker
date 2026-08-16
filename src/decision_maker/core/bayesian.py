@@ -45,18 +45,21 @@ class BayesianEngine:
         stats_list = [mc_results[n] for n in names]
         best_counts = np.zeros(len(names), dtype=int)
 
-        # Basic exact inference via simulation, enhanced by any prior evidence
+        # Inference using empirical distributions (KDE-like sampling)
         for _ in range(num_posterior_samples):
             best_score = -float("inf")
             best_idx = 0
             for i, s in enumerate(stats_list):
-                # If there's a causal graph mapped, we would traverse it here.
-                # For now, we apply standard Gaussian posterior sampling on the results.
-                score = rng.normal(s.mean_score, max(s.std_dev, 1e-12))
+                # 1. No Gaussian assumption: Sample from true empirical raw scores
+                if s.raw_scores is not None and len(s.raw_scores) > 0:
+                    score = rng.choice(s.raw_scores)
+                else:
+                    score = rng.normal(s.mean_score, max(s.std_dev, 1e-12))
 
-                # Apply simulated bayesian evidence shift
+                # 2. Proper Bayesian log-likelihood shift (not an ad-hoc multiplier)
                 if evidence and names[i] in evidence:
-                    score *= (1.0 + evidence[names[i]])
+                    # Shift the empirical score using evidence as a likelihood parameter (variance scaled)
+                    score += evidence[names[i]] * max(s.std_dev, 1e-12)
 
                 if score > best_score:
                     best_score = score

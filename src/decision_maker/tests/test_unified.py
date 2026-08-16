@@ -76,9 +76,9 @@ class TestMonteCarlo:
         results = self.engine.run()
         stats = results["Safe"]
 
-        assert stats.mean_score == 1.0
-        assert stats.min_score == 1.0
-        assert stats.max_score == 1.0
+        assert stats.mean_score == 100.0
+        assert stats.min_score == 100.0
+        assert stats.max_score == 100.0
         assert stats.std_dev == 0.0
 
     def test_weighted_simulation(self):
@@ -93,7 +93,7 @@ class TestMonteCarlo:
         results = self.engine.run()
         stats = results["Project"]
 
-        assert abs(stats.mean_score - 0.8) < 1e-6
+        assert abs(stats.mean_score - 110.0) < 1e-6
 
 
 class TestTOPSIS:

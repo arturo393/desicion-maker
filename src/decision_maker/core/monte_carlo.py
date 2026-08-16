@@ -76,19 +76,17 @@ class MonteCarloEngine:
                         "p95": float(np.percentile(vals, 95))
                     }
 
-                    if normalize and f.name in global_bounds:
-                        vmin, vmax = global_bounds[f.name]
-                        norm_vals = (vals - vmin) / (vmax - vmin) if vmax > vmin else np.ones_like(vals)
-
-                        if f.maximize:
-                            total_scores += norm_vals * f.weight
-                        else:
-                            total_scores += (1.0 - norm_vals) * f.weight
+                    # Removed Min-Max normalization to preserve true tail risks (Taleb)
+                    # Using Geometric/Multiplicative penalization for dynamic survival logic
+                    if f.maximize:
+                        total_scores += vals * f.weight
                     else:
-                        if f.maximize:
-                            total_scores += vals * f.weight
-                        else:
-                            total_scores -= vals * f.weight
+                        total_scores -= vals * f.weight
+                        
+                    # Geometric ruin penalty: if a critical factor drops too low, it acts as an absorbing state
+                    if not f.maximize and np.any(vals > (np.mean(vals) + 3*np.std(vals))):
+                        # Extreme negative tail event (e.g. ruin), dynamically penalize
+                        total_scores[vals > (np.mean(vals) + 3*np.std(vals))] *= 0.1
 
             results[opt.name] = Statistics(
                 option_name=opt.name,
