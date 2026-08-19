@@ -22,11 +22,13 @@ from decision_maker.core.antifragile import AntifragileEngine
 from decision_maker.core.bayesian import BayesianEngine
 from decision_maker.core.bootstrap import BootstrapConfig, BootstrapRanking
 from decision_maker.core.decision_theory import DecisionTheoryEngine
+from decision_maker.core.ergodicity import ErgodicityAnalyzer
 from decision_maker.core.explainability import ExplainabilityEngine, NarrativeContext
 from decision_maker.core.game_theory import GameTheoryEngine
 from decision_maker.core.gemini_agent import GeminiDeepResearchAgent
 from decision_maker.core.genetic import GeneticOptimizer
 from decision_maker.core.information_theory import InformationTheoryEngine
+from decision_maker.core.kelly import KellyCriterionEngine
 from decision_maker.core.ml_surrogate import MLSurrogateEngine
 from decision_maker.core.models import DecisionOption, Factor, Statistics
 from decision_maker.core.monte_carlo import MonteCarloEngine
@@ -149,6 +151,8 @@ class UnifiedDecisionFramework:
         self.roa_engine = RealOptionsEngine()
         self.ml_surrogate_engine = MLSurrogateEngine()
         self.portfolio_optimizer = PortfolioOptimizer()
+        self.ergodicity_engine = ErgodicityAnalyzer()
+        self.kelly_engine = KellyCriterionEngine()
         self.promethee_pref_types = promethee_pref_types
         self.promethee_pref_params = promethee_pref_params
 
@@ -301,6 +305,9 @@ class UnifiedDecisionFramework:
 
         antifragile = self.antifragile_engine.analyze(mc_results, self.mc_engine.factors)
 
+        ergodicity = self.ergodicity_engine.analyze(mc_results, self.mc_engine.factors)
+        kelly = self.kelly_engine.analyze(mc_results, self.mc_engine.factors)
+
         ai_reports = {}
         if use_ai and self.ai_agent.is_available:
             tasks = [self.ai_agent.research(opt.name, opt.description) for opt in self.mc_engine.options]
@@ -349,6 +356,8 @@ class UnifiedDecisionFramework:
             "waterfall": waterfall,
             "counterfactual": counterfactual,
             "antifragile": antifragile,
+            "ergodicity": ergodicity,
+            "kelly": kelly,
             "factors": self.mc_engine.factors,
             "uncertainty": self._analyze_uncertainty(mc_results),
             "challenges": self._analyze_challenges(

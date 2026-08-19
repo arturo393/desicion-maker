@@ -16,6 +16,9 @@ from decision_maker.core.models import DecisionOption, Factor, Statistics
 
 logger = logging.getLogger(__name__)
 
+RUIN_THRESHOLD_PERCENTILE = 5.0
+EPSILON_SCORE = 1e-12
+
 
 class MonteCarloEngine:
     def __init__(self, num_simulations: int = 10000, correlation_matrix: np.ndarray | None = None):
@@ -36,6 +39,61 @@ class MonteCarloEngine:
         self._option_names.add(option.name)
         self.options.append(option)
 
+    def _apply_correlation(self, samples: dict[str, np.ndarray]) -> dict[str, np.ndarray]:
+        """Apply Cholesky decomposition to induce correlation between factors."""
+        if self.correlation_matrix is None:
+            return samples
+
+        factor_names = [f.name for f in self.factors if any(f.name in opt.variables for opt in self.options)]
+        n_factors = len(factor_names)
+        if n_factors < 2:
+            return samples
+
+        if self.correlation_matrix.shape != (n_factors, n_factors):
+            logger.warning(
+                f"Correlation matrix shape {self.correlation_matrix.shape} "
+                f"doesn't match {n_factors} factors — skipping correlation"
+            )
+            return samples
+
+        try:
+            L = np.linalg.cholesky(self.correlation_matrix)
+        except np.linalg.LinAlgError:
+            logger.warning("Correlation matrix not positive definite — skipping correlation")
+            return samples
+
+        for opt in self.options:
+            available = [fn for fn in factor_names if fn in opt.variables]
+            if len(available) < 2:
+                continue
+
+            idx_map = {fn: i for i, fn in enumerate(factor_names) if fn in opt.variables}
+            idx_list = [idx_map[fn] for fn in available]
+
+            raw = np.column_stack([samples[opt.name][fn] for fn in available if fn in samples[opt.name]])
+            if raw.shape[1] < 2:
+                continue
+
+            from scipy.stats import rankdata
+            ranked = np.apply_along_axis(rankdata, 0, raw) / (self.num_simulations + 1)
+            from scipy.stats import norm
+            normal_scores = norm.ppf(np.clip(ranked, 0.001, 0.999))
+
+            correlated = normal_scores @ L[np.ix_(idx_list, idx_list)].T
+            from scipy.stats import norm as norm_dist
+            uniform_correlated = norm_dist.cdf(correlated)
+
+            for j, fn in enumerate(available):
+                if fn in samples[opt.name]:
+                    original = samples[opt.name][fn]
+                    order = np.argsort(original)
+                    template = np.zeros(self.num_simulations)
+                    rank_order = np.argsort(np.argsort(uniform_correlated[:, j]))
+                    template[rank_order] = original[order]
+                    samples[opt.name][fn] = template
+
+        return samples
+
     def run(self, normalize: bool = True) -> dict[str, Statistics]:
         if not self.options or not self.factors:
             return {}
@@ -48,6 +106,8 @@ class MonteCarloEngine:
             for v_name, var in opt.variables.items():
                 opt_data[v_name] = var.sample(self.num_simulations)
             sampled_data[opt.name] = opt_data
+
+        sampled_data = self._apply_correlation(sampled_data)
 
         global_bounds = {}
         if normalize:
@@ -76,17 +136,18 @@ class MonteCarloEngine:
                         "p95": float(np.percentile(vals, 95))
                     }
 
-                    # Removed Min-Max normalization to preserve true tail risks (Taleb)
-                    # Using Geometric/Multiplicative penalization for dynamic survival logic
                     if f.maximize:
                         total_scores += vals * f.weight
                     else:
                         total_scores -= vals * f.weight
-                        
-                    # Geometric ruin penalty: if a critical factor drops too low, it acts as an absorbing state
-                    if not f.maximize and np.any(vals > (np.mean(vals) + 3*np.std(vals))):
-                        # Extreme negative tail event (e.g. ruin), dynamically penalize
-                        total_scores[vals > (np.mean(vals) + 3*np.std(vals))] *= 0.1
+
+            if np.std(total_scores) > EPSILON_SCORE:
+                ruin_threshold = np.percentile(total_scores, RUIN_THRESHOLD_PERCENTILE)
+                ruin_mask = total_scores <= ruin_threshold
+                ruin_count = np.sum(ruin_mask)
+                if ruin_count > 0:
+                    ruin_penalty = 1.0 - (ruin_count / self.num_simulations)
+                    total_scores[ruin_mask] *= ruin_penalty
 
             results[opt.name] = Statistics(
                 option_name=opt.name,
