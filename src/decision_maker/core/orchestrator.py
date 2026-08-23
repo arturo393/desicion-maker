@@ -17,6 +17,7 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
+from decision_maker.core.action_threshold import MinimumActionThreshold
 from decision_maker.core.adaptive_router import AdaptiveRouter
 from decision_maker.core.aggregator import RankAggregator
 from decision_maker.core.antifragile import AntifragileEngine
@@ -32,6 +33,7 @@ from decision_maker.core.gemini_agent import GeminiDeepResearchAgent
 from decision_maker.core.genetic import GeneticOptimizer
 from decision_maker.core.information_theory import InformationTheoryEngine
 from decision_maker.core.kelly import KellyCriterionEngine
+from decision_maker.core.meta_calibration import MetaCalibration
 from decision_maker.core.ml_surrogate import MLSurrogateEngine
 from decision_maker.core.models import DecisionOption, Factor, Statistics
 from decision_maker.core.monte_carlo import MonteCarloEngine
@@ -39,10 +41,12 @@ from decision_maker.core.outcome_tracker import OutcomeTracker
 from decision_maker.core.pareto import ParetoEngine
 from decision_maker.core.portfolio import PortfolioOptimizer
 from decision_maker.core.promethee import PrometheeConfig, PrometheeEngine
+from decision_maker.core.reasoning_trace import ReasoningTrace
 from decision_maker.core.roa import RealOptionsEngine
 from decision_maker.core.robust import RobustOptimizer
 from decision_maker.core.sensitivity import SensitivityEngine
 from decision_maker.core.topsis import TOPSISEngine
+from decision_maker.core.unknown_scanner import UnknownUnknownsScanner
 from decision_maker.core.utils import (
     DEFAULT_BOOTSTRAP_ITERATIONS,
     SCALE_MISMATCH_THRESHOLD,
@@ -161,6 +165,10 @@ class UnifiedDecisionFramework:
         self.calibration_scorer = CalibrationScorer()
         self.decision_journal = DecisionJournal()
         self.adaptive_router = AdaptiveRouter()
+        self.action_threshold = MinimumActionThreshold()
+        self.reasoning_trace = ReasoningTrace()
+        self.unknown_scanner = UnknownUnknownsScanner()
+        self.meta_calibration = MetaCalibration()
         self.promethee_pref_types = promethee_pref_types
         self.promethee_pref_params = promethee_pref_params
 
@@ -247,6 +255,8 @@ class UnifiedDecisionFramework:
         if not mc_results:
             logger.warning("No results from Monte Carlo engine")
             return {}
+
+        threshold = self.action_threshold.evaluate(mc_results, self.mc_engine.factors)
 
         _check_scale_mismatch(self.mc_engine.factors, mc_results)
 
@@ -390,10 +400,21 @@ class UnifiedDecisionFramework:
                 "recommended_engines": profile.recommended_engines,
                 "skip_engines": profile.skip_engines,
             },
+            "action_threshold": MinimumActionThreshold.to_dict(threshold),
             "learning": {
                 "outcome_accuracy": self.outcome_tracker.accuracy(),
                 "calibration": self.calibration_scorer.score(self.outcome_tracker.entries()),
                 "journal_summary": self.decision_journal.summary(),
+                "unknowns": UnknownUnknownsScanner.to_dict(
+                    self.unknown_scanner.scan(self.outcome_tracker.entries())
+                ),
+                "meta_calibration": MetaCalibration.to_dict(
+                    self.meta_calibration.evaluate(
+                        self.reasoning_trace.entries(),
+                        self.outcome_tracker.entries(),
+                    )
+                ),
+                "routing_trace": self.reasoning_trace.summary(),
             },
         }
 
