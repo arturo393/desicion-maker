@@ -17,10 +17,13 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
+from decision_maker.core.adaptive_router import AdaptiveRouter
 from decision_maker.core.aggregator import RankAggregator
 from decision_maker.core.antifragile import AntifragileEngine
 from decision_maker.core.bayesian import BayesianEngine
 from decision_maker.core.bootstrap import BootstrapConfig, BootstrapRanking
+from decision_maker.core.calibration_scorer import CalibrationScorer
+from decision_maker.core.decision_journal import DecisionJournal
 from decision_maker.core.decision_theory import DecisionTheoryEngine
 from decision_maker.core.ergodicity import ErgodicityAnalyzer
 from decision_maker.core.explainability import ExplainabilityEngine, NarrativeContext
@@ -32,6 +35,7 @@ from decision_maker.core.kelly import KellyCriterionEngine
 from decision_maker.core.ml_surrogate import MLSurrogateEngine
 from decision_maker.core.models import DecisionOption, Factor, Statistics
 from decision_maker.core.monte_carlo import MonteCarloEngine
+from decision_maker.core.outcome_tracker import OutcomeTracker
 from decision_maker.core.pareto import ParetoEngine
 from decision_maker.core.portfolio import PortfolioOptimizer
 from decision_maker.core.promethee import PrometheeConfig, PrometheeEngine
@@ -153,6 +157,10 @@ class UnifiedDecisionFramework:
         self.portfolio_optimizer = PortfolioOptimizer()
         self.ergodicity_engine = ErgodicityAnalyzer()
         self.kelly_engine = KellyCriterionEngine()
+        self.outcome_tracker = OutcomeTracker()
+        self.calibration_scorer = CalibrationScorer()
+        self.decision_journal = DecisionJournal()
+        self.adaptive_router = AdaptiveRouter()
         self.promethee_pref_types = promethee_pref_types
         self.promethee_pref_params = promethee_pref_params
 
@@ -225,6 +233,15 @@ class UnifiedDecisionFramework:
             mode = "standard"
 
         logger.info(f"Starting analysis in {mode.upper()} mode")
+
+        profile = self.adaptive_router.profile(
+            self.mc_engine.options,
+            self.mc_engine.factors,
+            has_correlation=self.mc_engine.correlation_matrix is not None,
+        )
+        if mode == "auto":
+            mode = profile.recommended_mode
+            logger.info(f"Adaptive routing: complexity={profile.complexity_score:.2f} → {mode}")
 
         mc_results = self.mc_engine.run()
         if not mc_results:
@@ -366,6 +383,18 @@ class UnifiedDecisionFramework:
                 explanation=explanation,
                 use_ai=use_ai,
             ),
+            "adaptive_profile": {
+                "complexity_score": profile.complexity_score,
+                "recommended_mode": profile.recommended_mode,
+                "reasoning": profile.reasoning,
+                "recommended_engines": profile.recommended_engines,
+                "skip_engines": profile.skip_engines,
+            },
+            "learning": {
+                "outcome_accuracy": self.outcome_tracker.accuracy(),
+                "calibration": self.calibration_scorer.score(self.outcome_tracker.entries()),
+                "journal_summary": self.decision_journal.summary(),
+            },
         }
 
     def _analyze_uncertainty(self, mc_results: dict[str, Statistics]) -> dict[str, Any]:
