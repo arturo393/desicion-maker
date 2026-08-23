@@ -24,6 +24,9 @@ from decision_maker.core.antifragile import AntifragileEngine
 from decision_maker.core.bayesian import BayesianEngine
 from decision_maker.core.bootstrap import BootstrapConfig, BootstrapRanking
 from decision_maker.core.calibration_scorer import CalibrationScorer
+from decision_maker.core.causal_dag import CausalDAG
+from decision_maker.core.decision_commitment import DecisionCommitment
+from decision_maker.core.decision_gates import DecisionGate
 from decision_maker.core.decision_journal import DecisionJournal
 from decision_maker.core.decision_theory import DecisionTheoryEngine
 from decision_maker.core.ergodicity import ErgodicityAnalyzer
@@ -169,6 +172,9 @@ class UnifiedDecisionFramework:
         self.reasoning_trace = ReasoningTrace()
         self.unknown_scanner = UnknownUnknownsScanner()
         self.meta_calibration = MetaCalibration()
+        self.decision_gates = DecisionGate()
+        self.causal_dag = CausalDAG()
+        self.decision_commitment = DecisionCommitment()
         self.promethee_pref_types = promethee_pref_types
         self.promethee_pref_params = promethee_pref_params
 
@@ -258,6 +264,8 @@ class UnifiedDecisionFramework:
 
         threshold = self.action_threshold.evaluate(mc_results, self.mc_engine.factors)
 
+        causal_dag = self.causal_dag.build(self.mc_engine.factors, [o.name for o in self.mc_engine.options])
+
         _check_scale_mismatch(self.mc_engine.factors, mc_results)
 
         data_fuzzy, weights, max_bools, factor_names = self._build_analysis_inputs(mc_results)
@@ -335,6 +343,36 @@ class UnifiedDecisionFramework:
         ergodicity = self.ergodicity_engine.analyze(mc_results, self.mc_engine.factors)
         kelly = self.kelly_engine.analyze(mc_results, self.mc_engine.factors)
 
+        gate_result = self.decision_gates.apply(
+            mc_results=mc_results,
+            factors=self.mc_engine.factors,
+            ergodicity_data=ergodicity,
+            signal_to_noise=threshold.signal_to_noise,
+        )
+
+        if gate_result.pipeline_halted:
+            logger.warning(f"PIPELINE HALTED by gates: {gate_result.halt_reason}")
+            return {
+                "pipeline_halted": True,
+                "gate_result": DecisionGate.to_dict(gate_result),
+                "threshold": MinimumActionThreshold.to_dict(threshold),
+                "causal_dag": causal_dag,
+                "mc_results": mc_results,
+                "factors": self.mc_engine.factors,
+            }
+
+        if gate_result.options_vetoed:
+            for vetoed in gate_result.options_vetoed:
+                mc_results.pop(vetoed, None)
+            logger.info(f"Options vetoed by gates: {gate_result.options_vetoed}")
+
+        commitment = self.decision_commitment.create(
+            chosen_option=threshold.winning_option,
+            mc_results=mc_results,
+            reasoning=threshold.reasoning,
+            confidence=threshold.confidence_in_winner,
+        )
+
         ai_reports = {}
         if use_ai and self.ai_agent.is_available:
             tasks = [self.ai_agent.research(opt.name, opt.description) for opt in self.mc_engine.options]
@@ -401,6 +439,16 @@ class UnifiedDecisionFramework:
                 "skip_engines": profile.skip_engines,
             },
             "action_threshold": MinimumActionThreshold.to_dict(threshold),
+            "gate_result": DecisionGate.to_dict(gate_result),
+            "causal_dag": causal_dag,
+            "commitment": {
+                "decision_id": commitment.decision_id,
+                "chosen_option": commitment.chosen_option,
+                "success_metric": commitment.success_metric,
+                "deadline": commitment.deadline,
+                "reversible": commitment.reversible,
+                "exit_criteria": commitment.exit_criteria,
+            },
             "learning": {
                 "outcome_accuracy": self.outcome_tracker.accuracy(),
                 "calibration": self.calibration_scorer.score(self.outcome_tracker.entries()),
