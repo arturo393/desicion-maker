@@ -41,14 +41,6 @@ class GeneticOptimizer:
         ideal_genes = {}
         source_options = {}
 
-        # We also need the global min/max for each factor to normalize the 'Ideal'
-        global_bounds = {f.name: {"min": float("inf"), "max": float("-inf")} for f in factors}
-        for opt_stats in mc_results.values():
-            for f_name, f_data in opt_stats.factor_stats.items():
-                if f_name in global_bounds:
-                    global_bounds[f_name]["min"] = min(global_bounds[f_name]["min"], f_data["mean"])
-                    global_bounds[f_name]["max"] = max(global_bounds[f_name]["max"], f_data["mean"])
-
         for f in factors:
             best_raw_val = None
             best_opt = None
@@ -76,24 +68,16 @@ class GeneticOptimizer:
                 ideal_genes[f.name] = best_raw_val
                 source_options[f.name] = best_opt
 
-        # 2. Calculate the Normalized Weighted Score of this 'Ideal' option
+        # 2. Calculate the theoretical max score on the SAME raw scale the
+        #    MonteCarloEngine produces (weighted raw values, no normalization).
+        #    MC scoring: maximize -> vals * w ; minimize -> -vals * w.
         theoretical_max_score = 0.0
         for f in factors:
             if f.name in ideal_genes:
                 raw_val = ideal_genes[f.name]
                 if not math.isfinite(raw_val):
                     continue
-                f_min = global_bounds[f.name]["min"]
-                f_max = global_bounds[f.name]["max"]
-                if not (math.isfinite(f_min) and math.isfinite(f_max)):
-                    continue
-
-                # Normalize exactly like the MonteCarloEngine
-                norm_val = (raw_val - f_min) / (f_max - f_min) if f_max > f_min else 1.0
-
-                # Apply maximization logic
-                score_contribution = norm_val if f.maximize else (1.0 - norm_val)
-                theoretical_max_score += score_contribution * f.weight
+                theoretical_max_score += raw_val * f.weight if f.maximize else -raw_val * f.weight
 
         # 3. Apply a small 'complexity penalty' for being a hybrid
         unique_sources = len(set(source_options.values()))

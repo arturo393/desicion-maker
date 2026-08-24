@@ -36,7 +36,14 @@ def _rust_input(num_simulations=1000):
 
 class TestRustMonteCarloEngine:
     import pytest
-    @pytest.mark.skip(reason="Rust engine needs update after quant audit")
+
+    # KNOWN DIVERGENCE: Rust normalizes each factor to [0,1] via global min-max
+    # before weighted scoring (lib.rs:180-196). Production Python MonteCarloEngine
+    # scores raw weighted values (monte_carlo.py:139-142). The parity test is
+    # skipped BECAUSE they intentionally disagree — not because either is broken.
+    # Un-skip only after deciding the architecture: wire Rust normalization into
+    # Python (and fix genetic.py's gap computation to match) OR delete rust_core.
+    @pytest.mark.skip(reason="Rust normalizes; production Python scores raw. Intentional divergence — see audit")
     def test_deterministic_matches_python_normalized(self):
         from decision_maker.core.models import DecisionOption, DistributionType, Factor
         from decision_maker.core.monte_carlo import MonteCarloEngine

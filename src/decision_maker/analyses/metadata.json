@@ -9,11 +9,7 @@
       "version": "1.2",
       "status": "active",
       "results_location": "results/furniture/",
-      "methodologies_used": [
-        "Monte Carlo",
-        "TOPSIS",
-        "Pareto Analysis"
-      ],
+      "methodologies_used": ["Monte Carlo", "TOPSIS", "Pareto Analysis"],
       "notes": "Incluye análisis de precios del mercado chileno usando Gemini Research"
     },
     "mining_decision": {
@@ -25,11 +21,7 @@
       "version": "1.0",
       "status": "archived",
       "results_location": "results/mining/",
-      "methodologies_used": [
-        "Decision Trees",
-        "Expected Value",
-        "Scenario Analysis"
-      ],
+      "methodologies_used": ["Decision Trees", "Expected Value", "Scenario Analysis"],
       "notes": "Primera versión del análisis de carrera minera. Ver mining_improved para versión actualizada"
     },
     "mining_improved": {
@@ -41,13 +33,7 @@
       "version": "2.0",
       "status": "active",
       "results_location": "results/mining/",
-      "methodologies_used": [
-        "Monte Carlo",
-        "TOPSIS",
-        "Decision Trees",
-        "Sensitivity Analysis",
-        "VaR (Value at Risk)"
-      ],
+      "methodologies_used": ["Monte Carlo", "TOPSIS", "Decision Trees", "Sensitivity Analysis", "VaR (Value at Risk)"],
       "notes": "Mejora significativa sobre mining_decision.py con análisis de riesgo más robusto y datos actualizados"
     },
     "refactoring_decision": {
@@ -59,11 +45,7 @@
       "version": "1.0",
       "status": "completed",
       "results_location": "results/refactoring/",
-      "methodologies_used": [
-        "Break-even Analysis",
-        "Decision Trees",
-        "Payoff Matrix"
-      ],
+      "methodologies_used": ["Break-even Analysis", "Decision Trees", "Payoff Matrix"],
       "notes": "Análisis único para proyecto específico de refactorización"
     },
     "sqm_santiago": {
@@ -75,11 +57,7 @@
       "version": "1.0",
       "status": "active",
       "results_location": "results/sqm/",
-      "methodologies_used": [
-        "TOPSIS",
-        "Multi-Criteria Decision Analysis",
-        "Scenario Analysis"
-      ],
+      "methodologies_used": ["TOPSIS", "Multi-Criteria Decision Analysis", "Scenario Analysis"],
       "notes": "Análisis confidencial para proyecto SQM"
     }
   },
@@ -88,8 +66,9 @@
     "active_analyses": 3,
     "archived_analyses": 1,
     "completed_analyses": 1,
-    "last_updated": "2026-01-03",
-    "framework_version": "3.0.0"
+    "last_updated": "2026-08-23",
+    "framework_version": "3.0.0",
+    "note": "Catálogo manual. Solo los 5 análisis históricos están registrados; el directorio analyses/ contiene además 19 scripts operativos (becker_*, fsk_*, power_supply_*, process_*, sophos_xg115, vlad25_modo_diagnostico, tablero_cabinet, etc.) que no se mantienen en este índice. Si el índice vuelve a ser fuente de verdad, derivarlo del filesystem en vez de mantenerlo a mano."
   },
   "status_definitions": {
     "active": "Análisis en uso regular, puede ser actualizado frecuentemente",

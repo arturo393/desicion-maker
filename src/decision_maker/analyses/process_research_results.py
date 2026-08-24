@@ -4,11 +4,21 @@ para la carpeta 05-power-supply de sw-diagnosticoremoto
 """
 
 import json
+import os
 from pathlib import Path
 
+_ANALYSES_DIR = Path(__file__).resolve().parent
+
 # Paths
-RESEARCH_FILE = Path("power_supply_research_results.json")
-OUTPUT_DIR = Path("../../docs/docs/sw-diagnosticoremoto/05-power-supply/investigacion")
+RESEARCH_FILE = _ANALYSES_DIR / "power_supply_research_results.json"
+# Cross-repo output: defaults to the sibling sw-diagnosticoremoto repo,
+# overridable via POWER_SUPPLY_OUTPUT_DIR.
+OUTPUT_DIR = Path(
+    os.environ.get(
+        "POWER_SUPPLY_OUTPUT_DIR",
+        str(Path.home() / "uqomm" / "sw-diagnosticoremoto" / "docs" / "docs" / "05-power-supply" / "investigacion"),
+    )
+)
 
 # Crear directorio si no existe
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)

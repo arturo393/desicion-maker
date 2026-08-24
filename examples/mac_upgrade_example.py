@@ -15,14 +15,10 @@ Factors:
 """
 
 import asyncio
-import os
 import sys
 
-# Fix path to import core logic
-sys.path.append(os.path.join(os.path.dirname(__file__), "../python"))
-
-from python.core.models import DecisionOption, DistributionType, Factor
-from python.core.orchestrator import UnifiedDecisionFramework
+from decision_maker.core.models import DecisionOption, DistributionType, Factor
+from decision_maker.core.orchestrator import UnifiedDecisionFramework
 
 
 async def main():

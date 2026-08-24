@@ -62,6 +62,18 @@ results/
 htmlcov/
 coverage.xml
 
+# Generated research artifacts (Gemini output, not source)
+power_supply_research_results.json
+power_supply_utility_analysis.json
+power_supply_utility_results.json
+power_supply_research_result.json
+**/power_supply_*results.json
+**/power_supply_*analysis.json
+
+# Compiled extension modules (built from rust_core/, can drift from source)
+*.so
+src/decision_maker_core/*.so
+
 # Stray files from other projects
 core/examples/
 

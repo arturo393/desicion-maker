@@ -10,8 +10,8 @@ import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from python.core.models import DecisionOption, DistributionType, Factor  # noqa: E402
-from python.core.orchestrator import UnifiedDecisionFramework
+from decision_maker.core.models import DecisionOption, DistributionType, Factor  # noqa: E402
+from decision_maker.core.orchestrator import UnifiedDecisionFramework
 
 
 def cost_score(price):      return max(0, 100 - (price / 50))

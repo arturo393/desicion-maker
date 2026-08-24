@@ -109,8 +109,9 @@ def _render_new_analysis():
 
     if submitted:
         with st.spinner("Running analysis..."):
-            _execute_analysis(name, mode, sims, factors, options)
-            st.success("Analysis complete!")
+            completed = _execute_analysis(name, mode, sims, factors, options)
+            if completed:
+                st.success("Analysis complete!")
 
 
 def _execute_analysis(
@@ -119,7 +120,7 @@ def _execute_analysis(
     sims: int,
     factors: list[dict],
     options: list[dict],
-):
+) -> bool:
     import asyncio
 
     import streamlit as st
@@ -144,6 +145,13 @@ def _execute_analysis(
         result = loop.run_until_complete(fw.run_analysis(mode=mode))
     finally:
         loop.close()
+
+    if result.get("pipeline_halted"):
+        halt_reason = result.get("gate_result", {}).get("halt_reason", "Decision gates halted the pipeline")
+        st.error(f"🚫 Analysis halted by decision gates: {halt_reason}")
+        st.info("The options were indistinguishable from noise or failed survival gates. "
+                "No recommendation was made. Gather more data or adjust factors.")
+        return False
 
     # Save to registry
     from decision_maker.core.registry import DecisionRegistry, SaveDecisionRequest
@@ -193,6 +201,8 @@ def _execute_analysis(
     if antifragile:
         with st.expander("Antifragile Analysis"):
             st.json(antifragile)
+
+    return True
 
 
 def _simplify_result(result: dict[str, Any]) -> dict[str, Any]:

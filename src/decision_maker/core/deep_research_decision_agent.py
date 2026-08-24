@@ -31,6 +31,9 @@ class CareerOption:
     remote_flexibility: float = 5.0
     learning_opportunity: float = 5.0
     career_ceiling: float = 5.0
+    unemployment_risk: float = 0.0
+    burnout_risk: float = 0.0
+    market_risk: float = 0.0
     description: str = ""
 
     def to_decision_option(self) -> DecisionOption:
