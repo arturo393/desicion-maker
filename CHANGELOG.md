@@ -2,6 +2,37 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v3.1] - 2026-08-23
+
+Rediseño arquitectónico cuantitativo (trabajo de las incidencias ID-1846 y continuación 19–23 Ago).
+
+### 🦀 Núcleo Rust
+- **`rust_core/`** — crate `decision_maker_core` (pyo3 + rayon + ndarray) que expone la normalización Min-Max global del Monte Carlo.
+- **`MonteCarloEngine.run(normalize=True)`** ahora usa los mismos bounds globales que el núcleo Rust, alineando Python y Rust.
+- Fallback a motor Python puro si el módulo nativo no está instalado.
+
+### 🧠 Aprendizaje y Meta-Aprendizaje
+- **Learning System** — `outcome_tracker` (seguimiento de resultados), `calibration` (calibración de confianza), `decision_journal` (diario), `adaptive_router` (enrutamiento adaptivo de motores).
+- **Meta-Learning** — `action_threshold` (umbral de acción), `reasoning_trace` (traza de razonamiento), `unknown_scanner` (detección de incógnitas), `meta_calibration`.
+
+### 🚦 Compuertas de Decisión con Veto
+- **`decision_gates`** con poder de veto real: ergodicidad (`ergodicity`), ruina (`ruin_probabilities` cableado desde Monte Carlo), DAG causal (`causal_dag`), compromiso (`decision_commitment`).
+
+### 📉 Ergonomía y Riesgo
+- **Ergodicity analyzer** — crecimiento promedio-tiempo vs ensamble, probabilidad de ruina.
+- **Kelly criterion** — dimensionamiento óptimo de apuesta bajo incertidumbre (umbral de campo, no degenerado).
+- Correlación de Cholesky entre factores en Monte Carlo.
+
+### 🔀 Motor Difuso
+- Lógica difusa migrada a **`FuzzyWeightedSum`** (antes embebida); integrado en `analyses/decision_concon.py`.
+
+### 🧹 Auditoría Infinita
+- 10 rondas de auditoría que eliminaron código muerto, inconsistencias y brechas críticas.
+- Des-normalización de consumidores de escala rotos por el cableado Rust: Kelly, `via_negativa`, `success_rate`, `confidence_weighted_winner`, matriz de decisión.
+
+### 🧪 Test Suite
+- **495 tests passing** en todos los motores (era 322 en v3.0).
+
 ## [v3.0] - 2026-06-02
 
 ### 🧠 10 New Decision Engines
@@ -17,8 +48,8 @@ All notable changes to this project will be documented in this file.
 - **Decision Registry** — SQLite-backed persistent store for querying, comparing, and tracking outcomes across analyses.
 
 ### 🌐 API & Dashboard
-- **REST API** (`python/api/server.py`) — FastAPI server exposing the full decision framework via Pydantic-schematized endpoints.
-- **Web Dashboard** (`python/dashboard/app.py`) — Interactive frontend for running analyses and visualizing results.
+- **REST API** (`src/decision_maker/api/server.py`) — FastAPI server exposing the full decision framework via Pydantic-schematized endpoints.
+- **Web Dashboard** (`src/decision_maker/dashboard/app.py`) — Interactive frontend for running analyses and visualizing results.
 
 ### 🖥️ CLI Overhaul
 - **`decision-maker` CLI** — Typer-based entry point with subcommands for running configs and distribution listing.

@@ -1,6 +1,6 @@
 # Architecture
 
-Python framework for multi-criteria decision analysis under uncertainty. 22+ engines, 322+ tests.
+Dual Python + Rust framework for multi-criteria decision analysis under uncertainty. 20+ engines, 495 tests. Performance-critical Monte Carlo normalization runs in a native Rust extension (`rust_core/`).
 
 ## Building Blocks
 
@@ -41,6 +41,13 @@ results = await fw.run_analysis(mode="standard")
 | Topology | `topology.py` | MDS/Isomap embedding, clustering, ranking stability | standalone |
 | Visualization | `visualization.py` | Matplotlib/seaborn plots (Pareto, tornado, distributions) | standalone |
 | Registry | `registry.py` | SQLite-backed persistent decision store | standalone |
+| Rust Math Core | `rust_core/` (Rust) | Native Monte Carlo Min-Max normalization (pyo3 + rayon + ndarray) | library |
+| Ergodicity | `ergodicity.py` | Time-average vs ensemble growth, ruin probability | standalone |
+| Kelly Criterion | `kelly.py` | Optimal bet sizing under uncertainty (field-benchmark win threshold) | standalone |
+| Fuzzy Weighted Sum | `fuzzy_weighted_sum.py` | Weighted-sum aggregation with fuzzy membership | standalone |
+| Learning System | `outcome_tracker.py`, `calibration.py`, `decision_journal.py`, `adaptive_router.py` | Outcome tracking, confidence calibration, journal, adaptive routing | library |
+| Meta-Learning | `action_threshold.py`, `reasoning_trace.py`, `unknown_scanner.py`, `meta_calibration.py` | Action threshold, reasoning trace, unknown scanner, meta-calibration | library |
+| Decision Gates | `decision_gates.py` | Veto power: ergodicity, ruin, causal DAG, commitment | library |
 | AHP | `ahp.py` | Pairwise weight calibration | library |
 | Config Runner | `config_runner.py` | YAML-based decision config | library |
 
@@ -109,10 +116,11 @@ Statistics (per option after MC)
 3. **PROMETHEE with uncertainty** -- averages net flows across p5/mean/p95 scenarios rather than a single deterministic run.
 4. **Borda aggregation** -- combines rankings from multiple methods into a consensus, reducing method bias.
 5. **Weights computed once** -- factor weights and maximize/minimize flags are built once and reused across all engines.
+6. **Rust normalization is the single source of truth** -- `MonteCarloEngine.run(normalize=True)` normalizes each factor to [0,1] via the global min/max across all options, matching the `rust_core` extension. All scale-dependent consumers (Kelly, via_negativa, success_rate, confidence, decision matrix) must compare on that same normalized scale.
 
 ## Test Coverage
 
-331+ tests across all engines. Run with:
+495 tests across all engines. Run with:
 
 ```bash
 uv run pytest src/decision_maker/tests/ -v
