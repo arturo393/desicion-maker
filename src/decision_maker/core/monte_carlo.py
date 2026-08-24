@@ -136,10 +136,24 @@ class MonteCarloEngine:
                         "p95": float(np.percentile(vals, 95))
                     }
 
-                    if f.maximize:
-                        total_scores += vals * f.weight
+                    # Normalize exactly like the Rust MonteCarloEngine (lib.rs Phase 3):
+                    # factor normalized to [0,1] via global min/max; maximize -> norm*w,
+                    # minimize -> (1-norm)*w. Matches global bounds across all options.
+                    if normalize and f.name in global_bounds:
+                        lo, hi = global_bounds[f.name]
+                        if hi > lo:
+                            norm_vals = (vals - lo) / (hi - lo)
+                        else:
+                            norm_vals = np.ones_like(vals)
+                        if f.maximize:
+                            total_scores += norm_vals * f.weight
+                        else:
+                            total_scores += (1.0 - norm_vals) * f.weight
                     else:
-                        total_scores -= vals * f.weight
+                        if f.maximize:
+                            total_scores += vals * f.weight
+                        else:
+                            total_scores -= vals * f.weight
 
             if np.std(total_scores) > EPSILON_SCORE:
                 ruin_threshold = np.percentile(total_scores, RUIN_THRESHOLD_PERCENTILE)

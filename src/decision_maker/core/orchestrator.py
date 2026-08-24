@@ -361,10 +361,16 @@ class UnifiedDecisionFramework:
         ergodicity = self.ergodicity_engine.analyze(mc_results, self.mc_engine.factors)
         kelly = self.kelly_engine.analyze(mc_results, self.mc_engine.factors)
 
+        ruin_probabilities = {
+            name: opt_data.get("ruin_probability", 0.0)
+            for name, opt_data in ergodicity.get("options", {}).items()
+        }
+
         gate_result = self.decision_gates.apply(
             mc_results=mc_results,
             factors=self.mc_engine.factors,
             ergodicity_data=ergodicity,
+            ruin_probabilities=ruin_probabilities,
             signal_to_noise=threshold.signal_to_noise,
         )
 

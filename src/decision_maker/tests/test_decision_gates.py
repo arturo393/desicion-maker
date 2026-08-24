@@ -20,12 +20,14 @@ class TestDecisionGate:
         assert len(result.options_approved) == 2
         assert result.veto_count == 0
 
-    def test_ergodicity_veto(self):
+    def test_ergodicity_is_informational_not_veto(self):
+        # Ergodicity on additive normalized MC scores is a scale artifact,
+        # not evidence of wealth destruction — it must NOT reject options.
         mc = {"A": self._make_stats("A", 10.0, 1.0)}
         ergodicity = {"options": {"A": {"temporal_log_growth": -0.05}}}
         result = DecisionGate.apply(mc, [], ergodicity_data=ergodicity, signal_to_noise=5.0)
-        assert "A" in result.options_vetoed
-        assert result.pipeline_halted is True
+        assert "A" in result.options_approved
+        assert result.pipeline_halted is False
 
     def test_low_snh_halts(self):
         mc = {"A": self._make_stats("A", 5.0, 3.0), "B": self._make_stats("B", 4.8, 3.0)}
@@ -45,13 +47,15 @@ class TestDecisionGate:
         assert result.pipeline_halted is True
         assert "0 options" in result.halt_reason.lower() or "all" in result.halt_reason.lower()
 
-    def test_partial_veto(self):
+    def test_partial_veto_by_other_gates(self):
         mc = {
             "A": self._make_stats("A", 10.0, 1.0),
             "B": self._make_stats("B", 5.0, 1.0),
         }
+        # Ruin probability is a valid veto gate; ergodicity is informational.
         ergodicity = {"options": {"A": {"temporal_log_growth": 0.05}, "B": {"temporal_log_growth": -0.1}}}
-        result = DecisionGate.apply(mc, [], ergodicity_data=ergodicity, signal_to_noise=5.0)
+        ruin = {"B": 0.5}
+        result = DecisionGate.apply(mc, [], ergodicity_data=ergodicity, ruin_probabilities=ruin, signal_to_noise=5.0)
         assert "A" in result.options_approved
         assert "B" in result.options_vetoed
 

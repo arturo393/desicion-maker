@@ -117,18 +117,24 @@ class DecisionGate:
                         reasoning=f"Negative mean score ({ensemble_mean:.2f}) dominates log-growth; gate skipped (scale artifact)",
                     ))
                 elif log_growth < DecisionGate.ERGODICITY_LOG_GROWTH_MIN:
+                    # Ergodicity is INFORMATIONAL here, not a veto. Peters' ergodicity
+                    # applies to multiplicative return trajectories (wealth dynamics),
+                    # not to normalized additive decision scores. On MC scores the
+                    # log-growth is dominated by the ruin-penalty clipping, so a
+                    # negative value is a scale artifact, not evidence of wealth
+                    # destruction. Report it; do not reject the option.
                     result.gate_verdicts.append(GateVerdict(
                         gate_name="ergodicity",
                         option_name=name,
-                        passed=False,
+                        passed=True,
                         value=log_growth,
                         threshold=DecisionGate.ERGODICITY_LOG_GROWTH_MIN,
                         reasoning=(
-                            f"Non-ergodic: temporal log-growth={log_growth:.4f} < 0. "
-                            f"This option destroys wealth over time."
+                            f"Non-ergodic log-growth={log_growth:.4f} on additive "
+                            f"normalized scores — informational only, not a veto. "
+                            f"Ergodicity veto requires real return trajectories."
                         ),
                     ))
-                    option_approved = False
                 else:
                     result.gate_verdicts.append(GateVerdict(
                         gate_name="ergodicity",

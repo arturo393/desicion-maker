@@ -61,7 +61,7 @@ class TestCli:
         runner = CliRunner()
         result = runner.invoke(
             app,
-            ["run", "--mode", "express", "--sims", "10", "--output", "/tmp/opencode/cli_test_out"],
+            ["run", "--mode", "express", "--sims", "1000", "--output", "/tmp/opencode/cli_test_out"],
         )
         assert result.exit_code == 0
         assert "Reports saved" in result.output
@@ -70,7 +70,7 @@ class TestCli:
         runner = CliRunner()
         result = runner.invoke(
             app,
-            ["run", "--mode", "bogus", "--sims", "10", "--output", "/tmp/opencode/cli_test_out2"],
+            ["run", "--mode", "bogus", "--sims", "1000", "--output", "/tmp/opencode/cli_test_out2"],
         )
         assert result.exit_code == 0
         assert "Reports saved" in result.output

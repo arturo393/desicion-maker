@@ -56,7 +56,7 @@ Colección de análisis de decisiones personales usando el framework:
 ## 📁 Estructura
 
 ```
-python/
+src/decision_maker/
 ├── analyses/                          # 📊 TUS ANÁLISIS
 │   ├── _template.py                  # Template para nuevo análisis
 │   ├── furniture_diy.py              # Análisis muebles
@@ -64,14 +64,14 @@ python/
 │   ├── metadata.json                 # Tracking de todos los análisis
 │   └── ...
 ├── core/                              # 🧠 Motor principal
-│   ├── deep_research_decision_agent.py  # Compat shim para scripts legacy
-│   └── ...                             # 30+ módulos (TOPSIS, PROMETHEE, Monte Carlo, etc.)
-├── scripts/                           # 🛠️ Utilidades
-│   ├── gemini_query.py
-│   └── ...
-├── api/                               # 🌐 FastAPI (futuro)
-├── requirements.txt                   # Dependencias
-└── .env.example                       # Template de configuración
+│   ├── orchestrator.py               # UnifiedDecisionFramework
+│   ├── fuzzy_weighted_sum.py         # Fuzzy weighted-sum (lingüístico)
+│   └── ...                            # 30+ módulos (TOPSIS, PROMETHEE, Monte Carlo, etc.)
+├── api/                               # 🌐 FastAPI
+│   └── server.py
+├── dashboard/                         # 📊 Streamlit
+│   └── app.py
+└── tests/                             # ✅ Pytest (482 tests)
 ```
 
 ## 🧠 13 Metodologías

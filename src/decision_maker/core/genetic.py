@@ -8,7 +8,6 @@ from __future__ import annotations
 
 __all__ = ["GeneticOptimizer"]
 
-import math
 from typing import Any
 
 from decision_maker.core.models import Factor, Statistics
@@ -68,16 +67,15 @@ class GeneticOptimizer:
                 ideal_genes[f.name] = best_raw_val
                 source_options[f.name] = best_opt
 
-        # 2. Calculate the theoretical max score on the SAME raw scale the
-        #    MonteCarloEngine produces (weighted raw values, no normalization).
-        #    MC scoring: maximize -> vals * w ; minimize -> -vals * w.
+        # 2. Calculate the theoretical max score on the SAME normalized scale the
+        #    MonteCarloEngine now produces (each factor normalized to [0,1] via
+        #    global min/max; maximize -> norm*w, minimize -> (1-norm)*w).
+        #    The ideal option holds every factor at its best value, so each factor
+        #    contributes its full weight: theoretical_max = sum of weights.
         theoretical_max_score = 0.0
         for f in factors:
             if f.name in ideal_genes:
-                raw_val = ideal_genes[f.name]
-                if not math.isfinite(raw_val):
-                    continue
-                theoretical_max_score += raw_val * f.weight if f.maximize else -raw_val * f.weight
+                theoretical_max_score += f.weight
 
         # 3. Apply a small 'complexity penalty' for being a hybrid
         unique_sources = len(set(source_options.values()))

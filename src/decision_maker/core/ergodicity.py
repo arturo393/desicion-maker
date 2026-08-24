@@ -94,7 +94,7 @@ class ErgodicityAnalyzer:
         temporal_log_growth = float(np.mean(log_returns))
         geometric_mean = float(np.exp(temporal_log_growth))
 
-        ruin_count = np.sum(scores <= ErgodicityAnalyzer.RUIN_THRESHOLD)
+        ruin_count = np.sum(scores < ErgodicityAnalyzer.RUIN_THRESHOLD)
         ruin_probability = float(ruin_count / len(scores))
 
         cumulative = np.cumprod(positive_scores)

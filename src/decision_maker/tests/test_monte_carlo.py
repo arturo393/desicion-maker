@@ -17,9 +17,9 @@ class TestMonteCarloEngine:
 
         results = engine.run()
         stats = results["Safe"]
-        assert stats.mean_score == 100.0
-        assert stats.min_score == 100.0
-        assert stats.max_score == 100.0
+        assert stats.mean_score == 1.0
+        assert stats.min_score == 1.0
+        assert stats.max_score == 1.0
         assert stats.std_dev == 0.0
 
     def test_weighted_simulation(self):
@@ -33,7 +33,8 @@ class TestMonteCarloEngine:
 
         results = engine.run()
         stats = results["Project"]
-        assert math.isclose(stats.mean_score, 110.0, rel_tol=1e-9)
+        # Normalized: Cost(50,min)->(1-1.0)*0.2=0; Benefit(150,max)->1.0*0.8=0.8
+        assert math.isclose(stats.mean_score, 0.8, rel_tol=1e-9)
 
     def test_multiple_options(self):
         engine = MonteCarloEngine(num_simulations=100)
@@ -46,8 +47,9 @@ class TestMonteCarloEngine:
         engine.add_option(opt_b)
 
         results = engine.run()
-        assert results["A"].mean_score == 10.0
-        assert results["B"].mean_score == 20.0
+        # Normalized: A->(10-10)/(20-10)=0, B->(20-10)/(20-10)=1
+        assert results["A"].mean_score == 0.0
+        assert results["B"].mean_score == 1.0
 
     def test_minimize_factor(self):
         engine = MonteCarloEngine(num_simulations=100)
@@ -57,7 +59,8 @@ class TestMonteCarloEngine:
         engine.add_option(opt)
 
         results = engine.run()
-        assert results["CostCenter"].mean_score == -100.0
+        # Normalized: Expense(100,min)->(1-1.0)*1.0=0
+        assert results["CostCenter"].mean_score == 0.0
 
     def test_all_distributions(self):
         engine = MonteCarloEngine(num_simulations=1000)
@@ -161,7 +164,8 @@ class TestMonteCarloEngine:
         engine.add_factor(Factor("B", 0.5, maximize=True))
         engine.add_option(opt)
         results = engine.run()
-        assert results["Partial"].mean_score == 50.0
+        # Normalized: A(100,max,w=0.5)->1.0*0.5=0.5; B missing contributes nothing
+        assert results["Partial"].mean_score == 0.5
 
     def test_factor_with_zero_weight(self):
         import pytest
@@ -181,7 +185,8 @@ class TestMonteCarloEngine:
         engine.add_factor(Factor("B", 0.5, maximize=False))
         engine.add_option(opt)
         results = engine.run()
-        assert results["CancelOut"].mean_score == 0.0
+        # Normalized: A(max,w=0.5)->1.0*0.5=0.5; B(min,w=0.5)->(1-1.0)*0.5=0
+        assert results["CancelOut"].mean_score == 0.5
 
     def test_option_with_no_variables(self):
         engine = MonteCarloEngine(num_simulations=10)
@@ -198,7 +203,8 @@ class TestMonteCarloEngine:
         engine.add_factor(Factor("X", 1.0, maximize=True))
         engine.add_option(opt)
         results = engine.run()
-        assert results["OnlyOne"].mean_score == 42.0
+        # Normalized: single deterministic value -> hi==lo -> norm 1.0
+        assert results["OnlyOne"].mean_score == 1.0
 
     def test_nan_params_in_variable(self):
         engine = MonteCarloEngine(num_simulations=100)
@@ -262,7 +268,8 @@ class TestMonteCarloEngine:
         engine.add_factor(Factor("X", 1.0, maximize=True))
         engine.add_option(opt)
         results = engine.run()
-        assert results["A"].mean_score == 42.0
+        # Normalized: single deterministic value -> hi==lo -> norm 1.0
+        assert results["A"].mean_score == 1.0
 
     def test_engine_runs_without_rust_module(self, monkeypatch):
         """The Monte Carlo engine must work when the Rust extension is absent."""
@@ -290,4 +297,5 @@ class TestMonteCarloEngine:
         engine.add_option(opt)
 
         results = engine.run()
-        assert results["Safe"].mean_score == 100.0
+        # Normalized: single deterministic value -> hi==lo -> norm 1.0
+        assert results["Safe"].mean_score == 1.0
