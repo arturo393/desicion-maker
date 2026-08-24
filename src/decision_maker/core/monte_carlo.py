@@ -149,18 +149,23 @@ class MonteCarloEngine:
                     ruin_penalty = 1.0 - (ruin_count / self.num_simulations)
                     total_scores[ruin_mask] *= ruin_penalty
 
+            p5 = float(np.percentile(total_scores, 5))
+            p95 = float(np.percentile(total_scores, 95))
+            below_p5 = total_scores[total_scores <= p5]
+            cvar = float(np.mean(below_p5)) if len(below_p5) > 0 else p5
+
             results[opt.name] = Statistics(
                 option_name=opt.name,
                 mean_score=float(np.mean(total_scores)),
                 std_dev=float(np.std(total_scores)),
                 min_score=float(np.min(total_scores)),
                 max_score=float(np.max(total_scores)),
-                percentile_5=float(np.percentile(total_scores, 5)),
-                percentile_95=float(np.percentile(total_scores, 95)),
+                percentile_5=p5,
+                percentile_95=p95,
                 success_rate=float(np.mean(total_scores > 0)),
                 factor_stats=factor_stats,
-                var_95=float(np.percentile(total_scores, 5)),
-                cvar_95=float(np.mean(total_scores[total_scores <= np.percentile(total_scores, 5)]) if len(total_scores[total_scores <= np.percentile(total_scores, 5)]) > 0 else np.percentile(total_scores, 5)),
+                var_95=p5,
+                cvar_95=cvar,
                 raw_scores=total_scores,
                 raw_factor_data=opt_data,
             )

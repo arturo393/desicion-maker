@@ -15,8 +15,6 @@ from decision_maker.core.models import Statistics
 
 
 class DecisionTheoryEngine:
-    OPTIMISTIC_PERCENTILE = 0.95
-    CONSERVATIVE_PERCENTILE = 0.05
 
     @staticmethod
     def analyze(

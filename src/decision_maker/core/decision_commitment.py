@@ -8,16 +8,15 @@ from __future__ import annotations
 
 __all__ = ["DecisionCommitment", "Commitment"]
 
-import json
 import logging
 import uuid
-from dataclasses import dataclass, field, asdict
+from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-import numpy as np
 
+from decision_maker.core.jsonl_store import JsonlStore
 from decision_maker.core.models import Statistics
 
 logger = logging.getLogger(__name__)
@@ -54,7 +53,7 @@ class Commitment:
             self.decision_id = f"commit_{uuid.uuid4().hex[:12]}"
 
 
-class DecisionCommitment:
+class DecisionCommitment(JsonlStore[Commitment]):
     """
     Transforms a recommendation into a binding commitment.
 
@@ -72,27 +71,10 @@ class DecisionCommitment:
     """
 
     def __init__(self, commitments_path: str | Path | None = None):
-        self.commitments_path = Path(commitments_path or DEFAULT_COMMITMENTS_PATH)
-        self._entries: list[Commitment] = []
-        self._load()
+        super().__init__(commitments_path, DEFAULT_COMMITMENTS_PATH, id_field="decision_id")
 
-    def _load(self) -> None:
-        if self.commitments_path.exists():
-            try:
-                with open(self.commitments_path) as f:
-                    for line in f:
-                        line = line.strip()
-                        if line:
-                            data = json.loads(line)
-                            self._entries.append(Commitment(**data))
-            except Exception as e:
-                logger.warning(f"Failed to load commitments: {e}")
-
-    def _save(self) -> None:
-        self.commitments_path.parent.mkdir(parents=True, exist_ok=True)
-        with open(self.commitments_path, "w") as f:
-            for entry in self._entries:
-                f.write(json.dumps(asdict(entry)) + "\n")
+    def _deserialize(self, data: dict[str, Any]) -> Commitment:
+        return Commitment(**data)
 
     def create(
         self,
@@ -168,20 +150,10 @@ class DecisionCommitment:
         }
 
     def pending_review(self) -> list[Commitment]:
-        now = datetime.now(timezone.utc).isoformat()
         return [
             e for e in self._entries
             if not e.outcome_recorded and e.deadline != "REVIEW NEEDED"
         ]
-
-    def entries(self) -> list[Commitment]:
-        return list(self._entries)
-
-    def get_entry(self, decision_id: str) -> Commitment | None:
-        for entry in self._entries:
-            if entry.decision_id == decision_id:
-                return entry
-        return None
 
     def summary(self) -> dict[str, Any]:
         n = len(self._entries)

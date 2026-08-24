@@ -105,7 +105,7 @@ class DecisionGate:
                         passed=True,
                         value=log_growth,
                         threshold=DecisionGate.ERGODICITY_LOG_GROWTH_MIN,
-                        reasoning=f"Deterministic option (std=0), ergodicity gate skipped",
+                        reasoning="Deterministic option (std=0), ergodicity gate skipped",
                     ))
                 elif ensemble_mean <= 0:
                     result.gate_verdicts.append(GateVerdict(

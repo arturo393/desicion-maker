@@ -10,7 +10,7 @@ __all__ = ["UnknownUnknownsScanner", "UnknownReport"]
 
 import logging
 from collections import Counter
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Any
 
 import numpy as np

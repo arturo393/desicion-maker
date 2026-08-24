@@ -242,25 +242,43 @@ class UnifiedDecisionFramework:
         use_ai: bool = False,
         results_dir: str | None = None,
     ) -> dict[str, Any]:
-        if mode not in ("express", "standard", "advanced"):
+        if mode not in ("express", "standard", "advanced", "auto"):
             logger.warning(f"Unknown mode '{mode}', falling back to 'standard'")
             mode = "standard"
 
         logger.info(f"Starting analysis in {mode.upper()} mode")
 
+        mc_results = self.mc_engine.run()
+        if not mc_results:
+            logger.warning("No results from Monte Carlo engine")
+            return {}
+
         profile = self.adaptive_router.profile(
             self.mc_engine.options,
             self.mc_engine.factors,
+            mc_results=mc_results,
             has_correlation=self.mc_engine.correlation_matrix is not None,
         )
         if mode == "auto":
             mode = profile.recommended_mode
             logger.info(f"Adaptive routing: complexity={profile.complexity_score:.2f} → {mode}")
 
-        mc_results = self.mc_engine.run()
-        if not mc_results:
-            logger.warning("No results from Monte Carlo engine")
-            return {}
+        self.reasoning_trace.record(
+            problem_name=self.mc_engine.options[0].name if self.mc_engine.options else "untitled",
+            complexity_score=profile.complexity_score,
+            recommended_mode=profile.recommended_mode,
+            engines_run=profile.recommended_engines,
+            engines_skipped=profile.skip_engines,
+            skip_reasons={e: "not needed at this complexity level" for e in profile.skip_engines},
+            routing_reasoning=profile.reasoning,
+            dimension_scores={
+                "num_options": float(profile.num_options),
+                "num_factors": float(profile.num_factors),
+                "uncertainty": profile.factor_uncertainty,
+                "diversity": profile.option_diversity,
+                "correlation": float(profile.has_correlation),
+            },
+        )
 
         threshold = self.action_threshold.evaluate(mc_results, self.mc_engine.factors)
 
@@ -366,12 +384,19 @@ class UnifiedDecisionFramework:
                 mc_results.pop(vetoed, None)
             logger.info(f"Options vetoed by gates: {gate_result.options_vetoed}")
 
-        commitment = self.decision_commitment.create(
-            chosen_option=threshold.winning_option,
-            mc_results=mc_results,
-            reasoning=threshold.reasoning,
-            confidence=threshold.confidence_in_winner,
+        approved_winner = (
+            max(mc_results.items(), key=lambda x: x[1].mean_score)[0]
+            if mc_results else None
         )
+
+        commitment = None
+        if approved_winner and threshold.should_decide:
+            commitment = self.decision_commitment.create(
+                chosen_option=approved_winner,
+                mc_results=mc_results,
+                reasoning=threshold.reasoning,
+                confidence=threshold.confidence_in_winner,
+            )
 
         ai_reports = {}
         if use_ai and self.ai_agent.is_available:
@@ -441,7 +466,7 @@ class UnifiedDecisionFramework:
             "action_threshold": MinimumActionThreshold.to_dict(threshold),
             "gate_result": DecisionGate.to_dict(gate_result),
             "causal_dag": causal_dag,
-            "commitment": {
+            "commitment": None if commitment is None else {
                 "decision_id": commitment.decision_id,
                 "chosen_option": commitment.chosen_option,
                 "success_metric": commitment.success_metric,

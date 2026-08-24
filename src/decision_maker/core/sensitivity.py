@@ -1,6 +1,6 @@
 """
 Sensitivity analysis engine assessing decision stability under weight and score perturbations.
-Usage: from decision_maker.core.sensitivity import SensitivityAnalyzer
+Usage: from decision_maker.core.sensitivity import SensitivityEngine
 Does NOT: Execute AHP or PROMETHEE comparisons directly.
 """
 

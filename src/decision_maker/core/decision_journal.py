@@ -8,15 +8,15 @@ from __future__ import annotations
 
 __all__ = ["DecisionJournal", "JournalEntry"]
 
-import json
 import logging
 from datetime import datetime, timezone
-from dataclasses import dataclass, field, asdict
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
 import numpy as np
 
+from decision_maker.core.jsonl_store import JsonlStore
 from decision_maker.core.models import Factor, Statistics
 
 logger = logging.getLogger(__name__)
@@ -52,7 +52,7 @@ class JournalEntry:
             self.decision_id = f"dec_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}"
 
 
-class DecisionJournal:
+class DecisionJournal(JsonlStore[JournalEntry]):
     """
     Structured bitácora for decision-making discipline.
 
@@ -65,27 +65,10 @@ class DecisionJournal:
     """
 
     def __init__(self, journal_path: str | Path | None = None):
-        self.journal_path = Path(journal_path or DEFAULT_JOURNAL_PATH)
-        self._entries: list[JournalEntry] = []
-        self._load()
+        super().__init__(journal_path, DEFAULT_JOURNAL_PATH, id_field="decision_id")
 
-    def _load(self) -> None:
-        if self.journal_path.exists():
-            try:
-                with open(self.journal_path) as f:
-                    for line in f:
-                        line = line.strip()
-                        if line:
-                            data = json.loads(line)
-                            self._entries.append(JournalEntry(**data))
-            except Exception as e:
-                logger.warning(f"Failed to load journal: {e}")
-
-    def _save(self) -> None:
-        self.journal_path.parent.mkdir(parents=True, exist_ok=True)
-        with open(self.journal_path, "w") as f:
-            for entry in self._entries:
-                f.write(json.dumps(asdict(entry)) + "\n")
+    def _deserialize(self, data: dict[str, Any]) -> JournalEntry:
+        return JournalEntry(**data)
 
     def log_decision(
         self,
@@ -191,15 +174,6 @@ class DecisionJournal:
             "engine_usage": engine_usage,
             "avg_confidence": float(np.mean(confidence_values)) if confidence_values else 0.0,
         }
-
-    def entries(self) -> list[JournalEntry]:
-        return list(self._entries)
-
-    def get_entry(self, decision_id: str) -> JournalEntry | None:
-        for entry in self._entries:
-            if entry.decision_id == decision_id:
-                return entry
-        return None
 
     def search(self, query: str) -> list[JournalEntry]:
         query_lower = query.lower()

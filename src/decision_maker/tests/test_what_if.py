@@ -120,6 +120,8 @@ class TestWhatIfEngine:
     def test_suggest_returns_list(self, engine):
         suggestions = engine._suggest()
         assert isinstance(suggestions, list)
+        if suggestions:
+            assert all(isinstance(s, str) and s for s in suggestions)
 
     def test_compute_raw_bounds(self):
         bounds = _compute_raw_bounds(_build_mc_results(), ["Cost", "Quality"])

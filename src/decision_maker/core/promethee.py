@@ -64,6 +64,8 @@ class PrometheeEngine:
 
         if pref_types is None:
             pref_types = ["usual"] * n_factors
+        elif len(pref_types) == 1 and n_factors > 1:
+            pref_types = [pref_types[0]] * n_factors
         if not pref_params:
             pref_params = [{} for _ in range(n_factors)]
 

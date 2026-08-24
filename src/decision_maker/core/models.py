@@ -4,6 +4,7 @@
 [What it DOESN'T do] Does not implement execution logic or orchestration.
 """
 
+import logging
 import math
 from collections.abc import Callable
 from enum import StrEnum
@@ -11,6 +12,8 @@ from typing import Any
 
 import numpy as np
 from pydantic import BaseModel, ConfigDict, Field, model_validator
+
+logger = logging.getLogger(__name__)
 
 EPSILON = 1e-9
 
@@ -141,10 +144,17 @@ class UncertainVariable(BaseModel):
 
         sampler = SAMPLE_DISPATCH.get(self.dist_type)
         if sampler is None:
+            logger.warning(
+                f"Unknown distribution type '{self.dist_type}' for variable '{self.name}' — sampling zeros"
+            )
             return np.zeros(size)
         try:
             return sampler(sanitized, size)
-        except (ValueError, TypeError):
+        except (ValueError, TypeError) as e:
+            logger.warning(
+                f"Sampling failed for variable '{self.name}' "
+                f"({self.dist_type}, params={sanitized}): {e} — sampling zeros"
+            )
             return np.zeros(size)
 
 

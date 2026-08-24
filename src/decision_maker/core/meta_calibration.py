@@ -12,7 +12,6 @@ import logging
 from dataclasses import dataclass
 from typing import Any
 
-import numpy as np
 
 from decision_maker.core.outcome_tracker import OutcomeEntry
 from decision_maker.core.reasoning_trace import TraceEntry

@@ -8,8 +8,10 @@ from __future__ import annotations
 
 __all__ = ["GeminiDeepResearchAgent"]
 
+import json
 import logging
 import os
+import re
 
 from dotenv import load_dotenv
 
@@ -64,8 +66,6 @@ class GeminiDeepResearchAgent:
                 model=self.model,
                 contents=calibration_prompt(context_data),
             )
-            import json
-            import re
 
             text = response.text
             match = re.search(r"\{.*\}", text, re.DOTALL)

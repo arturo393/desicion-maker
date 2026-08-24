@@ -8,12 +8,11 @@ from __future__ import annotations
 
 __all__ = ["DecisionRegistry", "SaveDecisionRequest", "SaveTemplateRequest"]
 
-import contextlib
 import json
 import logging
 import sqlite3
 import threading
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -171,8 +170,13 @@ class DecisionRegistry:
         result = dict(row)
         for key in ("tags", "results_json", "factors_json", "options_json"):
             if result.get(key):
-                with contextlib.suppress(json.JSONDecodeError, TypeError):
+                try:
                     result[key] = json.loads(result[key])
+                except (json.JSONDecodeError, TypeError) as e:
+                    logger.warning(
+                        f"Corrupt JSON in column '{key}' of decision {decision_id}: {e}. "
+                        f"Returning raw string."
+                    )
         return result
 
     def delete_decision(self, decision_id: int) -> bool:
@@ -229,7 +233,12 @@ class DecisionRegistry:
                 ),
             )
             self._conn.commit()
-            return cur.lastrowid
+            row = self._conn.execute(
+                "SELECT id FROM templates WHERE name = ?", (req.name,)
+            ).fetchone()
+            if row is None:
+                raise sqlite3.Error(f"Failed to resolve template id for '{req.name}' after upsert")
+            return row[0]
 
     def list_templates(self, category: str | None = None) -> list[dict[str, Any]]:
         if category:
@@ -249,8 +258,10 @@ class DecisionRegistry:
         result = dict(row)
         for key in ("factors_json", "options_json"):
             if result.get(key):
-                with contextlib.suppress(json.JSONDecodeError, TypeError):
+                try:
                     result[key] = json.loads(result[key])
+                except (json.JSONDecodeError, TypeError) as e:
+                    logger.warning(f"Corrupt JSON in template column '{key}': {e}. Returning raw string.")
         return result
 
     def fetch_template(self, template_id: int) -> dict[str, Any] | None:

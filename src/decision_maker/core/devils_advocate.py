@@ -10,7 +10,7 @@ __all__ = ["DevilsAdvocate", "ChallengeRequest"]
 
 import json
 import re
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Any
 
 from decision_maker.core.content import ChallengeContext, challenge_prompt

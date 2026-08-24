@@ -12,6 +12,55 @@ class TestOutcomeTracker:
     def _make_tracker(self, tmp_path: Path) -> OutcomeTracker:
         return OutcomeTracker(outcomes_path=tmp_path / "test_outcomes.jsonl")
 
+    def _entry_dict(self, decision_id: str) -> dict:
+        return {
+            "decision_id": decision_id,
+            "predicted_winner": "A",
+            "predicted_confidence": 0.7,
+            "actual_winner": "A",
+            "actual_score": 5.0,
+            "options_evaluated": [],
+            "factors_used": [],
+            "engine_scores": {},
+            "was_correct": True,
+            "regret": 0.0,
+            "notes": "",
+            "tags": [],
+        }
+
+    def test_corrupt_line_skipped_not_truncating(self, tmp_path):
+        path = tmp_path / "corrupt.jsonl"
+        path.write_text(
+            json.dumps(self._entry_dict("d1")) + "\n"
+            + "{corrupt json line\n"
+            + json.dumps(self._entry_dict("d2")) + "\n"
+        )
+        tracker = OutcomeTracker(outcomes_path=path)
+        entries = tracker.entries()
+        assert any(e.decision_id == "d1" for e in entries)
+        assert any(e.decision_id == "d2" for e in entries)
+        assert tracker.accuracy() == 1.0
+
+    def test_corrupt_line_does_not_destroy_history_on_save(self, tmp_path):
+        path = tmp_path / "corrupt_save.jsonl"
+        path.write_text(
+            json.dumps(self._entry_dict("d1")) + "\n"
+            + "{corrupt json line\n"
+            + json.dumps(self._entry_dict("d2")) + "\n"
+        )
+        tracker = OutcomeTracker(outcomes_path=path)
+        tracker.record(
+            decision_id="d3",
+            predicted_winner="A",
+            predicted_confidence=0.6,
+            actual_winner="A",
+            actual_score=4.0,
+            engine_scores={"A": 4.0},
+        )
+        entries = tracker.entries()
+        ids = {e.decision_id for e in entries}
+        assert {"d1", "d2", "d3"} <= ids
+
     def test_empty_tracker(self, tmp_path):
         tracker = self._make_tracker(tmp_path)
         assert tracker.accuracy() == 0.0

@@ -9,7 +9,7 @@ from __future__ import annotations
 __all__ = ["CausalDAG", "CausalNode", "CausalEdge"]
 
 import logging
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Any
 
 from decision_maker.core.models import Factor

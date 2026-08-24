@@ -115,7 +115,9 @@ class AntifragileEngine:
             beats_all = all(portfolio_score >= single_scores[n] for n in names)
 
             if beats_all:
-                (f"{single_scores[a]:.3f} + {single_scores[b]:.3f} = {portfolio_score:.3f} (avg)")
+                logger.debug(
+                    f"{single_scores[a]:.3f} + {single_scores[b]:.3f} = {portfolio_score:.3f} (avg)"
+                )
                 barbells.append(
                     {
                         "option_a": a,

@@ -8,14 +8,15 @@ from __future__ import annotations
 
 __all__ = ["ReasoningTrace", "TraceEntry"]
 
-import json
 import logging
-from dataclasses import dataclass, field, asdict
+from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
 import numpy as np
+
+from decision_maker.core.jsonl_store import JsonlStore
 
 logger = logging.getLogger(__name__)
 
@@ -46,7 +47,7 @@ class TraceEntry:
             self.decision_id = f"trace_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}"
 
 
-class ReasoningTrace:
+class ReasoningTrace(JsonlStore[TraceEntry]):
     """
     Records the reasoning behind routing decisions.
 
@@ -56,27 +57,10 @@ class ReasoningTrace:
     """
 
     def __init__(self, trace_path: str | Path | None = None):
-        self.trace_path = Path(trace_path or DEFAULT_TRACE_PATH)
-        self._entries: list[TraceEntry] = []
-        self._load()
+        super().__init__(trace_path, DEFAULT_TRACE_PATH, id_field="decision_id")
 
-    def _load(self) -> None:
-        if self.trace_path.exists():
-            try:
-                with open(self.trace_path) as f:
-                    for line in f:
-                        line = line.strip()
-                        if line:
-                            data = json.loads(line)
-                            self._entries.append(TraceEntry(**data))
-            except Exception as e:
-                logger.warning(f"Failed to load traces: {e}")
-
-    def _save(self) -> None:
-        self.trace_path.parent.mkdir(parents=True, exist_ok=True)
-        with open(self.trace_path, "w") as f:
-            for entry in self._entries:
-                f.write(json.dumps(asdict(entry)) + "\n")
+    def _deserialize(self, data: dict[str, Any]) -> TraceEntry:
+        return TraceEntry(**data)
 
     def record(
         self,
@@ -107,15 +91,6 @@ class ReasoningTrace:
         self._save()
         logger.info(f"Trace recorded: {entry.decision_id} — {recommended_mode} ({len(engines_run)} engines)")
         return entry
-
-    def entries(self) -> list[TraceEntry]:
-        return list(self._entries)
-
-    def get_entry(self, decision_id: str) -> TraceEntry | None:
-        for entry in self._entries:
-            if entry.decision_id == decision_id:
-                return entry
-        return None
 
     def routing_accuracy(self) -> dict[str, Any]:
         if not self._entries:

@@ -10,7 +10,6 @@ __all__ = ["AdaptiveRouter", "ProblemProfile"]
 
 import logging
 from dataclasses import dataclass
-from typing import Any
 
 import numpy as np
 
@@ -148,7 +147,7 @@ class AdaptiveRouter:
     def _simple_engines() -> tuple[list[str], list[str]]:
         return (
             ["MonteCarlo", "TOPSIS", "Pareto", "DecisionTheory"],
-            ["Bayesian", "Genetic", "GameTheory", "ROA", "MLSsurrogate",
+            ["Bayesian", "Genetic", "GameTheory", "ROA", "MLSurrogate",
              "Ergodicity", "Kelly", "Bootstrap", "Portfolio"],
         )
 
@@ -157,7 +156,7 @@ class AdaptiveRouter:
         return (
             ["MonteCarlo", "TOPSIS", "Pareto", "DecisionTheory", "Sensitivity",
              "PROMETHEE", "Robust", "Ergodicity", "Kelly", "Antifragile", "Explainability"],
-            ["Genetic", "GameTheory", "ROA", "MLSsurrogate", "Bootstrap"],
+            ["Genetic", "GameTheory", "ROA", "MLSurrogate", "Bootstrap"],
         )
 
     @staticmethod
@@ -166,7 +165,7 @@ class AdaptiveRouter:
             ["MonteCarlo", "TOPSIS", "Pareto", "DecisionTheory", "Sensitivity",
              "PROMETHEE", "Robust", "Bayesian", "Ergodicity", "Kelly",
              "Antifragile", "Explainability", "Bootstrap", "GameTheory",
-             "ROA", "MLSsurrogate", "Portfolio", "InformationTheory"],
+             "ROA", "MLSurrogate", "Portfolio", "InformationTheory"],
             [],
         )
 

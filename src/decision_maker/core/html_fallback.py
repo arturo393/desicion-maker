@@ -10,10 +10,8 @@ __all__ = ["generate_html_inline"]
 
 import os
 from datetime import datetime
-from typing import Any
 
 from decision_maker.core.content import REPORT_CSS
-from decision_maker.core.models import Statistics
 from decision_maker.core.reporting import ReportData
 from decision_maker.core.utils import resolve_winner
 

@@ -1,6 +1,6 @@
 """
 Analytic Hierarchy Process (AHP) engine for pairwise comparison and consistency calculation.
-Usage: from decision_maker.core.ahp import AHPEngine
+Usage: from decision_maker.core.ahp import AHPHelper
 Does NOT: Handle non-pairwise multi-criteria decision algorithms like TOPSIS or PROMETHEE.
 """
 

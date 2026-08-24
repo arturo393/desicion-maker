@@ -8,16 +8,15 @@ from __future__ import annotations
 
 __all__ = ["OutcomeTracker", "OutcomeEntry"]
 
-import json
 import logging
 from datetime import datetime, timezone
-from dataclasses import dataclass, field, asdict
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
 import numpy as np
 
-from decision_maker.core.models import Statistics
+from decision_maker.core.jsonl_store import JsonlStore
 
 logger = logging.getLogger(__name__)
 
@@ -47,7 +46,7 @@ class OutcomeEntry:
             self.timestamp = datetime.now(timezone.utc).isoformat()
 
 
-class OutcomeTracker:
+class OutcomeTracker(JsonlStore[OutcomeEntry]):
     """
     Records decision outcomes and computes learning metrics.
 
@@ -56,27 +55,10 @@ class OutcomeTracker:
     """
 
     def __init__(self, outcomes_path: str | Path | None = None):
-        self.outcomes_path = Path(outcomes_path or DEFAULT_OUTCOMES_PATH)
-        self._entries: list[OutcomeEntry] = []
-        self._load()
+        super().__init__(outcomes_path, DEFAULT_OUTCOMES_PATH, id_field="decision_id")
 
-    def _load(self) -> None:
-        if self.outcomes_path.exists():
-            try:
-                with open(self.outcomes_path) as f:
-                    for line in f:
-                        line = line.strip()
-                        if line:
-                            data = json.loads(line)
-                            self._entries.append(OutcomeEntry(**data))
-            except Exception as e:
-                logger.warning(f"Failed to load outcomes: {e}")
-
-    def _save(self) -> None:
-        self.outcomes_path.parent.mkdir(parents=True, exist_ok=True)
-        with open(self.outcomes_path, "w") as f:
-            for entry in self._entries:
-                f.write(json.dumps(asdict(entry)) + "\n")
+    def _deserialize(self, data: dict[str, Any]) -> OutcomeEntry:
+        return OutcomeEntry(**data)
 
     def record(
         self,
@@ -167,9 +149,6 @@ class OutcomeTracker:
             "worst_tag": min(self.tag_accuracy(), key=self.tag_accuracy().get) if self.tag_accuracy() else None,
             "trend": "improving" if recent_10 > overall else "declining" if recent_10 < overall else "stable",
         }
-
-    def entries(self) -> list[OutcomeEntry]:
-        return list(self._entries)
 
     def delete(self, decision_id: str) -> bool:
         before = len(self._entries)

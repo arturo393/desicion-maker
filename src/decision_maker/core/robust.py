@@ -1,6 +1,6 @@
 """
 Distributionally Robust Optimization (DRO) engine for evaluating worst-case decision scenarios.
-Usage: from decision_maker.core.robust import DistributionallyRobustOptimizer
+Usage: from decision_maker.core.robust import RobustOptimizer
 Does NOT: Generate visual charts or Markdown reports.
 """
 

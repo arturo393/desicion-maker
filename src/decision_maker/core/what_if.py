@@ -1,6 +1,6 @@
 """
 What-If interactive scenario runner for exploring factor weight and direction perturbations.
-Usage: from decision_maker.core.what_if import WhatIfRunner
+Usage: from decision_maker.core.what_if import WhatIfEngine
 Does NOT: Export multi-page HTML reports or connect to external databases.
 """
 

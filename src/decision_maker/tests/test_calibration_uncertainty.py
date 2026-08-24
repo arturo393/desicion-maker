@@ -130,5 +130,10 @@ class TestDevilsAdvocate:
         advocate = DevilsAdvocate(use_ai=True)
         # With no GEMINI_API_KEY the agent is unavailable and falls back gracefully.
         result = advocate.challenge(self._request())
-        assert isinstance(result["ai"], list)
-        assert result["source"] in ("ai", "heuristic")
+        # If no AI challenges were produced, the source must be heuristic,
+        # not claim AI provenance it doesn't have.
+        if result["n_ai_challenges"] == 0:
+            assert result["source"] == "heuristic"
+            assert len(result["heuristic"]) > 0
+        else:
+            assert result["source"] == "ai"

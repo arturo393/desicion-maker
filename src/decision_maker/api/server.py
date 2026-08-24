@@ -68,6 +68,36 @@ async def analyze(req: AnalysisRequest):
             fw.add_option(opt)
 
         result = await fw.run_analysis(mode=req.mode, use_ai=req.use_ai)
+
+        if not result:
+            return {
+                "session_id": None,
+                "status": "error",
+                "message": "Analysis produced no results",
+                "mc_results": {},
+                "topsis_scores": {},
+                "future_metrics": {},
+                "explanation": "",
+                "winner": None,
+                "uncertainty": {},
+                "challenges": {},
+            }
+
+        if result.get("pipeline_halted"):
+            return {
+                "session_id": None,
+                "status": "halted",
+                "message": result.get("gate_result", {}).get("halt_reason", "Decision gates halted the pipeline"),
+                "gate_result": result.get("gate_result"),
+                "mc_results": {},
+                "topsis_scores": {},
+                "future_metrics": {},
+                "explanation": "",
+                "winner": None,
+                "uncertainty": {},
+                "challenges": {},
+            }
+
         session_id = fw.save_session(req.name, req.description)
 
         # Format the output for the UI

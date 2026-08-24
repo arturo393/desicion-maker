@@ -301,8 +301,11 @@ def save_html_report(data: ReportData) -> str:
 
         env = Environment(loader=FileSystemLoader(os.path.join(os.path.dirname(__file__), "templates")))
         template = env.get_template("report.html.j2")
-    except (ImportError, Exception) as e:
+    except ImportError as e:
         logger.warning(f"Jinja2 not available ({e}), falling back to inline HTML generation")
+        return _generate_html_inline(data)
+    except Exception as e:
+        logger.warning(f"Template rendering unavailable ({e}), falling back to inline HTML generation")
         return _generate_html_inline(data)
 
     bluf_winner, _ = resolve_winner(data.topsis_scores, data.mc_results)
@@ -338,6 +341,17 @@ def save_html_report(data: ReportData) -> str:
         for n, s in data.mc_results.items()
     ]
 
+    advanced_insights = {}
+    if data.future:
+        bayesian = data.future.get("bayesian_probs")
+        if isinstance(bayesian, dict) and bayesian:
+            leader = max(bayesian, key=bayesian.get)
+            advanced_insights["bayesian_prob"] = float(bayesian[leader])
+            advanced_insights["bayesian_leader"] = leader
+        ideal = data.future.get("ideal_option")
+        if isinstance(ideal, dict) and "improvement_potential" in ideal:
+            advanced_insights["improvement_potential"] = float(ideal["improvement_potential"])
+
     html = template.render(
         timestamp=data.timestamp,
         mode=data.mode,
@@ -348,7 +362,7 @@ def save_html_report(data: ReportData) -> str:
         mc_data=mc_data,
         algo_comp=data.algo_comp,
         has_prom=data.mode == "advanced" and data.future and "promethee_scores" in data.future,
-        advanced_insights={},
+        advanced_insights=advanced_insights,
         risk_profiles=risk_profiles,
         explanation=data.explanation,
     )

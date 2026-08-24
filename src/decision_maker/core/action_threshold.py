@@ -14,7 +14,7 @@ from typing import Any
 
 import numpy as np
 
-from decision_maker.core.models import DecisionOption, Factor, Statistics
+from decision_maker.core.models import Factor, Statistics
 
 logger = logging.getLogger(__name__)
 

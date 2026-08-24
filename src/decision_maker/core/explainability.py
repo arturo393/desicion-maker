@@ -297,8 +297,17 @@ class ExplainabilityEngine:
                         )
                     )
                     ai_text = agent.research("Explain decision", prompt)
-                    lines.append("**AI-Generated Analysis:**")
-                    lines.append(ai_text if isinstance(ai_text, str) else str(ai_text))
+                    if hasattr(ai_text, "__await__"):
+                        try:
+                            import asyncio
+
+                            ai_text = asyncio.run(ai_text)
+                        except RuntimeError:
+                            logger.warning("AI narrative skipped: event loop already running")
+                            ai_text = None
+                    if ai_text:
+                        lines.append("**AI-Generated Analysis:**")
+                        lines.append(ai_text if isinstance(ai_text, str) else str(ai_text))
             except (ConnectionError, TimeoutError, ValueError) as e:
                 logger.warning(f"AI narrative generation failed: {e}")
 

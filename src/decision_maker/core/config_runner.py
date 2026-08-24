@@ -1,6 +1,6 @@
 """
 Loads and executes decision analysis pipelines defined in JSON configuration files.
-Usage: from decision_maker.core.config_runner import ConfigRunner
+Usage: from decision_maker.core.config_runner import run_from_config, build_framework_from_config
 Does NOT: Host interactive web or GUI sessions.
 """
 
