@@ -57,11 +57,17 @@ class KellyCriterionEngine:
         if not mc_results:
             return {"options": {}, "ranking": [], "summary": "No results to analyze"}
 
+        # Field-average benchmark: an option "wins" a simulation when it beats the
+        # average score across all options. On normalized [0,1] scores, score > 0 is
+        # always true (degenerate), so this cross-option benchmark replaces a fixed 0.
+        mean_scores = [s.mean_score for s in mc_results.values() if s.raw_scores is not None]
+        win_threshold = float(np.mean(mean_scores)) if mean_scores else 0.0
+
         options = {}
         for name, stats in mc_results.items():
             if stats.raw_scores is None:
                 continue
-            result = KellyCriterionEngine._analyze_option(name, stats, risk_fraction)
+            result = KellyCriterionEngine._analyze_option(name, stats, risk_fraction, win_threshold)
             options[name] = result
 
         ranking = sorted(options.keys(), key=lambda n: options[n].kelly_fraction, reverse=True)
@@ -79,10 +85,13 @@ class KellyCriterionEngine:
         name: str,
         stats: Statistics,
         risk_fraction: float,
+        win_threshold: float = 0.0,
     ) -> KellyResult:
         scores = stats.raw_scores
 
-        win_threshold = 0.0
+        # win_threshold is the field-average benchmark passed from analyze(). An
+        # option "wins" a simulation when it beats the field average. On normalized
+        # [0,1] scores a fixed 0 threshold would make every simulation a win.
         win_count = np.sum(scores > win_threshold)
         total = len(scores)
         win_probability = float(win_count / total) if total > 0 else 0.0

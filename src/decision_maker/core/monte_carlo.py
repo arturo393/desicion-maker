@@ -121,6 +121,8 @@ class MonteCarloEngine:
                     global_bounds[f.name] = (np.min(conc), np.max(conc))
 
         results: dict[str, Statistics] = {}
+        option_scores: dict[str, np.ndarray] = {}
+
         for opt in self.options:
             opt_data = sampled_data[opt.name]
             total_scores = np.zeros(self.num_simulations)
@@ -155,6 +157,14 @@ class MonteCarloEngine:
                         else:
                             total_scores -= vals * f.weight
 
+            option_scores[opt.name] = total_scores
+
+        score_matrix = np.column_stack(list(option_scores.values())) if option_scores else np.empty((self.num_simulations, 0))
+        cross_option_mean = np.mean(score_matrix, axis=1) if score_matrix.shape[1] > 0 else np.zeros(self.num_simulations)
+
+        for opt in self.options:
+            total_scores = option_scores[opt.name]
+
             if np.std(total_scores) > EPSILON_SCORE:
                 ruin_threshold = np.percentile(total_scores, RUIN_THRESHOLD_PERCENTILE)
                 ruin_mask = total_scores <= ruin_threshold
@@ -168,6 +178,14 @@ class MonteCarloEngine:
             below_p5 = total_scores[total_scores <= p5]
             cvar = float(np.mean(below_p5)) if len(below_p5) > 0 else p5
 
+            # success_rate = fraction of simulations where this option beats the
+            # cross-option average (wins the comparison), not where score > 0.
+            # With normalized [0,1] scores, score > 0 is always true (degenerate).
+            if score_matrix.shape[1] > 1:
+                success_rate = float(np.mean(total_scores > cross_option_mean))
+            else:
+                success_rate = 1.0
+
             results[opt.name] = Statistics(
                 option_name=opt.name,
                 mean_score=float(np.mean(total_scores)),
@@ -176,7 +194,7 @@ class MonteCarloEngine:
                 max_score=float(np.max(total_scores)),
                 percentile_5=p5,
                 percentile_95=p95,
-                success_rate=float(np.mean(total_scores > 0)),
+                success_rate=success_rate,
                 factor_stats=factor_stats,
                 var_95=p5,
                 cvar_95=cvar,

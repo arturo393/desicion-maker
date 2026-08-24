@@ -397,9 +397,15 @@ class AntifragileEngine:
                         continue
                     w = f.weight / total_remaining_weight
                     vals = raw_data[f.name]
-                    # Removed Min-Max normalization to capture true unbounded convexity (Taleb filter)
-                    raw_w_vals = (vals * w) if f.maximize else (-vals * w)
-                    total = raw_w_vals if total is None else total + raw_w_vals
+                    # Normalize with the same global bounds the MonteCarloEngine uses
+                    # so recomputed scores are on the SAME [0,1] scale as original_scores.
+                    b = global_bounds.get(f.name, {"min": 0.0, "max": 1.0})
+                    if b["max"] > b["min"]:
+                        norm_vals = (vals - b["min"]) / (b["max"] - b["min"])
+                    else:
+                        norm_vals = np.ones_like(vals)
+                    w_vals = (norm_vals * w) if f.maximize else ((1.0 - norm_vals) * w)
+                    total = w_vals if total is None else total + w_vals
 
                 new_scores[name] = float(np.mean(total)) if total is not None else 0.0
 

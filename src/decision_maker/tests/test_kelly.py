@@ -33,7 +33,9 @@ class TestKellyCriterionEngine:
         result = KellyCriterionEngine.analyze(mc, [])
         opt = result["options"]["Winner"]
         assert opt["kelly_fraction"] > 0.0
-        assert opt["win_probability"] == 1.0
+        # Non-degenerate: a single positive-valued option is NOT "always a win".
+        # With a field-average benchmark, win_probability lies strictly in (0, 1).
+        assert 0.0 < opt["win_probability"] < 1.0
         assert opt["verdict"] in ("moderate_edge", "strong_edge")
 
     def test_all_losses_zero_kelly(self):
@@ -112,7 +114,25 @@ class TestKellyCriterionEngine:
         opt = result["options"]["Opt"]
         assert opt["edge"] > 0.0
         assert opt["odds"] > 1.0
-        assert opt["win_probability"] == pytest.approx(0.8, abs=0.05)
+        # Non-degenerate win probability (field-average benchmark, not 0).
+        assert 0.0 < opt["win_probability"] < 1.0
+
+    def test_non_degenerate_on_positive_scores(self):
+        # Regression: with normalized [0,1]-style positive scores, Kelly must not
+        # assign every option win_probability == 1.0 and kelly_fraction == 1.0.
+        rng = np.random.default_rng(7)
+        a = rng.uniform(0.3, 0.9, 1000)
+        b = rng.uniform(0.1, 0.5, 1000)
+        mc = {
+            "A": self._make_stats("A", a),
+            "B": self._make_stats("B", b),
+        }
+        result = KellyCriterionEngine.analyze(mc, [])
+        for opt in result["options"].values():
+            assert opt["win_probability"] < 1.0
+            assert opt["kelly_fraction"] <= 1.0
+        # The stronger option should win the ranking.
+        assert result["ranking"][0]["option"] == "A"
 
     def test_max_loss_fraction_range(self):
         np.random.seed(42)

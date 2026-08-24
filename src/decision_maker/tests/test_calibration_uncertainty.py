@@ -64,11 +64,20 @@ class TestCalibration:
 
 class TestUncertainty:
     def test_confidence_weighted_winner(self):
-        results = {"A": _stats("A", 80, 5), "B": _stats("B", 79, 30)}
+        # Clear winner: higher mean AND lower noise -> high confidence.
+        results = {"A": _stats("A", 80, 2), "B": _stats("B", 50, 5)}
         winner = confidence_weighted_winner(results)
         assert winner["winner"] == "A"
         assert winner["confidence"] > 0.5
         assert winner["runner_up"] == "B"
+
+    def test_confidence_low_when_runner_up_noisy(self):
+        # Non-inflated: a tiny edge over a very noisy runner-up yields low
+        # confidence (the old |mean|/(|mean|+std) formula returned ~0.94).
+        results = {"A": _stats("A", 80, 5), "B": _stats("B", 79, 30)}
+        winner = confidence_weighted_winner(results)
+        assert winner["winner"] == "A"
+        assert winner["confidence"] < 0.5
 
     def test_winner_is_highest_mean(self):
         results = {"A": _stats("A", 50, 1), "B": _stats("B", 90, 1)}

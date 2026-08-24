@@ -27,20 +27,28 @@ def confidence_weighted_winner(mc_results: dict[str, Statistics]) -> dict:
 
     scored = []
     for name, stats in mc_results.items():
-        signal = abs(stats.mean_score)
         noise = max(stats.std_dev, 1e-9)
-        confidence = min(1.0, signal / (signal + noise))
-        scored.append((name, stats.mean_score, confidence))
+        scored.append((name, stats.mean_score, noise))
 
     scored.sort(key=lambda x: x[1], reverse=True)
-    winner, winner_score, winner_conf = scored[0]
+    winner, winner_score, winner_noise = scored[0]
     runner_up = scored[1][0] if len(scored) > 1 else None
-    edge = winner_score - (scored[1][1] if len(scored) > 1 else 0.0)
+    runner_score = scored[1][1] if len(scored) > 1 else 0.0
+    runner_noise = scored[1][2] if len(scored) > 1 else 0.0
+    edge = winner_score - runner_score
+
+    # Confidence from the winner's edge over the runner-up relative to the
+    # combined comparison noise. On normalized [0,1] scores, |mean| alone
+    # inflates confidence (0 is the floor, not the neutral point), so the edge
+    # over the field is the signal. Combined noise (both options) is the honest
+    # denominator: a tiny edge over a very noisy runner-up yields low confidence.
+    combined_noise = max((winner_noise ** 2 + runner_noise ** 2) ** 0.5, 1e-9)
+    confidence = min(1.0, abs(edge) / (abs(edge) + combined_noise))
 
     return {
         "winner": winner,
         "score": float(winner_score),
-        "confidence": float(winner_conf),
+        "confidence": float(confidence),
         "edge": float(edge),
         "runner_up": runner_up,
     }

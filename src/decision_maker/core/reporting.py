@@ -126,6 +126,19 @@ def _rank_scores(scores: pd.Series, prefix: str) -> dict[str, dict[str, Any]]:
 
 
 def prepare_decision_matrix(mc_results: dict[str, Statistics], factors: list[Factor]) -> dict[str, Any]:
+    # Global bounds per factor across all options, matching the MonteCarloEngine
+    # normalization so contributions are on the same [0,1] scale as total_score.
+    factor_names = {f.name for f in factors}
+    bounds: dict[str, tuple[float, float]] = {}
+    for fn in factor_names:
+        vals = [
+            stats.factor_stats[fn]["mean"]
+            for stats in mc_results.values()
+            if fn in stats.factor_stats
+        ]
+        if vals:
+            bounds[fn] = (min(vals), max(vals))
+
     decision_matrix = {}
     for name, stats in mc_results.items():
         decision_matrix[name] = {"total_score": stats.mean_score}
@@ -133,7 +146,12 @@ def prepare_decision_matrix(mc_results: dict[str, Statistics], factors: list[Fac
             if factor.name in stats.factor_stats:
                 f_stats = stats.factor_stats[factor.name]
                 mean_val = f_stats["mean"]
-                contribution = mean_val * factor.weight if factor.maximize else -mean_val * factor.weight
+                lo, hi = bounds.get(factor.name, (mean_val, mean_val))
+                if hi > lo:
+                    norm_mean = (mean_val - lo) / (hi - lo)
+                else:
+                    norm_mean = 1.0
+                contribution = norm_mean * factor.weight if factor.maximize else (1.0 - norm_mean) * factor.weight
                 decision_matrix[name][factor.name] = {
                     "raw": mean_val,
                     "weight": factor.weight,
