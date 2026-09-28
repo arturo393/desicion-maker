@@ -14,11 +14,20 @@ updated: 2026-09-27
 # 🎉 REORGANIZACIÓN COMPLETADA ✅
 
 > [!info] Índice del material de archivo
-> `reorganization/`, `session-logs/` y `tests-results/` son **historia**: registran cómo
-> se reorganizó el repo en enero 2026. El layout que describen ya no es el actual — las
-> rutas y los nombres de archivo que citan (`docs/INDEX.md`, `REORGANIZATION_PLAN.md`,
-> `python/scripts/`, root de 54 archivos…) no existen. Para el estado del vault hoy,
-> ver [[index]].
+> `reorganization/`, `session-logs/` y `tests-results/` son **historia**: el layout que
+> describen ya no es el actual — las rutas y los nombres de archivo que citan
+> (`docs/INDEX.md`, `REORGANIZATION_PLAN.md`, `python/scripts/`, root de 54 archivos…)
+> no existen. Para el estado del vault hoy, ver [[index]].
+>
+> **Dos momentos distintos, y no conviene mezclarlos.**
+> - `session-logs/` registra la reorganización de **diciembre 2024** (54 → 19 archivos en
+>   la raíz, backup `desicion-maker-backup-20241224-194148`). Es **anterior al historial de
+>   git de este repo** — el primer commit es del 2025-11-28 y arrancó con dos archivos —
+>   así que la fecha es real y no un error de tipeo: el proyecto existía en disco antes de
+>   `git init`.
+> - `reorganization/` es el **plan y análisis de enero 2026** (rama
+>   `refactor/reorganize-structure`), escrito *después* de esa reorganización y no ejecutado
+>   tal cual.
 >
 > **Plan y análisis — nunca ejecutados tal cual.** Los enlaces con forma de ruta en
 > estos documentos están rotos **a propósito**: son la estructura que el plan proponía y
