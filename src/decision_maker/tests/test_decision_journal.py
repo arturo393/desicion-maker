@@ -46,7 +46,7 @@ class TestDecisionJournal:
             lessons_learned="Lead time assumptions were conservative",
         )
         assert result is True
-        updated = journal.get_entry(entry.decision_id)
+        updated = journal.entry(entry.decision_id)
         assert any("OUTCOME:" in a for a in updated.assumptions_made)
 
     def test_log_outcome_nonexistent(self, tmp_path):
@@ -98,7 +98,7 @@ class TestDecisionJournal:
     def test_get_entry(self, tmp_path):
         journal = self._make_journal(tmp_path)
         entry = journal.log_decision(context="c", question="q", options=["A"])
-        found = journal.get_entry(entry.decision_id)
+        found = journal.entry(entry.decision_id)
         assert found is not None
         assert found.question == "q"
-        assert journal.get_entry("nonexistent") is None
+        assert journal.entry("nonexistent") is None

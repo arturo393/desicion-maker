@@ -327,14 +327,14 @@ def save_markdown_report(data: ReportData) -> str:
 
 def save_html_report(data: ReportData) -> str:
     try:
-        from jinja2 import Environment, FileSystemLoader
+        from jinja2 import Environment, FileSystemLoader, TemplateError
 
         env = Environment(loader=FileSystemLoader(os.path.join(os.path.dirname(__file__), "templates")))
         template = env.get_template("report.html.j2")
     except ImportError as e:
         logger.warning(f"Jinja2 not available ({e}), falling back to inline HTML generation")
         return _generate_html_inline(data)
-    except Exception as e:
+    except (TemplateError, OSError) as e:
         logger.warning(f"Template rendering unavailable ({e}), falling back to inline HTML generation")
         return _generate_html_inline(data)
 

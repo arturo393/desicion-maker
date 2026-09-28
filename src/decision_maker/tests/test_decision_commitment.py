@@ -40,7 +40,7 @@ class TestDecisionCommitment:
         commitment = c.create("OptA", {"OptA": self._make_stats("OptA", 5.0)})
         result = c.record_outcome(commitment.decision_id, was_successful=True, actual_result="Worked great")
         assert result is True
-        updated = c.get_entry(commitment.decision_id)
+        updated = c.entry(commitment.decision_id)
         assert updated.was_successful is True
 
     def test_record_outcome_nonexistent(self, tmp_path):

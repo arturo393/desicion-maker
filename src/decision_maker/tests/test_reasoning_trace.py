@@ -49,10 +49,10 @@ class TestReasoningTrace:
     def test_get_entry(self, tmp_path):
         trace = self._make_trace(tmp_path)
         entry = trace.record("p1", 0.5, "standard", ["MC"], [])
-        found = trace.get_entry(entry.decision_id)
+        found = trace.entry(entry.decision_id)
         assert found is not None
         assert found.problem_name == "p1"
-        assert trace.get_entry("nonexistent") is None
+        assert trace.entry("nonexistent") is None
 
     def test_summary(self, tmp_path):
         trace = self._make_trace(tmp_path)

@@ -28,7 +28,7 @@ class JsonlStore(Generic[T]):
       1. Load: per-line try/except so one corrupt line doesn't drop the rest
       2. Save: rewrite from memory (append-only log semantics)
       3. entries(): return all records
-      4. get_entry(id): find by a field
+      4. entry(id): find by a field
 
     Subclasses provide the dataclass type, a path, and the id field name.
     """
@@ -65,7 +65,7 @@ class JsonlStore(Generic[T]):
     def entries(self) -> list[T]:
         return list(self._entries)
 
-    def get_entry(self, entry_id: str) -> T | None:
+    def entry(self, entry_id: str) -> T | None:
         for entry in self._entries:
             if getattr(entry, self.id_field) == entry_id:
                 return entry
