@@ -6,7 +6,7 @@ Does NOT: Run decision algorithms (dispatches to them).
 
 from __future__ import annotations
 
-__all__ = ["AdaptiveRouter", "ProblemProfile"]
+__all__ = ["ENGINE_UNIVERSE", "ROUTES", "AdaptiveRouter", "ProblemProfile"]
 
 import logging
 from dataclasses import dataclass
@@ -16,6 +16,101 @@ import numpy as np
 from decision_maker.core.models import DecisionOption, Factor, Statistics
 
 logger = logging.getLogger(__name__)
+
+
+# The engine universe: the single source for "how many engines does this
+# framework have", so the answer is derived instead of repeated. 19 routable
+# engines, measured from the union of the three routes below.
+#
+# It is NOT the count of modules in core/ (59) nor the count of rows in the
+# Engines table of docs/architecture.md (31): that table also lists analysis and
+# presentation modules -- visualization, topology, registry, what_if -- which the
+# router never dispatches to. Routable engine and analysis module are two
+# different things and the notes used to add them up.
+#
+# Genetic is in the universe but in no route's recommended list, including
+# advanced's, whose own reasoning string says "Full suite needed". Whether that
+# is deliberate is an open question recorded in docs/kanban.md; it was not
+# changed here, because routing behaviour is a product decision.
+ENGINE_UNIVERSE: tuple[str, ...] = (
+    "MonteCarlo",
+    "TOPSIS",
+    "Pareto",
+    "DecisionTheory",
+    "Sensitivity",
+    "PROMETHEE",
+    "Robust",
+    "Bayesian",
+    "Genetic",
+    "Bootstrap",
+    "Ergodicity",
+    "Kelly",
+    "Antifragile",
+    "Explainability",
+    "GameTheory",
+    "ROA",
+    "MLSurrogate",
+    "Portfolio",
+    "InformationTheory",
+)
+
+# tier -> (recommended, skipped). Read-only reference data: the methods below
+# hand out copies so a caller mutating the result cannot corrupt the routes.
+ROUTES: dict[str, tuple[tuple[str, ...], tuple[str, ...]]] = {
+    "express": (
+        ("MonteCarlo", "TOPSIS", "Pareto", "DecisionTheory"),
+        (
+            "Bayesian",
+            "Genetic",
+            "GameTheory",
+            "ROA",
+            "MLSurrogate",
+            "Ergodicity",
+            "Kelly",
+            "Bootstrap",
+            "Portfolio",
+        ),
+    ),
+    "standard": (
+        (
+            "MonteCarlo",
+            "TOPSIS",
+            "Pareto",
+            "DecisionTheory",
+            "Sensitivity",
+            "PROMETHEE",
+            "Robust",
+            "Ergodicity",
+            "Kelly",
+            "Antifragile",
+            "Explainability",
+        ),
+        ("Genetic", "GameTheory", "ROA", "MLSurrogate", "Bootstrap"),
+    ),
+    "advanced": (
+        (
+            "MonteCarlo",
+            "TOPSIS",
+            "Pareto",
+            "DecisionTheory",
+            "Sensitivity",
+            "PROMETHEE",
+            "Robust",
+            "Bayesian",
+            "Ergodicity",
+            "Kelly",
+            "Antifragile",
+            "Explainability",
+            "Bootstrap",
+            "GameTheory",
+            "ROA",
+            "MLSurrogate",
+            "Portfolio",
+            "InformationTheory",
+        ),
+        (),
+    ),
+}
 
 
 @dataclass
@@ -38,9 +133,13 @@ class AdaptiveRouter:
     """
     Selects the optimal engine suite based on problem complexity.
 
-    Key insight: 24 engines is overkill for simple problems and sometimes
-    insufficient for complex ones. The router measures complexity and
+    Key insight: the full engine set is overkill for simple problems and
+    sometimes insufficient for complex ones. The router measures complexity and
     routes to the right subset, saving compute and reducing noise.
+
+    How many engines there are comes from ENGINE_UNIVERSE below, not from prose:
+    three notes used to say 24, this docstring said 24, and the routes listed a
+    different set -- 19. Read the number off the constant.
 
     Complexity dimensions:
     1. Number of options (more = harder)
@@ -144,30 +243,26 @@ class AdaptiveRouter:
         return opt_score + factor_score + uncertainty_score + diversity_score + correlation_score
 
     @staticmethod
+    def _route(mode: str) -> tuple[list[str], list[str]]:
+        recommended, skipped = ROUTES[mode]
+        return list(recommended), list(skipped)
+
+    @staticmethod
     def _simple_engines() -> tuple[list[str], list[str]]:
-        return (
-            ["MonteCarlo", "TOPSIS", "Pareto", "DecisionTheory"],
-            ["Bayesian", "Genetic", "GameTheory", "ROA", "MLSurrogate",
-             "Ergodicity", "Kelly", "Bootstrap", "Portfolio"],
-        )
+        return AdaptiveRouter._route("express")
 
     @staticmethod
     def _moderate_engines() -> tuple[list[str], list[str]]:
-        return (
-            ["MonteCarlo", "TOPSIS", "Pareto", "DecisionTheory", "Sensitivity",
-             "PROMETHEE", "Robust", "Ergodicity", "Kelly", "Antifragile", "Explainability"],
-            ["Genetic", "GameTheory", "ROA", "MLSurrogate", "Bootstrap"],
-        )
+        return AdaptiveRouter._route("standard")
 
     @staticmethod
     def _advanced_engines() -> tuple[list[str], list[str]]:
-        return (
-            ["MonteCarlo", "TOPSIS", "Pareto", "DecisionTheory", "Sensitivity",
-             "PROMETHEE", "Robust", "Bayesian", "Ergodicity", "Kelly",
-             "Antifragile", "Explainability", "Bootstrap", "GameTheory",
-             "ROA", "MLSurrogate", "Portfolio", "InformationTheory"],
-            [],
-        )
+        return AdaptiveRouter._route("advanced")
+
+    @staticmethod
+    def all_engines() -> list[str]:
+        """The engine universe, as a list. This is the number the docs quote."""
+        return list(ENGINE_UNIVERSE)
 
     @staticmethod
     def should_skip_engine(engine_name: str, profile: ProblemProfile) -> bool:

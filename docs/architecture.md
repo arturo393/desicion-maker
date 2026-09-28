@@ -13,7 +13,7 @@ updated: 2026-09-27
 
 # Architecture
 
-Dual Python + Rust framework for multi-criteria decision analysis under uncertainty. 24 motores cuantitativos, 537 tests. Performance-critical Monte Carlo normalization runs in a native Rust extension (`rust_core/`).
+Dual Python + Rust framework for multi-criteria decision analysis under uncertainty. 19 motores ruteables, 539 tests. Performance-critical Monte Carlo normalization runs in a native Rust extension (`rust_core/`).
 
 ## Building Blocks
 
@@ -31,6 +31,9 @@ results = await fw.run_analysis(mode="standard")
 
 | Engine | File | Purpose | Mode |
 |--------|------|---------|------|
+| Game Theory | `game_theory.py` | Pure Nash equilibria, competitive-robustness labels | advanced |
+| Real Options (ROA) | `roa.py` | Flexibility value via Black-Scholes | advanced |
+| ML Surrogate | `ml_surrogate.py` | Neural/tree surrogates replacing full Monte Carlo in genetic passes | advanced |
 | Monte Carlo | `monte_carlo.py` | Stochastic simulation of N scenarios | all |
 | TOPSIS | `topsis.py` | Fuzzy multi-criteria ranking | all |
 | Pareto | `pareto.py` | Efficient frontier / dominated options | all |
@@ -58,6 +61,8 @@ results = await fw.run_analysis(mode="standard")
 | Ergodicity | `ergodicity.py` | Time-average vs ensemble growth, ruin probability | standalone |
 | Kelly Criterion | `kelly.py` | Optimal bet sizing under uncertainty (field-benchmark win threshold) | standalone |
 | Fuzzy Weighted Sum | `fuzzy_weighted_sum.py` | Weighted-sum aggregation with fuzzy membership | standalone |
+
+This table is a **module index**, not an engine count. Of the rows above, 19 are engines the router dispatches to and their names come from `ENGINE_UNIVERSE` in `core/adaptive_router.py`; the rest are analysis, presentation or infrastructure modules the router never calls (Visualization, Topology, Registry, What-If, the Rust core). Two rows are the same engine as another: `PROMETHEE (uncertainty)` and `PROMETHEE II (crisp)` are both `PROMETHEE`. `Genetic` is in the universe and in no recommended route — see docs/kanban.md.
 | Learning System | `outcome_tracker.py`, `calibration.py`, `decision_journal.py`, `adaptive_router.py` | Outcome tracking, confidence calibration, journal, adaptive routing | library |
 | Meta-Learning | `action_threshold.py`, `reasoning_trace.py`, `unknown_scanner.py`, `meta_calibration.py` | Action threshold, reasoning trace, unknown scanner, meta-calibration | library |
 | Decision Gates | `decision_gates.py` | Veto power: ergodicity, ruin, causal DAG, commitment | library |
@@ -141,7 +146,7 @@ Statistics (per option after MC)
 
 ## Test Coverage
 
-537 tests across all engines. Run with:
+539 tests across all engines. Run with:
 
 ```bash
 uv run pytest src/decision_maker/tests/ -v

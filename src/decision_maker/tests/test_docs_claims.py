@@ -18,11 +18,12 @@ Four of the five claims below were wrong when this file was written:
 * `AGENTS.md` demanded Python 3.12+ while `pyproject.toml` declared `>=3.11`
   and CI's lowest matrix cell is 3.11.
 
-What these tests CANNOT do is verify that "24 motores" is true. There is no
-engine registry in the codebase — no `ENGINES`, no `__all__` in `core/` that
-enumerates them — so the number is a curated claim with nothing behind it.
-`test_engine_count_is_consistent_across_notes` checks only that the three notes
-agree with each other, which is weaker on purpose and says so out loud.
+The engine count is now DERIVED, not compared. It used to be the opposite: three
+notes said 24, `adaptive_router.py`'s own docstring said 24, and the three route
+lists summed to 19 — the notes agreed with each other and all three were wrong,
+which is exactly what a test that only compares copies of a number cannot see.
+`ENGINE_UNIVERSE` and `ROUTES` in `core/adaptive_router.py` are now the single
+source, and the tests read the number off them.
 
 Run:  uv run pytest src/decision_maker/tests/test_docs_claims.py -v
 """
@@ -32,6 +33,8 @@ import re
 from pathlib import Path
 
 import pytest
+
+from decision_maker.core.adaptive_router import ENGINE_UNIVERSE, ROUTES
 
 REPO = Path(__file__).resolve().parents[3]
 DOCS = REPO / "docs"
@@ -158,22 +161,60 @@ def test_results_stays_unversioned() -> None:
     )
 
 
-def test_engine_count_is_consistent_across_notes() -> None:
-    """The three notes that name an engine total must name the same one.
+def test_routes_cover_exactly_the_engine_universe() -> None:
+    """Every routed engine is declared, and every declared engine is routed somewhere.
 
-    WEAKER THAN IT LOOKS, deliberately: this proves the notes agree, not that 24 is
-    right. Nothing in the codebase enumerates the engines, so truth is not
-    checkable — see the module docstring. When a registry exists, this test should
-    be replaced by one that derives the number instead of comparing copies of it.
+    This is the invariant that makes the doc's number derivable. It was added with
+    `ENGINE_UNIVERSE`, and it fails in both directions: an engine in a route that
+    nobody declared, and a declared engine that no route ever reaches.
     """
-    found: dict[str, int] = {}
-    for name in ("architecture.md", "roadmap.md", "kanban.md"):
-        text = _read(DOCS / name)
-        match = re.search(r"(\d+)\s+motores", text, re.IGNORECASE)
-        assert match, f"{name} no longer states an engine count, or states it in an unreadable form"
-        found[name] = int(match.group(1))
+    routed = {name for recommended, skipped in ROUTES.values() for name in (*recommended, *skipped)}
+    declared = set(ENGINE_UNIVERSE)
 
-    assert len(set(found.values())) == 1, f"the notes disagree on the engine count: {found}"
+    assert len(ENGINE_UNIVERSE) == len(declared), "ENGINE_UNIVERSE repeats an engine name"
+    assert not routed - declared, f"routed but never declared: {sorted(routed - declared)}"
+    assert not declared - routed, f"declared but no route ever reaches it: {sorted(declared - routed)}"
+
+
+def test_documented_engine_count_is_the_derived_one() -> None:
+    """The notes must state the number the code produces, not a remembered one.
+
+    The old version of this test compared the three notes to each other, which
+    proved they agreed and nothing else: they all said 24 while the routes summed
+    to 19, and the docstring said 24 too. Comparing copies of a number cannot
+    detect the number being wrong — only reading it off the source can.
+    """
+    expected = len(ENGINE_UNIVERSE)
+    for name in ("architecture.md", "roadmap.md", "kanban.md"):
+        # "N motores" a secas tambien matchea prosa sobre una cantidad parcial ("faltan
+        # tres motores"), asi que se exige la frase canonica del total.
+        match = re.search(r"(\d+)\s+motores ruteables", _read(DOCS / name), re.IGNORECASE)
+        assert match, f"{name} no longer states an engine count, or states it unreadably"
+        assert int(match.group(1)) == expected, (
+            f"{name} says {match.group(1)} engines, but ENGINE_UNIVERSE has {expected}. "
+            f"Add the engine to core/adaptive_router.py first, then update the note."
+        )
+
+
+def test_every_engine_is_named_in_the_architecture_table() -> None:
+    """The `### Engines` table must name every engine the router can dispatch to.
+
+    Three routable engines were missing from it (GameTheory, ROA, MLSurrogate) for
+    as long as it existed: the table was maintained by hand and the router by hand,
+    and nothing compared them. Matching is on letters only, so `DecisionTheory`
+    matches a row titled "Decision Theory".
+    """
+    text = _read(DOCS / "architecture.md")
+    table = text[text.index("### Engines") :]
+    end = table.find("\n## ", 1)
+    if end != -1:
+        table = table[:end]
+    squashed = re.sub(r"[^a-z]", "", table.lower())
+
+    for engine in ENGINE_UNIVERSE:
+        assert re.sub(r"[^a-z]", "", engine.lower()) in squashed, (
+            f"{engine} is routable but the ### Engines table never names it"
+        )
 
 
 def test_agents_python_floor_matches_pyproject() -> None:

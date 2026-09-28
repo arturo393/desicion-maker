@@ -21,7 +21,7 @@ Tablero de ejecución en tiempo real: [[kanban]].
 
 ## 🎯 Estado Actual (v3.0)
 
-El framework dispone de **24 motores de decisión**, API REST, interfaz web interactiva y CLI.
+El framework dispone de **19 motores ruteables**, API REST, interfaz web interactiva y CLI.
 
 ### Motores Completados
 - **Antifrágil**: [[antifragile-engine]] — estrategia Barbell, convexidad, indexación de fragilidad y vía negativa.
