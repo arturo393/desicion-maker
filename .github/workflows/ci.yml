@@ -20,10 +20,15 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
-          cache: pip
 
       - name: Set up Rust toolchain
         uses: dtolnay/rust-toolchain@stable
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
 
       - name: Cache Rust build
         uses: actions/cache@v4
@@ -33,37 +38,38 @@ jobs:
             ~/.cargo/registry
           key: ${{ runner.os }}-cargo-${{ hashFiles('rust_core/Cargo.lock') }}
 
-      - name: Install package (builds Rust extension via maturin)
-        run: |
-          python -m pip install --upgrade pip
-          pip install "maturin>=1.4,<2.0"
-          pip install -e ".[test]"
+      # --frozen falla si uv.lock no corresponde a pyproject.toml, que es
+      # justamente lo que se quiere: el drift tiene que romper el build, no
+      # resolverse en silencio. maturin es el build-backend declarado, asi que
+      # uv sync compila la extension Rust sin pasos extra.
+      - name: Install from the frozen lock (builds Rust extension via maturin)
+        run: uv sync --frozen --extra dev
 
       - name: Lint with ruff
-        run: ruff check .
+        run: uv run ruff check .
 
       - name: Run dev-agents linter
-        run: python scripts/dev_agents_linter.py src/decision_maker/core
+        run: uv run python scripts/dev_agents_linter.py src/decision_maker/core
 
       - name: "Docs: every link resolves"
-        run: python scripts/check_docs_links.py
+        run: uv run python scripts/check_docs_links.py
 
       - name: "Docs: vault root is docs/ and holds no generated content"
-        run: python scripts/check_docs_scope.py
+        run: uv run python scripts/check_docs_scope.py
 
       - name: "Docs: notes match the source they describe"
-        run: python scripts/check_obsidian_fidelity.py
+        run: uv run python scripts/check_obsidian_fidelity.py
 
       - name: "Docs: no cross-language drift in the vault"
-        run: python scripts/check_obsidian_language.py
+        run: uv run python scripts/check_obsidian_language.py
 
       - name: Run tests
-        run: pytest --tb=short -q
+        run: uv run pytest --tb=short -q
 
       - name: Coverage gate (core >= 80%)
         run: |
-          coverage run --source=src/decision_maker/core -m pytest --tb=short -q
-          coverage report --fail-under=80
+          uv run coverage run --source=src/decision_maker/core -m pytest --tb=short -q
+          uv run coverage report --fail-under=80
 
   build-wheel:
     name: Build wheel (maturin sdist + wheel)
