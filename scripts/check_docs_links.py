@@ -42,9 +42,13 @@ KNOWN_BROKEN: dict[str, dict[str, str]] = {
             "./ANALISIS_REORGANIZACION_FINAL.md", "./README_REORGANIZATION.md",
             "./REORGANIZATION_COMPLETE.md", "./REORGANIZATION_PLAN.md",
             "./REORGANIZATION_SUMMARY.md", "./docs/CREAR_NUEVO_SCRIPT.md",
-            "./docs/QUICK_START.md", "./docs/architecture.md", "./docs/index.md",
-            "./python/scripts/",
+            "./docs/QUICK_START.md",
         )
+    } | {
+        # NOT the same case as the ones above, and it used to be filed with them:
+        # this is a directory that never existed, not a doc from the phantom tree.
+        "./python/scripts/": "proposed script directory from the same unexecuted plan; "
+                            "the path does not exist on disk either way",
     },
     "docs/reorganization/plan.md": {
         "./REORGANIZATION_PLAN.md#ejecución":

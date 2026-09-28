@@ -24,4 +24,4 @@ nav:
   - Guide: guide.md
   - Architecture: architecture.md
   - ADRs:
-    - 001: Rust Math Engine: adr/001-use-rust-for-math-engine.md
+    - "001: Rust Math Engine": adr/001-use-rust-for-math-engine.md

@@ -112,23 +112,23 @@ research_leaky_feeder.py        🔄 (path .env: ../.. )
 
 ### Para Principiantes
 - [README_REORGANIZATION.md](./README_REORGANIZATION.md) - Guía rápida (5 min)
-- [docs/index.md](./docs/index.md) - Tabla de contenidos
+- [docs/index.md](../index.md) - Tabla de contenidos
 - [docs/QUICK_START.md](./docs/QUICK_START.md) - Primeros pasos (3 pasos, 5 min)
 
 ### Para Desarrolladores
 - [docs/CREAR_NUEVO_SCRIPT.md](./docs/CREAR_NUEVO_SCRIPT.md) - Plantilla
-- [docs/architecture.md](./docs/architecture.md) - Entender internals
+- [docs/architecture.md](../architecture.md) - Entender internals
 - [python/scripts/](./python/scripts/) - Scripts organizados
 
 ### Para Arquitectos
-- [docs/architecture.md](./docs/architecture.md) - 870 líneas, todo
+- [docs/architecture.md](../architecture.md) - 870 líneas, todo
 - [REORGANIZATION_PLAN.md](./REORGANIZATION_PLAN.md) - Plan técnico
 - [ANALISIS_REORGANIZACION_FINAL.md](./ANALISIS_REORGANIZACION_FINAL.md) - Análisis profundo
 
 ### Para Mantenedores
 - [REORGANIZATION_SUMMARY.md](./REORGANIZATION_SUMMARY.md) - Cambios rápidos
 - [REORGANIZATION_COMPLETE.md](./REORGANIZATION_COMPLETE.md) - Cómo usar nuevo
-- [docs/index.md](./docs/index.md) - Navegar fácilmente
+- [docs/index.md](../index.md) - Navegar fácilmente
 
 ---
 

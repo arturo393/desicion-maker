@@ -80,7 +80,7 @@ Una revisión estructural encontró cinco defectos Alta. Todos corregidos, y dos
 ### Lo que este trabajo NO verificó
 
 - **Ninguno de los 4 checkers corre en el harness de tests.** Se ejecutan como scripts en CI. Un test que verifica que el archivo aparece en la salida de CI sigue sin existir.
-- **Los 13 enlaces rotos preexistentes siguen rotos.** Están documentados por target exacto en `KNOWN_BROKEN` porque apuntan a un árbol de documentación propuesto que nunca se ejecutó; reescribir los paths no arregla nada.
+- **De los enlaces rotos preexistentes, dos no estaban rotos.** Están documentados por target exacto en `KNOWN_BROKEN` porque apuntan a un árbol de documentación propuesto que nunca se ejecutó; reescribir los paths no arregla nada.
 - **2 literales `.py` en notas `archive` no se verifican contra el árbol**: están en la bitácora de Dic-2025 y el checker los lista como NOTA, no como fallo, porque son afirmaciones sobre el pasado. Los nombres y las líneas están en la salida del propio checker, que es donde se leen; no se repiten acá porque un literal `.py` en esta nota se verifica contra el árbol actual.
 - **El fix del `open()` con context manager no se ejecutó en runtime.** El script es de análisis, necesita red y asyncio, y la suite no lo cubre. Lo verificado es que el archivo compila y que el patrón es la equivalencia directa del original.
 - **`AGENTS.md` decía "Python 3.12+" y `pyproject.toml` exige `>=3.11`.** Corregido a 3.11+, que es el piso que la CI prueba en su celda más baja. Ver abajo.
@@ -89,7 +89,7 @@ Una revisión estructural encontró cinco defectos Alta. Todos corregidos, y dos
 
 La ronda anterior verificó que las afirmaciones sobre el código fueran ciertas. Estas son las que hablan de **conteos**, que envejecen distinto: un literal `.py` queda viejo cuando el código se mueve, pero un total como "521 tests" queda viejo sin que nadie toque nada. Cuatro estaban mal:
 
-- **`architecture.md` e `index.md` decían 495 tests; había 521.** Ahora 539, que es el total real con los seis tests de este ratchet y los diez de `test_checkers_run.py` incluidos. El número volvió a moverse en el mismo commit en que se escribió el test que lo vigila, que es exactamente lo que debería pasar.
+- **`architecture.md` e `index.md` decían 495 tests; había 521.** Ahora 543, que es el total real con los seis tests de este ratchet y los diez de `test_checkers_run.py` incluidos. El número volvió a moverse en el mismo commit en que se escribió el test que lo vigila, que es exactamente lo que debería pasar.
 - **`decision-analyses.md` decía 36 scripts y su propia tabla listaba 37 filas.** La 37 es `_template.py`, la plantilla canónica, que no es un análisis. El texto ahora lo dice en vez de dejar que la prosa y la tabla se contradigan.
 - **`results-catalog.md` afirmaba que el repositorio registraba 295 archivos, en `results/`.** `results/` está en `.gitignore` con **cero** archivos versionados, así que ese número sólo podía reproducirlo la máquina que lo escribió — y ahora hay 2081 archivos ahí, porque las corridas siguieron. Dos claims más del mismo tipo aparecieron al escribir el detector: `improvement-analysis.md` ("17 archivos") y una mención de "~300 reportes" en [[note-schema]]. Los tres se reemplazaron por la regla de nomenclatura, que sí es reproducible. Nota sobre esta línea: el texto va redactado así a propósito. La primera redacción citaba el claim literal y el ratchet la marcó a sí mismo, porque no distingue entre afirmar un conteo y citar uno viejo. Se prefirió la regla simple y estricta antes que enseñarle al regex a reconocer el pasado.
 - **Los 37 enlaces entrantes de [[database-hub]] no correspondían a ninguna métrica.** Medido: 28 notas distintas y 42 instancias.
@@ -173,18 +173,55 @@ suitos de CI, así que la suite podía estar 100% verde con un checker roto.
 `test_checkers_run.py` los corre como subprocesos y verifica su código de
 salida.
 
+### Quinta ronda: tres cards del kanban describían defectos que no existían (28-Sep-2026)
+
+El kanban abría tres frentes que, medidos uno por uno, no eran lo que decían —
+misma clase que el conteo «24 motores» de la ronda anterior. Se midió cada uno
+antes de tocar código, y en dos casos el instrumento era el que estaba mal:
+
+| Card decía | Medición | Qué se hizo |
+|---|---|---|
+| `nav: index.md` no resuelve contra `docs/index.md` | **Sí resuelve**: mkdocs arma los targets de `nav` contra `docs_dir` | Nada; el problema real era otro |
+| 13 enlaces rotos, «los targets no existen en ningún lado» | **Dos sí existen** un nivel arriba | Se arreglaron; ver abajo |
+| Fidelidad agrupa clases por nota, no por sección | **Ya resuelve por sección** (`sections()` + claim 2, con test dedicado) | Nada; ya estaba corregido |
+
+**El defecto real de `mkdocs.yml` era peor que el reportado: el archivo no era
+YAML válido.** La línea 27 era `- 001: Rust Math Engine: adr/...`, con un `:` sin
+comillas dentro del valor, así que `mkdocs build` abortaba en el parser antes de
+mirar el vault. Nunca se había compilado, y no podía: no está en CI, ni en el
+extra `test`, ni instalado. El ratchet nuevo (`test_mkdocs_config.py`, 4 tests)
+afirma que el archivo parsea y que cada target de `nav` existe, con un control
+negativo que exige que el `:` sin comillas **levante excepción** — verificado
+revirtiendo el arreglo: el test se pone rojo.
+
+Medido después del arreglo: `mkdocs build` da 49 warnings, de los cuales **8 son
+links rotos reales** (los mismos que quedan declarados) y **41 son mkdocs sin ver
+fuera de `docs_dir`** — `../README.md` desde `docs/` apunta al root del repo y
+existe, sólo que mkdocs no lo resuelve. Sigue sin ser el publicador del vault:
+los wikilinks necesitan plugin y su `nav` cubre 4 de 54 notas.
+
+Sobre los enlaces: once entradas estaban declaradas en `KNOWN_BROKEN` con una
+justificación **en bloque** («los targets no existen en ningún lado») que era
+falsa para dos de ellas. Al medir una por una, `./docs/architecture.md` y
+`./docs/index.md` desde `docs/reorganization/` resolvían a `../architecture.md` y
+`../index.md`, que existen. Se corrigieron y se sacaron de la lista: **11 → 9**.
+`./python/scripts/` quedó con su propia razón porque es un directorio que nunca
+existió, no un documento del árbol fantasma — la justificación agrupada lo había
+tapado.
+
+Deuda al cerrar la ronda: **543 tests**.
+
 ## En curso
 
 - [ ] Falta nota para 41 módulos anunciados en `[[architecture]]` — entre ellos `pareto.py`, `decision_theory.py`, `sensitivity.py`, `aggregator.py` y `config_runner.py`, todos de primera clase en el pipeline `standard`
 
 ## Pendiente
 
-- [ ] `mkdocs.yml` (raíz del repo, no `docs/mkdocs.yml`) declara `nav: Home: index.md`, que no matchea `docs/index.md` en disco
-- [ ] `check_obsidian_fidelity.py` agrupa las clases por nota, no por sección `## \`modulo.py\``: una nota podría mandar a importar `AHPHelper` desde TOPSIS y el check lo aprobaría
 - [ ] Falta decidir si `reorganization/` y `session-logs/` se fusionan (el análisis dice que no, por diff de contenido)
+- [ ] Falta decidir si `mkdocs.yml` se completa como publicador o se retira: hoy es válido y verificado, pero no renderiza los wikilinks del vault ni ve fuera de `docs_dir`
 
 ## Descartado
 
-- [x] 12 links rotos en `reorganization/DELIVERABLES.md` — el plan nunca se ejecutó; los targets no existen en ningún lado, así que arreglar los paths no arregla nada. Quedan declarados como pre-existentes en `KNOWN_BROKEN`
+- [x] Enlaces rotos en `reorganization/deliverables.md` y `plan.md` — el plan nunca se ejecutó. Once entradas quedaron declaradas en `KNOWN_BROKEN` con una justificación en bloque, y al medir una por una dos eran falsas: `./docs/architecture.md` y `./docs/index.md` tienen destino real un nivel arriba. Corregidas; quedan 9, cada una con su razón, y `./python/scripts/` aparte porque es un directorio inexistente y no un documento del árbol fantasma
 - [x] `docs/reorganization/` y `docs/session-logs/` no se fusionan: se verificó por diff que tienen contenido distinto (256 vs 307 líneas). Sólo falta declarar cuál es el canónico
 - [x] Archivo de histórico: [[reorganization/README|reorganization]] — documentación de la reorganización de 2026
