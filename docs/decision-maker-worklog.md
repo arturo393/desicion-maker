@@ -89,7 +89,7 @@ Una revisión estructural encontró cinco defectos Alta. Todos corregidos, y dos
 
 La ronda anterior verificó que las afirmaciones sobre el código fueran ciertas. Estas son las que hablan de **conteos**, que envejecen distinto: un literal `.py` queda viejo cuando el código se mueve, pero un total como "521 tests" queda viejo sin que nadie toque nada. Cuatro estaban mal:
 
-- **`architecture.md` e `index.md` decían 495 tests; había 521.** Ahora 527, que es el total real con los seis tests de este ratchet incluidos. El número volvió a moverse en el mismo commit en que se escribió el test que lo vigila, que es exactamente lo que debería pasar.
+- **`architecture.md` e `index.md` decían 495 tests; había 521.** Ahora 537, que es el total real con los seis tests de este ratchet y los diez de `test_checkers_run.py` incluidos. El número volvió a moverse en el mismo commit en que se escribió el test que lo vigila, que es exactamente lo que debería pasar.
 - **`decision-analyses.md` decía 36 scripts y su propia tabla listaba 37 filas.** La 37 es `_template.py`, la plantilla canónica, que no es un análisis. El texto ahora lo dice en vez de dejar que la prosa y la tabla se contradigan.
 - **`results-catalog.md` afirmaba que el repositorio registraba 295 archivos, en `results/`.** `results/` está en `.gitignore` con **cero** archivos versionados, así que ese número sólo podía reproducirlo la máquina que lo escribió — y ahora hay 2081 archivos ahí, porque las corridas siguieron. Dos claims más del mismo tipo aparecieron al escribir el detector: `improvement-analysis.md` ("17 archivos") y una mención de "~300 reportes" en [[note-schema]]. Los tres se reemplazaron por la regla de nomenclatura, que sí es reproducible. Nota sobre esta línea: el texto va redactado así a propósito. La primera redacción citaba el claim literal y el ratchet la marcó a sí mismo, porque no distingue entre afirmar un conteo y citar uno viejo. Se prefirió la regla simple y estricta antes que enseñarle al regex a reconocer el pasado.
 - **Los 37 enlaces entrantes de [[database-hub]] no correspondían a ninguna métrica.** Medido: 28 notas distintas y 42 instancias.
@@ -123,16 +123,64 @@ Un conteo de 87 que resulta ser cero no es un audit con 87 hallazgos: es un dete
 Dos pendientes del kanban medidos en el camino, sin abrir nada nuevo: `ndarray = "0.15"` está declarado en `rust_core/Cargo.toml` y tiene **cero usos** en el único archivo `.rs` del crate, así que la dependencia está sin usar; y `mkdocs.yml` declara 4 entradas de navegación contra 54 notas, o sea 50 inalcanzables desde el nav del generador estático, aunque las 4 entradas apuntan a archivos reales.
 
 
+### Cuarta ronda: el entorno que nadie estaba mirando
+
+Las tres rondas anteriores_operandaron sobre el código. Esta se abrió porque
+`cargo check` falló con un error que no era del código, y resultó ser el más
+importante de los cuatro.
+
+**La suite no se estaba corriendo en el entorno del proyecto.** `uv run pytest`
+resolvía a `/home/arturo/.local/bin/pytest` — un Python 3.14.4 del
+site-packages del usuario — porque `.venv/` se había creado sin el extra `test`
+y por lo tanto sin `pytest`. Lo que se medía en las rondas anteriores era:
+
+| | intérprete | numpy | scipy | pytest |
+|---|---|---|---|---|
+| **lo que se medía** | `/usr/bin/python3` 3.14.4 | 2.5.2 | 1.18.0 | 8.3.5 (global) |
+| **el proyecto** | `.venv/bin/python` 3.11.15 | 2.4.6 | 1.17.1 | no estaba instalado |
+
+O sea, tres entornos distintos: el que se testeaba, el que declara `pyproject.toml`
+y el que construía CI. La afirmación "el runtime es 3.11.15" de la sección de
+`ruff` era cierta para `uv run python` y falsa para los tests.
+
+Al sincronizar el venv aparecieron 8 errores que no existían: `uvicorn` no está
+declarado en el extra `test` — a propósito, porque los tests ejercitan rutas y
+no el proceso que sirve — pero `api/server.py` lo importaba a nivel de módulo, lo
+que hacía el archivo inimportable sin un servidor ASGI. El import se movió a
+`run_server()`, que es el único lugar donde se usa. Los 8 tests de
+`test_api_server.py` son el ratchet: devolver el import arriba los rompe.
+
+**El linter de dev-agents llevaba rojo desde `74d116e`.** CI corre
+`dev_agents_linter.py src/decision_maker/core` y el paso salía con 1. Nueve
+violaciones, de las cuales dos eran defectos reales y las otras siete eran parámetros:
+
+- `reporting.py` — `except Exception` alrededor de la carga del template de
+  Jinja2. Ahora `(TemplateError, OSError)`, que es lo que `get_template` puede
+  levantar de verdad.
+- `jsonl_store.get_entry` → `entry`, que era el otro nombre con prefijo `get_`
+  del repo, y empareja con el `entries()` que ya existía.
+
+Las siete de UX-01 (5 a 14 parámetros) no se refactorizaron: convertir
+`log_decision` y `create` en Parameter Objects es un rediseño de API sobre
+cuatro módulos y ~40 call sites, que necesita spec propia. Lo que sí se hizo es
+convertir la regla en un ratchet de dos vías en `dev_agents_linter.py`: falla si
+se **agrega** una violación y también si se **arregla** una sin actualizar la
+tabla, así que el número sólo puede bajar y nadie lo baja en silencio. Los tres
+controles negativos están verificados.
+
+Y el mismo criterio para los checkers: `scripts/` se ejecutaba como pasos
+suitos de CI, así que la suite podía estar 100% verde con un checker roto.
+`test_checkers_run.py` los corre como subprocesos y verifica su código de
+salida.
+
 ## En curso
 
 - [ ] Falta nota para 41 módulos anunciados en `[[architecture]]` — entre ellos `pareto.py`, `decision_theory.py`, `sensitivity.py`, `aggregator.py` y `config_runner.py`, todos de primera clase en el pipeline `standard`
 
 ## Pendiente
 
-- [ ] `ndarray` sigue declarado en `rust_core/Cargo.toml` sin usarse en `lib.rs`, y `README.md:3`, `README.md:47` y `docs/index.md:43` lo siguen anunciando como parte del stack
 - [ ] `mkdocs.yml` (raíz del repo, no `docs/mkdocs.yml`) declara `nav: Home: index.md`, que no matchea `docs/index.md` en disco
 - [ ] `check_obsidian_fidelity.py` agrupa las clases por nota, no por sección `## \`modulo.py\``: una nota podría mandar a importar `AHPHelper` desde TOPSIS y el check lo aprobaría
-- [ ] `docs/.obsidian/` sin regla en `.gitignore` raíz: commitearlo arrastra 968 KB de `main.js` vendorizado del plugin Kanban
 - [ ] Falta decidir si `reorganization/` y `session-logs/` se fusionan (el análisis dice que no, por diff de contenido)
 
 ## Descartado
