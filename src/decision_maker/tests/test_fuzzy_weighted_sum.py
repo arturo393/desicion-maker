@@ -1,11 +1,11 @@
 import pytest
 
 from decision_maker.core.fuzzy_weighted_sum import (
+    CriterionDirection,
     FuzzyCriterion,
     FuzzyNumber,
     FuzzyOption,
     FuzzyWeightedSum,
-    CriterionDirection,
 )
 
 

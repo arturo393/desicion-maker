@@ -9,8 +9,8 @@ from __future__ import annotations
 __all__ = ["DecisionJournal", "JournalEntry"]
 
 import logging
-from datetime import datetime, timezone
 from dataclasses import dataclass, field
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -47,9 +47,9 @@ class JournalEntry:
 
     def __post_init__(self):
         if not self.timestamp:
-            self.timestamp = datetime.now(timezone.utc).isoformat()
+            self.timestamp = datetime.now(UTC).isoformat()
         if not self.decision_id:
-            self.decision_id = f"dec_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}"
+            self.decision_id = f"dec_{datetime.now(UTC).strftime('%Y%m%d_%H%M%S')}"
 
 
 class DecisionJournal(JsonlStore[JournalEntry]):

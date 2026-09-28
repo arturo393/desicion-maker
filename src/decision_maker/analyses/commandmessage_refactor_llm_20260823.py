@@ -189,7 +189,7 @@ async def main():
     scores_by_opt = {name: weighted_scores(s) for name, s in samples_by_opt.items()}
 
     print("=" * 96)
-    print("MONTE CARLO — score compuesto ponderado (escala 0-10, REV 2 + MantenimientoAsistidoLLM), N=%d" % N)
+    print(f"MONTE CARLO — score compuesto ponderado (escala 0-10, REV 2 + MantenimientoAsistidoLLM), N={N}")
     print("=" * 96)
     stats = {}
     for name, sc in scores_by_opt.items():
@@ -198,7 +198,7 @@ async def main():
         print(f"  {name:42s} p5={p5:5.2f}  mean={mean:5.2f}  p95={p95:5.2f}")
 
     print()
-    print("FRECUENCIA DE SER LA MEJOR OPCIÓN (de %d muestras):" % N)
+    print(f"FRECUENCIA DE SER LA MEJOR OPCIÓN (de {N} muestras):")
     win = {name: 0 for name in scores_by_opt}
     M = np.stack([scores_by_opt[o.name] for o in options], axis=0)  # (n_opt, N)
     winners = np.argmax(M, axis=0)

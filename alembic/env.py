@@ -1,5 +1,5 @@
-from logging.config import fileConfig
 import os
+from logging.config import fileConfig
 
 from sqlalchemy import engine_from_config, pool
 
@@ -15,8 +15,9 @@ if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
 # Load models so their tables are registered on SQLModel.metadata.
-from decision_maker.core import db_models  # noqa: F401
 from sqlmodel import SQLModel
+
+from decision_maker.core import db_models  # noqa: F401
 
 target_metadata = SQLModel.metadata
 

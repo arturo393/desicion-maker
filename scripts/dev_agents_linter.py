@@ -47,9 +47,12 @@ class DevAgentsVisitor(ast.NodeVisitor):
 
     def visit_Call(self, node):
         # Rule: No print() in prod
-        if isinstance(node.func, ast.Name) and node.func.id == "print":
-            if "tests/" not in self.filename:
-                self.add_violation(node.lineno, "OBS-01", "Found print() statement. Use structured logging (logger) instead.")
+        if (
+            isinstance(node.func, ast.Name)
+            and node.func.id == "print"
+            and "tests/" not in self.filename
+        ):
+            self.add_violation(node.lineno, "OBS-01", "Found print() statement. Use structured logging (logger) instead.")
         self.generic_visit(node)
 
     def visit_ExceptHandler(self, node):
@@ -68,7 +71,7 @@ def check_file_header(filepath, content):
         tree = ast.parse(content)
     except SyntaxError:
         return ["Syntax Error"]
-        
+
     violations = []
     docstring = ast.get_docstring(tree)
     if not docstring:
@@ -77,16 +80,16 @@ def check_file_header(filepath, content):
         lines = [line.strip() for line in docstring.split("\n") if line.strip()]
         if len(lines) < 3:
             violations.append(f"{filepath}:1 - [UX-03] Module docstring is too short ({len(lines)} lines). Requires a 3-line header (what it does, how to use it, what it DOES NOT do).")
-            
+
     return violations
 
 
 def lint_file(filepath):
-    with open(filepath, "r", encoding="utf-8") as f:
+    with open(filepath, encoding="utf-8") as f:
         content = f.read()
 
     header_violations = check_file_header(filepath, content)
-    
+
     try:
         tree = ast.parse(content)
     except SyntaxError as e:
@@ -94,16 +97,16 @@ def lint_file(filepath):
 
     visitor = DevAgentsVisitor(filepath)
     visitor.visit(tree)
-    
+
     return header_violations + visitor.violations
 
 
 def main():
     target_dir = sys.argv[1] if len(sys.argv) > 1 else "src"
     all_violations = []
-    
+
     print(f"Running @dev-agents Native Linter on '{target_dir}'...")
-    
+
     for root, _, files in os.walk(target_dir):
         for file in files:
             if file.endswith(".py"):

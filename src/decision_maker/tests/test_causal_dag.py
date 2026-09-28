@@ -1,6 +1,5 @@
-import pytest
 
-from decision_maker.core.causal_dag import CausalDAG, CausalNode, CausalEdge
+from decision_maker.core.causal_dag import CausalDAG
 from decision_maker.core.models import Factor
 
 

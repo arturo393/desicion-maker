@@ -1,7 +1,6 @@
-import pytest
 
-from decision_maker.core.decision_gates import DecisionGate, GateResult, GateVerdict
-from decision_maker.core.models import DecisionOption, DistributionType, Factor, Statistics
+from decision_maker.core.decision_gates import DecisionGate
+from decision_maker.core.models import Statistics
 
 
 class TestDecisionGate:

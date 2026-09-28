@@ -91,6 +91,12 @@ asyncio_default_fixture_loop_scope = "function"
 [tool.ruff]
 line-length = 120
 target-version = "py311"
+# Applied migrations are a frozen record of what ran against a real database, not
+# code under active development: they are already applied in every environment, so
+# rewriting them changes history nobody can replay, and their annotations have no
+# effect on the DDL they emit. They keep the Union[...] spelling the generator wrote.
+# Everything else — env.py included, and it is a live file — is linted.
+extend-exclude = ["alembic/versions"]
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "UP", "B", "SIM", "PT"]

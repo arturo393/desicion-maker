@@ -1,8 +1,7 @@
 import numpy as np
-import pytest
 
-from decision_maker.core.models import DecisionOption, DistributionType, Factor, Statistics
 from decision_maker.core.ergodicity import ErgodicityAnalyzer
+from decision_maker.core.models import Statistics
 
 
 class TestErgodicityAnalyzer:

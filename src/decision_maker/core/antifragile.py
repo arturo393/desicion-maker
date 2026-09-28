@@ -102,14 +102,14 @@ class AntifragileEngine:
         barbells = []
         for a, b in combinations(names, 2):
             portfolio_score = (single_scores[a] + single_scores[b]) / 2.0
-            
+
             # Use empirical covariance instead of assuming zero correlation (Taleb filter)
             if mc_results[a].raw_scores is not None and mc_results[b].raw_scores is not None:
                 cov_matrix = np.cov(mc_results[a].raw_scores, mc_results[b].raw_scores)
                 cov_ab = cov_matrix[0, 1] if cov_matrix.shape == (2, 2) else 0.0
             else:
                 cov_ab = 0.0
-            
+
             portfolio_risk = float(np.sqrt(0.25 * single_risk[a]**2 + 0.25 * single_risk[b]**2 + 2 * 0.25 * cov_ab))
 
             beats_all = all(portfolio_score >= single_scores[n] for n in names)
@@ -400,10 +400,9 @@ class AntifragileEngine:
                     # Normalize with the same global bounds the MonteCarloEngine uses
                     # so recomputed scores are on the SAME [0,1] scale as original_scores.
                     b = global_bounds.get(f.name, {"min": 0.0, "max": 1.0})
-                    if b["max"] > b["min"]:
-                        norm_vals = (vals - b["min"]) / (b["max"] - b["min"])
-                    else:
-                        norm_vals = np.ones_like(vals)
+                    norm_vals = (
+                        (vals - b["min"]) / (b["max"] - b["min"]) if b["max"] > b["min"] else np.ones_like(vals)
+                    )
                     w_vals = (norm_vals * w) if f.maximize else ((1.0 - norm_vals) * w)
                     total = w_vals if total is None else total + w_vals
 

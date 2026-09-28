@@ -32,19 +32,18 @@ ENGLISH = {
     "will", "would", "can", "could", "should", "must", "into", "over",
     "returns", "return", "takes", "take", "gives", "handles", "uses", "using",
     "converts", "computes", "calculates", "performs", "combines", "bundles",
-    "without", "into", "per", "via", "one", "two", "only", "also", "same",
+    "without", "per", "via", "one", "two", "only", "also", "same",
 }
 SPANISH = {
     "el", "la", "los", "las", "un", "una", "unos", "unas", "de", "del", "al",
     "y", "o", "u", "que", "qué", "en", "con", "sin", "por", "para", "como",
     "pero", "más", "mas", "muy", "todo", "toda", "este", "esta", "esto",
     "ese", "esa", "es", "son", "ser", "está", "estan", "fue", "era", "se",
-    "su", "sus", "lo", "al", "ya", "sólo", "solo", "cada", "entre", "hasta",
+    "su", "sus", "lo", "ya", "sólo", "solo", "cada", "entre", "hasta",
     "desde", "donde", "cuál", "cual", "cuando", "aún", "aun", "también",
-    "tambien", "así", "asi", "sobre", "bajo", "tras", "hace", "hay", "ser",
-    "calcula", "calcula", "devuelve", "toma", "usa", "convierte", "combina",
-    "permite", "hacen", "están", "están", "también", "ningún", "ningun",
-    "sólo", "único", "unico", "además", "ademas", "mientras", "aunque",
+    "tambien", "así", "asi", "sobre", "bajo", "tras", "hace", "hay", "calcula", "devuelve", "toma", "usa", "convierte", "combina",
+    "permite", "hacen", "están", "ningún", "ningun",
+    "único", "unico", "además", "ademas", "mientras", "aunque",
 }
 
 # Split words but keep intra-word hyphens/underscores as one token.

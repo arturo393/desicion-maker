@@ -4,18 +4,19 @@ Calculadora de Diferencias: Santiago (Actualizado sin arriendo) vs Viña/Concón
 """
 import json
 
+
 def calculate_decision():
     # Escenario 1: Santiago Actual (Según datos precisos del usuario)
     # Gasolina escolar: 70.000/semana -> 280.000/mes
     # Colegio + Jardin: 900.000/mes
     # Viajes Stgo-Viña (Lu y Mi = 8 viajes/mes). Peaje + Gasolina aprox 34.000/viaje -> 272.000/mes
     # TAG escolar/urbano estimado: 50.000/mes
-    
+
     santiago = {
         "vivienda": 0,
         "colegio_y_jardin": 900000,
         "traslado_escolar_gasolina": 280000, # 70k semanal
-        "traslado_escolar_tag_estimado": 50000, 
+        "traslado_escolar_tag_estimado": 50000,
         "traslado_stgo_vina": 272000, # 8 viajes x 34.000 (peajes+bencina)
         "traslado_tiempo_escolar": 20.0, # ~1 hr diaria x 20 dias
         "traslado_tiempo_stgo_vina": 28.0, # 8 viajes x 3.5 hrs
@@ -42,11 +43,11 @@ def calculate_decision():
     }
     mudanza_2027["total_dinero"] = sum(v for k, v in mudanza_2027.items() if "tiempo" not in k)
     mudanza_2027["total_tiempo"] = mudanza_2027["traslado_tiempo_total"]
-    
+
     # Deltas (Mudanza - Santiago)
     delta_mudanza_dinero = mudanza["total_dinero"] - santiago["total_dinero"]
     delta_mudanza_tiempo = mudanza["total_tiempo"] - santiago["total_tiempo"]
-    
+
     print(json.dumps({
         "santiago": santiago,
         "mudanza": mudanza,

@@ -75,7 +75,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 try:
-    from core.deep_research_decision_agent import CareerOption, DecisionAnalysisEngine
+    from core.deep_research_decision_agent import CareerOption
     print("✅ Decision Maker Framework loaded successfully")
 except ImportError as e:
     print(f"❌ Error loading Decision Maker Framework: {e}")

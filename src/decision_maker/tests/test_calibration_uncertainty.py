@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import numpy as np
-import pytest
 
 from decision_maker.core.calibration import DecisionOutcome, compute_calibration
 from decision_maker.core.devils_advocate import ChallengeRequest, DevilsAdvocate

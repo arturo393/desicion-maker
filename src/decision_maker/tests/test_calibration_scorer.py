@@ -1,8 +1,8 @@
 import numpy as np
 import pytest
 
-from decision_maker.core.outcome_tracker import OutcomeEntry
 from decision_maker.core.calibration_scorer import CalibrationScorer
+from decision_maker.core.outcome_tracker import OutcomeEntry
 
 
 class TestCalibrationScorer:
@@ -16,7 +16,7 @@ class TestCalibrationScorer:
                 actual_score=5.0,
                 was_correct=was_correct,
             )
-            for i, (c, was_correct) in enumerate(zip(confidences, correct))
+            for i, (c, was_correct) in enumerate(zip(confidences, correct, strict=True))
         ]
 
     def test_empty_entries(self):

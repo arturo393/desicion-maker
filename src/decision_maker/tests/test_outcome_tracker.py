@@ -1,11 +1,9 @@
 import json
-import tempfile
 from pathlib import Path
 
-import numpy as np
 import pytest
 
-from decision_maker.core.outcome_tracker import OutcomeTracker, OutcomeEntry
+from decision_maker.core.outcome_tracker import OutcomeTracker
 
 
 class TestOutcomeTracker:

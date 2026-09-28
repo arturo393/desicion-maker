@@ -68,13 +68,23 @@ Una revisión estructural encontró cinco defectos Alta. Todos corregidos, y dos
 - [x] **El docstring del checker de idioma prometía una regla que ya no era cierta** ("fichas de módulo en inglés"). Las dos fichas que quedaban en inglés eran las dos que describían mal su módulo. Regla reescrita: el vault es mixto a propósito y lo que se vigila es la ausencia de intruders, no el idioma.
 - [x] **Un token tenía letras de otro alfabeto pegadas dentro de una palabra española** —`мног`licriterio, en [[topsis]]— y el checker de idioma no lo veía, por una razón que vale la pena: el token corrupto no está ni en `ENGLISH` ni en `SPANISH`, así que la comparación de listas, que sólo puede atrapar palabras que conoce, lo deja pasar. Se agregó una regla para cirílico y chino pegados a una palabra, con **dos** controles negativos: tiene que marcar la sustitución que se coló y **no** marcar `σ` ni `Σ`, que son notación legítima en [[antifragile-engine]] y [[bayesian-inference-engine]]. La primera versión de la regla era demasiado ancha y los dos controles la rechazaron: señaló `σ` en la fórmula de fragilidad y `Σ` en `-Σ p ln p`, que son correctos. La segunda marcó `σa²`, donde el subíndice `a` es latino. Lo que separa la corrupción de la notación no es que se mezclen, sino que haya dos o más letras extranjeras en secuencia.
 
+### Limpieza de `ruff` — todo el repo, no un directorio
+
+- [x] **`ruff` quedó limpio en todo el repo**: 115 hallazgos, 96 por autofix y 19 a mano. CI pasó de `ruff check src/decision_maker` a `ruff check .`; con el comando anterior, "ruff pasa" era cierto para un directorio y no decía nada del resto.
+- [x] **Dos de los 19 no eran estilo, eran bugs.** Uno: `json.dump({...}, open(out, "w"))` en `uqomm_adopcion_v6_leakyfeeder.py` dejaba el archivo abierto y dependía del GC de CPython para cerrarlo. Otro: `zip(confidences, correct)` sin `strict=` en `test_calibration_scorer.py` truncaba en silencio si las listas midieran distinto; los 9 call sites miden igual, así que hoy no ocultaba nada, y `strict=True` lo vuelve ruidoso si alguno deja de hacerlo.
+- [x] **`np.random.seed(20260823)` estaba asignado a `rng`.** `seed()` devuelve `None`, así que `rng` valía `None`: el seed se aplicaba por efecto colateral y la variable era un `None` esperando a ser usado. Ruff lo marcó como `F841` y la lectura lo confirmó.
+- [x] **`raise ... from None` en `registry.py` cambiaba comportamiento y no estaba cubierto**, así que se escribió el test. Escribirlo corrigió el supuesto del test: `from None` **no** borra `__context__`, pone `__cause__` en `None` y `__suppress_context__` en `True`. La aserción que yo tenía, de que el contexto quedara vacío, era un test que no podía pasar. Control negativo hecho: quitar el `from None` lo pone rojo.
+- [x] **`alembic/versions` quedó excluido de ruff, con el motivo escrito en `pyproject.toml`.** Son migraciones ya aplicadas, el registro congelado de lo que corrió contra una base real; reescribirlas cambia historia que nadie puede reproducir. `alembic/env.py` sí se lintea, porque es un archivo vivo. Verificado que la exclusión es lo que silencia los 10 hallazgos: sin ella, `ruff check .` los reporta.
+- [x] **`UP017` (6) es seguro aquí, verificado y no inferido**: el autofix convirtió `timezone.utc` en `datetime.UTC`, que existe desde 3.11. `pyproject.toml` declara `requires-python = ">=3.11"` y el runtime es 3.11.15.
+
 ### Lo que este trabajo NO verificó
 
 - **Ninguno de los 4 checkers corre en el harness de tests.** Se ejecutan como scripts en CI. Un test que verifica que el archivo aparece en la salida de CI sigue sin existir.
 - **Los 13 enlaces rotos preexistentes siguen rotos.** Están documentados por target exacto en `KNOWN_BROKEN` porque apuntan a un árbol de documentación propuesto que nunca se ejecutó; reescribir los paths no arregla nada.
 - **2 literales `.py` en notas `archive` no se verifican contra el árbol**: están en la bitácora de Dic-2025 y el checker los lista como NOTA, no como fallo, porque son afirmaciones sobre el pasado. Los nombres y las líneas están en la salida del propio checker, que es donde se leen; no se repiten acá porque un literal `.py` en esta nota se verifica contra el árbol actual.
-- **`ruff check src/decision_maker` reporta 113 errores preexistentes** en archivos de test que no son de esta tarea. Los 4 de los scripts de docs (`UP031`, `B033` en la lista de palabras, y los de `dev_agents_linter.py`) no los lintea CI, que sólo corre `src/decision_maker`.
-- **No se ha hecho commit.** `ci.yml` llama a 4 scripts que siguen sin trackear: commitear el workflow antes que los scripts rompe el pipeline en el push.
+- **El fix del `open()` con context manager no se ejecutó en runtime.** El script es de análisis, necesita red y asyncio, y la suite no lo cubre. Lo verificado es que el archivo compila y que el patrón es la equivalencia directa del original.
+- **`AGENTS.md` dice "Python 3.12+" y `pyproject.toml` exige `>=3.11`.** No son lo mismo. El código se verificó contra 3.11, que es el piso real declarado, así que si el piso correcto fuera 3.12 habría que revisarlo; queda en el kanban.
+
 
 ## En curso
 

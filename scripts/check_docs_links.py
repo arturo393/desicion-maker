@@ -161,7 +161,8 @@ def main() -> int:
 
             for m in WIKILINK.finditer(line):
                 kind, path = resolve_wiki(m.group(1), alias_table)
-                target = "[[%s]]" % m.group(1).split("|")[0].split("#")[0].strip()
+                target_name = m.group(1).split("|")[0].split("#")[0].strip()
+                target = f"[[{target_name}]]"
                 known = target in exempt
                 if kind in {"alias", "BROKEN(case)"} and path is not None:
                     rows.append((where, m.group(0), f"RESOLVED {kind} -> {path.name}", known))

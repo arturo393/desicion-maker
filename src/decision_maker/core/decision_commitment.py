@@ -11,10 +11,9 @@ __all__ = ["DecisionCommitment", "Commitment"]
 import logging
 import uuid
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
-
 
 from decision_maker.core.jsonl_store import JsonlStore
 from decision_maker.core.models import Statistics
@@ -48,7 +47,7 @@ class Commitment:
 
     def __post_init__(self):
         if not self.timestamp:
-            self.timestamp = datetime.now(timezone.utc).isoformat()
+            self.timestamp = datetime.now(UTC).isoformat()
         if not self.decision_id:
             self.decision_id = f"commit_{uuid.uuid4().hex[:12]}"
 

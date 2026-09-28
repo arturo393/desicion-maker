@@ -1,7 +1,6 @@
-import pytest
 
 from decision_maker.core.outcome_tracker import OutcomeEntry
-from decision_maker.core.unknown_scanner import UnknownUnknownsScanner, UnknownReport
+from decision_maker.core.unknown_scanner import UnknownUnknownsScanner
 
 
 class TestUnknownUnknownsScanner:

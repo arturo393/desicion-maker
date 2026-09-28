@@ -40,7 +40,7 @@ jobs:
           pip install -e ".[test]"
 
       - name: Lint with ruff
-        run: ruff check src/decision_maker
+        run: ruff check .
 
       - name: Run dev-agents linter
         run: python scripts/dev_agents_linter.py src/decision_maker/core

@@ -143,10 +143,7 @@ class MonteCarloEngine:
                     # minimize -> (1-norm)*w. Matches global bounds across all options.
                     if normalize and f.name in global_bounds:
                         lo, hi = global_bounds[f.name]
-                        if hi > lo:
-                            norm_vals = (vals - lo) / (hi - lo)
-                        else:
-                            norm_vals = np.ones_like(vals)
+                        norm_vals = (vals - lo) / (hi - lo) if hi > lo else np.ones_like(vals)
                         if f.maximize:
                             total_scores += norm_vals * f.weight
                         else:
@@ -181,10 +178,9 @@ class MonteCarloEngine:
             # success_rate = fraction of simulations where this option beats the
             # cross-option average (wins the comparison), not where score > 0.
             # With normalized [0,1] scores, score > 0 is always true (degenerate).
-            if score_matrix.shape[1] > 1:
-                success_rate = float(np.mean(total_scores > cross_option_mean))
-            else:
-                success_rate = 1.0
+            success_rate = (
+                float(np.mean(total_scores > cross_option_mean)) if score_matrix.shape[1] > 1 else 1.0
+            )
 
             results[opt.name] = Statistics(
                 option_name=opt.name,

@@ -1,9 +1,6 @@
-import tempfile
 from pathlib import Path
 
-import pytest
-
-from decision_maker.core.reasoning_trace import ReasoningTrace, TraceEntry
+from decision_maker.core.reasoning_trace import ReasoningTrace
 
 
 class TestReasoningTrace:

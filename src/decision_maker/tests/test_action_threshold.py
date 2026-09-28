@@ -1,8 +1,7 @@
-import numpy as np
 import pytest
 
-from decision_maker.core.action_threshold import MinimumActionThreshold, ThresholdVerdict
-from decision_maker.core.models import DecisionOption, DistributionType, Factor, Statistics
+from decision_maker.core.action_threshold import MinimumActionThreshold
+from decision_maker.core.models import Statistics
 
 
 class TestMinimumActionThreshold:

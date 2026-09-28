@@ -1,9 +1,7 @@
 from __future__ import annotations
 
 import os
-import tempfile
 
-import pytest
 import yaml
 from typer.testing import CliRunner
 

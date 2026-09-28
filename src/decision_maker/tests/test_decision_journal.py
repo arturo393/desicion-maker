@@ -1,9 +1,8 @@
-import tempfile
 from pathlib import Path
 
 import pytest
 
-from decision_maker.core.decision_journal import DecisionJournal, JournalEntry
+from decision_maker.core.decision_journal import DecisionJournal
 from decision_maker.core.models import Factor
 
 

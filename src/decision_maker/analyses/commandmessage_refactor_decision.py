@@ -157,13 +157,13 @@ def topsis(mean_matrix):
 
 
 async def main():
-    rng = np.random.seed(20260823)
+    np.random.seed(20260823)
     samples_by_opt = {opt.name: sample_option(opt) for opt in options}
     scores_by_opt = {name: weighted_scores(s) for name, s in samples_by_opt.items()}
 
     # Estadísticas por opción
     print("=" * 92)
-    print("MONTE CARLO — score compuesto ponderado (escala 0-10), N=%d" % N)
+    print(f"MONTE CARLO — score compuesto ponderado (escala 0-10), N={N}")
     print("=" * 92)
     stats = {}
     for name, sc in scores_by_opt.items():
@@ -173,7 +173,7 @@ async def main():
 
     # Frecuencia de victoria (qué opción queda en el puesto 1 en cada muestra)
     print()
-    print("FRECUENCIA DE SER LA MEJOR OPCIÓN (de %d muestras):" % N)
+    print(f"FRECUENCIA DE SER LA MEJOR OPCIÓN (de {N} muestras):")
     win = {name: 0 for name in scores_by_opt}
     M = np.stack([scores_by_opt[n] for n in [o.name for o in options]], axis=0)  # (n_opt, N)
     winners = np.argmax(M, axis=0)
@@ -207,7 +207,8 @@ async def main():
             wts[i] = base[i] * (rest / old_others)
         cl = topsis(mean_mat * 1.0)  # closeness usa weights globales; recomputar con wts
         # recompute closeness manually with wts
-        ideal = mean_mat.max(axis=0); anti = mean_mat.min(axis=0)
+        ideal = mean_mat.max(axis=0)
+        anti = mean_mat.min(axis=0)
         db = np.array([np.sqrt(((mean_mat[r]-ideal)**2*wts).sum()) for r in range(len(options))])
         dw = np.array([np.sqrt(((mean_mat[r]-anti)**2*wts).sum()) for r in range(len(options))])
         cl = dw/(db+dw)

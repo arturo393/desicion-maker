@@ -8,8 +8,10 @@ Incluye:
 """
 
 import asyncio
+
 from decision_maker.core.models import DecisionOption, DistributionType, Factor
 from decision_maker.core.orchestrator import UnifiedDecisionFramework
+
 
 async def run_analysis():
     framework = UnifiedDecisionFramework()
@@ -51,7 +53,7 @@ async def run_analysis():
     print("\n" + "="*80)
     print("ANÁLISIS DE MUDANZA Y CAMBIO AL COLEGIO PATMOS (2 HIJOS)")
     print("================================================================")
-    
+
     # Check if there is rank aggregation
     ranking = []
     if 'rank_aggregation' in results and 'ranking' in results['rank_aggregation']:
@@ -73,7 +75,7 @@ async def run_analysis():
             print(f"  - {f}: {mean_val:,.0f}" + (" hrs" if "Tiempo" in f else " CLP"))
             if "Costo" in f:
                 costo_total += mean_val
-        
+
         print(f"  >> COSTO TOTAL MENSUAL ESPERADO: {costo_total:,.0f} CLP")
 
 if __name__ == "__main__":

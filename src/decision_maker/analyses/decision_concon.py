@@ -6,10 +6,10 @@ Uses: decision_maker.core.fuzzy_weighted_sum
 """
 
 from decision_maker.core.fuzzy_weighted_sum import (
-    FuzzyWeightedSum,
+    CriterionDirection,
     FuzzyCriterion,
     FuzzyOption,
-    CriterionDirection,
+    FuzzyWeightedSum,
 )
 
 

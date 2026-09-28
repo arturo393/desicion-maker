@@ -237,7 +237,9 @@ class DecisionRegistry:
                 "SELECT id FROM templates WHERE name = ?", (req.name,)
             ).fetchone()
             if row is None:
-                raise sqlite3.Error(f"Failed to resolve template id for '{req.name}' after upsert")
+                raise sqlite3.Error(
+                    f"Failed to resolve template id for '{req.name}' after upsert"
+                ) from None
             return row[0]
 
     def list_templates(self, category: str | None = None) -> list[dict[str, Any]]:

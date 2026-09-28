@@ -147,10 +147,7 @@ def prepare_decision_matrix(mc_results: dict[str, Statistics], factors: list[Fac
                 f_stats = stats.factor_stats[factor.name]
                 mean_val = f_stats["mean"]
                 lo, hi = bounds.get(factor.name, (mean_val, mean_val))
-                if hi > lo:
-                    norm_mean = (mean_val - lo) / (hi - lo)
-                else:
-                    norm_mean = 1.0
+                norm_mean = (mean_val - lo) / (hi - lo) if hi > lo else 1.0
                 contribution = norm_mean * factor.weight if factor.maximize else (1.0 - norm_mean) * factor.weight
                 decision_matrix[name][factor.name] = {
                     "raw": mean_val,

@@ -111,7 +111,7 @@ class AdaptiveRouter:
             return 0.0
         cv_values = []
         for stats in mc_results.values():
-            for fname, fstats in stats.factor_stats.items():
+            for fstats in stats.factor_stats.values():
                 mean = abs(fstats["mean"])
                 std = fstats["std"]
                 if mean > 1e-9:

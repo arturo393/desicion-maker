@@ -143,7 +143,7 @@ class UnknownUnknownsScanner:
                 c[t] += 1
 
         missing = []
-        for tag, count in wrong_tags.most_common(5):
+        for tag, _count in wrong_tags.most_common(5):
             if tag not in right_tags or wrong_tags[tag] > right_tags.get(tag, 0) * 2:
                 missing.append(f"Tag '{tag}' appears disproportionately in failures")
 

@@ -15,7 +15,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 try:
-    from decision_maker.core.models import DecisionOption, DistributionType, Factor
+    from decision_maker.core.models import DecisionOption
     from decision_maker.core.orchestrator import UnifiedDecisionFramework
 except ImportError:
     print("ERROR: Cannot import decision framework. Run from project root.")

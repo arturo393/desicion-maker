@@ -1,8 +1,6 @@
-import numpy as np
-import pytest
 
 from decision_maker.core.adaptive_router import AdaptiveRouter, ProblemProfile
-from decision_maker.core.models import DecisionOption, DistributionType, Factor, Statistics
+from decision_maker.core.models import DecisionOption, Factor, Statistics
 
 
 class TestAdaptiveRouter:

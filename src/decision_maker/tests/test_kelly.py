@@ -1,8 +1,8 @@
 import numpy as np
 import pytest
 
-from decision_maker.core.models import DecisionOption, DistributionType, Factor, Statistics
 from decision_maker.core.kelly import KellyCriterionEngine
+from decision_maker.core.models import Statistics
 
 
 class TestKellyCriterionEngine:

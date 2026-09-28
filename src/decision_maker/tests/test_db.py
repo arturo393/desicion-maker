@@ -9,7 +9,7 @@ from decision_maker.core.db_models import AnalysisSession
 
 @pytest.fixture
 def in_memory_db(monkeypatch):
-    from sqlmodel import SQLModel, create_engine
+    from sqlmodel import create_engine
 
     engine = create_engine(
         "sqlite://",

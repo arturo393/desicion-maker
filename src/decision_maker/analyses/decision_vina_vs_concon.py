@@ -5,10 +5,11 @@ Incluye modelado del impacto logístico y red de apoyo según las edades de los 
 """
 import json
 
+
 def calcular_penalizacion_por_edad(edades):
     """
     Calcula un sobrecosto y penalización de utilidad basado en cuán pequeños son los niños.
-    Niños menores a 7 años tienen alta probabilidad de enfermedades (virus de jardín) 
+    Niños menores a 7 años tienen alta probabilidad de enfermedades (virus de jardín)
     y emergencias de salida temprana.
     """
     factor_riesgo = 0
@@ -19,17 +20,17 @@ def calcular_penalizacion_por_edad(edades):
             factor_riesgo += 0.3  # Alta dependencia (Ej. 5 años)
         else:
             factor_riesgo += 0.1  # Independencia básica
-            
-    # El riesgo se traduce en un sobrecosto estimado mensual (ej. niñera de urgencia, 
+
+    # El riesgo se traduce en un sobrecosto estimado mensual (ej. niñera de urgencia,
     # perder medio día de trabajo, transporte imprevisto) si no hay red de apoyo cerca.
-    costo_urgencia_mensual_base = 150000 
+    costo_urgencia_mensual_base = 150000
     return factor_riesgo, int(costo_urgencia_mensual_base * factor_riesgo)
 
 def calculate():
     # Parámetros del modelo
     edades_hijos = [3, 5]
-    costo_mudanza_inicial = 300000 
-    
+    costo_mudanza_inicial = 300000
+
     factor_riesgo, costo_urgencias = calcular_penalizacion_por_edad(edades_hijos)
 
     # Escenario 1: Viña del Mar (Colegio Patmos) - Red de apoyo (Abuelos) cerca
@@ -37,11 +38,11 @@ def calculate():
     vina_patmos = {
         "vivienda": 900000,
         "colegio": 720000,
-        "traslado_trabajo": 60000, 
+        "traslado_trabajo": 60000,
         "costo_urgencias_infantiles": 0, # Absorbed by grandparents
-        "red_apoyo": 100, 
-        "entorno_playa": 50, 
-        "tiempo_traslado_trabajo": 15, 
+        "red_apoyo": 100,
+        "entorno_playa": 50,
+        "tiempo_traslado_trabajo": 15,
     }
     vina_patmos["total_mensual"] = vina_patmos["vivienda"] + vina_patmos["colegio"] + vina_patmos["traslado_trabajo"] + vina_patmos["costo_urgencias_infantiles"]
 
@@ -50,11 +51,11 @@ def calculate():
     concon_colegio = {
         "vivienda": 1100000,
         "colegio": 720000,
-        "traslado_trabajo": 30000, 
+        "traslado_trabajo": 30000,
         "costo_urgencias_infantiles": costo_urgencias, # Penalización aplicada
-        "red_apoyo": 30, 
-        "entorno_playa": 100, 
-        "tiempo_traslado_trabajo": 5, 
+        "red_apoyo": 30,
+        "entorno_playa": 100,
+        "tiempo_traslado_trabajo": 5,
     }
     concon_colegio["total_mensual"] = concon_colegio["vivienda"] + concon_colegio["colegio"] + concon_colegio["traslado_trabajo"] + concon_colegio["costo_urgencias_infantiles"]
 

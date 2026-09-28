@@ -1,8 +1,8 @@
 import pytest
 
+from decision_maker.core.meta_calibration import MetaCalibration
 from decision_maker.core.outcome_tracker import OutcomeEntry
 from decision_maker.core.reasoning_trace import TraceEntry
-from decision_maker.core.meta_calibration import MetaCalibration, MetaCalibrationResult
 
 
 class TestMetaCalibration:

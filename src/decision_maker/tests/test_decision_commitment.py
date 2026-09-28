@@ -1,9 +1,8 @@
-import tempfile
 from pathlib import Path
 
 import pytest
 
-from decision_maker.core.decision_commitment import DecisionCommitment, Commitment
+from decision_maker.core.decision_commitment import DecisionCommitment
 from decision_maker.core.models import Statistics
 
 

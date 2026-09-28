@@ -5,7 +5,7 @@ import pandas as pd
 import pytest
 
 from decision_maker.core.models import Factor, Statistics
-from decision_maker.core.report_schema import REPORT_SCHEMA, validate_report
+from decision_maker.core.report_schema import validate_report
 from decision_maker.core.reporting import (
     ReportData,
     build_algorithm_comparison,

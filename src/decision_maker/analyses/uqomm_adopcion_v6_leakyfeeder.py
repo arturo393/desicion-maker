@@ -35,9 +35,12 @@ EVIDENCIA DE MERCADO recogida el 2026-08-25:
       sniffer; cero SNMP implementado en los seis repos.        verificado en repo
 """
 
-import asyncio, json, sys
+import asyncio
+import json
+import sys
 from datetime import datetime
 from pathlib import Path
+
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from decision_maker.core.models import DecisionOption, DistributionType, Factor, UncertainVariable
 from decision_maker.core.orchestrator import UnifiedDecisionFramework
@@ -160,17 +163,18 @@ async def main():
 
     out = Path("results") / "uqomm_adopcion_v6_leakyfeeder.json"
     out.parent.mkdir(exist_ok=True)
-    json.dump({
-        "date": datetime.now().isoformat(),
-        "pregunta": "Donde integrar y que mejorar para compatibilidad, facilidad de "
-                    "instalacion y adopcion de mercado, dado el hw/sw existente",
-        "mercados": ["Chile", "Australia", "Peru", "Mexico"],
-        "factors": FACTORS, "options": DESC,
-        "principal": {k: v for k, v in principal.items() if k != "explanation"},
-        "control_identidad": c1.get("explanation", "")[:600],
-        "control_permuta": c2.get("explanation", "")[:600],
-        "sensibilidad": sens,
-    }, open(out, "w"), indent=2, default=str)
+    with open(out, "w") as fh:
+        json.dump({
+            "date": datetime.now().isoformat(),
+            "pregunta": "Donde integrar y que mejorar para compatibilidad, facilidad de "
+                        "instalacion y adopcion de mercado, dado el hw/sw existente",
+            "mercados": ["Chile", "Australia", "Peru", "Mexico"],
+            "factors": FACTORS, "options": DESC,
+            "principal": {k: v for k, v in principal.items() if k != "explanation"},
+            "control_identidad": c1.get("explanation", "")[:600],
+            "control_permuta": c2.get("explanation", "")[:600],
+            "sensibilidad": sens,
+        }, fh, indent=2, default=str)
     print(f"\nGuardado en {out}")
 
 
