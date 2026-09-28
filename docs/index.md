@@ -87,8 +87,8 @@ making claims the code contradicted, and the vault was corrected against the sou
 │   ├── analyses/             # decision scripts (decision_concon, sophos_xg115, vlad25…)
 │   ├── api/server.py         # FastAPI REST
 │   ├── dashboard/app.py      # Streamlit UI
-│   └── tests/                # 527 tests
-├── rust_core/                # Rust crate decision_maker_core (pyo3 + rayon + ndarray)
+│   └── tests/                # 537 tests
+├── rust_core/                # Rust crate decision_maker_core (pyo3 + rayon)
 ├── examples/
 ├── docs/                     # Obsidian vault root (config: docs/.obsidian/)
 ├── jira/                     # local Jira tracking (DM-25.md ↔ ID-1846)

@@ -13,7 +13,7 @@ updated: 2026-09-27
 
 # Decision Maker Framework (v3.1)
 
-Dual Python + Rust library for multi-criteria decision analysis under uncertainty. Combines Monte Carlo simulation, multi-criteria optimization, robust decision theory, AI-powered research, learning/meta-learning loops, and interactive tools. Performance-critical math (Monte Carlo normalization) runs in a native Rust extension (`rust_core/`, pyo3 + rayon + ndarray).
+Dual Python + Rust library for multi-criteria decision analysis under uncertainty. Combines Monte Carlo simulation, multi-criteria optimization, robust decision theory, AI-powered research, learning/meta-learning loops, and interactive tools. Performance-critical math (Monte Carlo normalization) runs in a native Rust extension (`rust_core/`, pyo3 + rayon).
 
 ## Quick Start
 
@@ -57,7 +57,7 @@ uv run decision-maker list-distributions
 | Topology | MDS/Isomap clustering and stability analysis |
 | Visualization | Publication-ready plots (Pareto, tornado, distributions) |
 | Registry | SQLite-backed persistent decision store |
-| Rust Math Core | Native Monte Carlo Min-Max normalization (pyo3 + rayon + ndarray) |
+| Rust Math Core | Native Monte Carlo Min-Max normalization (pyo3 + rayon) |
 | Ergodicity | Time-average vs ensemble growth, ruin probability, Kelly criterion |
 | Learning System | Outcome tracking, confidence calibration, decision journal, adaptive routing |
 | Meta-Learning | Action threshold, reasoning trace, unknown scanner, meta-calibration |
