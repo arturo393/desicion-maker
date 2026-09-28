@@ -30,8 +30,9 @@ Tablero interactivo de seguimiento de tareas, hitos y desarrollo del framework c
 - [ ] 🦀 **Limpieza en Cargo.toml**: auditar dependencia `ndarray` en `rust_core/Cargo.toml` respecto a [[adr/001-use-rust-for-math-engine]] #rust #p3
 - [ ] 🗺️ **Sincronización mkdocs.yml**: alinear navegación del generador estático con la estructura unificada de `docs/` #docs #p3
 - [ ] 🧪 **Correr los checkers documentales en el harness**: hoy `scripts/check_docs_*.py` y `scripts/check_obsidian_*.py` se ejecutan sólo en CI, así que un test que confirme que sus nombres aparecen en la salida del pipeline no existe #qa #p2
-- [ ] 🧾 **`AGENTS.md` dice Python 3.12+ y `pyproject.toml` exige `>=3.11`**: el código se verifica contra 3.11, que es el piso real; hay que decidir cuál de los dos es el canónico y alinear el otro #docs #p3
+- [x] 🧾 **Piso de Python alineado**: `AGENTS.md` decía Python 3.12+ y `pyproject.toml` exige `>=3.11`; canónico el declared, porque es lo que la CI prueba en su celda más baja. `AGENTS.md` ahora dice 3.11+, y un test compara ambos #docs #p3
 - [ ] 🔗 **Resolver los 13 enlaces rotos preexistentes**: apuntan a un árbol de documentación propuesto que nunca se ejecutó, y están documentados por target exacto en `KNOWN_BROKEN` para que no se confundan con roturas nuevas #docs #p3
+- [ ] 🔢 **Hacer derivable el conteo de 24 motores**: `architecture.md`, `roadmap.md` y este kanban coinciden en 24, y nada más en el repo lo respalda — no existe registro de motores en el código, ni `ENGINES` ni un `__all__` en `core/` que los enumere. Hoy el test solo verifica que las tres notas coincidan, que es más débil y lo dice. La salida es una lista explícita, y entonces el número se deriva en vez de repetirse #docs #p2
 
 ## 🚧 En Curso (In Progress)
 
@@ -45,7 +46,7 @@ Sin tarjetas.
 
 - [x] 🗄️ **Formateo de Documentación como Base de Datos**: propiedades YAML enriquecidas (`id`, `type`, `category`, `status`, `related`) para Dataview y Obsidian #database
 - [x] 📊 **Creación de Centro de Base de Datos**: [[database-hub]] con consultas Dataview y tablas Markdown para navegación relacional #database
-- [x] 📈 **Catálogo Exhaustivo de Resultados**: [[results-catalog]] indexando los 295 artefactos en `results/` (reportes, JSON y visualizaciones) #database
+- [x] 📈 **Catálogo Exhaustivo de Resultados**: [[results-catalog]] documentando los lotes de simulación y su nomenclatura (reportes, JSON y visualizaciones) #database
 - [x] 🔬 **Catálogo Completo de Análisis y Scripts**: [[decision-analyses]] integrando 36 análisis operativos, 7 scripts utilitarios y 3 ejemplos #database
 - [x] 📦 **Auditoría e Indexación de Documentación Legacy y Raíz**: [[legacy-docs]] con los 10 documentos históricos de `archive/legacy/` y archivos raíz #database
 - [x] 🔗 **Interconexión Total del Grafo**: enlazado bidireccional entre módulos cuantitativos, guías, arquitectura, roadmap y resultados #graph
@@ -59,7 +60,7 @@ Sin tarjetas.
 - [x] 🔗 **Validación de Enlaces de Grafo**: 559 enlaces verificados, 546 resueltos y 13 rotos documentados, sin ninguno nuevo, mediante `scripts/check_docs_links.py` #qa
 - [x] 🌐 **Validación de Consistencia Lingüística**: 0 intrusos léxicos y 0 alfabetos foreignos pegados, verificado mediante `scripts/check_obsidian_language.py` #qa
 - [x] 🎯 **Validación de Fidelidad de Código**: 54 notas, 25 módulos, 45 clases, 25 imports, 25 propietarios y 189 literales de módulo verificadas con AST mediante `scripts/check_obsidian_fidelity.py` #qa
-- [x] ⚡ **Suite de Pruebas Unitarias**: validación de 521 tests pasando con `uv run pytest` #qa
+- [x] ⚡ **Suite de Pruebas Unitarias**: validación de 527 tests pasando con `uv run pytest` #qa
 - [x] 🏗️ **Unificación del Vault**: raíz de Obsidian consolidada en `docs/`, con la configuración del vault bajo control de versiones y el plugin `obsidian-kanban` #vault
 - [x] 🏷️ **Normalización de Nombres**: convención uniforme `lowercase-with-hyphens` y 100% de aliases resueltos #naming
 - [x] 🚀 **24 Motores Cuantitativos**: implementación de Monte Carlo, Fuzzy TOPSIS, PROMETHEE, Barbell/Antifragile, Bayesian, etc. #core

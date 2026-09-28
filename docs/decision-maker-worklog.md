@@ -83,7 +83,28 @@ Una revisión estructural encontró cinco defectos Alta. Todos corregidos, y dos
 - **Los 13 enlaces rotos preexistentes siguen rotos.** Están documentados por target exacto en `KNOWN_BROKEN` porque apuntan a un árbol de documentación propuesto que nunca se ejecutó; reescribir los paths no arregla nada.
 - **2 literales `.py` en notas `archive` no se verifican contra el árbol**: están en la bitácora de Dic-2025 y el checker los lista como NOTA, no como fallo, porque son afirmaciones sobre el pasado. Los nombres y las líneas están en la salida del propio checker, que es donde se leen; no se repiten acá porque un literal `.py` en esta nota se verifica contra el árbol actual.
 - **El fix del `open()` con context manager no se ejecutó en runtime.** El script es de análisis, necesita red y asyncio, y la suite no lo cubre. Lo verificado es que el archivo compila y que el patrón es la equivalencia directa del original.
-- **`AGENTS.md` dice "Python 3.12+" y `pyproject.toml` exige `>=3.11`.** No son lo mismo. El código se verificó contra 3.11, que es el piso real declarado, así que si el piso correcto fuera 3.12 habría que revisarlo; queda en el kanban.
+- **`AGENTS.md` decía "Python 3.12+" y `pyproject.toml` exige `>=3.11`.** Corregido a 3.11+, que es el piso que la CI prueba en su celda más baja. Ver abajo.
+
+### Segunda ronda: cifras declaradas contra código medido
+
+La ronda anterior verificó que las afirmaciones sobre el código fueran ciertas. Estas son las que hablan de **conteos**, que envejecen distinto: un literal `.py` queda viejo cuando el código se mueve, pero un total como "521 tests" queda viejo sin que nadie toque nada. Cuatro estaban mal:
+
+- **`architecture.md` e `index.md` decían 495 tests; había 521.** Ahora 527, que es el total real con los seis tests de este ratchet incluidos. El número volvió a moverse en el mismo commit en que se escribió el test que lo vigila, que es exactamente lo que debería pasar.
+- **`decision-analyses.md` decía 36 scripts y su propia tabla listaba 37 filas.** La 37 es `_template.py`, la plantilla canónica, que no es un análisis. El texto ahora lo dice en vez de dejar que la prosa y la tabla se contradigan.
+- **`results-catalog.md` afirmaba que el repositorio registraba 295 archivos, en `results/`.** `results/` está en `.gitignore` con **cero** archivos versionados, así que ese número sólo podía reproducirlo la máquina que lo escribió — y ahora hay 2081 archivos ahí, porque las corridas siguieron. Dos claims más del mismo tipo aparecieron al escribir el detector: `improvement-analysis.md` ("17 archivos") y una mención de "~300 reportes" en [[note-schema]]. Los tres se reemplazaron por la regla de nomenclatura, que sí es reproducible. Nota sobre esta línea: el texto va redactado así a propósito. La primera redacción citaba el claim literal y el ratchet la marcó a sí mismo, porque no distingue entre afirmar un conteo y citar uno viejo. Se prefirió la regla simple y estricta antes que enseñarle al regex a reconocer el pasado.
+- **Los 37 enlaces entrantes de [[database-hub]] no correspondían a ninguna métrica.** Medido: 28 notas distintas y 42 instancias.
+
+#### Tres instrumentos que mentían, y uno de ellos era mío
+
+El conteo de enlaces salía **27** por un script y **28** por `grep`. La diferencia era el script: usaba `p.name` como clave de diccionario, y el árbol tiene **dos** `README.md`, así que uno pisaba al otro. Con ruta completa los dos instrumentos dan 28 y coinciden. El mismo bug de basename estaba en el mensaje del detector de `results/`, que reportaba `improvement-analysis.md:84` para un archivo que vive en `docs/reorganization/`. La lección no es "usar grep": es que un número que dos instrumentos no coinciden no es un número, es el síntoma de que falta un control.
+
+El primer detector de claims en `results/` tampoco servía: emparejaba un conteo con la mención de `results/` por **co-ocurrencia en la línea**, y marcó una frase que dice "los 54 archivos `.md` son todos documentación" y, tres cláusulas más, da `results/` como razón del cambio de raíz. Dos hechos ajenos compartiendo línea. Probé una ventana de ±60 caracteres y la siguió marcando, porque ajustar la distancia hasta que el falso positivo del propio instrumento desaparece es la forma de enseñarle a mirar para otro lado. Quedó con dos relaciones explícitas en vez de una distancia: `results/` seguido de cerca por un conteo, o un conteo unido a `results/` por *en*/*de*. "y no hay `results/`" no matchea ninguna de las dos, que es justo el objetivo.
+
+#### Lo que el ratchet no puede verificar
+
+`test_engine_count_is_consistent_across_notes` comprueba que `architecture.md`, `roadmap.md` y el kanban digan el mismo número de motores. **No comprueba que 24 sea cierto.** No existe registro de motores en el código: ni `ENGINES`, ni un `__all__` en `core/` que los enumere, y `core/` tiene 57 módulos de los que sólo un subconjunto son motores. El test es más débil a propósito y lo dice en su docstring. Queda en el kanban como pendiente de una lista explícita; cuando exista, el número se deriva en vez de repetirse en tres lugares.
+
+Los seis tests tienen control negativo: se reintrodujo cada defecto uno por uno y los seis lo detectaron. El del conteo de tests sólo corre en la suite completa — con un path o un `-k`, `session.items` ya viene filtrado y el total no es comparable, así que skipea con el motivo escrito en vez de ponerse rojo por una razón que no tiene que ver con la documentación.
 
 
 ## En curso

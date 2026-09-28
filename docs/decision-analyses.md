@@ -13,7 +13,7 @@ updated: 2026-09-28
 
 # 📊 Catálogo de Análisis de Decisiones Aplicadas
 
-Este registro centraliza los 36 scripts de decisión cuantitativa en `src/decision_maker/analyses/`, los 7 scripts auxiliares en `src/decision_maker/scripts/` y los ejemplos de referencia en `examples/`. Cada archivo representa un caso concreto modelado con metodologías estocásticas y multicriterio.
+Este registro centraliza los 36 análisis de decisión cuantitativa en `src/decision_maker/analyses/` —más `_template.py`, la plantilla canónica, que no es un análisis y por eso no cuenta— y los 7 scripts auxiliares en `src/decision_maker/scripts/`. Cada archivo representa un caso concreto modelado con metodologías estocásticas y multicriterio.
 
 Hub general de base de datos: [[database-hub]] | Catálogo de reportes y salidas: [[results-catalog]].
 

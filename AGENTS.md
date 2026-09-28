@@ -34,7 +34,7 @@ uv run pytest          # run unit tests
 ```
 
 ## Conventions
-- Python 3.12+, typed (type hints obligatorios).
+- Python 3.11+, typed (type hints obligatorios). El piso es `>=3.11` de `pyproject.toml` y la CI corre la matriz 3.11/3.12; antes decía 3.12+, que era más restrictivo que lo que el código y la CI exigen. Si alguna vez se sube el piso, se suben las tres cosas juntas, no sólo esta línea.
 - Monte Carlo: N caminos suficientes para convergencia; nunca 1 trayectoria única.
 - Decision analysis: separar modelado (Python) de presentación (dashboard/streamlit).
 - Configurable values en config, no magic numbers.

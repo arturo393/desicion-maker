@@ -92,7 +92,7 @@ Cuatro ejes. Todos en minúscula, palabras compuestas siempre con guion.
 
 **El vocabulario completo son 58 valores y no se enumera aquí a propósito.** Una lista de 58 valores escrita en prosa es un índice que nadie mantiene: cuando se revisó ya nombraba 44 que no estaban, y una lista así se pudre más rápido de lo que se lee. Lo que se declara es la **regla** de los cuatro ejes, y el conteo va fijado en `test_docs_schema.py`: ese test se pone rojo si el número cambia, así que un tag nuevo obliga a decidir si pertenece a un eje o a actualizar el número a propósito.
 
-**El tag `archive` excluye del control de idioma, y excluye mucho.** Hoy son 25 de 54 notas, y entre ellas [[database-hub]] (37 enlaces entrantes) y [[kanban]]. El tag mezcla dos intenciones —"esto es histórico" y "esto está en otro idioma"— y por eso alcanza a las dos notas más consultadas del vault. Se mantiene porque el filtro es correcto, pero el número está fijado en el test: si alguien confunde `archive` con `deprecated`, el CI se pone rojo en vez de silenciosamente dejar de verificar 25 notas.
+**El tag `archive` excluye del control de idioma, y excluye mucho.** Hoy son 25 de 54 notas, y entre ellas [[database-hub]] —la referencian 28 notas distintas del vault, 42 instancias de enlace, contando por ruta completa y no por nombre de archivo— y [[kanban]]. El tag mezcla dos intenciones —"esto es histórico" y "esto está en otro idioma"— y por eso alcanza a las dos notas más consultadas del vault. Se mantiene porque el filtro es correcto, pero el número está fijado en el test: si alguien confunde `archive` con `deprecated`, el CI se pone rojo en vez de silenciosamente dejar de verificar 25 notas.
 
 ## Los dos axes que no se mezclan
 
@@ -115,7 +115,7 @@ La regla se cambió el 28-Sep-2026 porque la anterior —"fichas de módulo siem
 
 ## Qué cambiaría estas decisiones
 
-- **Raíz del vault = `docs/`.** Cambió desde `docs/obsidian/` el 27-Sep-2026. La razón original —que la raíz del repo metería `results/` (~300 reportes generados) y `.venv/` en el grafo— era cierta pero arrancaba de otra capa: aplicaba a la **raíz del repo**, no a `docs/`. Bajo `docs/` los 54 archivos `.md` son todos documentación, y no hay `results/`, `.venv/`, `node_modules/` ni `__pycache__`. Lo que se ganó fue alcance: con la raíz en `docs/obsidian/`, `index.md`, `architecture.md`, `guide.md`, `adr/` y `reorganization/` quedaban fuera del grafo e inalcanzables por wikilink.
+- **Raíz del vault = `docs/`.** Cambió desde `docs/obsidian/` el 27-Sep-2026. La razón original —que la raíz del repo metería `results/` (salida generada, no versionada) y `.venv/` en el grafo— era cierta pero arrancaba de otra capa: aplicaba a la **raíz del repo**, no a `docs/`. Bajo `docs/` los 54 archivos `.md` son todos documentación, y no hay `results/`, `.venv/`, `node_modules/` ni `__pycache__`. Lo que se ganó fue alcance: con la raíz en `docs/obsidian/`, `index.md`, `architecture.md`, `guide.md`, `adr/` y `reorganization/` quedaban fuera del grafo e inalcanzables por wikilink.
 
   **Lo que la cambiaría:** contenido *generado por el proyecto* dentro de `docs/` —un `docs/results/`, un `docs/.venv`, un `docs/node_modules/`— y no un cambio de gusto.
 

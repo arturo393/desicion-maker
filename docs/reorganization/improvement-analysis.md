@@ -81,7 +81,7 @@ stochastic-decision-architect/
 
 #### 1.4 Acumulación de Resultados
 ```
-results/ (17 archivos)
+results/ (salida generada, no versionada)
 ├── furniture/ (análisis mueble DIY)
 ├── mining/ (análisis minería)
 ├── research/ (investigaciones Gemini)

@@ -49,7 +49,7 @@ Dentro de `results/` residen artefactos especializados utilizados en la validaci
 
 ## 🗓️ 3. Lotes Históricos de Simulación
 
-El repositorio registra 295 archivos en `results/`, organizados cronológicamente por lotes operativos:
+Esta sección describe **lotes** de simulación, no un inventario. `results/` está en `.gitignore` y no tiene un solo archivo versionado: su contenido es salida local de cada máquina y cambia con cada corrida, así que un conteo de archivos en esa carpeta sería un número que nadie más puede reproducir. La fecha de cada lote y la marca temporal de su nombre (`YYYYMMDD_HHMMSS`) sí son reproducibles, y son lo que permite reconstruir la historia. Un test verifica que `results/` siga ignorado, para que este documento no vuelva a afirmar un total.
 
 ### Lote 1: Inicialización y Caso Sophos (2026-08-10)
 - **Foco:** Primera corrida formal de simulación estocástica aplicada al firewall perimetral de red industrial.
