@@ -1,3 +1,16 @@
+---
+aliases: [Legacy Integration Summary]
+tags: [archive, lumina, legacy]
+id: ARCH-LEGACY-INTEG-SUMMARY
+title: "Legacy Integration Summary"
+type: archive
+category: legacy
+status: archive
+related: ["[[docs/database-hub|database-hub]]", "[[docs/index|index]]"]
+created: 2025-12-01
+updated: 2026-09-27
+---
+
 # ✅ Integración Complete: Deep Research Pro + Decision Maker
 
 ## 📦 Lo que se agregó

@@ -1,3 +1,16 @@
+---
+aliases: [Agent Guidelines, Reglas de Agentes]
+tags: [agents, guidelines, lumina, rules]
+id: GOV-AGENTS
+title: "Decision Maker Framework - Agent Guidelines"
+type: meta
+category: governance
+status: active
+related: ["[[docs/index|index]]", "[[docs/note-schema|note-schema]]"]
+created: 2026-08-10
+updated: 2026-09-27
+---
+
 # Decision Maker Framework - Agent Guidelines
 
 ## Project Map (hermanos del dominio)

@@ -1,3 +1,16 @@
+---
+aliases: [Decision Maker README, Project Overview]
+tags: [readme, lumina, quant, overview]
+id: ROOT-README
+title: "Decision Maker Framework"
+type: narrative
+category: overview
+status: active
+related: ["[[docs/index|index]]", "[[docs/database-hub|database-hub]]", "[[docs/kanban|kanban]]", "[[docs/architecture|architecture]]"]
+created: 2026-08-10
+updated: 2026-09-27
+---
+
 # Decision Maker Framework (v3.1)
 
 Dual Python + Rust library for multi-criteria decision analysis under uncertainty. Combines Monte Carlo simulation, multi-criteria optimization, robust decision theory, AI-powered research, learning/meta-learning loops, and interactive tools. Performance-critical math (Monte Carlo normalization) runs in a native Rust extension (`rust_core/`, pyo3 + rayon + ndarray).
@@ -71,8 +84,10 @@ Commands: `run` (from YAML config, with `--what-if` for interactive REPL), `list
 
 ## Documentation
 
-- [Index](docs/INDEX.md) — overview and layout
-- [Architecture](docs/ARCHITECTURE.md) — building blocks, runtime flow
+- [Index](docs/index.md) — overview and layout
+- [Database Hub](docs/database-hub.md) — Obsidian relational database views, tables & Dataview queries
+- [Kanban Board](docs/kanban.md) — interactive project Kanban board
+- [Architecture](docs/architecture.md) — building blocks, runtime flow
 - [Guide](docs/guide.md) — how to model a decision step by step
 - [Changelog](CHANGELOG.md) — version history
 - [Roadmap](ROADMAP_v3.0.md) — planned features

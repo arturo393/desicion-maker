@@ -95,3 +95,15 @@ decision_maker.db
 decisions.db
 violations*.txt
 .agents/
+
+# Obsidian vault — the vault root is docs/, never the repo root.
+# A .obsidian/ at the repo root makes Obsidian treat the whole repository as the
+# vault, which puts results/, .venv/ and src/ in the graph. Keep it in docs/.
+/.obsidian/
+
+# Vendored plugin build artifacts. manifest.json IS tracked: it is the source of
+# truth for which plugin and which version, and without it a fresh clone silently
+# has no plugins. main.js and styles.css are ~1MB of generated code per plugin.
+/docs/.obsidian/plugins/*/main.js
+/docs/.obsidian/plugins/*/styles.css
+/docs/.obsidian/plugins/*/node_modules/

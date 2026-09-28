@@ -1,3 +1,16 @@
+---
+aliases: [Legacy Index]
+tags: [archive, lumina, legacy]
+id: ARCH-LEGACY-INDEX
+title: "Legacy Index"
+type: archive
+category: legacy
+status: archive
+related: ["[[docs/database-hub|database-hub]]", "[[docs/index|index]]"]
+created: 2025-12-01
+updated: 2026-09-27
+---
+
 # 📚 ÍNDICE MAESTRO - desicion-maker
 
 **Repositorio reorganizado y listo para usar.**

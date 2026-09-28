@@ -1,3 +1,16 @@
+---
+aliases: [Legacy Integrated System Readme]
+tags: [archive, lumina, legacy]
+id: ARCH-LEGACY-INTEG-SYSTEM
+title: "Legacy Integrated System Readme"
+type: archive
+category: legacy
+status: archive
+related: ["[[docs/database-hub|database-hub]]", "[[docs/index|index]]"]
+created: 2025-12-01
+updated: 2026-09-27
+---
+
 # 🎯 SISTEMA INTEGRADO: Gemini Deep Research + Decision-Maker Framework
 ## Para Análisis de Carrera & Minería 2025-2026
 

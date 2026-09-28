@@ -1,0 +1,8 @@
+# Obsidian writes per-machine window state here. Committing it produces diff
+# noise on every window resize and merge-conflicts between two clones.
+workspace.json
+workspace-mobile.json
+
+# Plugin-local caches and per-install state
+cache/
+plugins/*/data.json

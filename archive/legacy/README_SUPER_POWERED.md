@@ -1,3 +1,16 @@
+---
+aliases: [Legacy Readme Super Powered]
+tags: [archive, lumina, legacy]
+id: ARCH-LEGACY-SUPER-POWERED
+title: "Legacy Readme Super Powered"
+type: archive
+category: legacy
+status: archive
+related: ["[[docs/database-hub|database-hub]]", "[[docs/index|index]]"]
+created: 2025-12-01
+updated: 2026-09-27
+---
+
 # 🚀 Decision Maker - El Framework MÁS COMPLETO de Toma de Decisiones
 
 [![C++17](https://img.shields.io/badge/C%2B%2B-17-blue.svg)](https://en.cppreference.com/w/cpp/17)

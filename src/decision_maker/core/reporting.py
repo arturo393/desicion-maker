@@ -218,9 +218,24 @@ def save_json_report(data: ReportData) -> str:
 def save_markdown_report(data: ReportData) -> str:
     bluf_winner, bluf_reason = resolve_winner(data.topsis_scores, data.mc_results)
     mc_winner = max(data.mc_results.values(), key=lambda x: x.mean_score).option_name
+    date_now = datetime.now().strftime("%Y-%m-%d %H:%M")
+    date_iso = datetime.now().strftime("%Y-%m-%d")
     lines = [
+        "---",
+        f"aliases: [Report {data.timestamp}]",
+        "tags: [results, report, simulation, archive]",
+        f"id: REPORT-{data.timestamp}",
+        f'title: "Decision Analysis Report {data.timestamp}"',
+        "type: report",
+        "category: analyses",
+        "status: archive",
+        'related: ["[[results-catalog]]", "[[decision-analyses]]"]',
+        f"created: {date_iso}",
+        f"updated: {date_iso}",
+        "---",
+        "",
         "# Decision Analysis Report\n",
-        f"**Date:** {datetime.now().strftime('%Y-%m-%d %H:%M')}",
+        f"**Date:** {date_now}",
         f"**Execution Tier:** {data.mode.upper()}\n",
         "## Visual Insights\n",
         f"![Risk Profiles](risk_profiles_{data.timestamp}.png)\n",

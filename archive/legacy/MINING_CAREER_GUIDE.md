@@ -1,3 +1,16 @@
+---
+aliases: [Legacy Mining Career Guide]
+tags: [archive, lumina, legacy]
+id: ARCH-LEGACY-MINING-GUIDE
+title: "Legacy Mining Career Guide"
+type: archive
+category: legacy
+status: archive
+related: ["[[docs/database-hub|database-hub]]", "[[docs/index|index]]"]
+created: 2025-12-01
+updated: 2026-09-27
+---
+
 # 🏔️ MINING & CAREER DECISION ANALYZER
 ## Guía Completa: Gemini Deep Research + Decision-Maker 13 Metodologías
 
@@ -43,7 +56,7 @@ cat .env.gemini
 
 Debe contener:
 ```
-GEMINI_API_KEY=AIzaSyDIuo2lfInFZKeDAKApypziugGX8ieTRnw
+GEMINI_API_KEY=your_gemini_api_key_here
 GEMINI_MODEL=gemini-2.0-flash
 GEMINI_DEBUG=false
 ```

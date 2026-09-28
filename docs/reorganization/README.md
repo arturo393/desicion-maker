@@ -1,4 +1,45 @@
+---
+aliases: [Reorganization Readme, reorganization]
+tags: [archive, lumina, reorganization]
+id: ARCH-REORG-README
+title: "Reorganización Histórica del Repositorio"
+type: archive
+category: history
+status: archive
+related: ["[[decision-maker-moc]]", "[[database-hub]]", "[[index]]"]
+created: 2026-01-15
+updated: 2026-09-27
+---
+
 # 🎉 REORGANIZACIÓN COMPLETADA ✅
+
+> [!info] Índice del material de archivo
+> `reorganization/`, `session-logs/` y `tests-results/` son **historia**: registran cómo
+> se reorganizó el repo en enero 2026. El layout que describen ya no es el actual — las
+> rutas y los nombres de archivo que citan (`docs/INDEX.md`, `REORGANIZATION_PLAN.md`,
+> `python/scripts/`, root de 54 archivos…) no existen. Para el estado del vault hoy,
+> ver [[index]].
+>
+> **Plan y análisis — nunca ejecutados tal cual.** Los enlaces con forma de ruta en
+> estos documentos están rotos **a propósito**: son la estructura que el plan proponía y
+> sus targets no existen en ningún lado. No los repares. Están declarados como
+> pre-existentes en `scripts/check_docs_links.py` (`KNOWN_BROKEN`).
+>
+> | Nota | Qué contiene |
+> |---|---|
+> | [[reorganization/summary]] | Resumen de los cambios efectivamente aplicados |
+> | [[reorganization/complete]] | Comparativa antes/después, con métricas |
+> | [[reorganization/analysis]] | Análisis profundo previo a la reorganización |
+> | [[reorganization/plan]] | Plan propuesto (fases 1–4) — histórico |
+> | [[reorganization/deliverables]] | Entregables del plan — histórico |
+> | [[reorganization/improvement-analysis]] | Deuda técnica y oportunidades — histórico |
+> | [[reorganization/personal-improvement-plan]] | Plan de mejora personal — histórico |
+> | [[session-logs/reorganization-summary]] | Bitácora: qué se movió y por qué |
+> | [[session-logs/verification-report]] | Verificación posterior: raíz, estructura, contenido |
+> | [[session-logs/test-results]] | Tests de estructura y compilación de esa corrida |
+> | [[tests-results/meta-decision-result]] | Salida de la decisión meta (Opción B: todo Python) |
+
+---
 
 ## ¿Qué se hizo?
 

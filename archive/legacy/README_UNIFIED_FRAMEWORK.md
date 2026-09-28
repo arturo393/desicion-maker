@@ -1,3 +1,16 @@
+---
+aliases: [Legacy Readme Unified Framework]
+tags: [archive, lumina, legacy]
+id: ARCH-LEGACY-UNIFIED-FRAMEWORK
+title: "Legacy Readme Unified Framework"
+type: archive
+category: legacy
+status: archive
+related: ["[[docs/database-hub|database-hub]]", "[[docs/index|index]]"]
+created: 2025-12-01
+updated: 2026-09-27
+---
+
 # 🎯 Framework Unificado de Decisiones
 
 ## Introducción

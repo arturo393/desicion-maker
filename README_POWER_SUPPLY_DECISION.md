@@ -1,3 +1,16 @@
+---
+aliases: [Power Supply Strategy Analysis, Decision Fuente de Poder]
+tags: [analysis, decision, power-supply, sw-diagnosticoremoto, lumina]
+id: CASE-POWER-SUPPLY
+title: "Análisis de Decisión: Power Supply Module Strategy"
+type: analysis
+category: remote-diagnostics
+status: stable
+related: ["[[docs/sw-diagnosticoremoto/README|sw-diagnosticoremoto]]", "[[docs/database-hub|database-hub]]", "[[docs/index|index]]"]
+created: 2026-01-15
+updated: 2026-09-27
+---
+
 # 🎯 ANÁLISIS DE DECISIÓN: Power Supply Module Strategy
 
 > **Usando Decision Maker Framework para evaluar mejor estrategia técnica**
@@ -429,7 +442,7 @@ Integración con otros sistemas
 
 ## Documentos Relacionados
 
-Ver directorio `docs/docs/sw-diagnosticoremoto/05-power-supply/investigacion/` para documentacion tecnica completa.
+Ver directorio `docs/sw-diagnosticoremoto/05-power-supply/investigacion/` para documentacion tecnica completa.
 
 ---
 

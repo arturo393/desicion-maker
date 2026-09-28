@@ -1,3 +1,16 @@
+---
+aliases: [Stochastic Decision Architect Readme]
+tags: [archive, lumina, legacy]
+id: ARCH-STOCHASTIC-ARCHITECT
+title: "Stochastic Decision Architect Readme"
+type: archive
+category: legacy
+status: archive
+related: ["[[docs/database-hub|database-hub]]", "[[docs/index|index]]"]
+created: 2025-12-01
+updated: 2026-09-27
+---
+
 <div align="center">
 <img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
 </div>

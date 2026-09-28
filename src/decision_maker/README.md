@@ -1,3 +1,16 @@
+---
+aliases: [Python Decision Framework, Package Readme]
+tags: [package, lumina, quant, infrastructure]
+id: DOC-PKG-README
+title: "Python Decision Framework Package Readme"
+type: narrative
+category: infrastructure
+status: active
+related: ["[[docs/index|index]]", "[[docs/database-hub|database-hub]]", "[[docs/decision-analyses|decision-analyses]]"]
+created: 2026-01-03
+updated: 2026-09-27
+---
+
 # Python Decision Framework
 
 Motor de decisiones en Python con integración Gemini Deep Research.

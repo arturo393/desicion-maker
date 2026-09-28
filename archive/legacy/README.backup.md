@@ -1,3 +1,16 @@
+---
+aliases: [Legacy Readme Backup]
+tags: [archive, lumina, legacy]
+id: ARCH-LEGACY-README-BACKUP
+title: "Legacy Readme Backup"
+type: archive
+category: legacy
+status: archive
+related: ["[[docs/database-hub|database-hub]]", "[[docs/index|index]]"]
+created: 2025-12-01
+updated: 2026-09-27
+---
+
 # 🎯 desicion-maker: Framework Decisiones + Plan Minería 2026
 
 > Repositorio integrado: Framework de decisiones automático (C++) + Plan ejecutivo carrera minería + análisis alternativas

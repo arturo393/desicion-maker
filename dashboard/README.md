@@ -1,3 +1,16 @@
+---
+aliases: [Dashboard Frontend, React Dashboard]
+tags: [dashboard, frontend, react, vite]
+id: COMP-DASHBOARD
+title: "Dashboard Web Frontend"
+type: narrative
+category: infrastructure
+status: active
+related: ["[[docs/index|index]]", "[[docs/kanban|kanban]]"]
+created: 2026-08-10
+updated: 2026-09-27
+---
+
 # React + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.

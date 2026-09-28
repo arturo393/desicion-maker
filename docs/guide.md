@@ -1,4 +1,22 @@
+---
+aliases: [Guide, Modeling Guide, Guía de modelado]
+tags: [narrative, lumina, quant, mcda]
+id: DOC-GUIDE
+title: "Decision Modeling Guide"
+type: guide
+category: governance
+status: stable
+related: ["[[index]]", "[[architecture]]", "[[unified-orchestrator]]"]
+created: 2026-08-10
+updated: 2026-09-27
+---
+
 # Guide: Modeling a Decision
+
+> How to go from "I have to choose" to a ranked result with uncertainty attached.
+> Read it with: [[index]] for orientation, [[architecture]] for what runs underneath,
+> [[decision-maker-moc]] to jump to one module.
+> Not a tutorial for the engines individually — each of those has its own card.
 
 ## Step 1: Create Your Script
 
@@ -9,6 +27,7 @@ cp src/decision_maker/analyses/_template.py my_decision.py
 ## Step 2: Define Factors
 
 Factors are what you care about. Each has a name, weight (importance), and direction (maximize or minimize).
+`Factor` is defined in `decision_maker.core.models` — see [[data-models-and-schemas]].
 
 ```python
 from decision_maker.core.models import Factor
@@ -23,7 +42,8 @@ Weights should sum to 1.0 for interpretability but the framework normalizes inte
 
 ## Step 3: Define Options
 
-Each option has variables matching your factor names. Choose a distribution type for uncertainty:
+Each option has variables matching your factor names. Choose a distribution type for uncertainty —
+the spread you declare here is what the simulation in [[monte-carlo-engine]] actually samples.
 
 ```python
 from decision_maker.core.models import DecisionOption, DistributionType
@@ -52,6 +72,9 @@ fw.add_option(opt)
 | `BERNOULLI` | `p` | Binary outcomes |
 
 ## Step 4: Run
+
+`fw.run_analysis()` is the orchestrator's single entry point — [[unified-orchestrator]] for what it
+calls and in which order, [[architecture]] for the mode table.
 
 ```python
 import asyncio
@@ -84,6 +107,10 @@ The result dict contains:
 | `future.ideal_option` | Theoretical best composite (advanced) |
 | `future.bootstrap_ci` | Confidence intervals on ranking (advanced) |
 
+Keys that are easy to misread: `topsis_scores` and `future.promethee_scores` come from different
+engines (fuzzy vs crisp, see [[topsis]] and [[promethee]]), and `future.bayesian_probs` is a
+probability of *being best*, not a score ([[bayesian-inference-engine]]).
+
 ## Example: 3 Mac Upgrade Options
 
 See [`examples/mac_upgrade_comparison.py`](../examples/mac_upgrade_comparison.py) for a complete comparison across all 3 modes.
@@ -91,12 +118,12 @@ See [`examples/mac_upgrade_comparison.py`](../examples/mac_upgrade_comparison.py
 ## Using YAML Config
 
 ```bash
-# Edit config/decision_config.yaml
+# Edit src/decision_maker/config/decision_config.yaml
 uv run python -c "
 from decision_maker.core.config_runner import build_framework_from_config, load_decision_config
 import yaml
 
-with open('config/decision_config.yaml') as f:
+with open('src/decision_maker/config/decision_config.yaml') as f:
     config = yaml.safe_load(f)
 fw = build_framework_from_config(config)
 import asyncio

@@ -1,3 +1,16 @@
+---
+aliases: [Legacy Readme Old]
+tags: [archive, lumina, legacy]
+id: ARCH-LEGACY-README-OLD
+title: "Legacy Readme Old"
+type: archive
+category: legacy
+status: archive
+related: ["[[docs/database-hub|database-hub]]", "[[docs/index|index]]"]
+created: 2025-12-01
+updated: 2026-09-27
+---
+
 # 🎯 desicion-maker: Plan Minería + Framework Decisiones
 
 > **Repositorio reorganizado**: Plan ejecutivo minería Chile + Framework de decisiones automático

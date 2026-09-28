@@ -45,6 +45,18 @@ jobs:
       - name: Run dev-agents linter
         run: python scripts/dev_agents_linter.py src/decision_maker/core
 
+      - name: "Docs: every link resolves"
+        run: python scripts/check_docs_links.py
+
+      - name: "Docs: vault root is docs/ and holds no generated content"
+        run: python scripts/check_docs_scope.py
+
+      - name: "Docs: notes match the source they describe"
+        run: python scripts/check_obsidian_fidelity.py
+
+      - name: "Docs: no cross-language drift in the vault"
+        run: python scripts/check_obsidian_language.py
+
       - name: Run tests
         run: pytest --tb=short -q
 

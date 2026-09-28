@@ -1,3 +1,16 @@
+---
+aliases: [Changelog, Historial de Cambios]
+tags: [changelog, lumina, quant, project-management]
+id: ROOT-CHANGELOG
+title: "Decision Maker Changelog"
+type: changelog
+category: project-management
+status: active
+related: ["[[docs/kanban|kanban]]", "[[docs/index|index]]", "[[docs/adr/001-use-rust-for-math-engine|adr-001]]"]
+created: 2026-08-10
+updated: 2026-09-27
+---
+
 # Changelog
 
 All notable changes to this project will be documented in this file.

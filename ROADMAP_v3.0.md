@@ -1,3 +1,16 @@
+---
+aliases: [Roadmap v3.0, Project Roadmap, Hoja de Ruta]
+tags: [roadmap, lumina, quant, project-management]
+id: ROOT-ROADMAP
+title: "Roadmap v3.0: Decision Intelligence Framework"
+type: roadmap
+category: project-management
+status: active
+related: ["[[docs/kanban|kanban]]", "[[docs/index|index]]", "[[docs/decision-maker-moc|moc]]"]
+created: 2026-08-10
+updated: 2026-09-27
+---
+
 # 🗺️ Roadmap v3.0: Decision Intelligence Framework
 
 **Current State**: v3.0 ships 24 decision engines, a REST API, web dashboard, and CLI. The core library is feature-complete for most multi-criteria decision analysis workflows.

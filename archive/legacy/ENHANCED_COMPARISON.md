@@ -1,3 +1,16 @@
+---
+aliases: [Legacy Enhanced Comparison]
+tags: [archive, lumina, legacy]
+id: ARCH-LEGACY-ENHANCED-COMP
+title: "Legacy Enhanced Comparison"
+type: archive
+category: legacy
+status: archive
+related: ["[[docs/database-hub|database-hub]]", "[[docs/index|index]]"]
+created: 2025-12-01
+updated: 2026-09-27
+---
+
 # 📊 Análisis Comparativo: Simulación Básica vs. Mejorada
 
 ## 🎯 Objetivo
