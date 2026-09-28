@@ -89,7 +89,7 @@ Una revisión estructural encontró cinco defectos Alta. Todos corregidos, y dos
 
 La ronda anterior verificó que las afirmaciones sobre el código fueran ciertas. Estas son las que hablan de **conteos**, que envejecen distinto: un literal `.py` queda viejo cuando el código se mueve, pero un total como "521 tests" queda viejo sin que nadie toque nada. Cuatro estaban mal:
 
-- **`architecture.md` e `index.md` decían 495 tests; había 521.** Ahora 543, que es el total real con los seis tests de este ratchet y los diez de `test_checkers_run.py` incluidos. El número volvió a moverse en el mismo commit en que se escribió el test que lo vigila, que es exactamente lo que debería pasar.
+- **`architecture.md` e `index.md` decían 495 tests; había 521.** Ahora 539, que es el total real con los seis tests de este ratchet y los diez de `test_checkers_run.py` incluidos. El número volvió a moverse en el mismo commit en que se escribió el test que lo vigila, que es exactamente lo que debería pasar.
 - **`decision-analyses.md` decía 36 scripts y su propia tabla listaba 37 filas.** La 37 es `_template.py`, la plantilla canónica, que no es un análisis. El texto ahora lo dice en vez de dejar que la prosa y la tabla se contradigan.
 - **`results-catalog.md` afirmaba que el repositorio registraba 295 archivos, en `results/`.** `results/` está en `.gitignore` con **cero** archivos versionados, así que ese número sólo podía reproducirlo la máquina que lo escribió — y ahora hay 2081 archivos ahí, porque las corridas siguieron. Dos claims más del mismo tipo aparecieron al escribir el detector: `improvement-analysis.md` ("17 archivos") y una mención de "~300 reportes" en [[note-schema]]. Los tres se reemplazaron por la regla de nomenclatura, que sí es reproducible. Nota sobre esta línea: el texto va redactado así a propósito. La primera redacción citaba el claim literal y el ratchet la marcó a sí mismo, porque no distingue entre afirmar un conteo y citar uno viejo. Se prefirió la regla simple y estricta antes que enseñarle al regex a reconocer el pasado.
 - **Los 37 enlaces entrantes de [[database-hub]] no correspondían a ninguna métrica.** Medido: 28 notas distintas y 42 instancias.
@@ -189,16 +189,24 @@ antes de tocar código, y en dos casos el instrumento era el que estaba mal:
 YAML válido.** La línea 27 era `- 001: Rust Math Engine: adr/...`, con un `:` sin
 comillas dentro del valor, así que `mkdocs build` abortaba en el parser antes de
 mirar el vault. Nunca se había compilado, y no podía: no está en CI, ni en el
-extra `test`, ni instalado. El ratchet nuevo (`test_mkdocs_config.py`, 4 tests)
-afirma que el archivo parsea y que cada target de `nav` existe, con un control
-negativo que exige que el `:` sin comillas **levante excepción** — verificado
-revirtiendo el arreglo: el test se pone rojo.
+extra `test`, ni instalado.
 
-Medido después del arreglo: `mkdocs build` da 49 warnings, de los cuales **8 son
-links rotos reales** (los mismos que quedan declarados) y **41 son mkdocs sin ver
-fuera de `docs_dir`** — `../README.md` desde `docs/` apunta al root del repo y
-existe, sólo que mkdocs no lo resuelve. Sigue sin ser el publicador del vault:
-los wikilinks necesitan plugin y su `nav` cubre 4 de 54 notas.
+Se arregló el YAML y se midió el build: 49 warnings, de los cuales **8 son links
+rotos reales** (los mismos que quedan declarados) y **41 son mkdocs sin ver fuera
+de `docs_dir`** — `../README.md` desde `docs/` apunta al root del repo y existe,
+sólo que mkdocs no lo resuelve. Con eso medido, la pregunta correcta no era cómo
+terminar de arreglarlo sino **si debía existir**. Fue creado en `3279d14`
+(31-Jul-2026, la fase "God-Mode") como template genérico; ningún session-log lo
+menciona, ninguna decisión lo adoptó, y no puede leer los 512 `[[wikilinks]]` del
+vault sin un plugin externo ni ver fuera de `docs_dir`, con un nav que cubría 4 de
+54 notas.
+
+**Retirado.** Se borraron `mkdocs.yml`, el extra `docs` de `pyproject.toml` y el
+ratchet de 4 tests que se había escrito — se escribe un ratchet para proteger algo
+que va a vivir, no para custodiar lo que se retira. El repo ya es un vault de
+Obsidian con cuatro checkers encima; un publicador HTML sin audiencia era un
+segundo árbol de documentación esperando a divergir. Si algún día hace falta
+sitio, se genera desde el vault.
 
 Sobre los enlaces: once entradas estaban declaradas en `KNOWN_BROKEN` con una
 justificación **en bloque** («los targets no existen en ningún lado») que era
@@ -209,7 +217,7 @@ falsa para dos de ellas. Al medir una por una, `./docs/architecture.md` y
 existió, no un documento del árbol fantasma — la justificación agrupada lo había
 tapado.
 
-Deuda al cerrar la ronda: **543 tests**.
+Deuda al cerrar la ronda: **539 tests**.
 
 ## En curso
 
@@ -218,7 +226,6 @@ Deuda al cerrar la ronda: **543 tests**.
 ## Pendiente
 
 - [ ] Falta decidir si `reorganization/` y `session-logs/` se fusionan (el análisis dice que no, por diff de contenido)
-- [ ] Falta decidir si `mkdocs.yml` se completa como publicador o se retira: hoy es válido y verificado, pero no renderiza los wikilinks del vault ni ve fuera de `docs_dir`
 
 ## Descartado
 

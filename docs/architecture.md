@@ -13,7 +13,7 @@ updated: 2026-09-27
 
 # Architecture
 
-Dual Python + Rust framework for multi-criteria decision analysis under uncertainty. 19 motores ruteables, 543 tests. Performance-critical Monte Carlo normalization runs in a native Rust extension (`rust_core/`).
+Dual Python + Rust framework for multi-criteria decision analysis under uncertainty. 19 motores ruteables, 539 tests. Performance-critical Monte Carlo normalization runs in a native Rust extension (`rust_core/`).
 
 ## Building Blocks
 
@@ -146,7 +146,7 @@ Statistics (per option after MC)
 
 ## Test Coverage
 
-543 tests across all engines. Run with:
+539 tests across all engines. Run with:
 
 ```bash
 uv run pytest src/decision_maker/tests/ -v

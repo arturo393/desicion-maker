@@ -63,10 +63,6 @@ dev = [
     "decision-maker[test]",
     "ruff>=0.1.0",
 ]
-docs = [
-    "mkdocs-material>=9.0.0",
-    "mkdocstrings[python]>=0.24.0",
-]
 
 [project.scripts]
 decision-maker = "decision_maker.cli:main"
