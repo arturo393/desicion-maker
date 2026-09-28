@@ -27,11 +27,12 @@ Tablero interactivo de seguimiento de tareas, hitos y desarrollo del framework c
 ## 📌 Por Hacer / En Cola (To Do)
 
 - [ ] 📝 **Documentar módulos auxiliares restantes**: crear notas para submódulos de soporte secundario en `src/decision_maker/core/` (como `config_runner.py`, `jsonl_store.py`) #docs #p3
-- [ ] 🦀 **Limpieza en Cargo.toml**: auditar dependencia `ndarray` en `rust_core/Cargo.toml` respecto a [[adr/001-use-rust-for-math-engine]] #rust #p3
-- [ ] 🗺️ **Sincronización mkdocs.yml**: alinear navegación del generador estático con la estructura unificada de `docs/` #docs #p3
+- [ ] 🦀 **Quitar `ndarray` de `rust_core/Cargo.toml`**:_medido — la dependencia está declarada (`ndarray = "0.15"`) y tiene **cero usos**: el crate tiene un solo archivo `.rs` y no la menciona. No hay decisión que tomar, sólo la dependencia que sobra y el `Cargo.lock` que hay que regenerar #rust #p3
+- [ ] 🗺️ **Sincronización mkdocs.yml**: el `nav` declara 4 entradas contra 54 notas, así que 50 quedan inalcanzables desde el generador estático (las 4 entradas sí apuntan a archivos reales). Antes de llenarlo hay que decidir si mkdocs es el publicador del vault: el vault usa wikilinks `[[...]]`, que mkdocs no renderiza sin plugin #docs #p3
 - [ ] 🧪 **Correr los checkers documentales en el harness**: hoy `scripts/check_docs_*.py` y `scripts/check_obsidian_*.py` se ejecutan sólo en CI, así que un test que confirme que sus nombres aparecen en la salida del pipeline no existe #qa #p2
 - [x] 🧾 **Piso de Python alineado**: `AGENTS.md` decía Python 3.12+ y `pyproject.toml` exige `>=3.11`; canónico el declared, porque es lo que la CI prueba en su celda más baja. `AGENTS.md` ahora dice 3.11+, y un test compara ambos #docs #p3
 - [ ] 🔗 **Resolver los 13 enlaces rotos preexistentes**: apuntan a un árbol de documentación propuesto que nunca se ejecutó, y están documentados por target exacto en `KNOWN_BROKEN` para que no se confundan con roturas nuevas #docs #p3
+- [ ] 🔒 **Versionar `uv.lock` y alinear el install de CI con el local**: `.gitignore` ignora `uv.lock` y CI instala con `pip install -e ".[test]"` sin lockfile ni constraints. Las 20 dependencias tienen cota inferior y **ninguna superior**, así que cada corrida resuelve a la última versión en PyPI: un CI en verde no es reproducible desde el repo, y un release upstream lo rompe sin commit al que culpar. Local usa `uv`, CI usa `pip`, sin fuente de verdad común. Los pins existen (623 KB en disco) y el repo los descarta #deps #p1
 - [ ] 🔢 **Hacer derivable el conteo de 24 motores**: `architecture.md`, `roadmap.md` y este kanban coinciden en 24, y nada más en el repo lo respalda — no existe registro de motores en el código, ni `ENGINES` ni un `__all__` en `core/` que los enumere. Hoy el test solo verifica que las tres notas coincidan, que es más débil y lo dice. La salida es una lista explícita, y entonces el número se deriva en vez de repetirse #docs #p2
 
 ## 🚧 En Curso (In Progress)

@@ -106,6 +106,22 @@ El primer detector de claims en `results/` tampoco servía: emparejaba un conteo
 
 Los seis tests tienen control negativo: se reintrodujo cada defecto uno por uno y los seis lo detectaron. El del conteo de tests sólo corre en la suite completa — con un path o un `-k`, `session.items` ya viene filtrado y el total no es comparable, así que skipea con el motivo escrito en vez de ponerse rojo por una razón que no tiene que ver con la documentación.
 
+### Tercera ronda: qué se versiona, qué está muerto, qué resuelve el solver
+
+Tres instrumentos nuevos. Los anteriores habían mirado lo que la documentación afirma; estos miraron lo que el repositorio *contiene* y lo que el solver *resuelve*.
+
+**Ronda 1 — qué existe en disco y qué está en git.** Ningún `.py` sin versionar: el código no tiene trabajo invisible. Pero `.gitignore` ignora `uv.lock`, y ese archivo existe en disco con 623 KB de versiones resueltas. Nunca estuvo versionado —la regla se agregó en el commit de v3.0—, así que no es una regresión sino una decisión que nunca se revisó. Las consecuencias se miden en la ronda 3.
+
+**Ronda 2 — código muerto, y un bug en el propio detector.** El instrumento enumeró **87** símbolos de primer nivel sin referenciar. Leídos uno por uno: 80 son clases `Test*` que pytest recolecta sin nombrarlas, 4 son handlers de FastAPI registrados por decorador, uno es un comando de Typer y otro un fixture `autouse=True`. Es decir, **cero código muerto** — y casi lo reporto como 87.
+
+El near-miss importa más que el resultado. El detector nunca recursaba dentro de `ast.Attribute`, así que en una llamada encadenada como `_rank_scores(...).items()` veía el `.items` y cortaba el camino: la referencia interna era invisible. Marcaba como muerta una función con dos call sites vivos, y borrarla habría roto la preparación de la matriz de decisión. Reescrito con `ast.walk`, que es completo por construcción, el mismo detector baja de 87 a 6 —los 6 decorados de antes, todos falsos positivos.
+
+Un conteo de 87 que resulta ser cero no es un audit con 87 hallazgos: es un detector roto. La diferencia entre los dos números es entera la información.
+
+**Ronda 3 — qué resuelve el solver, y qué permite.** Las 20 dependencias declaradas tienen **cota inferior y ninguna superior**, CI instala con `pip install -e ".[test]"` sin lockfile, sin constraints y sin hashes. Con `uv.lock` ignorado, cada corrida de CI resuelve a la última versión publicada en ese momento. Un CI en verde no es reproducible desde el repositorio, y un release upstream puede romperlo sin que haya commit al que culpar: el fallo aparece en un commit que no lo tocó. Es la misma clase que el resto de esta auditoría —una confirmación que no se puede reproducir—, aplicada al pipeline. Local y CI además resuelven por mecanismos distintos: `uv` acá, `pip` allá, sin fuente de verdad común. Los pins existen; están en el disco y el repo los descarta.
+
+Dos pendientes del kanban medidos en el camino, sin abrir nada nuevo: `ndarray = "0.15"` está declarado en `rust_core/Cargo.toml` y tiene **cero usos** en el único archivo `.rs` del crate, así que la dependencia está sin usar; y `mkdocs.yml` declara 4 entradas de navegación contra 54 notas, o sea 50 inalcanzables desde el nav del generador estático, aunque las 4 entradas apuntan a archivos reales.
+
 
 ## En curso
 
