@@ -1,5 +1,4 @@
 
-import uvicorn
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -236,6 +235,15 @@ def get_calibration():
     return compute_calibration(outcomes)
 
 def run_server(host="0.0.0.0", port=8001):
+    # Imported here, not at module scope: uvicorn is the process that
+    # SERVES the app, not part of what the app IS. At module scope it made
+    # this file un-importable without an ASGI server, so the route tests
+    # needed a runtime dependency they have no business needing — the
+    # `test` extra declares fastapi and httpx but deliberately not uvicorn.
+    # The 8 tests in test_api_server.py are the ratchet: move this import
+    # back up and they error with ModuleNotFoundError in a clean environment.
+    import uvicorn
+
     uvicorn.run(app, host=host, port=port)
 
 if __name__ == "__main__":

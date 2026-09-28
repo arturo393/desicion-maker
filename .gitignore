@@ -9,7 +9,8 @@ python/.venv/
 python/venv/
 
 # Dependencies
-uv.lock
+# uv.lock SI se versiona: es lo que hace que un CI en verde sea reproducible.
+# No agregar de vuelta esta regla -- ver kanban, item de pins.
 
 # IDEs
 .vscode/
@@ -83,16 +84,16 @@ scratch/
 # Rust build artifacts
 rust_core/target/
 
-# Root-level exploratory scripts (not part of library)
-/bank_evaluation*.py
-/device_evaluation*.py
-/eval_conmute*.py
-/go_vs_python.py
-/language_evaluation.py
-/test_ahp.py
-/generic_template.py
-decision_maker.db
-decisions.db
+# Exploratory scripts at the repo root are ignored by pattern, not by name.
+# The seven name-specific rules that used to live here (/bank_evaluation*.py,
+# /device_evaluation*.py, /eval_conmute*.py, /go_vs_python.py,
+# /language_evaluation.py, /test_ahp.py, /generic_template.py) are gone: all
+# seven named files from the 2026 reorganization plan that was never executed,
+# so they protected nothing. /test_ahp.py was worse than dead — a real, tracked
+# test with that exact name lives in src/decision_maker/tests/, and being
+# root-anchored the rule never matched it, so it looked like a protection while
+# covering none. `/scratch/`, `/*.db` and `*.py[cod]` below do the actual work.
+/*.db
 violations*.txt
 .agents/
 
