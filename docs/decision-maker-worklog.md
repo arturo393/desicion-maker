@@ -225,10 +225,10 @@ Deuda al cerrar la ronda: **539 tests**.
 
 ## Pendiente
 
-- [ ] Falta decidir si `reorganization/` y `session-logs/` se fusionan (el análisis dice que no, por diff de contenido)
+*(nada abierto en esta familia: ver Descartado)*
 
 ## Descartado
 
 - [x] Enlaces rotos en `reorganization/deliverables.md` y `plan.md` — el plan nunca se ejecutó. Once entradas quedaron declaradas en `KNOWN_BROKEN` con una justificación en bloque, y al medir una por una dos eran falsas: `./docs/architecture.md` y `./docs/index.md` tienen destino real un nivel arriba. Corregidas; quedan 9, cada una con su razón, y `./python/scripts/` aparte porque es un directorio inexistente y no un documento del árbol fantasma
-- [x] `docs/reorganization/` y `docs/session-logs/` no se fusionan: se verificó por diff que tienen contenido distinto (256 vs 307 líneas). Sólo falta declarar cuál es el canónico
+- [x] `docs/reorganization/` y `docs/session-logs/` no se fusionan, y tampoco había que declarar un canónico: **ninguno lo es**. Son dos mitades del mismo archivo, complementarias y sin solape real — `reorganization/` (8 notas) es el *plan y análisis* de enero 2026 (propuesta, entregables, antes/después, deuda), `session-logs/` (3 notas) es la *bitácora de ejecución* (qué se movió, verificación posterior, tests de esa corrida), más `tests-results/meta-decision-result`. El diff lo confirma: los dos "summary" comparten 9 líneas de ~270 y ~320. El canónico del estado actual es `[[index]]`, y `[[reorganization/README]]` ya es la puerta de entrada del archivo — indexa las tres carpetas y lo dice explícitamente. La card pedía declarar algo que el README ya declaraba
 - [x] Archivo de histórico: [[reorganization/README|reorganization]] — documentación de la reorganización de 2026
