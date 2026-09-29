@@ -122,6 +122,7 @@ class MonteCarloEngine:
 
         results: dict[str, Statistics] = {}
         option_scores: dict[str, np.ndarray] = {}
+        option_factor_stats: dict[str, dict[str, dict[str, float]]] = {}
 
         for opt in self.options:
             opt_data = sampled_data[opt.name]
@@ -155,12 +156,15 @@ class MonteCarloEngine:
                             total_scores -= vals * f.weight
 
             option_scores[opt.name] = total_scores
+            option_factor_stats[opt.name] = factor_stats
 
         score_matrix = np.column_stack(list(option_scores.values())) if option_scores else np.empty((self.num_simulations, 0))
         cross_option_mean = np.mean(score_matrix, axis=1) if score_matrix.shape[1] > 0 else np.zeros(self.num_simulations)
 
         for opt in self.options:
             total_scores = option_scores[opt.name]
+            opt_data = sampled_data[opt.name]
+            factor_stats = option_factor_stats[opt.name]
 
             if np.std(total_scores) > EPSILON_SCORE:
                 ruin_threshold = np.percentile(total_scores, RUIN_THRESHOLD_PERCENTILE)
