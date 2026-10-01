@@ -40,6 +40,11 @@ GENERATED = {
 def main() -> int:
     failures: list[str] = []
 
+    # 0. An absent or empty vault is not a clean vault: rglob over nothing reads as "OK".
+    if not VAULT.is_dir() or not any(VAULT.rglob("*.md")):
+        print(f"RESULT: FAIL — {VAULT.relative_to(REPO)}/ is missing or holds no notes")
+        return 1
+
     # 1. A .obsidian at the repo root re-opens the whole repository as the vault.
     stray = REPO / ".obsidian"
     if stray.exists():

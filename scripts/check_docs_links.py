@@ -11,7 +11,13 @@ separately as BROKEN(case) — the difference matters on Linux and on GitHub, wh
 `architecture.md` does not open `ARCHITECTURE.md`.
 
 Link-shaped strings inside fenced code are reported as INERT, not broken: they
-are proposed content, not links.
+are proposed content, not links. A fence that never closes is a failure, because
+it would otherwise silence every link after it.
+
+Checked: [[wikilinks]], [text](path), ![image](path) and [ref]: path definitions.
+NOT checked: #anchors (the part after `#` is dropped), <a href> in HTML, http(s) URLs.
+An exemption in KNOWN_BROKEN that no longer matches anything is a failure too, so
+the table cannot outlive the breakage it documents.
 """
 from __future__ import annotations
 
@@ -20,14 +26,16 @@ import sys
 from pathlib import Path
 from urllib.parse import unquote
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))  # loadable by path, not only as `python scripts/x.py`
+from _fences import fence_mask  # noqa: E402
+
 REPO = Path(__file__).resolve().parent.parent
 DOCS = REPO / "docs"
 VAULT = DOCS
 
 WIKILINK = re.compile(r"\[\[([^\[\]]+?)\]\]")
-MDLINK = re.compile(r"(?<!!)\[([^\]\[]*)\]\(([^)\s]+)(?:\s+\"[^\"]*\")?\)")
+MDLINK = re.compile(r"!?\[([^\]\[]*)\]\(([^)\s]+)(?:\s+\"[^\"]*\")?\)")
 REFDEF = re.compile(r"^\s{0,3}\[([^\]]+)\]:\s*(\S+)\s*$")
-FENCE = re.compile(r"^\s*(```|~~~)")
 INLINE_CODE = re.compile(r"`[^`]*`")
 
 # Pre-existing breakage that is not ours to fix silently. Keyed by file AND by
@@ -55,18 +63,6 @@ KNOWN_BROKEN: dict[str, dict[str, str]] = {
             "plan/proposal document; the link-shaped string is proposed content"
     },
 }
-
-
-def strip_fences(lines: list[str]) -> list[bool]:
-    """True for lines strictly inside a fenced code block."""
-    inside, fenced = [False] * len(lines), False
-    for i, line in enumerate(lines):
-        if FENCE.match(line):
-            fenced = not fenced
-            inside[i] = False
-        else:
-            inside[i] = fenced
-    return inside
 
 
 def frontmatter_aliases(text: str) -> list[str]:
@@ -151,11 +147,15 @@ def main() -> int:
     alias_table = aliases()
     rows: list[tuple[str, str, str]] = []
     live_broken = 0
+    unclosed: list[str] = []
+    used_exemptions: set[tuple[str, str]] = set()
 
     for note in notes:
         raw_lines = note.read_text(encoding="utf-8").splitlines()
-        fenced = strip_fences(raw_lines)
+        fenced, open_line = fence_mask(raw_lines)
         rel = str(note.relative_to(REPO))
+        if open_line is not None:
+            unclosed.append(f"{rel}:{open_line}")
         exempt = KNOWN_BROKEN.get(rel, {})
 
         for n, line in enumerate(raw_lines, start=1):
@@ -168,6 +168,8 @@ def main() -> int:
                 target_name = m.group(1).split("|")[0].split("#")[0].strip()
                 target = f"[[{target_name}]]"
                 known = target in exempt
+                if known:
+                    used_exemptions.add((rel, target))
                 if kind in {"alias", "BROKEN(case)"} and path is not None:
                     rows.append((where, m.group(0), f"RESOLVED {kind} -> {path.name}", known))
                 else:
@@ -177,22 +179,34 @@ def main() -> int:
                 if kind in {"DANGLING", "BROKEN(case)"} and not fenced[n - 1] and not known:
                     live_broken += 1
 
-            for m in MDLINK.finditer(line):
-                raw = m.group(2)
+            md_targets = [(m.group(0), m.group(2)) for m in MDLINK.finditer(line)]
+            ref = REFDEF.match(line)
+            if ref:
+                md_targets.append((ref.group(0).strip(), ref.group(2)))
+            for text, raw in md_targets:
                 if raw.startswith(("http:", "https:", "mailto:", "//")):
                     continue
-                target = (note.parent / unquote(raw.split("#")[0].split("?")[0])).resolve()
+                path_part = unquote(raw.split("#")[0].split("?")[0])
+                if not path_part:
+                    continue                      # pure #anchor: not checked, see the docstring
+                target = (note.parent / path_part).resolve()
                 known = raw in exempt
-                if target.exists():
-                    rows.append((where, m.group(0), f"RESOLVED -> {target.relative_to(REPO)}", known))
+                if known:
+                    used_exemptions.add((rel, raw))
+                if not target.is_relative_to(REPO):
+                    rows.append((where, text, "BROKEN(escapes repo)", known))
+                    if not fenced[n - 1] and not known:
+                        live_broken += 1
+                elif target.exists():
+                    rows.append((where, text, f"RESOLVED -> {target.relative_to(REPO)}", known))
                 else:
                     verdict = "BROKEN"
                     if target.with_name(target.name.lower()).exists() or \
                        target.with_name(target.name.upper()).exists():
                         verdict = "BROKEN(case)"
-                    rows.append((where, m.group(0), verdict, known))
+                    rows.append((where, text, verdict, known))
                     if fenced[n - 1]:
-                        rows[-1] = (where, m.group(0), "INERT (in a code fence)", known)
+                        rows[-1] = (where, text, "INERT (in a code fence)", known)
                     if not fenced[n - 1] and not known:
                         live_broken += 1
 
@@ -222,7 +236,13 @@ def main() -> int:
     control = kind == "DANGLING"
     print(f"negative control (fake wikilink detected): {'PASS' if control else 'FAIL'}")
 
-    return 0 if live_broken == 0 and control else 1
+    for where in unclosed:
+        print(f"!! {where}: code fence opened here never closes")
+    stale = [(f, t) for f, ts in KNOWN_BROKEN.items() for t in ts if (f, t) not in used_exemptions]
+    for f, t in stale:
+        print(f"!! {f}: KNOWN_BROKEN exemption {t!r} no longer matches any link — remove it")
+
+    return 0 if live_broken == 0 and control and not unclosed and not stale else 1
 
 
 if __name__ == "__main__":

@@ -38,6 +38,9 @@ import re
 import sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))  # loadable by path, not only as `python scripts/x.py`
+from _fences import fence_mask  # noqa: E402
+
 REPO = Path(__file__).resolve().parent.parent
 VAULT = REPO / "docs"
 PKG = REPO / "src" / "decision_maker"
@@ -50,7 +53,6 @@ IMPORT = re.compile(r"`(from decision_maker[.\w]*\s+import\s+[^`]+)`")
 # registry row pointing at `core/ahp_helper.py` (the file is `core/ahp.py`) and the
 # "min-max regret" description of robust.py.
 PY_LITERAL = re.compile(r"`([A-Za-z_][\w/]*\.py)`")
-FENCE = re.compile(r"^\s*(```|~~~)")
 
 # A note that documents a stale claim quotes the broken form on purpose, and the
 # skeleton in note-schema.md contains a fenced template. Neither is a claim about
@@ -61,12 +63,10 @@ COUNTEREXAMPLE = re.compile(r"versión anterior|earlier version|stale claim", re
 
 def prose_lines(text: str) -> list[tuple[int, str]]:
     """Lines that make claims: outside code fences, not quoting a stale claim."""
-    out, fenced = [], False
+    out = []
+    inside, _ = fence_mask(text.splitlines())
     for n, line in enumerate(text.splitlines(), start=1):
-        if FENCE.match(line):
-            fenced = not fenced
-            continue
-        if fenced or COUNTEREXAMPLE.search(line):
+        if inside[n - 1] or COUNTEREXAMPLE.search(line):
             continue
         out.append((n, line))
     return out
@@ -157,6 +157,10 @@ def check(vault: Path, pkg: Path) -> tuple[list[str], dict[str, int], dict[str, 
         text = note.read_text(encoding="utf-8")
         rel = note.name
         claims = prose_lines(text)
+        _, open_line = fence_mask(text.splitlines())
+        if open_line is not None:
+            failures.append(f"{rel}:{open_line}: code fence never closes — it would hide "
+                            f"every claim after it")
         skipped["fenced/counterexample lines"] += len(text.splitlines()) - len(claims)
         archived = is_archive(text)
 
@@ -180,6 +184,8 @@ def check(vault: Path, pkg: Path) -> tuple[list[str], dict[str, int], dict[str, 
                     failures.append(f"{rel}:{lineno}: class {name} claimed outside any "
                                     f"module section — no owner to resolve it against")
                     continue
+                if module_path(pkg, module) is None:
+                    continue  # claim 1 already reported the missing module
                 if module not in ast_cache:
                     ast_cache[module] = classes_in(module_path(pkg, module))  # type: ignore[arg-type]
                 if name not in ast_cache[module]:
@@ -200,6 +206,15 @@ def check(vault: Path, pkg: Path) -> tuple[list[str], dict[str, int], dict[str, 
             for raw in PY_LITERAL.findall(line):
                 checked["py_literals"] += 1
                 base = raw.rsplit("/", 1)[-1]
+                if "/" in raw:
+                    # A literal that names a directory is a claim about that path, not
+                    # about any file with the same basename somewhere in the repo.
+                    roots = (vault.parent, vault.parent / "src", pkg, vault)
+                    if any((root / raw).exists() for root in roots):
+                        continue
+                    if not archived:
+                        failures.append(f"{rel}:{lineno}: `{raw}` does not exist at that path")
+                        continue
                 if any((root / base).exists() for root in (vault.parent, pkg, pkg / "core")):
                     continue
                 # One more place the real file may live: anywhere in the repo.

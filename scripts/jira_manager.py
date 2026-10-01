@@ -6,8 +6,10 @@ import urllib.parse
 import urllib.request
 
 URL_BASE = "https://averas-1744767979220.atlassian.net/rest/api/3"
-EMAIL = os.getenv("JIRA_EMAIL", "a.veras@gmail.com")
-TOKEN = os.getenv("JIRA_TOKEN", "your_token_here")
+# Sin valores por defecto: con credenciales falsas el script salia a la red igual.
+EMAIL = os.getenv("JIRA_EMAIL", "")
+TOKEN = os.getenv("JIRA_TOKEN", "")
+TIMEOUT_S = 15
 PROJECT_KEY = "DM"
 
 def get_auth_header():
@@ -42,13 +44,19 @@ def create_issue(summary, description, issue_type="Task"):
     req.add_header("Accept", "application/json")
 
     try:
-        with urllib.request.urlopen(req) as response:
+        with urllib.request.urlopen(req, timeout=TIMEOUT_S) as response:
             res = json.loads(response.read().decode())
             print(f"Created: {res['key']}")
             return res['key']
     except urllib.error.HTTPError as e:
-        print(f"Failed: {e.read().decode()}")
+        print(f"Failed: {e.read().decode()}", file=sys.stderr)
+        return None
 
 if __name__ == "__main__":
-    if len(sys.argv) > 2:
-        create_issue(sys.argv[1], sys.argv[2])
+    if len(sys.argv) <= 2:
+        print("usage: jira_manager.py <summary> <description>", file=sys.stderr)
+        sys.exit(2)
+    if not EMAIL or not TOKEN:
+        print("JIRA_EMAIL and JIRA_TOKEN must be set", file=sys.stderr)
+        sys.exit(2)
+    sys.exit(0 if create_issue(sys.argv[1], sys.argv[2]) else 1)

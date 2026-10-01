@@ -1,9 +1,16 @@
 name: CI
 
+# Sin filtro de ramas a proposito: el filtro era [master], la rama se renombro a main
+# el 2026-09-28 y desde entonces ningun push corrio CI, sin aviso. Un filtro por nombre
+# se rompe en el proximo rename; uno vacio no.
 on:
   push:
-    branches: [master]
   pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   test:

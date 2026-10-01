@@ -83,6 +83,9 @@ class DevAgentsVisitor(ast.NodeVisitor):
 
         self.generic_visit(node)
 
+
+    visit_AsyncFunctionDef = visit_FunctionDef  # async def must not escape UX-01/UX-02
+
     def visit_Call(self, node):
         # Rule: No print() in prod
         if (
@@ -190,6 +193,10 @@ def main():
     ux01_counts_by_file = {}
 
     print(f"Running @dev-agents Native Linter on '{target_dir}'...")
+    # A typo in the path must not read as "Perfect!" once the UX-01 baseline reaches zero.
+    if not os.path.isdir(target_dir):
+        print(f"❌ '{target_dir}' is not a directory")
+        sys.exit(1)
 
     for root, _, files in os.walk(target_dir):
         for file in files:
