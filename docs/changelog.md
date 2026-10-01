@@ -8,32 +8,11 @@ category: project-management
 status: active
 related: ["[[index]]", "[[decision-maker-moc]]", "[[kanban]]", "[[adr/001-use-rust-for-math-engine]]"]
 created: 2026-08-10
-updated: 2026-09-27
+updated: 2026-10-01
 ---
 
 # 📜 Historial de Cambios (Changelog)
 
-Registro histórico de cambios del Decision Maker Framework dentro del vault de Obsidian. Archivo canónico en la raíz: [CHANGELOG.md](../CHANGELOG.md).
+El historial de versiones vive en un solo lugar: [CHANGELOG.md](../CHANGELOG.md), en la raíz del repositorio.
 
----
-
-## [v3.1] - 2026-08-23
-
-Rediseño arquitectónico cuantitativo e integración de componentes críticos:
-
-### 🦀 Núcleo Rust y Normalización
-- Extensión nativa `rust_core/` documentada en [[adr/001-use-rust-for-math-engine]].
-- [[monte-carlo-engine]]: `normalize=True` usa límites globales idénticos entre Python y Rust.
-
-### 🧠 Aprendizaje y Meta-Aprendizaje
-- **Sistema de Aprendizaje**: `outcome_tracker`, `calibration`, `decision_journal`, `adaptive_router`.
-- **Meta-Aprendizaje**: `action_threshold`, `reasoning_trace`, `unknown_scanner`, `meta_calibration`.
-
-### 🚦 Compuertas de Decisión y Control de Ruina
-- Veto por ergodicidad, probabilidad de ruina estocástica, validación de DAG causal y compromiso de decisión.
-- Ergodicity Analyzer y Kelly Criterion para dimensionamiento estocástico.
-
-### 🗄️ Base de Datos y Gobernanza
-- [[database-hub]]: Centro unificado de base de datos relacional en Obsidian.
-- [[kanban]]: Tablero Kanban interactivo para control del proyecto.
-- [[note-schema]]: Esquema canónico y reglas de integridad.
+Esta nota fue una segunda copia y derivó de la original: su sección v3.1 (2026-08-23) listaba [[database-hub]], [[kanban]] y [[note-schema]], que se crearon el 2026-09-27. Se decidió dejarla como puntero porque dos copias de un changelog divergen sin que nada lo reporte; esos tres ítems pasaron a `[Unreleased]` en el archivo raíz. Si el vault necesitara el historial dentro de Obsidian, la señal sería que alguien lo copie de nuevo a mano: en ese caso se genera desde `CHANGELOG.md`, no se mantiene en paralelo.

@@ -8,12 +8,12 @@ category: analyses
 status: active
 related: ["[[database-hub]]", "[[decision-maker-moc]]", "[[results-catalog]]", "[[index]]"]
 created: 2026-08-10
-updated: 2026-09-28
+updated: 2026-10-01
 ---
 
 # 📊 Catálogo de Análisis de Decisiones Aplicadas
 
-Este registro centraliza los 36 análisis de decisión cuantitativa en `src/decision_maker/analyses/` —más `_template.py`, la plantilla canónica, que no es un análisis y por eso no cuenta— y los 7 scripts auxiliares en `src/decision_maker/scripts/`. Cada archivo representa un caso concreto modelado con metodologías estocásticas y multicriterio.
+Este registro centraliza los 37 análisis de decisión cuantitativa en `src/decision_maker/analyses/` —más `_template.py`, la plantilla canónica, que no es un análisis y por eso no cuenta— y los 7 scripts auxiliares en `src/decision_maker/scripts/`. Cada archivo representa un caso concreto modelado con metodologías estocásticas y multicriterio.
 
 Hub general de base de datos: [[database-hub]] | Catálogo de reportes y salidas: [[results-catalog]].
 
@@ -57,6 +57,7 @@ Hub general de base de datos: [[database-hub]] | Catálogo de reportes y salidas
 | `ANA-MINA-MONIT` | `tech_eval_monitoreo_mina.py` | Evaluación de tecnologías de monitoreo en la nube para faenas | [[monte-carlo-engine]], [[unified-orchestrator]] | `active` |
 | `ANA-UQOMM-V6` | `uqomm_adopcion_v6_leakyfeeder.py` | Estrategia para máxima adopción de mercado en leaky feeder | [[monte-carlo-engine]], [[antifragile-engine]] | `active` |
 | `ANA-VLAD25` | `vlad25_modo_diagnostico_decision.py` | Coexistencia de modo polling legacy y push para VLAD25 | [[bayesian-inference-engine]], [[topsis]] | `active` |
+| `ANA-DIAG-LINEA-BASE` | `diagnostico_remoto_linea_base_decision.py` | Sobre qué línea de sw-diagnosticoremoto seguir construyendo (development, VHF v4.2.0 vendida, UHF ulad): unificar, sobre cuál base, o separarlas | [[unified-orchestrator]] (modo `standard`), [[monte-carlo-engine]], [[topsis]], [[decision-theory]], [[sensitivity-analysis]] | `active` |
 
 ---
 
@@ -70,9 +71,9 @@ Hub general de base de datos: [[database-hub]] | Catálogo de reportes y salidas
 | `ANA-PWR-UTIL-RES` | `power_supply_utility_research.py` | Investigación de funciones de utilidad para telemetría de poder | Script Python |
 | `ANA-PWR-PROC-RES` | `process_research_results.py` | Procesamiento y generación de reportes Markdown para ingeniería | Script Python |
 | `ANA-PWR-PROC-UTIL` | `process_utility_analysis.py` | Cálculo de matrices de utilidad multicriterio y exportación | Script Python |
-| `DATA-PWR-RES` | `power_supply_research_results.json` | Dataset de resultados de investigación de mercado de fuentes | JSON Data |
-| `DATA-PWR-UTIL-AN` | `power_supply_utility_analysis.json` | Dataset con scores de utilidad ponderada por fabricante | JSON Data |
-| `DATA-PWR-UTIL-RES` | `power_supply_utility_results.json` | Dataset final de resultados de utilidad procesados | JSON Data |
+| `DATA-PWR-RES` | `power_supply_research_results.json` | Dataset de resultados de investigación de mercado de fuentes | JSON generado por `power_supply_deep_research_simple.py`, no versionado (`.gitignore`) — no existe en un clon limpio |
+| `DATA-PWR-UTIL-AN` | `power_supply_utility_analysis.json` | Dataset con scores de utilidad ponderada por fabricante | JSON generado por `process_utility_analysis.py`, no versionado (`.gitignore`) — no existe en un clon limpio |
+| `DATA-PWR-UTIL-RES` | `power_supply_utility_results.json` | Dataset final de resultados de utilidad procesados | JSON generado por `power_supply_utility_research.py`, no versionado (`.gitignore`) — no existe en un clon limpio |
 
 ---
 

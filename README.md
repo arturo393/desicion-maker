@@ -8,12 +8,12 @@ category: overview
 status: active
 related: ["[[docs/index|index]]", "[[docs/database-hub|database-hub]]", "[[docs/kanban|kanban]]", "[[docs/architecture|architecture]]"]
 created: 2026-08-10
-updated: 2026-09-27
+updated: 2026-10-01
 ---
 
 # Decision Maker Framework (v3.1)
 
-Dual Python + Rust library for multi-criteria decision analysis under uncertainty. Combines Monte Carlo simulation, multi-criteria optimization, robust decision theory, AI-powered research, learning/meta-learning loops, and interactive tools. Performance-critical math (Monte Carlo normalization) runs in a native Rust extension (`rust_core/`, pyo3 + rayon).
+Dual Python + Rust library for multi-criteria decision analysis under uncertainty. Combines Monte Carlo simulation, multi-criteria optimization, robust decision theory, AI-powered research, learning/meta-learning loops, and interactive tools. The engine runs in Python/NumPy. The `rust_core/` crate (pyo3 + rayon) implements the Monte Carlo normalization too, but it is not on the execution path — nothing under `src/decision_maker/core/` imports it (see [docs/adr/001-use-rust-for-math-engine.md](docs/adr/001-use-rust-for-math-engine.md)).
 
 ## Quick Start
 
@@ -32,6 +32,8 @@ uv run decision-maker list-distributions
 ```
 
 ## The Engines
+
+Module index, not an engine count: 19 are routable (`ENGINE_UNIVERSE` in `src/decision_maker/core/adaptive_router.py`).
 
 | Method | What it does |
 |--------|-------------|
@@ -57,7 +59,7 @@ uv run decision-maker list-distributions
 | Topology | MDS/Isomap clustering and stability analysis |
 | Visualization | Publication-ready plots (Pareto, tornado, distributions) |
 | Registry | SQLite-backed persistent decision store |
-| Rust Math Core | Native Monte Carlo Min-Max normalization (pyo3 + rayon) |
+| Rust Math Core | Monte Carlo Min-Max normalization in Rust (pyo3 + rayon); built and tested, not imported by the framework |
 | Ergodicity | Time-average vs ensemble growth, ruin probability, Kelly criterion |
 | Learning System | Outcome tracking, confidence calibration, decision journal, adaptive routing |
 | Meta-Learning | Action threshold, reasoning trace, unknown scanner, meta-calibration |
@@ -96,6 +98,6 @@ Commands: `run` (from YAML config, with `--what-if` for interactive REPL), `list
 ## Requirements
 
 - Python 3.11+
-- `uv` (or `pip` + `requirements.txt`)
-- Rust toolchain (optional, to rebuild the native `rust_core` extension; prebuilt wheel falls back to the pure-Python engine)
+- `uv` (`uv.lock` is versioned)
+- Rust toolchain (optional, only to build and test `rust_core`; the framework does not import it)
 - Google Gemini API key (optional, for AI research)

@@ -8,23 +8,23 @@ category: governance
 status: active
 related: ["[[docs/index|index]]", "[[docs/note-schema|note-schema]]"]
 created: 2026-08-10
-updated: 2026-09-27
+updated: 2026-10-01
 ---
 
 # Decision Maker Framework - Agent Guidelines
 
 ## Project Map (hermanos del dominio)
 Este repo pertenece al dominio **Lumina** (cuantitativo), junto con:
-- `../monteCarlo` — bot de trading C++ que comparte la base conceptual Monte Carlo
+- `../montecarlo` — bot de trading C++ que comparte la base conceptual Monte Carlo
   (backtest, simulación de caminos, walk-forward). Si una tarea toca validación de
-  edge/riesgo en trading, consultar `monteCarlo` (AGENTS.md es la referencia).
-- `../../dev-agents` — conocimiento general SE/firmware/brands (referencia global).
-- `../../SafetyMind/` — dominio SEPARADO (edge AI industrial). No mezclar trabajo.
-- `../../curriculum` — proyecto personal, no relacionado.
+  edge/riesgo en trading, consultar `../montecarlo` (AGENTS.md es la referencia).
+- `~/.config/opencode/dev-agents` — conocimiento general SE/firmware/brands (referencia global).
+- `../../safetymind/` — dominio SEPARADO (edge AI industrial). No mezclar trabajo.
+- `curriculum` — proyecto personal, no relacionado. No existe en esta máquina (verificado 2026-10-01 con `find ~ -maxdepth 3 -iname '*curriculum*'`); se nombra para que no se lo confunda con este repo si aparece.
 
 Regla: si una tarea toca modelado de riesgo/decisión Monte Carlo para trading,
-revisar `monteCarlo` primero. Si toca hardware/edge AI, NO asumir relación con
-SafetyMind sin preguntar.
+revisar `../montecarlo` primero. Si toca hardware/edge AI, NO asumir relación con
+SafetyMind (`../../safetymind/`) sin preguntar.
 
 ## Build & Test
 ```bash

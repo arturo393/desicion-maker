@@ -8,12 +8,12 @@ category: project-management
 status: active
 related: ["[[docs/kanban|kanban]]", "[[docs/index|index]]", "[[docs/decision-maker-moc|moc]]"]
 created: 2026-08-10
-updated: 2026-09-27
+updated: 2026-10-01
 ---
 
 # 🗺️ Roadmap v3.0: Decision Intelligence Framework
 
-**Current State**: v3.0 ships 24 decision engines, a REST API, web dashboard, and CLI. The core library is feature-complete for most multi-criteria decision analysis workflows.
+**Current State**: v3.0 ships 19 routable engines (source: `ENGINE_UNIVERSE` in `core/adaptive_router.py`), a REST API, web dashboard, and CLI. The core library is feature-complete for most multi-criteria decision analysis workflows.
 
 ## ✅ Completed (v3.0)
 

@@ -8,12 +8,12 @@ category: governance
 status: stable
 related: ["[[index]]", "[[guide]]", "[[unified-orchestrator]]", "[[adr/001-use-rust-for-math-engine]]"]
 created: 2026-08-10
-updated: 2026-09-27
+updated: 2026-10-01
 ---
 
 # Architecture
 
-Dual Python + Rust framework for multi-criteria decision analysis under uncertainty. 19 motores ruteables, 539 tests. Performance-critical Monte Carlo normalization runs in a native Rust extension (`rust_core/`).
+Dual Python + Rust framework for multi-criteria decision analysis under uncertainty. 19 motores ruteables, 540 tests. The Monte Carlo engine runs in Python/NumPy; the `rust_core/` crate implements the same normalization but is not on the execution path (see [[adr/001-use-rust-for-math-engine]]).
 
 ## Building Blocks
 
@@ -73,9 +73,9 @@ This table is a **module index**, not an engine count. Of the rows above, 19 are
 > wikilink can resolve it and none should be written. Where a module also has a vault card, the card
 > is reached from [[decision-maker-moc]] — [[monte-carlo-engine]], [[topsis]], [[promethee]], [[ahp]],
 > [[genetic-algorithms]], [[bayesian-inference-engine]], [[antifragile-engine]], [[portfolio-optimizer]],
-> [[topological-data-analysis]], [[unified-orchestrator]]. Modules that are first-class in the pipeline
-> but have no card yet: `pareto.py`, `decision_theory.py`, `sensitivity.py`, `aggregator.py`,
-> `config_runner.py`.
+> [[topological-data-analysis]], [[unified-orchestrator]]. [[pareto-frontier]], [[decision-theory]], [[sensitivity-analysis]] and [[rank-aggregator]] own
+> `pareto.py`, `decision_theory.py`, `sensitivity.py` and `aggregator.py` through their `module:` field.
+> The only first-class pipeline module without a card is `config_runner.py`.
 
 ## Runtime Flow
 
@@ -142,11 +142,11 @@ Statistics (per option after MC)
 3. **PROMETHEE with uncertainty** -- averages net flows across p5/mean/p95 scenarios rather than a single deterministic run.
 4. **Borda aggregation** -- combines rankings from multiple methods into a consensus, reducing method bias.
 5. **Weights computed once** -- factor weights and maximize/minimize flags are built once and reused across all engines.
-6. **Normalized scale is the shared contract** -- `MonteCarloEngine.run(normalize=True)` normalizes each factor to [0,1] via the global min/max across all options. All scale-dependent consumers (Kelly, via_negativa, success_rate, confidence, decision matrix) must compare on that same normalized scale. The rule is currently implemented twice -- here at `monte_carlo.py:141-148` and in `rust_core/src/lib.rs:180-196` -- and the Rust copy is **not on the execution path** (no module under `core/` imports the extension). They agree on the formula but not on `success_rate`; see [[adr/001-use-rust-for-math-engine]].
+6. **Normalized scale is the shared contract** -- `MonteCarloEngine.run(normalize=True)` normalizes each factor to [0,1] via the global min/max across all options. All scale-dependent consumers (Kelly, via_negativa, success_rate, confidence, decision matrix) must compare on that same normalized scale. The rule is currently implemented twice -- here in `MonteCarloEngine.run()` (the block under `# Normalize exactly like the Rust MonteCarloEngine`) and in `rust_core/src/lib.rs` (`// Phase 3`) -- and the Rust copy is **not on the execution path** (no module under `core/` imports the extension). They agree on the formula but not on `success_rate`; see [[adr/001-use-rust-for-math-engine]].
 
 ## Test Coverage
 
-539 tests across all engines. Run with:
+540 tests across all engines. Run with:
 
 ```bash
 uv run pytest src/decision_maker/tests/ -v

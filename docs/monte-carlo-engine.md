@@ -10,7 +10,7 @@ module: "decision_maker.core.monte_carlo"
 class: "MonteCarloEngine"
 related: ["[[bayesian-inference-engine]]", "[[antifragile-engine]]", "[[topsis]]", "[[unified-orchestrator]]", "[[data-models-and-schemas]]"]
 created: 2026-08-10
-updated: 2026-09-27
+updated: 2026-10-01
 ---
 
 ## `monte_carlo.py`
@@ -38,25 +38,30 @@ Con `normalize=True` (el default), cada factor se lleva a `[0,1]` con los **lím
 - `maximize` → `norm * peso`
 - `minimize` → `(1 - norm) * peso`
 
-Que los límites sean globales y no por opción es lo que hace comparables los puntajes. El fórmula está en `monte_carlo.py:141-148` y su comentario apunta a que replica el motor de Rust.
+Que los límites sean globales y no por opción es lo que hace comparables los puntajes. La fórmula está en `MonteCarloEngine.run()`, en el bloque que empieza con el comentario `# Normalize exactly like the Rust MonteCarloEngine`, que apunta a que replica el motor de Rust.
 
 ### Penalización de cola
 
-`RUIN_THRESHOLD_PERCENTILE = 5.0`. Las trayectorias en o por debajo del percentil 5 reciben un factor **multiplicativo**:
+`RUIN_THRESHOLD_PERCENTILE = 5.0`. Las trayectorias en o por debajo del percentil 5 **de la propia opción** pierden una fracción de su magnitud:
 
 ```
 ruin_penalty = 1 - (ruin_count / num_simulations)
+score_cola  -= |score_cola| * (1 - ruin_penalty)
 ```
 
-El factor se encoge a medida que más trayectorias caen en la cola, así que una distribución con cola masiva se castiga más que una con una sola cola. Es una penalización geométrica sobre el ~5% inferior, no una suma ponderada.
+**Qué mide en realidad:** como el umbral es el percentil 5 de la misma opción, `ruin_count` es ~5 % de las trayectorias por construcción y el factor queda en ~0.95 para cualquier distribución continua, tenga cola fina o masiva (medido: N(0,1) y N(0,1000) dan 0.9500). No distingue colas; es un recorte fijo del ~5 % inferior. Solo cambia con empates (distribuciones discretas), y ahí de una forma que no depende del tamaño de la cola.
+
+Se resta `|s|` en vez de multiplicar para que con `normalize=False` y puntajes negativos la penalización empeore la cola en vez de acercarla a cero (antes de 2026-10-01 la mejoraba). En el camino por defecto (`normalize=True`, puntajes en [0,1]) las dos fórmulas coinciden.
+
+Para que castigue colas de verdad, el umbral tendría que ser común a todas las opciones (p. ej. el percentil 5 de la matriz conjunta). Se mantiene el umbral por opción porque cambiarlo reordena todos los análisis ya hechos; la señal para revisarlo es un caso donde dos opciones con colas distintas reciban la misma penalización y eso decida el ranking.
 
 ### Qué devuelve
 
-Por opción: `mean_score`, `std_dev`, `min_score`, `max_score`, `percentile_5`, `percentile_95`, `success_rate`, `var_95` (= p5), `cvar_95` (media de los puntajes ≤ p5) y **`raw_scores`**.
+Por opción: `mean_score`, `std_dev`, `min_score`, `max_score`, `percentile_5`, `percentile_95`, `success_rate`, `var_95` (= p5), `cvar_95` (media de los puntajes ≤ p5), **`raw_scores`**, `factor_stats` (mean/std/p5/p95 por factor) y `raw_factor_data` (muestras por factor), ambos de la propia opción (antes de `41c33a3`, 2026-09-29, eran los de la última opción para todas; ver [[results-catalog]]).
 
 Dos detalles que importan aguas abajo:
 
-- `success_rate` es la fracción de simulaciones donde la opción **supera la media cross-option**, no donde su puntaje es > 0. El comentario en `monte_carlo.py:181-184` documenta el cambio: con puntajes normalizados a `[0,1]`, `score > 0` siempre es cierto.
+- `success_rate` es la fracción de simulaciones donde la opción **supera la media cross-option**, no donde su puntaje es > 0. El comentario de `success_rate` en `MonteCarloEngine.run()` documenta el cambio: con puntajes normalizados a `[0,1]`, `score > 0` siempre es cierto.
 - `raw_scores` se conserva completo. Es lo que permite el remuestreo empírico de [[bayesian-inference-engine]] y la covarianza empírica de [[antifragile-engine]]. Si se perdiera, ambos caerían a aproximaciones.
 
 ### Clases Principales

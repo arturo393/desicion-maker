@@ -8,7 +8,7 @@ category: governance
 status: stable
 related: ["[[decision-maker-moc]]", "[[database-hub]]", "[[kanban]]", "[[architecture]]", "[[guide]]"]
 created: 2026-08-10
-updated: 2026-09-27
+updated: 2026-10-01
 ---
 
 # Decision Maker Framework
@@ -17,7 +17,7 @@ Dual Python + Rust library for multi-criteria decision analysis under uncertaint
 
 ## Context
 
-Analyze decisions with 20+ quantitative methods — Monte Carlo, TOPSIS, PROMETHEE, Pareto, Bayesian, Genetic, Robust optimization, Sensitivity analysis, Bootstrap ranking, Rank aggregation, classical decision theory, Ergodicity/Kelly, plus a Learning System and Meta-Learning loop. A native Rust extension (`rust_core/`) is built and tested but **not yet imported by the engine** — Monte Carlo currently runs in Python/NumPy; see [[adr/001-use-rust-for-math-engine]]. Optional AI research via Gemini.
+Analyze decisions with 20+ quantitative methods — Monte Carlo, TOPSIS, PROMETHEE, Pareto, Bayesian, Genetic, Robust optimization, Sensitivity analysis, Bootstrap ranking, Rank aggregation, classical decision theory, Ergodicity/Kelly, plus a Learning System and Meta-Learning loop. A native Rust extension (`rust_core/`) is built and tested but **not imported by the engine, by decision (ADR-001)**: it gets wired in only once its `success_rate` divergence from the Python engine is resolved. Monte Carlo runs in Python/NumPy; see [[adr/001-use-rust-for-math-engine]]. Optional AI research via Gemini.
 
 ## Quick Start
 
@@ -87,7 +87,7 @@ making claims the code contradicted, and the vault was corrected against the sou
 │   ├── analyses/             # decision scripts (decision_concon, sophos_xg115, vlad25…)
 │   ├── api/server.py         # FastAPI REST
 │   ├── dashboard/app.py      # Streamlit UI
-│   └── tests/                # 539 tests
+│   └── tests/                # 540 tests
 ├── rust_core/                # Rust crate decision_maker_core (pyo3 + rayon)
 ├── examples/
 ├── docs/                     # Obsidian vault root (config: docs/.obsidian/)

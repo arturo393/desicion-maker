@@ -66,9 +66,9 @@
     "active_analyses": 3,
     "archived_analyses": 1,
     "completed_analyses": 1,
-    "last_updated": "2026-08-23",
+    "last_updated": "2026-10-01",
     "framework_version": "3.0.0",
-    "note": "Catálogo manual. Solo los 5 análisis históricos están registrados; el directorio analyses/ contiene además 19 scripts operativos (becker_*, fsk_*, power_supply_*, process_*, sophos_xg115, vlad25_modo_diagnostico, tablero_cabinet, etc.) que no se mantienen en este índice. Si el índice vuelve a ser fuente de verdad, derivarlo del filesystem en vez de mantenerlo a mano."
+    "note": "Catálogo manual. Cubre solo 5 análisis históricos (furniture_diy, mining_decision, mining_improved, refactoring_decision, sqm_santiago); los otros 32 de los 37 análisis de analyses/ (sin contar _template.py) no tienen entrada (verificado 2026-10-01). Los results_location que declaran (results/furniture/, results/mining/, results/refactoring/, results/sqm/) no existen en disco, y ninguno de esos 5 scripts escribe en ellos: solo lo afirman en su docstring. El catálogo vigente es docs/decision-analyses.md. Si este índice vuelve a ser fuente de verdad, derivarlo del filesystem en vez de mantenerlo a mano."
   },
   "status_definitions": {
     "active": "Análisis en uso regular, puede ser actualizado frecuentemente",

@@ -8,7 +8,7 @@ category: analyses
 status: active
 related: ["[[database-hub]]", "[[decision-analyses]]", "[[unified-orchestrator]]", "[[reporting-and-registry]]"]
 created: 2026-09-28
-updated: 2026-09-28
+updated: 2026-10-01
 ---
 
 # 📈 Catálogo de Resultados de Simulación y Análisis (`results/`)
@@ -50,6 +50,11 @@ Dentro de `results/` residen artefactos especializados utilizados en la validaci
 ## 🗓️ 3. Lotes Históricos de Simulación
 
 Esta sección describe **lotes** de simulación, no un inventario. `results/` está en `.gitignore` y no tiene un solo archivo versionado: su contenido es salida local de cada máquina y cambia con cada corrida, así que un conteo de archivos en esa carpeta sería un número que nadie más puede reproducir. La fecha de cada lote y la marca temporal de su nombre (`YYYYMMDD_HHMMSS`) sí son reproducibles, y son lo que permite reconstruir la historia. Un test verifica que `results/` siga ignorado, para que este documento no vuelva a afirmar un total.
+
+> [!warning] `factor_stats` y `raw_factor_data` por opción no son confiables entre 2026-08-23 y 2026-09-29
+> Entre `c343bf9` (2026-08-23 21:18, hora local) y `41c33a3` (2026-09-29 10:28), `MonteCarloEngine.run()` entregaba a **todas** las opciones los `factor_stats` y `raw_factor_data` de la **última**. `mean_score`, percentiles, `success_rate` y el ranking no estaban afectados; sí lo que se calcula por factor y por opción: sensibilidad (modo `standard`), genético, `ml_surrogate`, reportes, explicabilidad, antifrágil, teoría de la información y what-if.
+>
+> Por marca temporal, el rango afectado va de `*_20260823_211837` a `*_20260929_102855`: la parte final del **Lote 3** (corridas del 2026-08-23 posteriores a esa hora, y las del 2026-08-24 al 2026-08-28), todo el **Lote 4** (2026-09-27), y las corridas locales del 2026-09-28 y de la mañana del 2026-09-29 que este catálogo no lista como lote. Para usar esos campos, se vuelve a correr el análisis.
 
 ### Lote 1: Inicialización y Caso Sophos (2026-08-10)
 - **Foco:** Primera corrida formal de simulación estocástica aplicada al firewall perimetral de red industrial.

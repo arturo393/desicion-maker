@@ -9,7 +9,7 @@ category: project-management
 status: active
 related: ["[[kanban]]", "[[decision-maker-moc]]", "[[database-hub]]", "[[index]]"]
 created: 2026-08-10
-updated: 2026-09-27
+updated: 2026-10-01
 ---
 
 ## Decision Maker Worklog
@@ -41,7 +41,7 @@ updated: 2026-09-27
 - [x] **Convención única `lowercase-with-hyphens`** en los 54 archivos (única excepción: `README.md`). UPPER_SNAKE restante: ninguno.
 - [x] **`docs/docs/sw-diagnosticoremoto/` aplanado** a `docs/sw-diagnosticoremoto/` — un `docs` dentro de `docs` era ruido de layout heredado del repo hermano.
 - [x] **Back-compat de aliases completo**: los 15 nombres viejos (con `_` y con mayúsculas) resuelven otra vez, 15/15.
-- [x] **Alcanzabilidad 54/54** desde `[[decision-maker-moc]]` y desde `[[index]]`, verificate por grafo. Sin huérfanas.
+- [x] **Alcanzabilidad 54/54** desde `[[decision-maker-moc]]` y desde `[[index]]`, verificada por grafo. Sin huérfanas.
 - [x] **3 instrumentos reparados** — cada uno daba verde sin medir:
   - `KNOWN_BROKEN` era por archivo, no por target: un link roto nuevo en `reorganization/` quedaba enmascarado para siempre. Ahora es por target exacto.
   - `is_archive` comparaba por substring: `tags: [archive-2024-review]` excluía una nota viva por accidente. Ahora compara el tag entero.
@@ -52,7 +52,7 @@ updated: 2026-09-27
 
 ## Auditoría de arquitectura — 28-Sep-2026
 
-Una revisión estructural encontró cinco defectos Alta. Todos corregidos, y dos de ellos	maximizaron el alcance de lo que había que arreglar.
+Una revisión estructural encontró cinco defectos Alta. Todos corregidos, y dos de ellos maximizaron el alcance de lo que había que arreglar.
 
 - [x] **El pool de clases del checker de fidelidad era la unión de la nota, no de la sección.** Una nota de un solo módulo detectaba una clase mal atribuida; una nota de dos módulos pasaba limpio. Cuatro notas declaran ≥2 módulos, o sea justo la forma donde se abría. Ahora la resolución es por sección, y `test_docs_fidelity.py` lo prueba con un caso de dos módulos.
 - [x] **El defecto ya había explotado: `robust.py` tenía dos dueños** con contenido incompatible. `robust-optimization.md` decía "min-max **regret** rankings"; `regret` no aparece en `robust.py` (0 ocurrencias, verificado). El registro de [[database-hub]] señalaba a `robust-optimization` como dueño, así que el contenido verificado de [[antifragile-engine]] se movió allí y antifragile quedó con un puntero. Lo mismo con `bootstrap.py` / `bootstrap-ranking.md` contra [[monte-carlo-engine]].
@@ -219,9 +219,21 @@ tapado.
 
 Deuda al cerrar la ronda: **539 tests**.
 
+## Auditoría en paralelo — 01-Oct-2026
+
+Cuatro auditores en paralelo con límites disjuntos: **core** (motores), **analyses** (casos de decisión), **scripts/CI** y **docs**. Lo que encontraron y se corrigió:
+
+- [x] **Fuga de `factor_stats` entre opciones** (`41c33a3`, 29-Sep): el segundo lazo de `MonteCarloEngine.run()` entregaba a todas las opciones los `factor_stats` y `raw_factor_data` de la última. Nació en `c343bf9` (23-Ago). Ranking y `mean_score` sanos; afectados los consumidores por factor (sensibilidad, genético, `ml_surrogate`, reportes, explicabilidad, antifrágil, teoría de la información, what-if). Test de regresión agregado, y advertencia con el rango por marca temporal en [[results-catalog]].
+- [x] **Penalización de cola con puntajes negativos**: multiplicar por `p<1` acercaba la cola a cero con `normalize=False`, o sea la premiaba. Ahora resta `|s|*(1-p)`; con `normalize=True` no cambia nada. Sección reescrita en [[monte-carlo-engine]], con la decisión de mantener el umbral por opción y la señal que la haría revisar.
+- [x] **Dos tests que no podían fallar**: `test_engine_runs_without_rust_module` parcheaba un import que `monte_carlo.py` no hace (borrado), y un test de ergodicidad afirmaba `>= 0.0` sobre un `count/len` (ahora exige el rango medido). La suite queda en 540.
+- [x] **CI no corría desde el 28-Sep**: el push filtraba por `master`, que ya no existe; `41c33a3` nunca pasó por CI. Push sin filtro, `workflow_dispatch` y `concurrency`.
+- [x] **Puntos ciegos de los checkers**: imágenes, `[ref]:`, fences sin cerrar, rutas que escapan del repo y exenciones `KNOWN_BROKEN` vencidas ahora fallan; `docs/` vacío falla; `jira_manager.py` sin credenciales por defecto (y el sitio de Jira respondió `SUSPENDED_INACTIVITY`). Detalle en [[dev-tools]], que además decía que el checker de enlaces cubría todo el repo: cubre `docs/**`.
+- [x] **Docs contra el código**: el README y [[architecture]] decían que la normalización corre en Rust (nada en `core/` importa la extensión); conteos de motores (19, de `ENGINE_UNIVERSE`), análisis (37) y tests (540) alineados; referencias `archivo:línea` a `monte_carlo.py` cambiadas por anclas de símbolo, porque ningún checker valida números de línea; rutas de repos hermanos en `AGENTS.md` verificadas con `ls`; el `README.md` del paquete y [[changelog]] reducidos a punteros, porque eran segundas copias que habían derivado; `CHANGELOG.md` con `[Unreleased]` desde v3.1.
+- [x] **Análisis nuevo** `diagnostico_remoto_linea_base_decision.py` catalogado en [[decision-analyses]] y descrito en [[sw-diagnosticoremoto/README|sw-diagnosticoremoto]]: gana E, con S6 sin verificar y S4 en empate.
+
 ## En curso
 
-- [ ] Falta nota para 41 módulos anunciados en `[[architecture]]` — entre ellos `pareto.py`, `decision_theory.py`, `sensitivity.py`, `aggregator.py` y `config_runner.py`, todos de primera clase en el pipeline `standard`
+- [ ] Falta nota dueña (`module:`) para 37 de los 58 módulos de `core/` (medido 2026-10-01). De los de primera clase en el pipeline `standard` sólo falta `config_runner.py`: `pareto.py`, `decision_theory.py`, `sensitivity.py` y `aggregator.py` ya tienen dueño en [[pareto-frontier]], [[decision-theory]], [[sensitivity-analysis]] y [[rank-aggregator]]
 
 ## Pendiente
 

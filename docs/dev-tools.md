@@ -8,7 +8,7 @@ category: infrastructure
 status: active
 related: ["[[database-hub]]", "[[decision-maker-moc]]", "[[note-schema]]", "[[index]]"]
 created: 2026-09-28
-updated: 2026-09-28
+updated: 2026-10-01
 ---
 
 # 🛠️ Herramientas de Desarrollo, Linters y QA (`scripts/`)
@@ -23,9 +23,10 @@ Hub general de base de datos: [[database-hub]] | Esquema canónico de notas: [[n
 
 | Script | Propósito y Función | Regla de Fallo |
 |:---|:---|:---|
-| `scripts/check_docs_links.py` | Validador exhaustivo de enlaces en Markdown (wikilinks y enlaces relativos) para todo el vault y archivos externos. | Falla si existe un enlace roto o apuntador inexistente. |
+| `scripts/check_docs_links.py` | Validador de enlaces de las notas de `docs/**` y de nada más: el `README.md`, `CHANGELOG.md` y demás `.md` de la raíz, y `src/decision_maker/README.md`, quedan fuera. Resuelve `[[wikilinks]]`, `[texto](ruta)`, imágenes `![...](ruta)` y definiciones `[ref]: ruta` contra el disco; lo que parece enlace dentro de un bloque de código se informa como inerte. **No** revisa anclas `#...` (se descarta lo que sigue al `#`), `<a href>` en HTML ni URLs `http(s)`. El parser de fences lo comparte con el verificador de fidelidad, en `scripts/_fences.py`. | Falla si un enlace no resuelve, si un fence nunca se cierra (silenciaría todos los enlaces que le siguen), si una ruta sale del repositorio, o si una exención de `KNOWN_BROKEN` ya no corresponde a ningún enlace roto. |
 | `scripts/check_obsidian_language.py` | Ratchet lingüístico. Enumera cada nota por el idioma de su cuerpo y marca palabras del otro. | Falla si una nota lleva un token del idioma contrario. **No** impone qué idioma debe tener la nota: el vault es mixto a propósito. Fuera de notas con tag `archive` (25 de 54, número fijado en `test_docs_schema.py`). |
-| `scripts/check_obsidian_fidelity.py` | Verificador de fidelidad contra el árbol real de `src/decision_maker/`. Resuelve 5 clases de afirmación: (1) cada heading `## \`modulo.py\`` existe; (2) cada bullet `**\`Clase\`**` es una clase real **del módulo dueño de su sección**; (3) cada `from decision_maker… import X` resuelve en runtime; (4) cada módulo tiene **un solo dueño** y los tres canales de propiedad —heading, frontmatter `module:`, fila de [[database-hub]]— concuerdan; (5) cada literal `.py` en prosa existe. | Falla si una afirmación no se sostiene contra el código. Clases e imports van por AST y por import real: dos instrumentos, para que uno tape el punto ciego del otro. Un literal `.py` en nota `archive` no falla: se cuenta y se imprime, porque una nota histórica que se lee como inventario vigente es su propia mentira. |
+| `scripts/check_obsidian_fidelity.py` | Verificador de fidelidad contra el árbol real de `src/decision_maker/`. Resuelve 5 clases de afirmación: (1) cada heading `## \`modulo.py\`` existe; (2) cada bullet `**\`Clase\`**` es una clase real **del módulo dueño de su sección**; (3) cada `from decision_maker… import X` resuelve en runtime; (4) cada módulo tiene **un solo dueño** y los tres canales de propiedad —heading, frontmatter `module:`, fila de [[database-hub]]— concuerdan; (5) cada literal `.py` en prosa existe; un literal con directorio (`dir/archivo.py`) se resuelve como ruta. | Falla si una afirmación no se sostiene contra el código. Clases e imports van por AST y por import real: dos instrumentos, para que uno tape el punto ciego del otro. Un literal `.py` en nota `archive` no falla: se cuenta y se imprime, porque una nota histórica que se lee como inventario vigente es su propia mentira. Un fence sin cerrar también falla. |
+| `scripts/check_docs_scope.py` | Verifica que la raíz del vault siga siendo `docs/`: sin directorios generados dentro (`results/`, `.venv/`, `node_modules/`) y sin `.obsidian/` en la raíz del repo. | Falla si se rompe cualquiera de las dos cosas, y también si `docs/` falta o está vacío, que antes pasaba como «nada que revisar». |
 
 ---
 
@@ -33,8 +34,8 @@ Hub general de base de datos: [[database-hub]] | Esquema canónico de notas: [[n
 
 | Script / Módulo | Propósito y Función | Integración |
 |:---|:---|:---|
-| `scripts/jira_manager.py` | Cliente automatizado para la API REST v3 de Jira Cloud. Permite sincronización de tareas de refactorización como [DM-25](../jira/DM-25.md). | Jira Cloud Atlassian REST API |
-| `scripts/dev_agents_linter.py` | Linter AST que verifica las convenciones de código de la Dev-Agents Foundation (límite de parámetros, modelos Pydantic). | Calidad de código Python |
+| `scripts/jira_manager.py` | Cliente automatizado para la API REST v3 de Jira Cloud. Permite sincronización de tareas de refactorización como [DM-25](../jira/DM-25.md). Exige `JIRA_EMAIL` y `JIRA_TOKEN` por entorno (no hay credenciales por defecto; sin ellas sale con código 2), tiene timeout y devuelve 1 si la creación falla. **El sitio de Jira Cloud respondió `SUSPENDED_INACTIVITY` el 2026-10-01**: hasta que se reactive, el script no puede hacer nada útil. | Jira Cloud Atlassian REST API |
+| `scripts/dev_agents_linter.py` | Linter AST que verifica las convenciones de código de la Dev-Agents Foundation (límite de parámetros, modelos Pydantic), incluidas las funciones `async def`. Falla si se le pasa algo que no es un directorio. | Calidad de código Python |
 | `alembic/` / `alembic.ini` | Motor de migraciones y evolución de esquema relacional SQLite documentado en [Alembic README](../alembic/README.md). | SQLAlchemy / SQLite |
 
 ---
