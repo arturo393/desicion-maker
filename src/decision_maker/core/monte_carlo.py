@@ -172,7 +172,9 @@ class MonteCarloEngine:
                 ruin_count = np.sum(ruin_mask)
                 if ruin_count > 0:
                     ruin_penalty = 1.0 - (ruin_count / self.num_simulations)
-                    total_scores[ruin_mask] *= ruin_penalty
+                    # Restar |s|*(1-p) en vez de multiplicar: con s<0 (normalize=False)
+                    # multiplicar por p<1 acercaba la cola a cero y la premiaba.
+                    total_scores[ruin_mask] -= np.abs(total_scores[ruin_mask]) * (1.0 - ruin_penalty)
 
             p5 = float(np.percentile(total_scores, 5))
             p95 = float(np.percentile(total_scores, 95))

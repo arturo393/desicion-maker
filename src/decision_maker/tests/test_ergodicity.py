@@ -50,7 +50,8 @@ class TestErgodicityAnalyzer:
         mc = {"Volatile": self._make_stats("Volatile", scores)}
         result = ErgodicityAnalyzer.analyze(mc, [])
         opt = result["options"]["Volatile"]
-        assert opt["ruin_probability"] >= 0.0
+        # >= 0.0 no podia fallar (es count/len); para N(0,10) se mide 0.49.
+        assert 0.40 < opt["ruin_probability"] < 0.60
 
     def test_ranking_by_log_growth(self):
         np.random.seed(42)

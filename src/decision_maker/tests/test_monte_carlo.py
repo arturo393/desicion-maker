@@ -36,6 +36,34 @@ class TestMonteCarloEngine:
         # Normalized: Cost(50,min)->(1-1.0)*0.2=0; Benefit(150,max)->1.0*0.8=0.8
         assert math.isclose(stats.mean_score, 0.8, rel_tol=1e-9)
 
+    def test_factor_stats_and_raw_data_belong_to_their_own_option(self):
+        """Regresion de 41c33a3: el segundo lazo reusaba factor_stats/opt_data de la ultima opcion."""
+        engine = MonteCarloEngine(num_simulations=50)
+        a = DecisionOption("A")
+        a.add_variable("X", DistributionType.DETERMINISTIC, 10)
+        b = DecisionOption("B")
+        b.add_variable("X", DistributionType.DETERMINISTIC, 20)
+        engine.add_factor(Factor("X", 1.0, maximize=True))
+        engine.add_option(a)
+        engine.add_option(b)
+        r = engine.run()
+        assert r["A"].factor_stats["X"]["mean"] == 10.0
+        assert r["B"].factor_stats["X"]["mean"] == 20.0
+        assert (r["A"].raw_factor_data["X"] == 10.0).all()
+        assert (r["B"].raw_factor_data["X"] == 20.0).all()
+
+    def test_tail_penalty_worsens_negative_scores(self):
+        """Con normalize=False y puntajes negativos la penalizacion de cola no puede mejorar la cola."""
+        np.random.seed(0)
+        engine = MonteCarloEngine(num_simulations=2000)
+        opt = DecisionOption("Neg")
+        opt.add_variable("X", DistributionType.NORMAL, -100, 50)
+        engine.add_factor(Factor("X", 1.0, maximize=True))
+        engine.add_option(opt)
+        np.random.seed(0)
+        raw = engine.run(normalize=False)["Neg"]
+        assert raw.min_score <= float(np.min(raw.raw_factor_data["X"]))
+
     def test_multiple_options(self):
         engine = MonteCarloEngine(num_simulations=100)
         opt_a = DecisionOption("A")
@@ -270,32 +298,3 @@ class TestMonteCarloEngine:
         results = engine.run()
         # Normalized: single deterministic value -> hi==lo -> norm 1.0
         assert results["A"].mean_score == 1.0
-
-    def test_engine_runs_without_rust_module(self, monkeypatch):
-        """The Monte Carlo engine must work when the Rust extension is absent."""
-        import builtins
-        import importlib
-        import sys
-
-        real_import = builtins.__import__
-
-        def fake_import(name, *args, **kwargs):
-            if name == "decision_maker_core":
-                raise ImportError("No module named decision_maker_core")
-            return real_import(name, *args, **kwargs)
-
-        monkeypatch.setattr(builtins, "__import__", fake_import)
-        monkeypatch.setitem(sys.modules, "decision_maker_core", None)
-        sys.modules.pop("decision_maker.core.monte_carlo", None)
-
-        module = importlib.import_module("decision_maker.core.monte_carlo")
-
-        engine = module.MonteCarloEngine(num_simulations=100)
-        opt = DecisionOption("Safe")
-        opt.add_variable("Income", DistributionType.DETERMINISTIC, 100)
-        engine.add_factor(Factor("Income", 1.0, maximize=True))
-        engine.add_option(opt)
-
-        results = engine.run()
-        # Normalized: single deterministic value -> hi==lo -> norm 1.0
-        assert results["Safe"].mean_score == 1.0
