@@ -32,6 +32,10 @@ Desde v3.1 (2026-08-23). Commits del 2026-09-28 en adelante más el árbol de tr
 - **`fsk_protocol_evaluation.py` y `fsk_scanner_integration.py` (v2)**: se caían al importar y su Monte Carlo no registraba factores. Reescritos sobre su propia tabla de puntajes y pesos, con test de humo.
 - Test de ergodicidad tautológico: afirmaba `ruin_probability >= 0.0`, que no puede fallar porque es `count/len`; ahora exige el rango medido para N(0,10).
 
+### ⚠️ Known Issues
+- **Cinco análisis sobre `DecisionAnalysisEngine` sin factores** (`mining_decision`, `mining_improved`, `furniture_diy`, `refactoring_decision`, `sqm_santiago`): el wrapper devuelve 0.0 para toda opción y el script sale con 0. Su salida del motor no es un resultado. En el kanban como #p1.
+- La penalización de cola no distingue colas (recorte fijo de ~5 % por opción): decisión de modelado abierta.
+
 ### ✨ Added
 - **Análisis `diagnostico_remoto_linea_base_decision.py`** (v1.2): sobre qué línea de sw-diagnosticoremoto seguir construyendo. Gana E (una línea de producto VHF+UHF, `development` como laboratorio): MC 0.752, TOPSIS 0.836; D segundo con 0.719. Ver [[docs/sw-diagnosticoremoto/README|sw-diagnosticoremoto]].
 - **Tests de regresión**: la fuga de `factor_stats` entre opciones, y la penalización de cola con puntajes negativos.

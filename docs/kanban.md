@@ -27,6 +27,16 @@ Tablero interactivo de seguimiento de tareas, hitos y desarrollo del framework c
 ## 📌 Por Hacer / En Cola (To Do)
 
 - [ ] 🧬 **¿`Genetic` sin ruta es deliberado?** Está en `ENGINE_UNIVERSE` y en ninguna ruta, ni en `advanced` — decisión de producto #p2
+- [ ] 🚨 **`DecisionAnalysisEngine` sin factores devuelve 0.0 en silencio**: `mining_decision`, `mining_improved`, `furniture_diy`, `refactoring_decision` y `sqm_santiago` llaman `analyze_option` sin un solo `add_factor`. Medido 2026-10-01: dos opciones opuestas dan `monte_carlo_score=0.0`, rango 0 y sin recomendación, con exit 0. Primero que el wrapper **lance** sin factores; después reescribir los cinco sobre sus propios datos, como FSK v2. No se verificó si alguno saca su recomendación final por otro camino #bug #p1
+- [ ] 🔬 **Correr los `power_supply_*` con `agy`**: ya no necesitan API key, pero no se corrieron enteros (~25 s por consulta). Los dos `process_*` leen los datasets que ellos generan, así que van después #analyses #p2
+- [ ] 📡 **Cerrar la decisión de línea base del diagnóstico remoto**: E gana, pero (a) la fecha de ID-1476 decide entre E y D (escenario S4 en empate), (b) S6 sin verificar: si los arreglos que le faltan a v4.2.0 importan en un VHF de campo, (c) S2: clientes instalados por línea. Fijar semilla para que S4 sea reproducible #analyses #p1
+- [ ] ♻️ **Re-correr lo que usó datos por factor entre 2026-08-23 y 2026-09-29**: `factor_stats`/`raw_factor_data` eran los de la última opción. Sólo afecta reportes de sensibilidad, explicabilidad, antifrágil o genético; los rankings están sanos ([[results-catalog]]) #analyses #p2
+- [ ] 📉 **¿La penalización de cola tiene que distinguir colas?** Hoy recorta ~5 % fijo por opción ([[monte-carlo-engine]]). Cambiar a un umbral común reordena todos los análisis ya hechos — decisión de modelado #quant #p2
+- [ ] 🌿 **Rama por defecto de GitHub en `main`**: sigue en `improve-computer-decision`, que va atrás. La cuenta de `gh` (`arturoSigmadev`) tiene push pero no admin; lo cambia `arturo393` en Settings → Default branch #infra #p2
+- [ ] 🗂️ **`metadata.json` cubre 5 de 37 análisis** y sus `results_location` no existen: completarlo o retirarlo #docs #p3
+- [ ] 🏷️ **Versión sin fuente única**: `pyproject.toml` dice 3.0.0, la doc v3.1, y no hay tags de git #infra #p3
+- [ ] 🧱 **`commandmessage_*` fallan en un clon limpio**: escriben en `results/` sin crearlo. Y los `sniffertelemetry` v1–v4 comparten nombres de opción, así que sus `analysis_*.json` genéricos no se distinguen #analyses #p3
+- [ ] 🔍 **Huecos que quedan en los checkers**: anclas `#...` no se verifican; `check_obsidian_language.py` detecta archivo con una ventana de 400 caracteres y no saca fences `~~~`; `dev_agents_linter.py` indexa UX-01 por nombre de función y dos métodos homónimos se pisan #qa #p3
 - [ ] 📝 **Documentar módulos auxiliares restantes**: crear notas para submódulos de soporte secundario en `src/decision_maker/core/` (como `config_runner.py`, `jsonl_store.py`) #docs #p3
 
 ## 🚧 En Curso (In Progress)
@@ -38,6 +48,11 @@ Sin tarjetas.
 Sin tarjetas.
 
 ## ✅ Completado (Done)
+
+- [x] 🤖 **Backend `agy` para la IA** (2026-10-01): sin `GEMINI_API_KEY` responde el CLI de Antigravity, en modo plan y sandbox. `DM_LLM_BACKEND=auto|api|agy`; la suite nunca llega a un LLM real ([[guide]]) #enhancement
+- [x] 📶 **FSK v2** (2026-10-01): los dos análisis se caían al importar y su Monte Carlo no registraba factores. Reescritos sobre su propia tabla de puntajes; el ganador del MC coincide con la suma ponderada y un test lo exige ([[decision-analyses]]) #analyses
+- [x] 🛰️ **CI vuelve a correr en push** (2026-10-01): filtraba por `master`, que ya no existe #infra
+- [x] 🧷 **Fuga de `factor_stats` con test de regresión** y penalización de cola que ya no premia puntajes negativos (2026-10-01) #quant
 
 - [x] 🏷️ **v3.1 publicada (2026-08-23)**: la card «Preparación de v3.1» seguía en curso después del release. La inferencia empírica automatizada que nombraba no entró en v3.1; vive en el Backlog como **AI-Powered Parameter Estimation** #quant
 - [x] 🦀 **Quitar `ndarray` de `rust_core/Cargo.toml`**: hecho. Se quitó la dependencia, el `Cargo.lock` la perdió (y con ella `num-complex`, `num-integer` y `rawpointer`), y los tres anuncios del stack que la nombraban. `cargo check` verificado con el Python del venv #rust #p3

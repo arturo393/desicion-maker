@@ -48,7 +48,7 @@ Module index, not an engine count: 19 are routable (`ENGINE_UNIVERSE` in `src/de
 | Genetic | Evolves the ideal composite option |
 | Bootstrap | Confidence intervals on rankings |
 | Rank Aggregation | Borda consensus across methods |
-| AI Agent | External research via Gemini |
+| AI Agent | External research via Gemini (API key) or the Antigravity CLI `agy` |
 | What-If | Interactive weight/score tweaking with live recomputation |
 | Antifragile | Barbell strategy, convexity, fragility indexing, via negativa |
 | Group Decision | Multi-stakeholder consensus ranking |
@@ -100,4 +100,20 @@ Commands: `run` (from YAML config, with `--what-if` for interactive REPL), `list
 - Python 3.11+
 - `uv` (`uv.lock` is versioned)
 - Rust toolchain (optional, only to build and test `rust_core`; the framework does not import it)
-- Google Gemini API key (optional, for AI research)
+- AI research (optional), either of:
+  - a Google Gemini API key (`GEMINI_API_KEY`) plus the Google SDK, or
+  - the Antigravity CLI `agy` on `PATH`, logged in — used automatically when there is no key.
+    `DM_LLM_BACKEND=auto|api|agy` picks the backend; `agy` runs in plan mode and sandboxed, so it
+    answers without editing files. Details in [docs/guide.md](docs/guide.md#ai-research-optional).
+
+## Known Limitations
+
+Measured on 2026-10-01; tracked in the [Kanban Board](docs/kanban.md).
+
+- Five analyses (`mining_decision`, `mining_improved`, `furniture_diy`, `refactoring_decision`,
+  `sqm_santiago`) run on the legacy `DecisionAnalysisEngine` without registering any factor: the
+  engine returns 0.0 for every option and the script still exits 0. Their engine output is not a result.
+- Per-option `factor_stats` / `raw_factor_data` in results produced 2026-08-23 → 2026-09-29 belong
+  to the last option (fixed in `41c33a3`); rankings and `mean_score` are unaffected.
+- The Monte Carlo tail penalty trims a fixed ~5 % of each option's own distribution, so it does not
+  tell a thin tail from a heavy one ([docs/monte-carlo-engine.md](docs/monte-carlo-engine.md)).
