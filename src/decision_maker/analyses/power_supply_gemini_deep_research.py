@@ -17,10 +17,11 @@ from pathlib import Path
 from typing import Any
 
 # Agregar path para imports
-sys.path.insert(0, str(Path(__file__).parent))
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-import google.generativeai as genai
 from dotenv import load_dotenv
+
+from decision_maker.core.gemini_helper import ask_llm
 
 # =============================================================================
 # CONFIGURACIÓN
@@ -30,13 +31,8 @@ from dotenv import load_dotenv
 env_file = Path(__file__).parent / ".env.gemini"
 load_dotenv(env_file)
 
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+# Sin GEMINI_API_KEY responde agy (DM_LLM_BACKEND, ver core/agy_backend.py).
 GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.0-flash")
-
-if not GEMINI_API_KEY:
-    raise ValueError("❌ GEMINI_API_KEY no configurada en .env.gemini")
-
-genai.configure(api_key=GEMINI_API_KEY)
 
 # =============================================================================
 # CONTEXTO DEL PROYECTO
@@ -204,9 +200,7 @@ Sé específico y práctico, pensando en aplicabilidad al proyecto.
 """
 
     try:
-        model = genai.GenerativeModel(GEMINI_MODEL)
-        response = model.generate_content(prompt)
-        return response.text
+        return ask_llm(prompt, GEMINI_MODEL)
     except Exception as e:
         print(f"❌ Error en investigación: {e}")
         return f"Error: {str(e)}"
@@ -293,7 +287,7 @@ async def main():
 
 if __name__ == "__main__":
     print("\n🔧 Configuración:")
-    print(f"   - API Key: {'✅ Configurada' if GEMINI_API_KEY else '❌ No encontrada'}")
+    print(f"   - API Key: {'✅ Configurada' if os.getenv('GEMINI_API_KEY') else '❌ No encontrada (responde agy)'}")
     print(f"   - Modelo: {GEMINI_MODEL}")
     print(f"   - Total queries: {len(RESEARCH_QUERIES)}")
 

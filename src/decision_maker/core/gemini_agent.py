@@ -2,6 +2,8 @@
 Wrapper client for querying Gemini models to analyze decision options and factors.
 Usage: from decision_maker.core.gemini_agent import GeminiDeepResearchAgent
 Does NOT: Fallback silently without raising configured API exceptions.
+
+Without a key or SDK it answers through the Antigravity CLI (`agy`); see core/agy_backend.py.
 """
 
 from __future__ import annotations
@@ -15,6 +17,7 @@ import re
 
 from dotenv import load_dotenv
 
+from decision_maker.core.agy_backend import AgyError, ask_agy, llm_backend
 from decision_maker.core.content import calibration_prompt, research_prompt
 
 logger = logging.getLogger(__name__)
@@ -35,22 +38,24 @@ class GeminiDeepResearchAgent:
                 self._client = _genai.Client(api_key=self.api_key)
             except ImportError:
                 pass
+        self.backend = llm_backend(api_ready=self._client is not None)
 
     @property
     def is_available(self) -> bool:
-        return self._client is not None
+        return self.backend != "none"
+
+    def _generate(self, prompt: str) -> str:
+        if self.backend == "agy":
+            return ask_agy(prompt)
+        response = self._client.models.generate_content(model=self.model, contents=prompt)
+        return response.text
 
     async def research(self, topic: str, context: str = "") -> str:
-        client = self._client
-        if client is None:
+        if not self.is_available:
             return "AI Disabled."
         try:
-            response = client.models.generate_content(
-                model=self.model,
-                contents=research_prompt(topic, context),
-            )
-            return response.text
-        except (ConnectionError, TimeoutError, ValueError) as e:
+            return self._generate(research_prompt(topic, context))
+        except (ConnectionError, TimeoutError, ValueError, AgyError) as e:
             return f"Error: {e}"
 
     async def calibrate_priors(self, context_data: str) -> dict:
@@ -58,20 +63,14 @@ class GeminiDeepResearchAgent:
         Uses the LLM to dynamically adjust probability distribution priors
         (e.g., standard deviation and mean adjustments) based on real-world context.
         """
-        client = self._client
-        if client is None:
+        if not self.is_available:
             return {}
         try:
-            response = client.models.generate_content(
-                model=self.model,
-                contents=calibration_prompt(context_data),
-            )
-
-            text = response.text
+            text = self._generate(calibration_prompt(context_data))
             match = re.search(r"\{.*\}", text, re.DOTALL)
             if match:
                 return json.loads(match.group(0))
             return {}
-        except (ConnectionError, TimeoutError, ValueError, json.JSONDecodeError) as e:
+        except (ConnectionError, TimeoutError, ValueError, json.JSONDecodeError, AgyError) as e:
             logger.error(f"Gemini API Error: {e}")
             return {}

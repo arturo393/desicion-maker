@@ -11,30 +11,19 @@ Queries enfocadas en:
 """
 
 import json
-import os
 import sys
 from datetime import datetime
 from pathlib import Path
 
 # Agregar parent directory al path
-sys.path.insert(0, str(Path(__file__).parent.parent))
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-try:
-    import google.generativeai as genai
-    from dotenv import load_dotenv
-except ImportError:
-    print("❌ Falta instalar: pip install google-generativeai python-dotenv")
-    sys.exit(1)
+from dotenv import load_dotenv
 
-# Cargar configuración
+from decision_maker.core.gemini_helper import ask_llm
+
+# Sin GEMINI_API_KEY responde agy (DM_LLM_BACKEND, ver core/agy_backend.py).
 load_dotenv(".env.gemini")
-API_KEY = os.getenv("GEMINI_API_KEY")
-
-if not API_KEY:
-    print("❌ Error: GEMINI_API_KEY no configurada en .env.gemini")
-    sys.exit(1)
-
-genai.configure(api_key=API_KEY)
 
 # Queries enfocadas en UTILIDAD
 UTILITY_QUERIES = {
@@ -142,21 +131,20 @@ def execute_deep_research():
     print()
 
     results = {}
-    model = genai.GenerativeModel("gemini-2.0-flash")
 
     for idx, (query_name, query_prompt) in enumerate(UTILITY_QUERIES.items(), 1):
         print(f"📊 [{idx}/{len(UTILITY_QUERIES)}] {query_name.replace('_', ' ').title()}...")
 
         try:
-            response = model.generate_content(query_prompt)
+            text = ask_llm(query_prompt)
 
             results[query_name] = {
                 "query": query_prompt[:200] + "...",
-                "response": response.text,
+                "response": text,
                 "timestamp": datetime.now().isoformat()
             }
 
-            print(f"   ✅ Completado ({len(response.text)} caracteres)")
+            print(f"   ✅ Completado ({len(text)} caracteres)")
 
         except Exception as e:
             print(f"   ❌ Error: {str(e)}")

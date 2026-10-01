@@ -9,10 +9,11 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).parent))
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-import google.generativeai as genai
 from dotenv import load_dotenv
+
+from decision_maker.core.gemini_helper import ask_llm
 
 # =============================================================================
 # CONFIGURACIÓN
@@ -21,13 +22,8 @@ from dotenv import load_dotenv
 env_file = Path(__file__).parent / ".env.gemini"
 load_dotenv(env_file)
 
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+# Sin GEMINI_API_KEY responde agy (DM_LLM_BACKEND, ver core/agy_backend.py).
 GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.0-flash")
-
-if not GEMINI_API_KEY:
-    raise ValueError("❌ GEMINI_API_KEY no configurada")
-
-genai.configure(api_key=GEMINI_API_KEY)
 
 # =============================================================================
 # CONTEXT
@@ -90,10 +86,9 @@ def gemini_research(query_name: str, query: str) -> str:
     """Realiza research con Gemini"""
     try:
         print(f"   📍 {query_name}...", end=" ", flush=True)
-        model = genai.GenerativeModel(GEMINI_MODEL)
-        response = model.generate_content(f"{PROJECT_CONTEXT}\n\n{query}")
+        text = ask_llm(f"{PROJECT_CONTEXT}\n\n{query}", GEMINI_MODEL)
         print("✅")
-        return response.text
+        return text
     except Exception as e:
         print(f"❌ Error: {e}")
         return f"Error: {str(e)}"

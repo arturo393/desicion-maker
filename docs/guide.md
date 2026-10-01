@@ -8,7 +8,7 @@ category: governance
 status: stable
 related: ["[[index]]", "[[architecture]]", "[[unified-orchestrator]]"]
 created: 2026-08-10
-updated: 2026-09-27
+updated: 2026-10-01
 ---
 
 # Guide: Modeling a Decision
@@ -138,3 +138,15 @@ export GEMINI_API_KEY="your_key"
 # Then pass use_ai=True to run_analysis:
 result = await fw.run_analysis(use_ai=True)
 ```
+
+Without `GEMINI_API_KEY` (or without the Google SDK), the same calls are answered by the Antigravity CLI, `agy`, when it is on `PATH` and logged in. `core/agy_backend.py` resolves it, selected by `DM_LLM_BACKEND`:
+
+| Value | Behavior |
+|---|---|
+| `auto` (default) | the API when there is a key and an SDK; otherwise `agy` |
+| `api` | only the API; no key means no AI |
+| `agy` | only `agy`, even with a key |
+
+`agy` runs with `--mode plan --sandbox` in a throwaway directory: it answers but does not edit files. `AGY_MODEL` picks the model (`agy models` lists them) and `AGY_BIN` the executable. An `agy` failure (non-zero exit, timeout, empty answer) raises `AgyError`; it never comes back looking like an answer.
+
+The test suite pins `DM_LLM_BACKEND=api` with no key (`tests/conftest.py`), so it never reaches a real LLM even with `agy` installed.
