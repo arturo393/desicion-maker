@@ -98,7 +98,7 @@ def test_every_analysis_file_is_in_the_table() -> None:
 
 
 def test_prose_analysis_count_excludes_the_template() -> None:
-    """The prose says 36; the directory holds 37 because `_template.py` is not an analysis."""
+    """The prose says 37; the directory holds 38 because `_template.py` is not an analysis."""
     text = _read(DOCS / "decision-analyses.md")
     prose = re.search(r"los (\d+) an[aá]lisis de decisi[oó]n cuantitativa", text)
     assert prose, "decision-analyses.md no longer states the analysis count in the expected form"
