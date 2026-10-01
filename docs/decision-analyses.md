@@ -43,8 +43,8 @@ Hub general de base de datos: [[database-hub]] | Catálogo de reportes y salidas
 | `ANA-SOPHOS` | `sophos_xg115_decision.py` | Evaluación de appliance Sophos XG115: firmware vs reemplazo | [[monte-carlo-engine]], [[topsis]], [[promethee]] | `active` |
 | `ANA-BECKER-HW` | `becker_hardware_decision.py` | Hardware receptor FSK para Becker Varis en gateway | [[monte-carlo-engine]], [[decision-theory]] | `active` |
 | `ANA-BECKER-RESP` | `becker_response_decision.py` | Estrategia de respuesta y compatibilidad con Becker Varis | [[decision-gates]], [[topsis]] | `active` |
-| `ANA-FSK-EVAL` | `fsk_protocol_evaluation.py` | Evaluación de alternativas para protocolo de comunicación FSK | [[promethee]], [[robust-optimization]] | `active` |
-| `ANA-FSK-SCANNER` | `fsk_scanner_integration.py` | Estrategia de integración de scanner FSK en infraestructura | [[unified-orchestrator]], [[topsis]] | `active` |
+| `ANA-FSK-EVAL` | `fsk_protocol_evaluation.py` | Protocolo serial que reemplaza al legacy 0x7E/0x7F del fsk-scanner. v2 (2026-10-01): gana VLAD25-V2 (0.659) muy cerca de Simple-framed (0.651) | [[unified-orchestrator]] (modo `standard`), [[monte-carlo-engine]], [[topsis]], [[decision-theory]] | `active` |
+| `ANA-FSK-SCANNER` | `fsk_scanner_integration.py` | Dónde vive la integración del FSK scanner Becker Varis. v2 (2026-10-01): gana Hybrid fsk-scanner + monitor-serial (0.795) | [[unified-orchestrator]] (modo `standard`), [[monte-carlo-engine]], [[topsis]], [[pareto-frontier]] | `active` |
 | `ANA-MINERIA-INT` | `mineria_integration.py` | Integración de datos RDSS a sistemas de control mineros | [[monte-carlo-engine]], [[ahp]] | `active` |
 | `ANA-PLC-BRIDGE` | `plc_bridge_comparativa.py` | Comparativa entre PLC puente Modbus vs API CSV vs existentes | [[pareto-frontier]], [[topsis]] | `active` |
 | `ANA-SNIFFER-V1` | `sniffertelemetry_destino.py` | Destino y arquitectura de repositorio `sw-sniffertelemetry` | [[decision-theory]], árboles de decisión | `archive` |

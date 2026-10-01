@@ -29,11 +29,13 @@ Desde v3.1 (2026-08-23). Commits del 2026-09-28 en adelante más el árbol de tr
 - El linter de dev-agents estaba rojo desde `74d116e`: 2 defectos y un ratchet (`6d4dac5`).
 - `ruff` limpio en todo el repo: 115 hallazgos, 2 de ellos bugs — un `open()` sin context manager y `zip()` sin `strict=` (`161d7d9`).
 - `mkdocs.yml` nunca fue YAML válido, y 3 cards del kanban describían defectos falsos (`4586f6c`).
+- **`fsk_protocol_evaluation.py` y `fsk_scanner_integration.py` (v2)**: se caían al importar y su Monte Carlo no registraba factores. Reescritos sobre su propia tabla de puntajes y pesos, con test de humo.
 - Test de ergodicidad tautológico: afirmaba `ruin_probability >= 0.0`, que no puede fallar porque es `count/len`; ahora exige el rango medido para N(0,10).
 
 ### ✨ Added
 - **Análisis `diagnostico_remoto_linea_base_decision.py`** (v1.2): sobre qué línea de sw-diagnosticoremoto seguir construyendo. Gana E (una línea de producto VHF+UHF, `development` como laboratorio): MC 0.752, TOPSIS 0.836; D segundo con 0.719. Ver [[docs/sw-diagnosticoremoto/README|sw-diagnosticoremoto]].
 - **Tests de regresión**: la fuga de `factor_stats` entre opciones, y la penalización de cola con puntajes negativos.
+- **Backend `agy`** (`core/agy_backend.py`): sin `GEMINI_API_KEY`, las llamadas a IA se responden con el CLI de Antigravity (`agy -p` en modo plan y sandbox). `DM_LLM_BACKEND=auto|api|agy`; `gemini_helper.ask_llm` lanza en vez de devolver el error como texto. Los tres `power_supply_*` que importaban `google.generativeai` directo pasan por él.
 - Los 5 checkers documentales se ejecutan desde pytest, no sólo como pasos de CI (`6fdba0b`).
 - Ratchets sobre las cifras que declaran las notas: tests, análisis, motores, piso de Python (`18cb0ae`).
 - Vault de Obsidian consolidado en `docs/`, auditoría estructural y 4 checkers en CI (`81582b5`), con [[docs/database-hub|database-hub]] (centro de base de datos relacional), [[docs/kanban|kanban]] (tablero del proyecto) y [[docs/note-schema|note-schema]] (esquema canónico de notas).

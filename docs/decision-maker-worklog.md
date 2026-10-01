@@ -231,9 +231,14 @@ Cuatro auditores en paralelo con límites disjuntos: **core** (motores), **analy
 - [x] **Docs contra el código**: el README y [[architecture]] decían que la normalización corre en Rust (nada en `core/` importa la extensión); conteos de motores (19, de `ENGINE_UNIVERSE`), análisis (37) y tests (540) alineados; referencias `archivo:línea` a `monte_carlo.py` cambiadas por anclas de símbolo, porque ningún checker valida números de línea; rutas de repos hermanos en `AGENTS.md` verificadas con `ls`; el `README.md` del paquete y [[changelog]] reducidos a punteros, porque eran segundas copias que habían derivado; `CHANGELOG.md` con `[Unreleased]` desde v3.1.
 - [x] **Análisis nuevo** `diagnostico_remoto_linea_base_decision.py` catalogado en [[decision-analyses]] y descrito en [[sw-diagnosticoremoto/README|sw-diagnosticoremoto]]: gana E, con S6 sin verificar y S4 en empate.
 
+### Backend `agy` y FSK reparados (01-Oct-2026)
+
+- [x] **Los análisis con Gemini corren sin API key**: `core/agy_backend.py` responde con el CLI de Antigravity (`agy -p`, en modo plan, sandbox y un directorio temporal, así que no edita nada). Lo usan `gemini_helper.ask_llm`/`search_with_gemini` y `GeminiDeepResearchAgent`; los tres `power_supply_*` que importaban `google.generativeai` directo pasan por `ask_llm`. Se elige con `DM_LLM_BACKEND` (`auto`/`api`/`agy`), documentado en [[guide]]. Un fallo de `agy` lanza `AgyError` en vez de volver como texto de respuesta; 9 tests contra un `agy` falso, con control negativo (quitar el chequeo de exit code o el modo plan los pone rojos). La suite fija `DM_LLM_BACKEND=api` en `conftest.py`: sin eso, `DevilsAdvocate()` con su `use_ai=True` por defecto habría llamado a `agy` desde los tests.
+- [x] **`fsk_protocol_evaluation.py` y `fsk_scanner_integration.py` reescritos (v2)**: v1 se caía al importar (`CareerOption(pros=...)`), llamaba `asyncio.run` dentro de un loop, y su Monte Carlo no registraba ningún factor y modelaba protocolos con salario y burnout. Se conservó la tabla de puntajes y pesos del autor, que era lo único real, y ahora alimenta el framework con ±1 punto triangular por juicio. Resultado: protocolo VLAD25-V2 (0.659) casi empatado con Simple-framed (0.651); integración Hybrid fsk-scanner + monitor-serial (0.795) clara. En los dos el ganador del MC coincide con la suma ponderada, y `test_fsk_analyses.py` lo exige (falla contra v1). Suite: 551.
+
 ## En curso
 
-- [ ] Falta nota dueña (`module:`) para 37 de los 58 módulos de `core/` (medido 2026-10-01). De los de primera clase en el pipeline `standard` sólo falta `config_runner.py`: `pareto.py`, `decision_theory.py`, `sensitivity.py` y `aggregator.py` ya tienen dueño en [[pareto-frontier]], [[decision-theory]], [[sensitivity-analysis]] y [[rank-aggregator]]
+- [ ] Falta nota dueña (`module:`) para 38 de los 59 módulos de `core/` (medido 2026-10-01). De los de primera clase en el pipeline `standard` sólo falta `config_runner.py`: `pareto.py`, `decision_theory.py`, `sensitivity.py` y `aggregator.py` ya tienen dueño en [[pareto-frontier]], [[decision-theory]], [[sensitivity-analysis]] y [[rank-aggregator]]
 
 ## Pendiente
 

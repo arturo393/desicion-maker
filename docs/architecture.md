@@ -13,7 +13,7 @@ updated: 2026-10-01
 
 # Architecture
 
-Dual Python + Rust framework for multi-criteria decision analysis under uncertainty. 19 motores ruteables, 540 tests. The Monte Carlo engine runs in Python/NumPy; the `rust_core/` crate implements the same normalization but is not on the execution path (see [[adr/001-use-rust-for-math-engine]]).
+Dual Python + Rust framework for multi-criteria decision analysis under uncertainty. 19 motores ruteables, 551 tests. The Monte Carlo engine runs in Python/NumPy; the `rust_core/` crate implements the same normalization but is not on the execution path (see [[adr/001-use-rust-for-math-engine]]).
 
 ## Building Blocks
 
@@ -46,7 +46,7 @@ results = await fw.run_analysis(mode="standard")
 | Bayesian | `bayesian.py` | Posterior probability of being best | advanced |
 | Genetic | `genetic.py` | Evolve ideal composite option | advanced |
 | Bootstrap | `bootstrap.py` | Confidence intervals on rankings | advanced |
-| AI Agent | `gemini_agent.py` | External research via Gemini | advanced |
+| AI Agent | `gemini_agent.py` | External research via Gemini (API key) or the Antigravity CLI `agy` (`agy_backend.py`, `DM_LLM_BACKEND`) | advanced |
 | What-If | `what_if.py` | Interactive weight/score tweaking with live recomputation | standalone |
 | Antifragile | `antifragile.py` | Barbell strategy, convexity, fragility indexing, via negativa | standalone |
 | Group Decision | `group_decision.py` | Multi-stakeholder consensus ranking | standalone |
@@ -146,7 +146,7 @@ Statistics (per option after MC)
 
 ## Test Coverage
 
-540 tests across all engines. Run with:
+551 tests across all engines. Run with:
 
 ```bash
 uv run pytest src/decision_maker/tests/ -v
