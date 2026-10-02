@@ -44,6 +44,9 @@ def _read(path: Path) -> str:
     return path.read_text(encoding="utf-8")
 
 
+DEFAULT_MARKEXPR = "not smoke"  # keep equal to addopts in pyproject.toml
+
+
 def _claims_test_count(request: pytest.FixtureRequest) -> bool:
     """True when this run collected the whole suite, so its total is comparable.
 
@@ -56,9 +59,14 @@ def _claims_test_count(request: pytest.FixtureRequest) -> bool:
     skipping — the opposite of what it was written to do.
     """
     opts = request.config.option
+    # pyproject's addopts sets `-m "not smoke"` on every run: that is the default suite, not a
+    # subset. Treating it as a filter made this ratchet skip on every run (2026-10-02).
+    markexpr = getattr(opts, "markexpr", None)
+    if markexpr not in (None, "", DEFAULT_MARKEXPR):
+        return False
     return not any(
         getattr(opts, name, None)
-        for name in ("keyword", "markexpr", "lf", "last_failed", "file_or_dir", "deselect", "ignore")
+        for name in ("keyword", "lf", "last_failed", "file_or_dir", "deselect", "ignore")
     )
 
 
@@ -236,3 +244,11 @@ def test_agents_python_floor_matches_pyproject() -> None:
         f"AGENTS.md says Python {claimed.group(1)}.{claimed.group(2)}+ but pyproject.toml "
         f"declares >={major}.{minor}. One of them is lying about what the code needs."
     )
+
+
+def test_default_markexpr_matches_pyproject() -> None:
+    """DEFAULT_MARKEXPR is a copy of pyproject's addopts; if they drift, the count ratchet skips forever."""
+    import tomllib
+
+    addopts = tomllib.loads((REPO / "pyproject.toml").read_text())["tool"]["pytest"]["ini_options"]["addopts"]
+    assert f'-m "{DEFAULT_MARKEXPR}"' in addopts

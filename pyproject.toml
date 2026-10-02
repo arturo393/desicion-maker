@@ -78,6 +78,9 @@ testpaths = ["src/decision_maker/tests"]
 python_files = ["test_*.py"]
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
+# smoke runs every analysis as a subprocess (~70 s): its own CI step, not part of the default run.
+addopts = '-m "not smoke"'
+markers = ["smoke: runs every analysis end to end (uv run pytest -m smoke)"]
 
 [tool.ruff]
 line-length = 120

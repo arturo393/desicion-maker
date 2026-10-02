@@ -73,6 +73,11 @@ jobs:
       - name: Run tests
         run: uv run pytest --tb=short -q
 
+      # Every analysis as a subprocess, offline (~2 min). Separate step so a red here names the
+      # analysis, and so the default `uv run pytest` stays fast; addopts excludes it locally.
+      - name: "Smoke: every analysis runs and the engine tells its options apart"
+        run: uv run pytest -m smoke --tb=short -q -rA src/decision_maker/tests/test_analyses_smoke.py
+
       - name: Coverage gate (core >= 80%)
         run: |
           uv run coverage run --source=src/decision_maker/core -m pytest --tb=short -q

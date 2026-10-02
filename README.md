@@ -31,6 +31,18 @@ uv run decision-maker run --config config.yaml --what-if   # interactive REPL af
 uv run decision-maker list-distributions
 ```
 
+## Testing
+
+```bash
+uv run pytest            # unit + docs ratchets (~25 s)
+uv run pytest -m smoke   # every analysis end to end, offline (~2 min)
+```
+
+The smoke suite runs each `src/decision_maker/analyses/*.py` as a subprocess and reads the Monte Carlo
+engine's own trace (`DM_MC_TRACE`): an analysis passes only if it ran the engine and the engine told
+its options apart. A new analysis is picked up automatically. The engine itself refuses an empty or
+incomplete model (no options, no factors, or a factor an option has no variable for).
+
 ## The Engines
 
 Module index, not an engine count: 19 are routable (`ENGINE_UNIVERSE` in `src/decision_maker/core/adaptive_router.py`).
@@ -110,9 +122,12 @@ Commands: `run` (from YAML config, with `--what-if` for interactive REPL), `list
 
 Measured on 2026-10-01; tracked in the [Kanban Board](docs/kanban.md).
 
-- Five analyses (`mining_decision`, `mining_improved`, `furniture_diy`, `refactoring_decision`,
-  `sqm_santiago`) run on the legacy `DecisionAnalysisEngine` without registering any factor: the
-  engine returns 0.0 for every option and the script still exits 0. Their engine output is not a result.
+- Results of `mining_decision`, `mining_improved`, `furniture_diy`, `refactoring_decision`,
+  `sqm_santiago` and the script `ip_config_strategy` produced before
+  2026-10-02 are void: the legacy `DecisionAnalysisEngine` registered no option and no factor, so
+  every option scored 0.0 and the winner was whichever sorted first. Fixed; re-run them.
+- `process_utility_analysis.py` loads the power-supply research only to require that it exists; its
+  analysis is hand-written and does not read it.
 - Per-option `factor_stats` / `raw_factor_data` in results produced 2026-08-23 → 2026-09-29 belong
   to the last option (fixed in `41c33a3`); rankings and `mean_score` are unaffected.
 - The Monte Carlo tail penalty trims a fixed ~5 % of each option's own distribution, so it does not

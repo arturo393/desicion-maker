@@ -9,7 +9,7 @@ category: project-management
 status: active
 related: ["[[kanban]]", "[[decision-maker-moc]]", "[[database-hub]]", "[[index]]"]
 created: 2026-08-10
-updated: 2026-10-01
+updated: 2026-10-02
 ---
 
 ## Decision Maker Worklog
@@ -235,6 +235,13 @@ Cuatro auditores en paralelo con límites disjuntos: **core** (motores), **analy
 
 - [x] **Los análisis con Gemini corren sin API key**: `core/agy_backend.py` responde con el CLI de Antigravity (`agy -p`, en modo plan, sandbox y un directorio temporal, así que no edita nada). Lo usan `gemini_helper.ask_llm`/`search_with_gemini` y `GeminiDeepResearchAgent`; los tres `power_supply_*` que importaban `google.generativeai` directo pasan por `ask_llm`. Se elige con `DM_LLM_BACKEND` (`auto`/`api`/`agy`), documentado en [[guide]]. Un fallo de `agy` lanza `AgyError` en vez de volver como texto de respuesta; 9 tests contra un `agy` falso, con control negativo (quitar el chequeo de exit code o el modo plan los pone rojos). La suite fija `DM_LLM_BACKEND=api` en `conftest.py`: sin eso, `DevilsAdvocate()` con su `use_ai=True` por defecto habría llamado a `agy` desde los tests.
 - [x] **`fsk_protocol_evaluation.py` y `fsk_scanner_integration.py` reescritos (v2)**: v1 se caía al importar (`CareerOption(pros=...)`), llamaba `asyncio.run` dentro de un loop, y su Monte Carlo no registraba ningún factor y modelaba protocolos con salario y burnout. Se conservó la tabla de puntajes y pesos del autor, que era lo único real, y ahora alimenta el framework con ±1 punto triangular por juicio. Resultado: protocolo VLAD25-V2 (0.659) casi empatado con Simple-framed (0.651); integración Hybrid fsk-scanner + monitor-serial (0.795) clara. En los dos el ganador del MC coincide con la suma ponderada, y `test_fsk_analyses.py` lo exige (falla contra v1). Suite: 551.
+
+### Modelo vacío y humo de todos los análisis (02-Oct-2026)
+
+- [x] **El motor ya no puntúa un modelo vacío**: `MonteCarloEngine.run()` lanza sin opciones, sin factores o con un factor sin variable (antes: `{}`, o 0 sumado en silencio). 8 tests que fijaban el comportamiento viejo, invertidos.
+- [x] **La capa legacy cumple su contrato original**: el shim de `8361a5a` no registraba ni las opciones ni los factores, así que `mining_decision`, `mining_improved`, `furniture_diy`, `refactoring_decision`, `sqm_santiago` e `ip_config_strategy` comparaban 0.0 contra 0.0 y ganaba la primera al ordenar. Ahora registra `all_options` y puntúa con `CAREER_FACTORS`, los pesos del motor original (`eed6522~1`); los seis dan puntajes distintos. `samba_performance_strategy` sigue roto por otra causa (migración a medias), con card.
+- [x] **Cadena `power_supply`**: escribía en `src/`, guardaba resultados con todas las consultas falladas, y `process_research_results.py` escribía en el repo `sw-diagnosticoremoto` por defecto. Una corrida de medición de esta sesión dejó ahí 4 `.md` con «Error: no SDK...» como estado del arte; **borrarlos quedó para el usuario** (el borrado en el repo hermano fue bloqueado por permisos).
+- [x] **Humo** (`-m smoke`): la primera versión miraba los reportes y su control negativo quedó verde; la segunda lee la traza del motor y falla exactamente en los cinco rotos. El ratchet del conteo de tests se saltaba siempre con el `-m` por defecto: arreglado, con un test que ata la copia del filtro a `pyproject.toml`.
 
 ## En curso
 

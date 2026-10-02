@@ -8,7 +8,7 @@ category: project-management
 status: active
 related: ["[[docs/kanban|kanban]]", "[[docs/index|index]]", "[[docs/adr/001-use-rust-for-math-engine|adr-001]]"]
 created: 2026-08-10
-updated: 2026-10-01
+updated: 2026-10-02
 ---
 
 # Changelog
@@ -30,13 +30,20 @@ Desde v3.1 (2026-08-23). Commits del 2026-09-28 en adelante más el árbol de tr
 - `ruff` limpio en todo el repo: 115 hallazgos, 2 de ellos bugs — un `open()` sin context manager y `zip()` sin `strict=` (`161d7d9`).
 - `mkdocs.yml` nunca fue YAML válido, y 3 cards del kanban describían defectos falsos (`4586f6c`).
 - **`fsk_protocol_evaluation.py` y `fsk_scanner_integration.py` (v2)**: se caían al importar y su Monte Carlo no registraba factores. Reescritos sobre su propia tabla de puntajes y pesos, con test de humo.
+- **El motor ya no puntúa en silencio un modelo vacío o incompleto**: `MonteCarloEngine.run()` lanza `ValueError` si no hay opciones, si no hay factores, o si a una opción le falta la variable de un factor. Antes devolvía `{}` en los dos primeros casos y en el tercero sumaba 0 a esa opción, que es el peor puntaje posible, sin aviso. Los 8 tests que fijaban ese comportamiento como contrato se invirtieron.
+- **`DecisionAnalysisEngine` (capa legacy) vuelve a cumplir su contrato original**: el shim del 19-Jul (`8361a5a`) no registraba ni las opciones que recibe `analyze_option(option, all_options)` ni ningún factor, así que `mining_decision`, `mining_improved`, `furniture_diy`, `refactoring_decision`, `sqm_santiago` e `ip_config_strategy` comparaban 0.0 contra 0.0 y ganaba la primera al ordenar. Ahora registra las opciones y, sin `add_factor`, puntúa con `CAREER_FACTORS`: los pesos del motor original (`eed6522~1`) y su ±15 % de salario. `overall_score` vuelve a la escala 0..10 que esos scripts imprimen; una opción desconocida lanza `KeyError` en vez de devolver ceros; `CareerOption` recupera `pros`/`cons`, que el shim había perdido (`ip_config_strategy` se caía al construirla). Resultados de esos análisis anteriores al 2026-10-02: nulos.
+- **Cadena `power_supply`**: los tres productores escribían junto a su código en `src/` (y uno, `power_supply_gemini_research.json`, no lo cubría el `.gitignore`), y guardaban un archivo aunque todas las consultas hubieran fallado. Ahora escriben en `results/power_supply/` y salen con 1 si fallan todas. `process_research_results.py` escribía por defecto en el repo `sw-diagnosticoremoto`; ahora en `results/`, y publicar allá es opt-in con `POWER_SUPPLY_OUTPUT_DIR`.
+- **El ratchet del conteo de tests se saltaba siempre** con el nuevo `addopts = -m "not smoke"`: trataba el `-m` por defecto como una corrida parcial. Ahora lo reconoce, y un test exige que su copia del filtro coincida con `pyproject.toml`.
+- **`decision-analyses.md` atribuía métodos que los scripts no usan**: 11 análisis no llaman al motor del framework y su columna nombraba `[[monte-carlo-engine]]`, AHP, PROMETHEE, Pareto, antifrágil u optimización robusta; varios ni mencionan el método. Reescritas con lo que cada uno hace.
 - Test de ergodicidad tautológico: afirmaba `ruin_probability >= 0.0`, que no puede fallar porque es `count/len`; ahora exige el rango medido para N(0,10).
 
 ### ⚠️ Known Issues
-- **Cinco análisis sobre `DecisionAnalysisEngine` sin factores** (`mining_decision`, `mining_improved`, `furniture_diy`, `refactoring_decision`, `sqm_santiago`): el wrapper devuelve 0.0 para toda opción y el script sale con 0. Su salida del motor no es un resultado. En el kanban como #p1.
+- `process_utility_analysis.py` carga la investigación sólo para exigir que exista (descarta el resultado de `json.load`); su análisis está escrito a mano.
 - La penalización de cola no distingue colas (recorte fijo de ~5 % por opción): decisión de modelado abierta.
 
 ### ✨ Added
+- **Humo de todos los análisis** (`tests/test_analyses_smoke.py`, `uv run pytest -m smoke`, paso propio en CI): corre cada `analyses/*.py` como subproceso, sin LLM. Exige exit 0 sin traceback, que los que necesitan LLM o datos fallen con un motivo, y —leyendo la traza del propio motor (`DM_MC_TRACE`), no la salida del script— que cada análisis haya corrido `MonteCarloEngine` puntuando al menos una opción y distinguiendo entre ellas. Control negativo: con el motor y el shim viejos puestos de vuelta, falla exactamente en los cinco análisis que comparaban 0.0 contra 0.0. Un análisis nuevo entra solo por el glob. 11 análisis declarados `NO_ENGINE` (TOPSIS/MC propios, calculadoras): para ellos sólo se verifica que corran.
+- `DM_MC_TRACE=<archivo>`: una línea JSON por corrida del motor con la media de cada opción. Apagado por defecto.
 - **Análisis `diagnostico_remoto_linea_base_decision.py`** (v1.2): sobre qué línea de sw-diagnosticoremoto seguir construyendo. Gana E (una línea de producto VHF+UHF, `development` como laboratorio): MC 0.752, TOPSIS 0.836; D segundo con 0.719. Ver [[docs/sw-diagnosticoremoto/README|sw-diagnosticoremoto]].
 - **Tests de regresión**: la fuga de `factor_stats` entre opciones, y la penalización de cola con puntajes negativos.
 - **Backend `agy`** (`core/agy_backend.py`): sin `GEMINI_API_KEY`, las llamadas a IA se responden con el CLI de Antigravity (`agy -p` en modo plan y sandbox). `DM_LLM_BACKEND=auto|api|agy`; `gemini_helper.ask_llm` lanza en vez de devolver el error como texto. Los tres `power_supply_*` que importaban `google.generativeai` directo pasan por él.

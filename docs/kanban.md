@@ -9,7 +9,7 @@ category: project-management
 status: active
 related: ["[[decision-maker-moc]]", "[[decision-maker-worklog]]", "[[index]]", "[[roadmap]]"]
 created: 2026-09-27
-updated: 2026-10-01
+updated: 2026-10-02
 ---
 
 # 📋 Tablero Kanban: Decision Maker Framework
@@ -27,7 +27,10 @@ Tablero interactivo de seguimiento de tareas, hitos y desarrollo del framework c
 ## 📌 Por Hacer / En Cola (To Do)
 
 - [ ] 🧬 **¿`Genetic` sin ruta es deliberado?** Está en `ENGINE_UNIVERSE` y en ninguna ruta, ni en `advanced` — decisión de producto #p2
-- [ ] 🚨 **`DecisionAnalysisEngine` sin factores devuelve 0.0 en silencio**: `mining_decision`, `mining_improved`, `furniture_diy`, `refactoring_decision` y `sqm_santiago` llaman `analyze_option` sin un solo `add_factor`. Medido 2026-10-01: dos opciones opuestas dan `monte_carlo_score=0.0`, rango 0 y sin recomendación, con exit 0. Primero que el wrapper **lance** sin factores; después reescribir los cinco sobre sus propios datos, como FSK v2. No se verificó si alguno saca su recomendación final por otro camino #bug #p1
+- [ ] 🧩 **`scripts/samba_performance_strategy.py` no corre**: migración a medias — construye `UnifiedDecisionFramework(debug=...)` y llama `analyze_option`, que el framework no tiene. Su propio docstring ya dice que hay que reescribirlo #analyses #p3
+- [ ] 🕳️ **Punto ciego del humo: 11 análisis con motor propio** (`NO_ENGINE` en `test_analyses_smoke.py`): para los que tienen TOPSIS/MC propio en numpy, el humo sólo prueba que corren, no que distingan opciones. Migrarlos al framework o darles su propia aserción #qa #p3
+- [ ] ✏️ **`samba`/`commandmessage`/varios declaran metodologías que no aplican**: se corrigió la tabla de [[decision-analyses]], pero los docstrings de varios scripts siguen prometiendo «13 metodologías» o Monte Carlo sin usarlo #docs #p3
+- [ ] 📶 **`process_utility_analysis.py` no lee la investigación que dice reinterpretar**: `json.load(f)` sin asignar; el análisis está escrito a mano. Reescribirlo sobre `power_supply_research_results.json` o declararlo como plantilla #analyses #p2
 - [ ] 🔬 **Correr los `power_supply_*` con `agy`**: ya no necesitan API key, pero no se corrieron enteros (~25 s por consulta). Los dos `process_*` leen los datasets que ellos generan, así que van después #analyses #p2
 - [ ] 📡 **Cerrar la decisión de línea base del diagnóstico remoto**: E gana, pero (a) la fecha de ID-1476 decide entre E y D (escenario S4 en empate), (b) S6 sin verificar: si los arreglos que le faltan a v4.2.0 importan en un VHF de campo, (c) S2: clientes instalados por línea. Fijar semilla para que S4 sea reproducible #analyses #p1
 - [ ] ♻️ **Re-correr lo que usó datos por factor entre 2026-08-23 y 2026-09-29**: `factor_stats`/`raw_factor_data` eran los de la última opción. Sólo afecta reportes de sensibilidad, explicabilidad, antifrágil o genético; los rankings están sanos ([[results-catalog]]) #analyses #p2
@@ -48,6 +51,10 @@ Sin tarjetas.
 Sin tarjetas.
 
 ## ✅ Completado (Done)
+
+- [x] 💨 **Humo de los 37 análisis** (2026-10-02): `uv run pytest -m smoke`, paso propio en CI. Lee la traza del motor (`DM_MC_TRACE`): cada análisis tiene que haberlo corrido, puntuado al menos una opción y distinguido entre ellas. Su primera versión miraba los JSON de reporte y el control negativo la dejó en verde; la segunda falla exactamente en los cinco análisis rotos #qa
+
+- [x] 🚨 **Modelo vacío o incompleto ya no puntúa en silencio** (2026-10-02): `MonteCarloEngine` lanza sin opciones, sin factores o con un factor sin variable. La capa legacy `DecisionAnalysisEngine` registra las opciones y puntúa con los pesos del motor original (`CAREER_FACTORS`); los cinco análisis y `ip_config_strategy`, que comparaban 0.0 contra 0.0, dan ahora puntajes distintos. Resultados anteriores de esos seis: nulos #bug
 
 - [x] 🤖 **Backend `agy` para la IA** (2026-10-01): sin `GEMINI_API_KEY` responde el CLI de Antigravity, en modo plan y sandbox. `DM_LLM_BACKEND=auto|api|agy`; la suite nunca llega a un LLM real ([[guide]]) #enhancement
 - [x] 📶 **FSK v2** (2026-10-01): los dos análisis se caían al importar y su Monte Carlo no registraba factores. Reescritos sobre su propia tabla de puntajes; el ganador del MC coincide con la suma ponderada y un test lo exige ([[decision-analyses]]) #analyses
@@ -78,7 +85,7 @@ Sin tarjetas.
 - [x] 🔗 **Validación de Enlaces de Grafo**: 587 enlaces vivos, 578 resueltos y 9 rotos documentados como preexistentes, sin ninguno nuevo (medido 2026-10-01), mediante `scripts/check_docs_links.py` #qa
 - [x] 🌐 **Validación de Consistencia Lingüística**: 0 intrusos léxicos y 0 alfabetos foráneos pegados, verificado mediante `scripts/check_obsidian_language.py` #qa
 - [x] 🎯 **Validación de Fidelidad de Código**: 54 notas, 25 módulos, 45 clases, 25 imports, 25 propietarios y 219 literales `.py` verificados (medido 2026-10-01) con AST mediante `scripts/check_obsidian_fidelity.py` #qa
-- [x] ⚡ **Suite de Pruebas Unitarias**: validación de 551 tests pasando con `uv run pytest` #qa
+- [x] ⚡ **Suite de Pruebas Unitarias**: validación de 554 tests pasando con `uv run pytest`, más el humo de todos los análisis con `uv run pytest -m smoke` #qa
 - [x] 🏗️ **Unificación del Vault**: raíz de Obsidian consolidada en `docs/`, con la configuración del vault bajo control de versiones y el plugin `obsidian-kanban` #vault
 - [x] 🏷️ **Normalización de Nombres**: convención uniforme `lowercase-with-hyphens` y 100% de aliases resueltos #naming
 - [x] 🚀 **19 Motores Ruteables** (fuente: `ENGINE_UNIVERSE` en `core/adaptive_router.py`): implementación de Monte Carlo, Fuzzy TOPSIS, PROMETHEE, Barbell/Antifragile, Bayesian, etc. #core
