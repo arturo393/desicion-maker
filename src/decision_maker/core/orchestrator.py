@@ -248,10 +248,7 @@ class UnifiedDecisionFramework:
 
         logger.info(f"Starting analysis in {mode.upper()} mode")
 
-        mc_results = self.mc_engine.run()
-        if not mc_results:
-            logger.warning("No results from Monte Carlo engine")
-            return {}
+        mc_results = self.mc_engine.run()  # raises on an empty or incomplete model
 
         profile = self.adaptive_router.profile(
             self.mc_engine.options,

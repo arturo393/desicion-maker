@@ -8,7 +8,9 @@ from __future__ import annotations
 
 __all__ = ["MonteCarloEngine"]
 
+import json
 import logging
+import os
 
 import numpy as np
 
@@ -94,9 +96,27 @@ class MonteCarloEngine:
 
         return samples
 
+    def _check_model(self) -> None:
+        """Refuse a model that would score silently wrong.
+
+        No factors (or no options) used to return {} and a factor missing from an option used to
+        add 0 to that option — the worst possible score, invisibly. Five analyses compared 0.0
+        against 0.0 for months that way (2026-10-01). Every one of these is a modeling error.
+        """
+        if not self.options:
+            raise ValueError("MonteCarloEngine has no options")
+        if not self.factors:
+            raise ValueError("MonteCarloEngine has no factors: every option would score 0")
+        missing = [(o.name, f.name) for o in self.options for f in self.factors if f.name not in o.variables]
+        if missing:
+            shown = ", ".join(f"{o}/{f}" for o, f in missing[:6])
+            raise ValueError(
+                f"{len(missing)} (option, factor) pairs have no variable, so the factor would add 0 "
+                f"to that option: {shown}{' ...' if len(missing) > 6 else ''}"
+            )
+
     def run(self, normalize: bool = True) -> dict[str, Statistics]:
-        if not self.options or not self.factors:
-            return {}
+        self._check_model()
 
         logger.info(f"Running {self.num_simulations} Monte Carlo simulations in Python...")
 
@@ -204,4 +224,19 @@ class MonteCarloEngine:
                 raw_factor_data=opt_data,
             )
 
+        _trace(results)
         return results
+
+
+def _trace(results: dict[str, Statistics]) -> None:
+    """With DM_MC_TRACE=<file>, append one JSON line per run: the means each option got.
+
+    The smoke test reads it to check the effect (the engine ran and told the options apart)
+    instead of the intention (the script exited 0 and printed something). Off by default.
+    """
+    path = os.getenv("DM_MC_TRACE")
+    if not path:
+        return
+    line = json.dumps({"means": {name: st.mean_score for name, st in results.items()}})
+    with open(path, "a", encoding="utf-8") as f:
+        f.write(line + "\n")

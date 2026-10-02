@@ -72,22 +72,22 @@ class TestUnifiedDecisionFramework:
             opt.add_variable("Bad", DistributionType.NORMAL, 0)
 
     @pytest.mark.asyncio
-    async def test_zero_options_returns_empty(self):
+    async def test_zero_options_raises(self):
         fw = UnifiedDecisionFramework()
         fw.mc_engine.num_simulations = 100
         fw.add_factor(Factor("X", 1.0, maximize=True))
-        result = await fw.run_analysis(mode="express")
-        assert result == {}
+        with pytest.raises(ValueError, match="no options"):
+            await fw.run_analysis(mode="express")
 
     @pytest.mark.asyncio
-    async def test_zero_factors_returns_empty(self):
+    async def test_zero_factors_raises(self):
         fw = UnifiedDecisionFramework()
         fw.mc_engine.num_simulations = 100
         opt = DecisionOption("Alone")
         opt.add_variable("X", DistributionType.DETERMINISTIC, 42)
         fw.add_option(opt)
-        result = await fw.run_analysis(mode="express")
-        assert result == {}
+        with pytest.raises(ValueError, match="no factors"):
+            await fw.run_analysis(mode="express")
 
     @pytest.mark.asyncio
     async def test_save_report_creates_files(self, framework):

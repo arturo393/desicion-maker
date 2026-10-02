@@ -124,16 +124,17 @@ class TestMonteCarloEngine:
     def test_empty_options(self):
         engine = MonteCarloEngine(num_simulations=100)
         engine.add_factor(Factor("X", 1.0, maximize=True))
-        results = engine.run()
-        assert results == {}
+        with pytest.raises(ValueError, match="no options"):
+            engine.run()
 
     def test_empty_factors(self):
         engine = MonteCarloEngine(num_simulations=100)
         opt = DecisionOption("A")
         opt.add_variable("X", DistributionType.DETERMINISTIC, 10)
         engine.add_option(opt)
-        results = engine.run()
-        assert results == {}
+        # Used to return {} and five analyses compared 0.0 against 0.0 for months.
+        with pytest.raises(ValueError, match="no factors"):
+            engine.run()
 
     def test_zero_simulations_raises(self):
         with pytest.raises(ValueError, match="num_simulations must be >= 1"):
@@ -191,9 +192,9 @@ class TestMonteCarloEngine:
         engine.add_factor(Factor("A", 0.5, maximize=True))
         engine.add_factor(Factor("B", 0.5, maximize=True))
         engine.add_option(opt)
-        results = engine.run()
-        # Normalized: A(100,max,w=0.5)->1.0*0.5=0.5; B missing contributes nothing
-        assert results["Partial"].mean_score == 0.5
+        # B missing used to add 0 to the option: the worst score, invisibly.
+        with pytest.raises(ValueError, match="Partial/B"):
+            engine.run()
 
     def test_factor_with_zero_weight(self):
         import pytest
@@ -221,8 +222,8 @@ class TestMonteCarloEngine:
         opt = DecisionOption("Empty", "no vars")
         engine.add_factor(Factor("X", 1.0, maximize=True))
         engine.add_option(opt)
-        results = engine.run()
-        assert results["Empty"].mean_score == 0.0
+        with pytest.raises(ValueError, match="Empty/X"):
+            engine.run()
 
     def test_single_simulation(self):
         engine = MonteCarloEngine(num_simulations=1)

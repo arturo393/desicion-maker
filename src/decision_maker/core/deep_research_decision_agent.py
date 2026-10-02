@@ -6,7 +6,7 @@ Does NOT: Execute local shell commands or modify system settings.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any
 
 import numpy as np
@@ -14,6 +14,28 @@ import numpy as np
 from decision_maker.core.gemini_agent import GeminiDeepResearchAgent as _GeminiAgent
 from decision_maker.core.models import DecisionOption, DistributionType, Factor
 from decision_maker.core.orchestrator import UnifiedDecisionFramework
+
+# Scoring of the original engine (git eed6522~1, python/core/deep_research_decision_agent.py), which the
+# legacy scripts were written against: its TOPSIS weights for the six positives, and its overall-score
+# risk weight (0.10) split 0.40/0.35/0.25. The 19-Jul shim (8361a5a) dropped all of this and registered
+# no factor, so every option scored 0.0 until 2026-10-01. Positives are scaled by 0.9 to make room for
+# risk; the sum is 1. probability_success, timeline_months, remote_flexibility and career_ceiling were
+# not in the original weighting either, and still are not scored.
+CAREER_FACTORS: tuple[tuple[str, float, bool], ...] = (
+    ("salary_expected", 0.270, True),
+    ("tech_growth", 0.135, True),
+    ("income_stability", 0.135, True),
+    ("work_life_balance", 0.090, True),
+    ("prestige", 0.135, True),
+    ("learning_opportunity", 0.135, True),
+    ("unemployment_risk", 0.040, False),
+    ("burnout_risk", 0.035, False),
+    ("market_risk", 0.025, False),
+)
+# The original Monte Carlo varied salary +/-15 % uniformly; a triangular keeps the same range.
+SALARY_SPREAD = 0.15
+# Legacy scripts print and threshold overall_score on a 0..10 scale.
+OVERALL_SCALE = 10.0
 
 
 @dataclass
@@ -35,10 +57,20 @@ class CareerOption:
     burnout_risk: float = 0.0
     market_risk: float = 0.0
     description: str = ""
+    # Part of the original class; the shim dropped them and every caller passing them crashed.
+    # Data for the reader only: they do not enter the score.
+    pros: list[str] = field(default_factory=list)
+    cons: list[str] = field(default_factory=list)
 
     def to_decision_option(self) -> DecisionOption:
         opt = DecisionOption(self.name, self.description)
-        opt.add_variable("salary_expected", DistributionType.DETERMINISTIC, self.salary_expected)
+        s = self.salary_expected
+        if s > 0:
+            opt.add_variable(
+                "salary_expected", DistributionType.TRIANGULAR, s * (1 - SALARY_SPREAD), s, s * (1 + SALARY_SPREAD)
+            )
+        else:
+            opt.add_variable("salary_expected", DistributionType.DETERMINISTIC, s)
         opt.add_variable("probability_success", DistributionType.DETERMINISTIC, self.probability_success)
         opt.add_variable("timeline_months", DistributionType.DETERMINISTIC, float(self.timeline_months))
         opt.add_variable("tech_growth", DistributionType.DETERMINISTIC, self.tech_growth)
@@ -48,6 +80,9 @@ class CareerOption:
         opt.add_variable("remote_flexibility", DistributionType.DETERMINISTIC, self.remote_flexibility)
         opt.add_variable("learning_opportunity", DistributionType.DETERMINISTIC, self.learning_opportunity)
         opt.add_variable("career_ceiling", DistributionType.DETERMINISTIC, self.career_ceiling)
+        opt.add_variable("unemployment_risk", DistributionType.DETERMINISTIC, self.unemployment_risk)
+        opt.add_variable("burnout_risk", DistributionType.DETERMINISTIC, self.burnout_risk)
+        opt.add_variable("market_risk", DistributionType.DETERMINISTIC, self.market_risk)
         return opt
 
 
@@ -68,11 +103,16 @@ class AnalysisResult:
 
 
 class DecisionAnalysisEngine:
-    """Legacy DecisionAnalysisEngine — wraps UnifiedDecisionFramework."""
+    """Legacy DecisionAnalysisEngine — wraps UnifiedDecisionFramework.
+
+    Keeps the original contract: `analyze_option(option, all_options)` with no setup scores every
+    option on CAREER_FACTORS. `add_option`/`add_factor` override that explicitly.
+    """
 
     def __init__(self, debug: bool = False):
         self.framework = UnifiedDecisionFramework()
         self._options: list[CareerOption] = []
+        self._custom_factors = False
         self._cached_results: dict[str, AnalysisResult] = {}
 
     def add_option(self, option: CareerOption) -> None:
@@ -81,7 +121,18 @@ class DecisionAnalysisEngine:
         self.framework.add_option(do)
 
     def add_factor(self, name: str, weight: float, maximize: bool = True) -> None:
+        self._custom_factors = True
         self.framework.add_factor(Factor(name, weight, maximize))
+
+    def _prepare(self, all_options: list[CareerOption]) -> None:
+        known = {o.name for o in self._options}
+        for o in all_options:
+            if o.name not in known:
+                self.add_option(o)
+                known.add(o.name)
+        if not self._custom_factors and not self.framework.mc_engine.factors:
+            for name, weight, maximize in CAREER_FACTORS:
+                self.framework.add_factor(Factor(name, weight, maximize))
 
     def _run_full_analysis(self) -> dict[str, AnalysisResult]:
         import asyncio
@@ -110,7 +161,7 @@ class DecisionAnalysisEngine:
         for name, stats in mc_results.items():
             results[name] = AnalysisResult(
                 option_name=name,
-                overall_score=stats.mean_score,
+                overall_score=stats.mean_score * OVERALL_SCALE,
                 monte_carlo_score=stats.mean_score,
                 topsis_rank=topsis_ranks.get(name, 99),
                 pareto_optimal=name in efficient,
@@ -131,8 +182,11 @@ class DecisionAnalysisEngine:
 
     def analyze_option(self, option: CareerOption, all_options: list[CareerOption]) -> AnalysisResult:
         if not self._cached_results:
+            self._prepare(all_options or [option])
             self._cached_results = self._run_full_analysis()
-        return self._cached_results.get(option.name, AnalysisResult(option_name=option.name))
+        if option.name not in self._cached_results:
+            raise KeyError(f"option {option.name!r} was not part of the analysis")
+        return self._cached_results[option.name]
 
     @staticmethod
     def _calculate_overall_score(result: AnalysisResult) -> float:

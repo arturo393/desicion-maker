@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import numpy as np
+import pytest
 
 from decision_maker.core.deep_research_decision_agent import (
+    CAREER_FACTORS,
     AnalysisResult,
     CareerOption,
     DecisionAnalysisEngine,
@@ -27,29 +29,45 @@ class TestCareerOption:
         assert "probability_success" in do.variables
         assert "timeline_months" in do.variables
         assert "tech_growth" in do.variables
-        assert do.variables["salary_expected"].params == [80000.0]
+        # +/-15 % salary range, as in the original engine's Monte Carlo
+        assert do.variables["salary_expected"].params == pytest.approx([68000.0, 80000.0, 92000.0])
 
 
 class TestDecisionAnalysisEngine:
-    def _build_engine(self):
+    """The original contract: analyze_option(option, all_options) with no setup scores on CAREER_FACTORS.
+
+    Until 2026-10-01 the shim registered no option and no factor, so every option scored 0.0 — and the
+    previous tests here asserted `overall_score >= 0`, which held precisely because of that.
+    """
+
+    GOOD = CareerOption("Good", salary_expected=5_000_000, tech_growth=9, income_stability=9,
+                        work_life_balance=8, prestige=8, learning_opportunity=9, burnout_risk=0.1)
+    BAD = CareerOption("Bad", salary_expected=1_000_000, tech_growth=2, income_stability=3,
+                       work_life_balance=3, prestige=2, learning_opportunity=2, burnout_risk=0.8)
+
+    def test_scores_differ_and_order_follows_the_attributes(self):
         engine = DecisionAnalysisEngine()
-        engine.add_factor("Cost", 0.5, maximize=False)
-        engine.add_factor("Quality", 0.5, maximize=True)
-        engine.add_option(CareerOption("A", salary_expected=100, probability_success=0.9, income_stability=8.0))
-        return engine
+        opts = [self.GOOD, self.BAD]
+        good, bad = (engine.analyze_option(o, opts) for o in opts)
+        assert good.overall_score > bad.overall_score
+        assert 0.0 < good.overall_score <= 10.0
+        assert good.recommendation == "Recommended"
 
-    def test_analyze_option_returns_analysis_result(self):
-        engine = self._build_engine()
-        result = engine.analyze_option(CareerOption(name="A"), [])
-        assert isinstance(result, AnalysisResult)
-        assert result.option_name == "A"
-        assert result.overall_score >= 0
+    def test_unknown_option_raises(self):
+        engine = DecisionAnalysisEngine()
+        engine.analyze_option(self.GOOD, [self.GOOD, self.BAD])
+        with pytest.raises(KeyError, match="Z"):
+            engine.analyze_option(CareerOption(name="Z"), [])
 
-    def test_analyze_unknown_option_returns_default(self):
-        engine = self._build_engine()
-        result = engine.analyze_option(CareerOption(name="Z"), [])
-        assert isinstance(result, AnalysisResult)
-        assert result.option_name == "Z"
+    def test_custom_factors_replace_the_defaults(self):
+        engine = DecisionAnalysisEngine()
+        engine.add_factor("burnout_risk", 1.0, maximize=True)  # perverse on purpose
+        opts = [self.GOOD, self.BAD]
+        good, bad = (engine.analyze_option(o, opts) for o in opts)
+        assert bad.overall_score > good.overall_score
+
+    def test_career_factor_weights_sum_to_one(self):
+        assert sum(w for _, w, _ in CAREER_FACTORS) == pytest.approx(1.0)
 
     def test_calculate_overall_score_penalizes_risk(self):
         result = AnalysisResult(monte_carlo_score=1.0, risk_score=0.2)
