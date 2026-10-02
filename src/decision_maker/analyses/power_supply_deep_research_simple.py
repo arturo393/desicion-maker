@@ -15,6 +15,9 @@ from dotenv import load_dotenv
 
 from decision_maker.core.gemini_helper import ask_llm
 
+# Generado, no fuente: va a results/ (ignorado por git), no junto al codigo.
+OUT_DIR = Path(__file__).resolve().parents[3] / "results" / "power_supply"
+
 # =============================================================================
 # CONFIGURACIÓN
 # =============================================================================
@@ -111,7 +114,12 @@ def main():
         results["investigaciones"][nombre] = resultado
 
     # Guardar
-    output_file = Path(__file__).parent / "power_supply_research_results.json"
+    failed = [n for n, r in results["investigaciones"].items() if r.startswith("Error:")]
+    if len(failed) == len(results["investigaciones"]):
+        print(f"\n❌ Las {len(failed)} consultas fallaron; no se guarda nada.")
+        sys.exit(1)
+    OUT_DIR.mkdir(parents=True, exist_ok=True)
+    output_file = OUT_DIR / "power_supply_research_results.json"
     with open(output_file, "w", encoding="utf-8") as f:
         json.dump(results, f, ensure_ascii=False, indent=2)
 

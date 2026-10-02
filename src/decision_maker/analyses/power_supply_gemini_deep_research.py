@@ -23,6 +23,9 @@ from dotenv import load_dotenv
 
 from decision_maker.core.gemini_helper import ask_llm
 
+# Generado, no fuente: va a results/ (ignorado por git), no junto al codigo.
+OUT_DIR = Path(__file__).resolve().parents[3] / "results" / "power_supply"
+
 # =============================================================================
 # CONFIGURACIÓN
 # =============================================================================
@@ -248,7 +251,12 @@ async def main():
         research_results = await run_full_research()
 
         # Guardar resultados
-        output_file = Path(__file__).parent / "power_supply_gemini_research.json"
+        failed = [n for n, r in research_results["investigaciones"].items() if r.startswith("Error:")]
+        if len(failed) == len(research_results["investigaciones"]):
+            print(f"\n❌ Las {len(failed)} consultas fallaron; no se guarda nada.")
+            return None
+        OUT_DIR.mkdir(parents=True, exist_ok=True)
+        output_file = OUT_DIR / "power_supply_gemini_research.json"
         with open(output_file, "w", encoding="utf-8") as f:
             json.dump(research_results, f, ensure_ascii=False, indent=2)
 
@@ -291,5 +299,6 @@ if __name__ == "__main__":
     print(f"   - Modelo: {GEMINI_MODEL}")
     print(f"   - Total queries: {len(RESEARCH_QUERIES)}")
 
-    # Ejecutar investigación
-    asyncio.run(main())
+    # Ejecutar investigación; None = fallo (todas las consultas o una excepcion)
+    if asyncio.run(main()) is None:
+        sys.exit(1)

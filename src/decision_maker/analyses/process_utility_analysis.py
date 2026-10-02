@@ -17,7 +17,9 @@ def analyze_utility_focus():
     """
 
     # Cargar investigación anterior
-    results_file = Path(__file__).parent / "power_supply_research_results.json"
+    # NOTE: the research is loaded only to require that it exists; the analysis below is
+    # hand-written and does not read it (json.load's result is discarded). Kanban card open.
+    results_file = Path(__file__).resolve().parents[3] / "results" / "power_supply" / "power_supply_research_results.json"
 
     if not results_file.exists():
         print("❌ No existe power_supply_research_results.json")
@@ -224,7 +226,7 @@ def main():
     analysis = analyze_utility_focus()
 
     # Guardar análisis
-    output_file = Path(__file__).parent / "power_supply_utility_analysis.json"
+    output_file = Path(__file__).resolve().parents[3] / "results" / "power_supply" / "power_supply_utility_analysis.json"
     with open(output_file, "w", encoding="utf-8") as f:
         json.dump(analysis, f, ensure_ascii=False, indent=2)
 

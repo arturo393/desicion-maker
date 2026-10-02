@@ -7,18 +7,17 @@ import json
 import os
 from pathlib import Path
 
-_ANALYSES_DIR = Path(__file__).resolve().parent
+_RESULTS = Path(__file__).resolve().parents[3] / "results" / "power_supply"
 
 # Paths
-RESEARCH_FILE = _ANALYSES_DIR / "power_supply_research_results.json"
-# Cross-repo output: defaults to the sibling sw-diagnosticoremoto repo,
-# overridable via POWER_SUPPLY_OUTPUT_DIR.
-OUTPUT_DIR = Path(
-    os.environ.get(
-        "POWER_SUPPLY_OUTPUT_DIR",
-        str(Path.home() / "uqomm" / "sw-diagnosticoremoto" / "docs" / "docs" / "05-power-supply" / "investigacion"),
-    )
-)
+RESEARCH_FILE = _RESULTS / "power_supply_research_results.json"
+# Default inside this repo's results/. Publishing into sw-diagnosticoremoto is opt-in via
+# POWER_SUPPLY_OUTPUT_DIR: the old default wrote into that sibling repo on every run, and a run whose
+# queries had all failed published "Error: ..." as its state of the art (2026-10-01).
+OUTPUT_DIR = Path(os.environ.get("POWER_SUPPLY_OUTPUT_DIR", str(_RESULTS / "docs")))
+
+if not RESEARCH_FILE.exists():
+    raise SystemExit(f"❌ No existe {RESEARCH_FILE}: correr antes power_supply_deep_research_simple.py")
 
 # Crear directorio si no existe
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)

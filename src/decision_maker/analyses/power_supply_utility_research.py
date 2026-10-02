@@ -22,6 +22,9 @@ from dotenv import load_dotenv
 
 from decision_maker.core.gemini_helper import ask_llm
 
+# Generado, no fuente: va a results/ (ignorado por git), no junto al codigo.
+OUT_DIR = Path(__file__).resolve().parents[3] / "results" / "power_supply"
+
 # Sin GEMINI_API_KEY responde agy (DM_LLM_BACKEND, ver core/agy_backend.py).
 load_dotenv(".env.gemini")
 
@@ -155,7 +158,11 @@ def execute_deep_research():
             }
 
     # Guardar resultados
-    output_path = Path(__file__).parent / "power_supply_utility_results.json"
+    if all("error" in r for r in results.values()):
+        print(f"\n❌ Las {len(results)} consultas fallaron; no se guarda nada.")
+        sys.exit(1)
+    OUT_DIR.mkdir(parents=True, exist_ok=True)
+    output_path = OUT_DIR / "power_supply_utility_results.json"
     with open(output_path, "w", encoding="utf-8") as f:
         json.dump(results, f, ensure_ascii=False, indent=2)
 
