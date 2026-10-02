@@ -44,6 +44,7 @@ class RobustOptimizer:
             "dro_scores": {},
             "stability_metrics": {},
             "weight_sensitivity": {},
+            "weight_shock_worst": {},
         }
 
         # 1. Weight Sensitivity Analysis (Local)
@@ -87,6 +88,7 @@ class RobustOptimizer:
                         sensitive_factors.append({"factor": f.name, "impact": diff, "shock": delta})
 
             results["weight_sensitivity"][opt_name] = sensitive_factors
+            results["weight_shock_worst"][opt_name] = worst_score
 
         # 2. Distributionally Robust Optimization (DRO) Analysis
         # Using a Wasserstein-based variance regularization approach

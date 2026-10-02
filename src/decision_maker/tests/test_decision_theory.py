@@ -45,3 +45,15 @@ class TestDecisionTheoryEngine:
         strategies = DecisionTheoryEngine.analyze(results)
         assert "High" in strategies["Maximax (Optimistic)"]
         assert "High" in strategies["Minimax Regret"]
+
+    def test_minimax_regret_uses_percentile_states(self):
+        """Regret must compare quantile states (comonotonic assumption) rather than arbitrary simulation indices."""
+        import numpy as np
+        scores_a = np.array([10.0, 20.0, 30.0, 40.0, 50.0])
+        scores_b = np.array([50.0, 40.0, 30.0, 20.0, 10.0])
+        results = {
+            "A": Statistics("A", 30.0, 14.14, 10.0, 50.0, 12.0, 48.0, 1.0, {}, 12.0, 10.0, raw_scores=scores_a),
+            "B": Statistics("B", 30.0, 14.14, 10.0, 50.0, 12.0, 48.0, 1.0, {}, 12.0, 10.0, raw_scores=scores_b),
+        }
+        strategies = DecisionTheoryEngine.analyze(results)
+        assert "Max Regret: 0.00" in strategies["Minimax Regret"]

@@ -272,13 +272,13 @@ def main():
         print(f"   ⚖️  WLB: {option.work_life_balance}/10 | Remote: {option.remote_flexibility}/10")
         print(f"   ⚠️  Risk: {result.risk_score:.2f} | Burnout: {option.burnout_risk*100:.0f}%")
 
-        # Recomendación con color
+        # Posición relativa entre las opciones comparadas (normalización min-max de la corrida)
         if result.overall_score >= 5.0:
-            print("   ✅ RECOMENDADO - Score ≥5.0")
+            print("   ✅ Posición relativa favorable entre las opciones comparadas (score ≥5.0)")
         elif result.overall_score >= 3.5:
-            print("   ⚠️  VIABLE - Score moderado")
+            print("   ⚠️  Posición relativa moderada entre las opciones comparadas")
         else:
-            print(f"   {result.recommendation}")
+            print(f"   Posición relativa desfavorable entre las opciones comparadas ({result.recommendation or 'no recomendado'})")
         print()
 
     # Análisis SQM específico

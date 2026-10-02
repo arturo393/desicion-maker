@@ -93,19 +93,25 @@ class TestUncertainVariable:
         UncertainVariable("Ok", DistributionType.NORMAL, [0, 1])
 
     def test_nan_params_sanitized(self):
+        # Inverted: Previously replaced NaN parameters with defaults silently; now raises ValueError.
         var = UncertainVariable("NaN", DistributionType.NORMAL, [float("nan"), float("nan")])
-        samples = var.sample(100)
-        assert np.all(np.isfinite(samples))
+        import pytest
+        with pytest.raises(ValueError, match="NaN or Inf"):
+            var.sample(100)
 
     def test_inf_params_sanitized(self):
+        # Inverted: Previously replaced Inf parameters with defaults silently; now raises ValueError.
         var = UncertainVariable("Inf", DistributionType.NORMAL, [float("inf"), float("inf")])
-        samples = var.sample(100)
-        assert np.all(np.isfinite(samples))
+        import pytest
+        with pytest.raises(ValueError, match="NaN or Inf"):
+            var.sample(100)
 
     def test_negative_inf_params_sanitized(self):
+        # Inverted: Previously replaced -Inf parameters with defaults silently; now raises ValueError.
         var = UncertainVariable("NegInf", DistributionType.NORMAL, [-float("inf"), float("inf")])
-        samples = var.sample(100)
-        assert np.all(np.isfinite(samples))
+        import pytest
+        with pytest.raises(ValueError, match="NaN or Inf"):
+            var.sample(100)
 
     def test_empty_params_defaults_used(self):
         import pytest
@@ -114,49 +120,82 @@ class TestUncertainVariable:
             UncertainVariable("Empty", DistributionType.NORMAL, [])
 
     def test_nan_deterministic(self):
+        # Inverted: Previously returned 0 for NaN deterministic; now raises ValueError.
         var = UncertainVariable("NaN", DistributionType.DETERMINISTIC, [float("nan")])
-        samples = var.sample(100)
-        assert np.all(samples == 0)
+        import pytest
+        with pytest.raises(ValueError, match="NaN or Inf"):
+            var.sample(100)
 
     def test_nan_beta_sanitized(self):
+        # Inverted: Previously sanitized NaN beta params to defaults; now raises ValueError.
         var = UncertainVariable("NaN", DistributionType.BETA, [float("nan"), float("nan")])
-        samples = var.sample(100)
-        assert np.all(np.isfinite(samples))
+        import pytest
+        with pytest.raises(ValueError, match="NaN or Inf"):
+            var.sample(100)
 
     def test_nan_uniform_sanitized(self):
+        # Inverted: Previously sanitized NaN uniform params to defaults; now raises ValueError.
         var = UncertainVariable("NaN", DistributionType.UNIFORM, [float("nan"), float("inf")])
-        samples = var.sample(100)
-        assert np.all(np.isfinite(samples))
+        import pytest
+        with pytest.raises(ValueError, match="NaN or Inf"):
+            var.sample(100)
 
     def test_bernoulli_nan_clipped(self):
+        # Inverted: Previously sanitized NaN bernoulli param to default; now raises ValueError.
         var = UncertainVariable("BNan", DistributionType.BERNOULLI, [float("nan")])
-        samples = var.sample(100)
-        assert np.all((samples == 0) | (samples == 1))
+        import pytest
+        with pytest.raises(ValueError, match="NaN or Inf"):
+            var.sample(100)
 
     def test_gamma_nan_sanitized(self):
+        # Inverted: Previously sanitized NaN gamma params to defaults; now raises ValueError.
         var = UncertainVariable("GNan", DistributionType.GAMMA, [float("nan"), float("nan")])
-        samples = var.sample(100)
-        assert np.all(np.isfinite(samples))
+        import pytest
+        with pytest.raises(ValueError, match="NaN or Inf"):
+            var.sample(100)
 
     def test_lognormal_nan_sanitized(self):
+        # Inverted: Previously sanitized NaN lognormal params to defaults; now raises ValueError.
         var = UncertainVariable("LNan", DistributionType.LOGNORMAL, [float("nan"), float("nan")])
-        samples = var.sample(100)
-        assert np.all(np.isfinite(samples))
+        import pytest
+        with pytest.raises(ValueError, match="NaN or Inf"):
+            var.sample(100)
 
     def test_poisson_nan_sanitized(self):
+        # Inverted: Previously sanitized NaN poisson param to default; now raises ValueError.
         var = UncertainVariable("PNan", DistributionType.POISSON, [float("nan")])
-        samples = var.sample(100)
-        assert np.all(np.isfinite(samples))
+        import pytest
+        with pytest.raises(ValueError, match="NaN or Inf"):
+            var.sample(100)
 
     def test_exponential_nan_sanitized(self):
+        # Inverted: Previously sanitized NaN exponential param to default; now raises ValueError.
         var = UncertainVariable("ENan", DistributionType.EXPONENTIAL, [float("nan")])
-        samples = var.sample(100)
-        assert np.all(np.isfinite(samples))
+        import pytest
+        with pytest.raises(ValueError, match="NaN or Inf"):
+            var.sample(100)
 
     def test_triangular_nan_sanitized(self):
+        # Inverted: Previously sanitized NaN triangular params to defaults; now raises ValueError.
         var = UncertainVariable("TNan", DistributionType.TRIANGULAR, [float("nan"), float("nan"), float("nan")])
-        samples = var.sample(100)
-        assert np.all(np.isfinite(samples))
+        import pytest
+        with pytest.raises(ValueError, match="NaN or Inf"):
+            var.sample(100)
+
+    def test_sampling_failure_raises_value_error(self, monkeypatch):
+        """When sampling fails, it must raise ValueError rather than returning zeros."""
+        var = UncertainVariable("FailVar", DistributionType.NORMAL, [10.0, 1.0])
+        import pytest
+
+        from decision_maker.core import models
+
+        def broken_sampler(params, size, rng=None):
+            raise ValueError("Underlying sampler breakdown")
+
+        monkeypatch.setitem(models.SAMPLE_DISPATCH, DistributionType.NORMAL, broken_sampler)
+        with pytest.raises(ValueError, match="Sampling failed for variable 'FailVar'"):
+            var.sample(100)
+
 
     def test_bernoulli_p_above_one_clipped(self):
         var = UncertainVariable("BHigh", DistributionType.BERNOULLI, [2.0])

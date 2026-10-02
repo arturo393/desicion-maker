@@ -26,8 +26,17 @@ class RankAggregator:
         borda_scores = {opt: 0.0 for opt in all_options}
         for _method_name, series in rankings.items():
             ranked = series.index.tolist()
+            k = len(ranked)
             for rank_pos, opt in enumerate(ranked):
                 borda_scores[opt] += n - rank_pos - 1
+            unranked = [opt for opt in all_options if opt not in series.index]
+            if unranked:
+                # Average of unassigned points: positions k to n-1 with points (n - k - 1) down to 0.
+                # Sum of points is (n - k - 1) * (n - k) / 2; divided by len(unranked) = (n - k),
+                # this gives exactly (n - k - 1) / 2.0.
+                avg_unassigned = (n - k - 1) / 2.0
+                for opt in unranked:
+                    borda_scores[opt] += avg_unassigned
         return pd.Series(borda_scores).sort_values(ascending=False)
 
     @staticmethod

@@ -236,13 +236,16 @@ class TestMonteCarloEngine:
         assert results["OnlyOne"].mean_score == 1.0
 
     def test_nan_params_in_variable(self):
+        # Inverted: Previously sanitized NaN parameters to defaults and succeeded;
+        # now raises ValueError when a variable has NaN/Inf parameters.
         engine = MonteCarloEngine(num_simulations=100)
         opt = DecisionOption("NaN")
         opt.add_variable("X", DistributionType.NORMAL, float("nan"), float("nan"))
         engine.add_factor(Factor("X", 1.0, maximize=True))
         engine.add_option(opt)
-        results = engine.run()
-        assert np.isfinite(results["NaN"].mean_score)
+        with pytest.raises(ValueError, match="NaN or Inf"):
+            engine.run()
+
 
     def test_correlation_matrix_not_applied_with_single_factor(self):
         engine = MonteCarloEngine(num_simulations=1000, correlation_matrix=np.eye(1))
@@ -299,3 +302,52 @@ class TestMonteCarloEngine:
         results = engine.run()
         # Normalized: single deterministic value -> hi==lo -> norm 1.0
         assert results["A"].mean_score == 1.0
+
+    def test_seed_reproducibility_identical_and_different(self):
+        """Same seed must produce identical results; different seeds must produce different results."""
+        def build_engine(seed_val):
+            eng = MonteCarloEngine(num_simulations=500, seed=seed_val)
+            eng.add_factor(Factor("Score", 1.0, maximize=True))
+            opt = DecisionOption("A")
+            opt.add_variable("Score", DistributionType.NORMAL, 10.0, 3.0)
+            eng.add_option(opt)
+            return eng
+
+        eng1 = build_engine(12345)
+        eng2 = build_engine(12345)
+        eng3 = build_engine(54321)
+
+        res1 = eng1.run()
+        res2 = eng2.run()
+        res3 = eng3.run()
+
+        # Same seed => identical draws and statistics
+        assert np.array_equal(res1["A"].raw_scores, res2["A"].raw_scores)
+        assert res1["A"].mean_score == res2["A"].mean_score
+
+        # Different seeds => different draws
+        assert not np.array_equal(res1["A"].raw_scores, res3["A"].raw_scores)
+
+    def test_seed_none_generates_and_stores_entropy_seed(self):
+        """When seed is None, engine generates an integer seed from entropy and saves it."""
+        eng = MonteCarloEngine(num_simulations=200)
+        eng.add_factor(Factor("Score", 1.0, maximize=True))
+        opt = DecisionOption("A")
+        opt.add_variable("Score", DistributionType.NORMAL, 10.0, 3.0)
+        eng.add_option(opt)
+        assert isinstance(eng.seed, int)
+
+        # The stored seed is the whole provenance: a new engine built from it replays the run.
+        replay = MonteCarloEngine(num_simulations=200, seed=eng.seed)
+        replay.add_factor(Factor("Score", 1.0, maximize=True))
+        replay.add_option(opt)
+        assert np.array_equal(eng.run()["A"].raw_scores, replay.run()["A"].raw_scores)
+
+    def test_second_run_replays_the_first(self):
+        """A run must be reproducible from the seed alone, not from the seed plus how many runs came before."""
+        eng = MonteCarloEngine(num_simulations=300, seed=7)
+        eng.add_factor(Factor("Score", 1.0, maximize=True))
+        opt = DecisionOption("A")
+        opt.add_variable("Score", DistributionType.NORMAL, 10.0, 3.0)
+        eng.add_option(opt)
+        assert np.array_equal(eng.run()["A"].raw_scores, eng.run()["A"].raw_scores)

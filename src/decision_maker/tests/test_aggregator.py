@@ -46,3 +46,18 @@ class TestRankAggregator:
     def test_copeland_empty_series(self):
         result = RankAggregator.copeland({})
         assert result.empty
+
+    def test_borda_unranked_options_receive_average_unassigned_points(self):
+        """Options not ranked by a method must receive the average of unassigned points for that method."""
+        rankings = {
+            "M1": pd.Series([10, 5, 1], index=["A", "B", "C"]),
+            "M2": pd.Series([10], index=["A"]),
+        }
+        # Total options = 3 (points available per method: 2, 1, 0)
+        # M1: A=2, B=1, C=0
+        # M2: A=2 (1st place). Unranked: B, C. Unassigned points: 1 and 0 -> avg = 0.5 each.
+        # Total expected: A = 2 + 2 = 4.0, B = 1 + 0.5 = 1.5, C = 0 + 0.5 = 0.5
+        result = RankAggregator.borda_count(rankings)
+        assert result["A"] == 4.0
+        assert result["B"] == 1.5
+        assert result["C"] == 0.5

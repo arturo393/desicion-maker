@@ -31,6 +31,9 @@ Tablero interactivo de seguimiento de tareas, hitos y desarrollo del framework c
 - [ ] 🕳️ **Punto ciego del humo: 11 análisis con motor propio** (`NO_ENGINE` en `test_analyses_smoke.py`): para los que tienen TOPSIS/MC propio en numpy, el humo sólo prueba que corren, no que distingan opciones. Migrarlos al framework o darles su propia aserción #qa #p3
 - [ ] ✏️ **`samba`/`commandmessage`/varios declaran metodologías que no aplican**: se corrigió la tabla de [[decision-analyses]], pero los docstrings de varios scripts siguen prometiendo «13 metodologías» o Monte Carlo sin usarlo #docs #p3
 - [ ] 📶 **`process_utility_analysis.py` no lee la investigación que dice reinterpretar**: `json.load(f)` sin asignar; el análisis está escrito a mano. Reescribirlo sobre `power_supply_research_results.json` o declararlo como plantilla #analyses #p2
+- [ ] 🎲 **El bootstrap de TOPSIS sigue sin semilla**: `core/bootstrap.py` usa `np.random.normal` global, así que los intervalos de ranking no se reproducen desde la semilla del motor. Pasarle un `Generator` como a `UncertainVariable.sample` #quant #p2
+- [ ] 🧮 **La compuerta de ruina decide «no aplicable» por el rango de los puntajes, no por `normalize`**: con `normalize=False` y todos los puntajes en [0, 1] también dice «no aplicable» (correcto en el resultado, ninguno puede bajar de 0, pero por inferencia). Pasarle el flag explícito #quant #p3
+- [ ] 📏 **`sqm_santiago`/`furniture_diy` siguen cortando en 5.0 y 3.5**: el texto ya dice «posición relativa», pero los umbrales absolutos sobre un puntaje min-max no significan nada. Quitarlos o ranquear #analyses #p3
 - [ ] 🔬 **Correr los `power_supply_*` con `agy`**: ya no necesitan API key, pero no se corrieron enteros (~25 s por consulta). Los dos `process_*` leen los datasets que ellos generan, así que van después #analyses #p2
 - [ ] 📡 **Cerrar la decisión de línea base del diagnóstico remoto**: E gana, pero (a) la fecha de ID-1476 decide entre E y D (escenario S4 en empate), (b) S6 sin verificar: si los arreglos que le faltan a v4.2.0 importan en un VHF de campo, (c) S2: clientes instalados por línea. Fijar semilla para que S4 sea reproducible #analyses #p1
 - [ ] ♻️ **Re-correr lo que usó datos por factor entre 2026-08-23 y 2026-09-29**: `factor_stats`/`raw_factor_data` eran los de la última opción. Sólo afecta reportes de sensibilidad, explicabilidad, antifrágil o genético; los rankings están sanos ([[results-catalog]]) #analyses #p2
@@ -51,6 +54,8 @@ Sin tarjetas.
 Sin tarjetas.
 
 ## ✅ Completado (Done)
+
+- [x] 🧭 **Corrección del núcleo (2026-10-02, hecho con `agy` y revisado)**: TOPSIS ya no invierte con criterios negativos; el veto se aplica antes de rankear; ruina «no aplicable» en vez de 0 medido; `seed` en `MonteCarloEngine` (cada `run()` parte de ella y queda en la traza); Minimax Regret por percentiles; bootstrap ordena (a,b,c); `weight_shock_worst`; NaN/Inf y fallos de muestreo lanzan; Borda promedia lo no rankeado; PROMETHEE crisp normalizado; `winner_agreement` en el resultado. 15 tests nuevos, todos con control negativo #core
 
 - [x] 💨 **Humo de los 37 análisis** (2026-10-02): `uv run pytest -m smoke`, paso propio en CI. Lee la traza del motor (`DM_MC_TRACE`): cada análisis tiene que haberlo corrido, puntuado al menos una opción y distinguido entre ellas. Su primera versión miraba los JSON de reporte y el control negativo la dejó en verde; la segunda falla exactamente en los cinco análisis rotos #qa
 
@@ -85,7 +90,7 @@ Sin tarjetas.
 - [x] 🔗 **Validación de Enlaces de Grafo**: 587 enlaces vivos, 578 resueltos y 9 rotos documentados como preexistentes, sin ninguno nuevo (medido 2026-10-01), mediante `scripts/check_docs_links.py` #qa
 - [x] 🌐 **Validación de Consistencia Lingüística**: 0 intrusos léxicos y 0 alfabetos foráneos pegados, verificado mediante `scripts/check_obsidian_language.py` #qa
 - [x] 🎯 **Validación de Fidelidad de Código**: 54 notas, 25 módulos, 45 clases, 25 imports, 25 propietarios y 219 literales `.py` verificados (medido 2026-10-01) con AST mediante `scripts/check_obsidian_fidelity.py` #qa
-- [x] ⚡ **Suite de Pruebas Unitarias**: validación de 554 tests pasando con `uv run pytest`, más el humo de todos los análisis con `uv run pytest -m smoke` #qa
+- [x] ⚡ **Suite de Pruebas Unitarias**: validación de 569 tests pasando con `uv run pytest`, más el humo de todos los análisis con `uv run pytest -m smoke` #qa
 - [x] 🏗️ **Unificación del Vault**: raíz de Obsidian consolidada en `docs/`, con la configuración del vault bajo control de versiones y el plugin `obsidian-kanban` #vault
 - [x] 🏷️ **Normalización de Nombres**: convención uniforme `lowercase-with-hyphens` y 100% de aliases resueltos #naming
 - [x] 🚀 **19 Motores Ruteables** (fuente: `ENGINE_UNIVERSE` en `core/adaptive_router.py`): implementación de Monte Carlo, Fuzzy TOPSIS, PROMETHEE, Barbell/Antifragile, Bayesian, etc. #core

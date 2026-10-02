@@ -56,9 +56,51 @@ class TestDecisionGate:
         ruin = {"B": 0.5}
         result = DecisionGate.apply(mc, [], ergodicity_data=ergodicity, ruin_probabilities=ruin, signal_to_noise=5.0)
         assert "A" in result.options_approved
-        assert "B" in result.options_vetoed
+        # Exactly once: the ruin branch and the final bookkeeping both appended it (2026-10-02 review).
+        assert result.options_vetoed == ["B"]
+        assert result.veto_count == 1
 
     def test_summary(self):
         mc = {"A": self._make_stats("A", 10.0, 1.0)}
         result = DecisionGate.apply(mc, [], signal_to_noise=5.0)
         assert "approved" in result.summary().lower()
+
+    def test_ruin_gate_not_applicable_on_normalized_scores(self):
+        """When scores are normalized in [0, 1], ruin gate must report 'not applicable', not a measured 0."""
+        mc = {
+            "A": self._make_stats("A", 0.8, 0.05),
+            "B": self._make_stats("B", 0.5, 0.05),
+        }
+        ruin = {"A": 0.0, "B": 0.0}
+        result = DecisionGate.apply(mc, [], ruin_probabilities=ruin, signal_to_noise=5.0)
+        ruin_verdicts = [v for v in result.gate_verdicts if v.gate_name == "ruin"]
+        assert len(ruin_verdicts) == 2
+        for v in ruin_verdicts:
+            assert v.passed is True
+            assert v.value is None
+            assert "not applicable" in v.reasoning.lower()
+
+    def test_ruin_gate_vetoes_unnormalized_negative_option(self):
+        """With normalize=False and an option with majority negative scores, ruin gate vetoes."""
+        import numpy as np
+        opt_b_stats = Statistics(
+            option_name="B", mean_score=-5.0, std_dev=2.0,
+            min_score=-10.0, max_score=-1.0,
+            percentile_5=-8.5, percentile_95=-1.5,
+            success_rate=0.1, factor_stats={}, var_95=-8.5, cvar_95=-9.0,
+            raw_scores=np.array([-5.0, -6.0, -4.0, -7.0, -1.0]),
+        )
+        mc = {
+            "A": self._make_stats("A", 10.0, 1.0),
+            "B": opt_b_stats,
+        }
+        ruin = {"A": 0.0, "B": 0.8}
+        result = DecisionGate.apply(
+            mc, [],
+            ruin_probabilities=ruin,
+            signal_to_noise=5.0,
+        )
+        assert "A" in result.options_approved
+        # Exactly once: the ruin branch and the final bookkeeping both appended it (2026-10-02 review).
+        assert result.options_vetoed == ["B"]
+        assert result.veto_count == 1

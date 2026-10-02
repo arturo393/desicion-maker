@@ -281,6 +281,38 @@ class UnifiedDecisionFramework:
 
         causal_dag = self.causal_dag.build(self.mc_engine.factors, [o.name for o in self.mc_engine.options])
 
+        ergodicity = self.ergodicity_engine.analyze(mc_results, self.mc_engine.factors)
+        ruin_probabilities = {
+            name: opt_data.get("ruin_probability")
+            for name, opt_data in ergodicity.get("options", {}).items()
+        }
+
+        gate_result = self.decision_gates.apply(
+            mc_results=mc_results,
+            factors=self.mc_engine.factors,
+            ergodicity_data=ergodicity,
+            ruin_probabilities=ruin_probabilities,
+            signal_to_noise=threshold.signal_to_noise,
+        )
+
+        if gate_result.pipeline_halted:
+            logger.warning(f"PIPELINE HALTED by gates: {gate_result.halt_reason}")
+            return {
+                "pipeline_halted": True,
+                "gate_result": DecisionGate.to_dict(gate_result),
+                "threshold": MinimumActionThreshold.to_dict(threshold),
+                "causal_dag": causal_dag,
+                "mc_results": mc_results,
+                "factors": self.mc_engine.factors,
+            }
+
+        # Filter vetoed options BEFORE computing subsequent rankings (TOPSIS, PROMETHEE,
+        # Borda, narrative, etc.) so that vetoed options are not ranked or recommended.
+        if gate_result.options_vetoed:
+            for vetoed in gate_result.options_vetoed:
+                mc_results.pop(vetoed, None)
+            logger.info(f"Options vetoed by gates: {gate_result.options_vetoed}")
+
         _check_scale_mismatch(self.mc_engine.factors, mc_results)
 
         data_fuzzy, weights, max_bools, factor_names = self._build_analysis_inputs(mc_results)
@@ -354,45 +386,29 @@ class UnifiedDecisionFramework:
         )
 
         antifragile = self.antifragile_engine.analyze(mc_results, self.mc_engine.factors)
-
-        ergodicity = self.ergodicity_engine.analyze(mc_results, self.mc_engine.factors)
         kelly = self.kelly_engine.analyze(mc_results, self.mc_engine.factors)
-
-        ruin_probabilities = {
-            name: opt_data.get("ruin_probability", 0.0)
-            for name, opt_data in ergodicity.get("options", {}).items()
-        }
-
-        gate_result = self.decision_gates.apply(
-            mc_results=mc_results,
-            factors=self.mc_engine.factors,
-            ergodicity_data=ergodicity,
-            ruin_probabilities=ruin_probabilities,
-            signal_to_noise=threshold.signal_to_noise,
-        )
-
-        if gate_result.pipeline_halted:
-            logger.warning(f"PIPELINE HALTED by gates: {gate_result.halt_reason}")
-            return {
-                "pipeline_halted": True,
-                "gate_result": DecisionGate.to_dict(gate_result),
-                "threshold": MinimumActionThreshold.to_dict(threshold),
-                "causal_dag": causal_dag,
-                "mc_results": mc_results,
-                "factors": self.mc_engine.factors,
-            }
-
-        if gate_result.options_vetoed:
-            for vetoed in gate_result.options_vetoed:
-                mc_results.pop(vetoed, None)
-            logger.info(f"Options vetoed by gates: {gate_result.options_vetoed}")
 
         approved_winner = (
             max(mc_results.items(), key=lambda x: x[1].mean_score)[0]
             if mc_results else None
         )
 
+        # Winner agreement: checks whether topsis, promethee, and borda agree with the MC mean winner.
+        # Engines not calculated in this run are omitted.
+        winner_agreement: dict[str, bool] = {}
+        if approved_winner:
+            if not topsis_scores.empty:
+                winner_agreement["topsis"] = bool(topsis_scores.index[0] == approved_winner)
+            prom_ranks = future_metrics.get("promethee_uncertainty")
+            if isinstance(prom_ranks, pd.Series) and not prom_ranks.empty:
+                winner_agreement["promethee"] = bool(prom_ranks.index[0] == approved_winner)
+            borda_dict = future_metrics.get("rank_aggregation")
+            if isinstance(borda_dict, dict) and borda_dict.get("winner") is not None:
+                winner_agreement["borda"] = bool(borda_dict["winner"] == approved_winner)
+
+
         commitment = None
+
         if approved_winner and threshold.should_decide:
             commitment = self.decision_commitment.create(
                 chosen_option=approved_winner,
@@ -468,7 +484,9 @@ class UnifiedDecisionFramework:
             },
             "action_threshold": MinimumActionThreshold.to_dict(threshold),
             "gate_result": DecisionGate.to_dict(gate_result),
+            "winner_agreement": winner_agreement,
             "causal_dag": causal_dag,
+
             "commitment": None if commitment is None else {
                 "decision_id": commitment.decision_id,
                 "chosen_option": commitment.chosen_option,
@@ -500,8 +518,9 @@ class UnifiedDecisionFramework:
 
         return {
             "confidence_weighted_winner": confidence_weighted_winner(mc_results),
-            "ranking_confidence": ranking_confidence(mc_results),
+            "ranking_confidence": ranking_confidence(mc_results, seed=self.mc_engine.seed),
         }
+
 
     def _analyze_challenges(
         self,
@@ -590,8 +609,11 @@ class UnifiedDecisionFramework:
         for name, stats in mc_results.items():
             data_crisp[name] = {f_name: stats.factor_stats[f_name]["mean"] for f_name in stats.factor_stats}
         df_crisp = pd.DataFrame.from_dict(data_crisp, orient="index")
+        if not df_crisp.empty:
+            df_crisp = _normalize_dataframe(df_crisp)
 
         promethee_scores = self.promethee_engine.analyze(
+
             df_crisp,
             PrometheeConfig(
                 weights=weights,

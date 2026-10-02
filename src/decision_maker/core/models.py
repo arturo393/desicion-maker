@@ -43,40 +43,66 @@ VALIDATION_RULES = {
     DistributionType.POISSON: (1, ("rate",)),
 }
 
-def _sample_deterministic(params: list[float], size: int) -> np.ndarray:
+def _sample_deterministic(params: list[float], size: int, rng: np.random.Generator | None = None) -> np.ndarray:
     return np.full(size, params[0])
 
-def _sample_normal(params: list[float], size: int) -> np.ndarray:
-    return np.random.normal(params[0], max(params[1], EPSILON), size)
+def _sample_normal(params: list[float], size: int, rng: np.random.Generator | None = None) -> np.ndarray:
+    std = max(params[1], EPSILON)
+    if rng is not None:
+        return rng.normal(params[0], std, size)
+    return np.random.normal(params[0], std, size)
 
-def _sample_uniform(params: list[float], size: int) -> np.ndarray:
+def _sample_uniform(params: list[float], size: int, rng: np.random.Generator | None = None) -> np.ndarray:
     low, high = min(params[0], params[1]), max(params[0], params[1])
+    if rng is not None:
+        return rng.uniform(low, high, size)
     return np.random.uniform(low, high, size)
 
-def _sample_triangular(params: list[float], size: int) -> np.ndarray:
+def _sample_triangular(params: list[float], size: int, rng: np.random.Generator | None = None) -> np.ndarray:
     left, mode, right = params[0], params[1], params[2]
     if not (left <= mode <= right):
         left, right = min(left, right), max(left, right)
         mode = np.clip(mode, left, right)
+    if rng is not None:
+        return rng.triangular(left, mode, right, size)
     return np.random.triangular(left, mode, right, size)
 
-def _sample_bernoulli(params: list[float], size: int) -> np.ndarray:
-    return np.random.binomial(1, np.clip(params[0], 0.0, 1.0), size).astype(float)
+def _sample_bernoulli(params: list[float], size: int, rng: np.random.Generator | None = None) -> np.ndarray:
+    p = np.clip(params[0], 0.0, 1.0)
+    if rng is not None:
+        return rng.binomial(1, p, size).astype(float)
+    return np.random.binomial(1, p, size).astype(float)
 
-def _sample_exponential(params: list[float], size: int) -> np.ndarray:
-    return np.random.exponential(max(params[0], EPSILON), size)
+def _sample_exponential(params: list[float], size: int, rng: np.random.Generator | None = None) -> np.ndarray:
+    scale = max(params[0], EPSILON)
+    if rng is not None:
+        return rng.exponential(scale, size)
+    return np.random.exponential(scale, size)
 
-def _sample_beta(params: list[float], size: int) -> np.ndarray:
-    return np.random.beta(max(params[0], EPSILON), max(params[1], EPSILON), size)
+def _sample_beta(params: list[float], size: int, rng: np.random.Generator | None = None) -> np.ndarray:
+    a, b = max(params[0], EPSILON), max(params[1], EPSILON)
+    if rng is not None:
+        return rng.beta(a, b, size)
+    return np.random.beta(a, b, size)
 
-def _sample_lognormal(params: list[float], size: int) -> np.ndarray:
-    return np.random.lognormal(params[0], max(params[1], EPSILON), size)
+def _sample_lognormal(params: list[float], size: int, rng: np.random.Generator | None = None) -> np.ndarray:
+    sigma = max(params[1], EPSILON)
+    if rng is not None:
+        return rng.lognormal(params[0], sigma, size)
+    return np.random.lognormal(params[0], sigma, size)
 
-def _sample_gamma(params: list[float], size: int) -> np.ndarray:
-    return np.random.gamma(max(params[0], EPSILON), max(params[1], EPSILON), size)
+def _sample_gamma(params: list[float], size: int, rng: np.random.Generator | None = None) -> np.ndarray:
+    shape, scale = max(params[0], EPSILON), max(params[1], EPSILON)
+    if rng is not None:
+        return rng.gamma(shape, scale, size)
+    return np.random.gamma(shape, scale, size)
 
-def _sample_poisson(params: list[float], size: int) -> np.ndarray:
-    return np.random.poisson(max(params[0], 0.0), size).astype(float)
+def _sample_poisson(params: list[float], size: int, rng: np.random.Generator | None = None) -> np.ndarray:
+    lam = max(params[0], 0.0)
+    if rng is not None:
+        return rng.poisson(lam, size).astype(float)
+    return np.random.poisson(lam, size).astype(float)
+
 
 
 SAMPLE_DISPATCH: dict[DistributionType, Callable] = {
@@ -119,43 +145,31 @@ class UncertainVariable(BaseModel):
 
         return self
 
-    def sample(self, size: int = 1) -> np.ndarray:
-        # Defaults fallback logic
-        defaults_map = {
-            DistributionType.DETERMINISTIC: [0.0],
-            DistributionType.NORMAL: [0.0, 1.0],
-            DistributionType.UNIFORM: [0.0, 1.0],
-            DistributionType.TRIANGULAR: [0.0, 1.0, 2.0],
-            DistributionType.BERNOULLI: [0.5],
-            DistributionType.EXPONENTIAL: [1.0],
-            DistributionType.BETA: [1.0, 1.0],
-            DistributionType.LOGNORMAL: [0.0, 1.0],
-            DistributionType.GAMMA: [1.0, 1.0],
-            DistributionType.POISSON: [1.0],
-        }
-        defaults = defaults_map.get(self.dist_type, [0.0])
+    def sample(self, size: int = 1, rng: np.random.Generator | None = None) -> np.ndarray:
+        if size == 0:
+            return np.array([])
 
-        sanitized = []
-        for i in range(len(defaults)):
-            if i < len(self.params) and not (math.isnan(self.params[i]) or math.isinf(self.params[i])):
-                sanitized.append(self.params[i])
-            else:
-                sanitized.append(defaults[i])
+        # Reject NaN or Inf parameters explicitly instead of silently falling back to defaults.
+        for i, val in enumerate(self.params):
+            if math.isnan(val) or math.isinf(val):
+                raise ValueError(
+                    f"Parameter {i} for variable '{self.name}' ({self.dist_type.value}) is invalid ({val}). "
+                    f"Parameters cannot be NaN or Inf."
+                )
 
         sampler = SAMPLE_DISPATCH.get(self.dist_type)
         if sampler is None:
-            logger.warning(
-                f"Unknown distribution type '{self.dist_type}' for variable '{self.name}' — sampling zeros"
+            raise ValueError(
+                f"Unknown distribution type '{self.dist_type}' for variable '{self.name}'"
             )
-            return np.zeros(size)
         try:
-            return sampler(sanitized, size)
+            return sampler(self.params, size, rng=rng)
         except (ValueError, TypeError) as e:
-            logger.warning(
+            raise ValueError(
                 f"Sampling failed for variable '{self.name}' "
-                f"({self.dist_type}, params={sanitized}): {e} — sampling zeros"
-            )
-            return np.zeros(size)
+                f"({self.dist_type.value}, params={self.params}): {e}"
+            ) from e
+
 
 
 class Factor(BaseModel):

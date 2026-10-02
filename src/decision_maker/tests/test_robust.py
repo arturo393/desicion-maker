@@ -56,3 +56,21 @@ class TestRobustOptimizer:
         assert result["winner"] is not None
         scores = list(result["dro_scores"].values())
         assert scores[0] == scores[1]
+
+    def test_weight_shock_worst_saved(self):
+        """Worst score under weight shocks must be saved in results['weight_shock_worst']."""
+        results = {
+            "A": Statistics(
+                "A", 100, 10, 80, 120, 85, 115, 0.9, {"Cost": {"mean": 50}, "Quality": {"mean": 80}}, 85, 80
+            ),
+            "B": Statistics(
+                "B", 120, 15, 70, 160, 80, 150, 0.85, {"Cost": {"mean": 30}, "Quality": {"mean": 95}}, 80, 75
+            ),
+        }
+        factors = [Factor("Cost", 0.5, maximize=False), Factor("Quality", 0.5, maximize=True)]
+        result = RobustOptimizer().analyze(results, factors, weight_shock=0.2)
+        assert "weight_shock_worst" in result
+        assert "A" in result["weight_shock_worst"]
+        assert "B" in result["weight_shock_worst"]
+        assert isinstance(result["weight_shock_worst"]["A"], float)
+        assert result["weight_shock_worst"]["A"] <= results["A"].mean_score

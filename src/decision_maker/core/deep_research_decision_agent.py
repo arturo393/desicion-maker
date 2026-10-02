@@ -157,8 +157,12 @@ class DecisionAnalysisEngine:
             max_score = max(s.mean_score for s in mc_results.values())
             regret_values = {n: max_score - s.mean_score for n, s in mc_results.items()}
 
+        mc_winner = max(mc_results.items(), key=lambda x: x[1].mean_score)[0] if mc_results else ""
+
         results = {}
         for name, stats in mc_results.items():
+            raw_robustness = robustness * (1.0 - stats.std_dev / (abs(stats.mean_score) + 1e-9))
+            clamped_robustness = float(np.clip(raw_robustness, 0.0, 1.0))
             results[name] = AnalysisResult(
                 option_name=name,
                 overall_score=stats.mean_score * OVERALL_SCALE,
@@ -167,16 +171,9 @@ class DecisionAnalysisEngine:
                 pareto_optimal=name in efficient,
                 regret_analysis=regret_values.get(name, 0.0),
                 risk_score=stats.std_dev,
-                scenario_robustness=robustness * (1.0 - stats.std_dev / (abs(stats.mean_score) + 1e-9)),
+                scenario_robustness=clamped_robustness,
                 confidence=stats.success_rate,
-                recommendation="Recommended"
-                if name
-                == (
-                    topsis.index[0]
-                    if topsis is not None and hasattr(topsis, "empty") and not topsis.empty
-                    else (max(mc_results.items(), key=lambda x: x[1].mean_score)[0] if mc_results else "")
-                )
-                else "",
+                recommendation="Recommended" if name == mc_winner else "",
             )
         return results
 

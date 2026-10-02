@@ -279,12 +279,13 @@ def main():
         print(f"   🎯 Éxito: {option.probability_success*100:.0f}%")
         print(f"   ⏱️  Timeline: {option.timeline_months} {'mes' if option.timeline_months == 1 else 'meses'}")
 
+        # Posición relativa entre las opciones comparadas (normalización min-max de la corrida)
         if result.overall_score >= 5.0:
-            print("   ✅ RECOMENDADO")
+            print("   ✅ Posición relativa favorable entre las opciones comparadas (score ≥5.0)")
         elif result.overall_score >= 3.5:
-            print("   ⚠️  VIABLE")
+            print("   ⚠️  Posición relativa moderada entre las opciones comparadas")
         else:
-            print(f"   ❌ {result.recommendation}")
+            print(f"   ❌ Posición relativa desfavorable entre las opciones comparadas ({result.recommendation or 'no recomendado'})")
         print()
 
     # Análisis del ganador

@@ -60,11 +60,13 @@ class BootstrapRanking:
                 for f in factor_names:
                     a, b_val, c = decision_matrix_fuzzy[opt][f]
                     noise = np.random.normal(0, (c - a) * BOOTSTRAP_NOISE_SCALE, 3)
-                    boot_data[opt][f] = (
-                        a + noise[0],
-                        b_val + noise[1],
-                        c + noise[2],
-                    )
+                    # Triangular fuzzy numbers require a <= b <= c; sort perturbed values
+                    perturbed = sorted([
+                        float(a + noise[0]),
+                        float(b_val + noise[1]),
+                        float(c + noise[2]),
+                    ])
+                    boot_data[opt][f] = (perturbed[0], perturbed[1], perturbed[2])
             scores = engine.analyze(boot_data, weights, maximize)
             for rank_pos, opt in enumerate(scores.index):
                 opt_idx = opt_names.index(opt)

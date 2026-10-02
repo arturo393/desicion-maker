@@ -81,6 +81,35 @@ class TestDecisionAnalysisEngine:
         )
         assert scores["B"] > scores["A"]
 
+    def test_scenario_robustness_clamped_and_recommendation_matches_mc(self, monkeypatch):
+        """Scenario robustness must be in [0, 1] and recommendation must follow overall_score (MC), not TOPSIS."""
+        import pandas as pd
+
+        from decision_maker.core.models import Statistics
+
+        engine = DecisionAnalysisEngine()
+        mock_result = {
+            "mc_results": {
+                "A": Statistics("A", 0.9, 0.05, 0.8, 1.0, 0.85, 0.95, 0.95, {}, 0.85, 0.8),
+                "B": Statistics("B", 0.1, 2.0, -1.0, 1.0, 0.0, 0.5, 0.5, {}, 0.0, -0.5),
+            },
+            "topsis_scores": pd.Series({"B": 0.99, "A": 0.01}),
+            "pareto": {},
+            "sensitivity": {"robustness_score": 1.0},
+        }
+
+        async def mock_run_analysis(**kwargs):
+            return mock_result
+
+        monkeypatch.setattr(engine.framework, "run_analysis", mock_run_analysis)
+        results = engine._run_full_analysis()
+
+        # Check clamping to [0, 1]
+        assert 0.0 <= results["B"].scenario_robustness <= 1.0
+        # Check recommendation matches overall_score (A) rather than TOPSIS (B)
+        assert results["A"].recommendation == "Recommended"
+        assert results["B"].recommendation == ""
+
 
 class TestGeminiDeepResearchAgent:
     def test_wrapper_delegates_and_availability(self):

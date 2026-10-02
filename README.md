@@ -75,7 +75,8 @@ Module index, not an engine count: 19 are routable (`ENGINE_UNIVERSE` in `src/de
 | Ergodicity | Time-average vs ensemble growth, ruin probability, Kelly criterion |
 | Learning System | Outcome tracking, confidence calibration, decision journal, adaptive routing |
 | Meta-Learning | Action threshold, reasoning trace, unknown scanner, meta-calibration |
-| Decision Gates | Veto power: ergodicity, ruin, causal DAG, commitment |
+| Decision Gates | Veto power: ruin, action threshold (ergodicity is informational) |
+
 
 ## Modes
 

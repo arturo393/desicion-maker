@@ -13,7 +13,7 @@ updated: 2026-10-01
 
 # Architecture
 
-Dual Python + Rust framework for multi-criteria decision analysis under uncertainty. 19 motores ruteables, 554 tests (plus a smoke suite that runs every analysis: `uv run pytest -m smoke`). The Monte Carlo engine runs in Python/NumPy; the `rust_core/` crate implements the same normalization but is not on the execution path (see [[adr/001-use-rust-for-math-engine]]).
+Dual Python + Rust framework for multi-criteria decision analysis under uncertainty. 19 motores ruteables, 569 tests (plus a smoke suite that runs every analysis: `uv run pytest -m smoke`). The Monte Carlo engine runs in Python/NumPy; the `rust_core/` crate implements the same normalization but is not on the execution path (see [[adr/001-use-rust-for-math-engine]]).
 
 ## Building Blocks
 
@@ -65,7 +65,7 @@ results = await fw.run_analysis(mode="standard")
 This table is a **module index**, not an engine count. Of the rows above, 19 are engines the router dispatches to and their names come from `ENGINE_UNIVERSE` in `core/adaptive_router.py`; the rest are analysis, presentation or infrastructure modules the router never calls (Visualization, Topology, Registry, What-If, the Rust core). Two rows are the same engine as another: `PROMETHEE (uncertainty)` and `PROMETHEE II (crisp)` are both `PROMETHEE`. `Genetic` is in the universe and in no recommended route — see docs/kanban.md.
 | Learning System | `outcome_tracker.py`, `calibration.py`, `decision_journal.py`, `adaptive_router.py` | Outcome tracking, confidence calibration, journal, adaptive routing | library |
 | Meta-Learning | `action_threshold.py`, `reasoning_trace.py`, `unknown_scanner.py`, `meta_calibration.py` | Action threshold, reasoning trace, unknown scanner, meta-calibration | library |
-| Decision Gates | `decision_gates.py` | Veto power: ergodicity, ruin, causal DAG, commitment | library |
+| Decision Gates | `decision_gates.py` | Veto power: ruin, action threshold (ergodicity is informational) | library |
 | AHP | `ahp.py` | Pairwise weight calibration | library |
 | Config Runner | `config_runner.py` | YAML-based decision config | library |
 
@@ -83,9 +83,10 @@ This table is a **module index**, not an engine count. Of the rows above, 19 are
 run_analysis(mode)
   |
   +-- MonteCarloEngine.run()             # simulate N scenarios
+  +-- DecisionGate.apply()               # filter vetoed options before ranking
   +-- _check_scale_mismatch()            # warn if scales differ >10x
   |
-  +-- TOPSISEngine.analyze(fuzzy)        # rank by distance to ideal
+  +-- TOPSISEngine.analyze(fuzzy)        # rank approved options by distance to ideal
   +-- ParetoEngine.analyze()             # find efficient frontier
   |
   +-- if standard+:
@@ -96,12 +97,20 @@ run_analysis(mode)
   |    +-- RankAggregator.aggregate()          # Borda of TOPSIS+MC+PROMETHEE
   |
   +-- if advanced:
-       +-- PROMETHEE (crisp data)
+       +-- PROMETHEE (crisp normalized data)
        +-- BayesianEngine.analyze()
        +-- GeneticOptimizer.evolve_ideal()
        +-- BootstrapRanking.confidence_intervals()
        +-- RankAggregator.aggregate()       # Borda of all 4 methods
 ```
+
+### Winner Selection and Agreement
+The approved winner (`approved_winner`) is selected solely by the Monte Carlo mean score among non-vetoed options (`max(mc_results, key=lambda x: x[1].mean_score)`). To provide transparency when multi-criteria engines suggest differing trade-offs, the result includes a `"winner_agreement"` dictionary:
+- `"topsis"`: whether the TOPSIS leader coincides with the approved winner.
+- `"promethee"`: whether the PROMETHEE uncertainty leader coincides with the approved winner.
+- `"borda"`: whether the Borda rank aggregation leader coincides with the approved winner.
+Engines that were not calculated in the chosen execution mode are omitted from the dictionary.
+
 
 Standalone engines (Antifragile, Group Decision, Information Theory, Portfolio, What-If, Weight Derivation, Explainability, Topology, Visualization, Registry) can be invoked independently or composed via the orchestrator ([[unified-orchestrator]]). Cards exist for Antifragile ([[antifragile-engine]]), Portfolio ([[portfolio-optimizer]]), Topology ([[topological-data-analysis]]) and Registry ([[reporting-and-registry]]); the rest are described only by the table above.
 
@@ -146,7 +155,7 @@ Statistics (per option after MC)
 
 ## Test Coverage
 
-554 tests across all engines, plus the smoke suite (`-m smoke`, one per analysis). Run with:
+569 tests across all engines, plus the smoke suite (`-m smoke`, one per analysis). Run with:
 
 ```bash
 uv run pytest src/decision_maker/tests/ -v

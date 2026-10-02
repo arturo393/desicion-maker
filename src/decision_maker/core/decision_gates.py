@@ -27,7 +27,7 @@ class GateVerdict:
     gate_name: str
     option_name: str
     passed: bool
-    value: float
+    value: float | None
     threshold: float
     reasoning: str
 
@@ -59,21 +59,20 @@ class DecisionGate:
     """
     Kill-switches that make the framework say NO with authority.
 
-    Three gates, applied in order:
-    1. ERGODICITY: If the option is non-ergodic, it's a Russian roulette bet.
-       No amount of positive expected value justifies a non-ergodic bet.
-       (Peters: temporal growth rate < 0 → reject)
+    Three gates, evaluated in order:
+    1. ERGODICITY: Evaluates temporal log-growth vs ensemble average (Peters).
+       Informational only on additive decision scores — does NOT veto because
+       negative log-growth on normalized scores is dominated by scaling artifacts.
 
-    2. RUIN: If the ruin probability exceeds the threshold, the option
-       has an absorbing barrier. No recovery is possible.
-       (Taleb: survival > profit)
+    2. RUIN: If ruin probability exceeds threshold, the option has an absorbing
+       barrier (Taleb: survival > profit). Vetoes option when evaluated on unnormalized
+       scores (normalize=False); reports not applicable on normalized [0,1] scores.
 
-    3. ACTION THRESHOLD: If signal-to-noise is too low, the options are
-       indistinguishable from noise. Deciding is guessing.
-       (Jaynes: if you can't distinguish, don't pretend you can)
+    3. ACTION THRESHOLD: If signal-to-noise is too low, options are indistinguishable
+       from noise (Jaynes: if you can't distinguish, don't pretend you can). Halts pipeline.
 
-    If ANY gate vetoes an option, that option is eliminated from the pipeline.
-    If the action threshold halts the pipeline, NO options are recommended.
+    If Ruin vetoes an option, that option is eliminated from the pipeline.
+    If Action Threshold halts the pipeline, NO options are recommended.
     """
 
     RUIN_PROBABILITY_THRESHOLD = 0.10
@@ -85,7 +84,7 @@ class DecisionGate:
         mc_results: dict[str, Statistics],
         factors: list[Factor],
         ergodicity_data: dict[str, Any] | None = None,
-        ruin_probabilities: dict[str, float] | None = None,
+        ruin_probabilities: dict[str, float | None] | None = None,
         signal_to_noise: float | None = None,
     ) -> GateResult:
         result = GateResult(total_options=len(mc_results))
@@ -145,7 +144,23 @@ class DecisionGate:
                         reasoning=f"Ergodic: log-growth={log_growth:.4f} ≥ 0",
                     ))
 
-            if ruin_probabilities and name in ruin_probabilities:
+            # Ruin gate check:
+            # On normalized [0,1] scores, RUIN_THRESHOLD=0.0 cannot trigger (ruin_p is None).
+            # If ruin_probabilities provides a float (unnormalized scores), evaluate threshold.
+            is_option_normalized = (stats.min_score >= -EPSILON and stats.max_score <= 1.0 + EPSILON)
+            if is_option_normalized or (ruin_probabilities and ruin_probabilities.get(name) is None):
+                result.gate_verdicts.append(GateVerdict(
+                    gate_name="ruin",
+                    option_name=name,
+                    passed=True,
+                    value=None,
+                    threshold=DecisionGate.RUIN_PROBABILITY_THRESHOLD,
+                    reasoning=(
+                        "Ruin gate not applicable: every score lies in [0, 1] (normalized), "
+                        "so none can fall below RUIN_THRESHOLD=0.0."
+                    ),
+                ))
+            elif ruin_probabilities and name in ruin_probabilities:
                 ruin_p = ruin_probabilities[name]
                 if ruin_p > DecisionGate.RUIN_PROBABILITY_THRESHOLD:
                     result.gate_verdicts.append(GateVerdict(

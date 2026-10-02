@@ -16,6 +16,9 @@ import pandas as pd
 logger = logging.getLogger(__name__)
 
 
+DEFAULT_NORMALIZATION_DIVISOR: float = 1.0
+
+
 class TOPSISEngine:
     def analyze(
         self,
@@ -26,19 +29,23 @@ class TOPSISEngine:
         if not decision_matrix_fuzzy:
             return pd.Series()
 
-        if len(decision_matrix_fuzzy) == 1:
-            opt_name = next(iter(decision_matrix_fuzzy))
-            return pd.Series({opt_name: 1.0})
-
         first_opt_factors = list(decision_matrix_fuzzy.values())[0]
         factor_names = list(first_opt_factors.keys())
 
+        # Weights and maximize flags must match factor dimensionality exactly.
+        # Truncating or ignoring length mismatches masks caller configuration bugs.
         if len(weights) != len(factor_names):
-            logger.warning(f"Weights count ({len(weights)}) != factor count ({len(factor_names)}). Truncating.")
-            weights = weights[: len(factor_names)]
+            raise ValueError(
+                f"Weights count ({len(weights)}) does not match factor count ({len(factor_names)})."
+            )
         if len(maximize) != len(factor_names):
-            logger.warning(f"Maximize count ({len(maximize)}) != factor count ({len(factor_names)}). Truncating.")
-            maximize = maximize[: len(factor_names)]
+            raise ValueError(
+                f"Maximize count ({len(maximize)}) does not match factor count ({len(factor_names)})."
+            )
+
+        if len(decision_matrix_fuzzy) == 1:
+            opt_name = next(iter(decision_matrix_fuzzy))
+            return pd.Series({opt_name: 1.0})
 
         norm_matrix: dict[str, dict[str, tuple[float, float, float]]] = {}
         for factor_idx, factor in enumerate(factor_names):
@@ -46,6 +53,7 @@ class TOPSISEngine:
 
             max_c = max(decision_matrix_fuzzy[opt][factor][2] for opt in decision_matrix_fuzzy)
             min_a = min(decision_matrix_fuzzy[opt][factor][0] for opt in decision_matrix_fuzzy)
+            divisor = (max_c - min_a) if max_c != min_a else DEFAULT_NORMALIZATION_DIVISOR
 
             for opt in decision_matrix_fuzzy:
                 if opt not in norm_matrix:
@@ -53,15 +61,22 @@ class TOPSISEngine:
                 a, b, c = decision_matrix_fuzzy[opt][factor]
 
                 if is_max:
-                    div = max_c if max_c != 0 else 1.0
-                    norm_matrix[opt][factor] = (a / div, b / div, c / div)
+                    # Linear min-max normalization for benefit criteria: (x - min_a) / (max_c - min_a).
+                    # Consistent with cost criteria and invariant to translation, preventing rank inversion
+                    # when all factor values are negative.
+                    norm_matrix[opt][factor] = (
+                        (a - min_a) / divisor,
+                        (b - min_a) / divisor,
+                        (c - min_a) / divisor,
+                    )
                 else:
-                    divisor = max_c - min_a if max_c != min_a else 1.0
+                    # Linear min-max normalization for cost criteria: (max_c - x) / (max_c - min_a).
                     norm_matrix[opt][factor] = (
                         (max_c - c) / divisor,
                         (max_c - b) / divisor,
                         (max_c - a) / divisor,
                     )
+
 
         weighted_matrix: dict[str, dict[str, tuple[float, float, float]]] = {}
         for opt in norm_matrix:

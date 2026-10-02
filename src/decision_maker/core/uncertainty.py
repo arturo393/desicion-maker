@@ -54,7 +54,14 @@ def confidence_weighted_winner(mc_results: dict[str, Statistics]) -> dict:
     }
 
 
-def ranking_confidence(mc_results: dict[str, Statistics], n_resamples: int = 1000, seed: int = 42) -> dict:
+DEFAULT_RANKING_CONFIDENCE_SEED: int = 42
+
+
+def ranking_confidence(
+    mc_results: dict[str, Statistics],
+    n_resamples: int = 1000,
+    seed: int | None = None,
+) -> dict:
     """
     Bootstrap-style confidence intervals for the ranking of each option.
 
@@ -66,7 +73,9 @@ def ranking_confidence(mc_results: dict[str, Statistics], n_resamples: int = 100
     if not mc_results:
         return {}
 
-    rng = np.random.default_rng(seed)
+    actual_seed = seed if seed is not None else DEFAULT_RANKING_CONFIDENCE_SEED
+    rng = np.random.default_rng(actual_seed)
+
     names = list(mc_results.keys())
     n_opts = len(names)
 

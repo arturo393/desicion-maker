@@ -11,6 +11,7 @@ __all__ = ["MonteCarloEngine"]
 import json
 import logging
 import os
+from typing import Any
 
 import numpy as np
 
@@ -23,7 +24,12 @@ EPSILON_SCORE = 1e-12
 
 
 class MonteCarloEngine:
-    def __init__(self, num_simulations: int = 10000, correlation_matrix: np.ndarray | None = None):
+    def __init__(
+        self,
+        num_simulations: int = 10000,
+        correlation_matrix: np.ndarray | None = None,
+        seed: int | None = None,
+    ):
         if num_simulations < 1:
             raise ValueError(f"num_simulations must be >= 1, got {num_simulations}")
         self.num_simulations = num_simulations
@@ -31,6 +37,9 @@ class MonteCarloEngine:
         self.options: list[DecisionOption] = []
         self._option_names: set = set()
         self.correlation_matrix = correlation_matrix
+        # Every run() starts from this seed, so any run is reproducible from the seed in its trace.
+        # A generator kept on the instance would make the second run depend on the first.
+        self.seed: int = seed if seed is not None else int(np.random.SeedSequence().entropy)
 
     def add_factor(self, factor: Factor) -> None:
         self.factors.append(factor)
@@ -120,11 +129,12 @@ class MonteCarloEngine:
 
         logger.info(f"Running {self.num_simulations} Monte Carlo simulations in Python...")
 
+        rng = np.random.default_rng(self.seed)
         sampled_data = {}
         for opt in self.options:
             opt_data = {}
             for v_name, var in opt.variables.items():
-                opt_data[v_name] = var.sample(self.num_simulations)
+                opt_data[v_name] = var.sample(self.num_simulations, rng=rng)
             sampled_data[opt.name] = opt_data
 
         sampled_data = self._apply_correlation(sampled_data)
@@ -224,11 +234,11 @@ class MonteCarloEngine:
                 raw_factor_data=opt_data,
             )
 
-        _trace(results)
+        _trace(results, seed=self.seed)
         return results
 
 
-def _trace(results: dict[str, Statistics]) -> None:
+def _trace(results: dict[str, Statistics], seed: int | None = None) -> None:
     """With DM_MC_TRACE=<file>, append one JSON line per run: the means each option got.
 
     The smoke test reads it to check the effect (the engine ran and told the options apart)
@@ -237,6 +247,9 @@ def _trace(results: dict[str, Statistics]) -> None:
     path = os.getenv("DM_MC_TRACE")
     if not path:
         return
-    line = json.dumps({"means": {name: st.mean_score for name, st in results.items()}})
+    payload: dict[str, Any] = {"means": {name: st.mean_score for name, st in results.items()}}
+    if seed is not None:
+        payload["seed"] = seed
+    line = json.dumps(payload)
     with open(path, "a", encoding="utf-8") as f:
         f.write(line + "\n")

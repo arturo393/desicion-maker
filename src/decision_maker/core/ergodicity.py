@@ -29,7 +29,7 @@ class ErgodicityResult:
     ensemble_std: float
     temporal_log_growth: float
     geometric_mean: float
-    ruin_probability: float
+    ruin_probability: float | None
     max_drawdown: float
     time_horizon_divergence: float
     is_ergodic: bool
@@ -94,8 +94,13 @@ class ErgodicityAnalyzer:
         temporal_log_growth = float(np.mean(log_returns))
         geometric_mean = float(np.exp(temporal_log_growth))
 
-        ruin_count = np.sum(scores < ErgodicityAnalyzer.RUIN_THRESHOLD)
-        ruin_probability = float(ruin_count / len(scores))
+        # On normalized [0, 1] scores, ruin threshold 0.0 is not applicable (scores cannot cross 0).
+        is_normalized = bool(len(scores) > 0 and np.all(scores >= -EPSILON) and np.all(scores <= 1.0 + EPSILON))
+        if is_normalized:
+            ruin_probability = None
+        else:
+            ruin_count = np.sum(scores < ErgodicityAnalyzer.RUIN_THRESHOLD)
+            ruin_probability = float(ruin_count / len(scores))
 
         cumulative = np.cumprod(positive_scores)
         running_max = np.maximum.accumulate(cumulative)
@@ -111,7 +116,8 @@ class ErgodicityAnalyzer:
                 divergences.append(abs(temporal_h - ensemble_h))
         time_horizon_divergence = float(np.mean(divergences)) if divergences else 0.0
 
-        is_ergodic = time_horizon_divergence < 0.05 and ruin_probability < 0.01
+        ruin_ok = ruin_probability is None or ruin_probability < 0.01
+        is_ergodic = time_horizon_divergence < 0.05 and ruin_ok
         verdict = (
             "ergodic" if is_ergodic
             else "mildly_non_ergodic" if time_horizon_divergence < 0.2
@@ -137,11 +143,12 @@ class ErgodicityAnalyzer:
             return "No options to analyze"
         total = len(options)
         best = max(options.values(), key=lambda r: r.temporal_log_growth)
+        ruin_str = f"ruin_p={best.ruin_probability:.2%}" if best.ruin_probability is not None else "ruin_p=n/a"
         return (
             f"{ergodic_count}/{total} ergodic. "
             f"Best temporal growth: {best.option_name} "
             f"(log-growth={best.temporal_log_growth:.4f}, "
-            f"ruin_p={best.ruin_probability:.2%})"
+            f"{ruin_str})"
         )
 
 
