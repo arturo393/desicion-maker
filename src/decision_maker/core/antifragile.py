@@ -306,12 +306,20 @@ class AntifragileEngine:
             # Tail fragility: how far the 5th percentile is from the mean
             tail_gap = (mean - var_95) / (std + EPSILON)
 
+            # If success_rate is None (single option, no cross-option comparison),
+            # the failure-to-beat-average penalty is 0.0.
+            success_term = (
+                FRAGILITY_SUCCESS_WEIGHT * (1.0 - success)
+                if success is not None
+                else 0.0
+            )
+
             # Composite fragility score (heuristic, 0-1 range)
             raw = (
                 FRAGILITY_CVAR_WEIGHT * np.clip(cvar_gap / FRAGILITY_CVAR_SCALE, 0, 1)
                 + FRAGILITY_VAR_WEIGHT * np.clip(var_ratio * 2.0, 0, 1)
                 + FRAGILITY_TAIL_WEIGHT * np.clip(tail_gap / FRAGILITY_TAIL_SCALE, 0, 1)
-                + FRAGILITY_SUCCESS_WEIGHT * (1.0 - success)
+                + success_term
             )
             fragility = float(np.clip(raw, 0, 1))
 

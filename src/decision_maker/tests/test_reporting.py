@@ -161,3 +161,27 @@ class TestReporting:
         }
         with pytest.raises(ValidationError):
             validate_report(bad)
+
+    def test_schema_accepts_null_success_rate(self):
+        """REPORT_SCHEMA must accept null for success_rate when an option has no competitor."""
+        valid_with_null = {
+            "timestamp": "20261002_120000",
+            "decision_matrix": {"Only": {"total_score": 10.0}},
+            "monte_carlo": {
+                "Only": {
+                    "mean": 10.0,
+                    "std": 1.0,
+                    "min": 5.0,
+                    "max": 15.0,
+                    "p5": 7.0,
+                    "p95": 13.0,
+                    "var_95": 7.0,
+                    "cvar_95": 6.0,
+                    "success_rate": None,
+                }
+            },
+            "topsis": {},
+            "algorithm_comparison": {},
+            "ai_insights": {},
+        }
+        validate_report(valid_with_null)

@@ -117,7 +117,7 @@ async def analyze(req: AnalysisRequest):
             mc_res[opt_name] = {
                 "mean_score": float(stats.mean_score),
                 "std_dev": float(stats.std_dev),
-                "success_rate": float(stats.success_rate),
+                "success_rate": float(stats.success_rate) if stats.success_rate is not None else None,
                 "percentile_5": float(stats.percentile_5),
                 "percentile_95": float(stats.percentile_95)
             }

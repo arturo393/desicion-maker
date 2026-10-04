@@ -185,17 +185,6 @@ class MonteCarloEngine:
                         else:
                             total_scores -= vals * f.weight
 
-            option_scores[opt.name] = total_scores
-            option_factor_stats[opt.name] = factor_stats
-
-        score_matrix = np.column_stack(list(option_scores.values())) if option_scores else np.empty((self.num_simulations, 0))
-        cross_option_mean = np.mean(score_matrix, axis=1) if score_matrix.shape[1] > 0 else np.zeros(self.num_simulations)
-
-        for opt in self.options:
-            total_scores = option_scores[opt.name]
-            opt_data = sampled_data[opt.name]
-            factor_stats = option_factor_stats[opt.name]
-
             if np.std(total_scores) > EPSILON_SCORE:
                 ruin_threshold = np.percentile(total_scores, RUIN_THRESHOLD_PERCENTILE)
                 ruin_mask = total_scores <= ruin_threshold
@@ -206,16 +195,33 @@ class MonteCarloEngine:
                     # multiplicar por p<1 acercaba la cola a cero y la premiaba.
                     total_scores[ruin_mask] -= np.abs(total_scores[ruin_mask]) * (1.0 - ruin_penalty)
 
+            option_scores[opt.name] = total_scores
+            option_factor_stats[opt.name] = factor_stats
+
+        # cross_option_mean is calculated from option_scores that ALREADY include the tail/ruin
+        # penalty. Comparing penalized total_scores against an unpenalized cross-option mean
+        # created an asymmetric benchmark where penalized options were compared against a baseline
+        # that ignored downside tail risk. Both sides now consistently use tail-penalized scores.
+        score_matrix = np.column_stack(list(option_scores.values())) if option_scores else np.empty((self.num_simulations, 0))
+        cross_option_mean = np.mean(score_matrix, axis=1) if score_matrix.shape[1] > 0 else np.zeros(self.num_simulations)
+
+        for opt in self.options:
+            total_scores = option_scores[opt.name]
+            opt_data = sampled_data[opt.name]
+            factor_stats = option_factor_stats[opt.name]
+
             p5 = float(np.percentile(total_scores, 5))
             p95 = float(np.percentile(total_scores, 95))
             below_p5 = total_scores[total_scores <= p5]
             cvar = float(np.mean(below_p5)) if len(below_p5) > 0 else p5
 
             # success_rate = fraction of simulations where this option beats the
-            # cross-option average (wins the comparison), not where score > 0.
-            # With normalized [0,1] scores, score > 0 is always true (degenerate).
-            success_rate = (
-                float(np.mean(total_scores > cross_option_mean)) if score_matrix.shape[1] > 1 else 1.0
+            # cross-option average (wins the comparison). When there is only one option,
+            # there is no competing alternative to compare against, so success_rate is None (n/a).
+            success_rate: float | None = (
+                float(np.mean(total_scores > cross_option_mean))
+                if score_matrix.shape[1] > 1
+                else None
             )
 
             results[opt.name] = Statistics(

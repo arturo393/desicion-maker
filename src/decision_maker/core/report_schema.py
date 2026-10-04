@@ -30,7 +30,7 @@ REPORT_SCHEMA = {
                     "p95": {"type": "number"},
                     "var_95": {"type": "number"},
                     "cvar_95": {"type": "number"},
-                    "success_rate": {"type": "number"},
+                    "success_rate": {"type": ["number", "null"]},
                 },
             },
         },

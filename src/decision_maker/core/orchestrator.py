@@ -58,6 +58,9 @@ from decision_maker.core.visualization import PlotContext, VisualizationEngine
 
 logger = logging.getLogger(__name__)
 
+# Offset added to mc_engine.seed to generate an independent pseudorandom stream for bootstrap
+BOOTSTRAP_SEED_OFFSET: int = 1
+
 
 @dataclass
 class AdvancedAnalysis:
@@ -634,13 +637,22 @@ class UnifiedDecisionFramework:
             rankings_advanced["PROMETHEE_uncertainty"] = prom_uncert
         borda_advanced = self.aggregator.aggregate(rankings_advanced, method="borda")
 
+        # Derive an independent seed for bootstrap perturbations so that noise draws
+        # do not correlate with the Monte Carlo simulation sequence.
+        bootstrap_seed = (
+            self.mc_engine.seed + BOOTSTRAP_SEED_OFFSET
+            if self.mc_engine.seed is not None
+            else None
+        )
         bootstrap_ci = self.bootstrap_engine.confidence_intervals(
             data_fuzzy,
             BootstrapConfig(
                 weights=weights,
                 maximize=max_bools,
                 n_bootstrap=DEFAULT_BOOTSTRAP_ITERATIONS,
+                seed=bootstrap_seed,
             ),
+            seed=bootstrap_seed,
         )
 
         future_metrics.update(

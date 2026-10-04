@@ -27,6 +27,7 @@ class BootstrapConfig:
     maximize: list[bool]
     n_bootstrap: int = 1000
     alpha: float = 0.05
+    seed: int | None = None
 
 
 class BootstrapRanking:
@@ -34,12 +35,16 @@ class BootstrapRanking:
     def confidence_intervals(
         decision_matrix_fuzzy: dict[str, dict[str, tuple[float, float, float]]],
         config: BootstrapConfig,
+        seed: int | None = None,
     ) -> dict[str, Any]:
         if not decision_matrix_fuzzy:
             return {}
         if len(decision_matrix_fuzzy) <= 1:
             opt = next(iter(decision_matrix_fuzzy))
             return {opt: {"mean_rank": 1.0, "ci_low": 1.0, "ci_high": 1.0, "p_best": 1.0}}
+
+        effective_seed = seed if seed is not None else config.seed
+        rng = np.random.default_rng(effective_seed)
 
         opt_names = list(decision_matrix_fuzzy.keys())
         n_opts = len(opt_names)
@@ -59,7 +64,7 @@ class BootstrapRanking:
                 boot_data[opt] = {}
                 for f in factor_names:
                     a, b_val, c = decision_matrix_fuzzy[opt][f]
-                    noise = np.random.normal(0, (c - a) * BOOTSTRAP_NOISE_SCALE, 3)
+                    noise = rng.normal(0, (c - a) * BOOTSTRAP_NOISE_SCALE, 3)
                     # Triangular fuzzy numbers require a <= b <= c; sort perturbed values
                     perturbed = sorted([
                         float(a + noise[0]),

@@ -40,11 +40,12 @@ class TestBootstrapRanking:
             captured_data.append(matrix)
             return original_analyze(self_eng, matrix, weights, maximize)
 
+        class MockRNG:
+            def normal(self, loc, scale, size):
+                return np.array([10.0, 0.0, -10.0])
+
         monkeypatch.setattr(TOPSISEngine, "analyze", mock_analyze)
-        monkeypatch.setattr(
-            "numpy.random.normal",
-            lambda loc, scale, size: np.array([10.0, 0.0, -10.0])
-        )
+        monkeypatch.setattr(np.random, "default_rng", lambda seed=None: MockRNG())
 
         data = {
             "A": {"X": (1.0, 2.0, 3.0)},
@@ -60,3 +61,26 @@ class TestBootstrapRanking:
                 for f_vals in opt_vals.values():
                     a, b, c = f_vals
                     assert a <= b <= c, f"Fuzzy number not sorted: ({a}, {b}, {c})"
+
+    def test_confidence_intervals_reproducibility_with_seed(self):
+        """Identical seed produces identical bootstrap confidence intervals; different seeds produce different ones."""
+        data = {
+            "OptionA": {"F1": (1.0, 2.0, 3.0), "F2": (2.0, 3.0, 4.0)},
+            "OptionB": {"F1": (1.5, 2.0, 2.5), "F2": (1.0, 3.0, 5.0)},
+        }
+        cfg_seed_42_a = BootstrapConfig(weights=[0.5, 0.5], maximize=[True, True], n_bootstrap=50, seed=42)
+        cfg_seed_42_b = BootstrapConfig(weights=[0.5, 0.5], maximize=[True, True], n_bootstrap=50, seed=42)
+        cfg_seed_99 = BootstrapConfig(weights=[0.5, 0.5], maximize=[True, True], n_bootstrap=50, seed=99)
+
+        res1 = BootstrapRanking.confidence_intervals(data, cfg_seed_42_a)
+        res2 = BootstrapRanking.confidence_intervals(data, cfg_seed_42_b)
+        res3 = BootstrapRanking.confidence_intervals(data, cfg_seed_99)
+
+        # Same seed => identical intervals
+        assert res1 == res2
+        # Different seed => distinct intervals
+        assert res1 != res3
+
+        # Parameter override takes precedence over config.seed
+        res_param_42 = BootstrapRanking.confidence_intervals(data, cfg_seed_99, seed=42)
+        assert res_param_42 == res1

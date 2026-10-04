@@ -211,7 +211,8 @@ def _generate_explanation(result: dict) -> None:
         f"Decision analysis with {len(mc)} options:\n"
         + "\n".join(
             f"{i + 1}. {name}: mean={s.mean_score:.3f}, std={s.std_dev:.3f}, "
-            f"VaR={s.var_95:.3f}, CVaR={s.cvar_95:.3f}, success_rate={s.success_rate:.1%}"
+            f"VaR={s.var_95:.3f}, CVaR={s.cvar_95:.3f}, "
+            f"success_rate={f'{s.success_rate:.1%}' if s.success_rate is not None else 'n/a'}"
             for i, (name, s) in enumerate(rankings)
         )
         + "\n\n"

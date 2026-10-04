@@ -98,7 +98,7 @@ class AnalysisResult:
     regret_analysis: float = 0.0
     risk_score: float = 0.0
     scenario_robustness: float = 0.0
-    confidence: float = 0.0
+    confidence: float | None = None
     recommendation: str = ""
 
 

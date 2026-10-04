@@ -164,7 +164,7 @@ class TestMonteCarloEngine:
         assert stats.min_score <= stats.mean_score <= stats.max_score
         assert stats.percentile_5 <= stats.percentile_95
         assert stats.cvar_95 <= stats.var_95
-        assert 0 <= stats.success_rate <= 1
+        assert stats.success_rate is None
         assert "A" in stats.factor_stats
         assert "B" in stats.factor_stats
         for _fname, fstats in stats.factor_stats.items():
@@ -351,3 +351,55 @@ class TestMonteCarloEngine:
         opt.add_variable("Score", DistributionType.NORMAL, 10.0, 3.0)
         eng.add_option(opt)
         assert np.array_equal(eng.run()["A"].raw_scores, eng.run()["A"].raw_scores)
+
+    def test_success_rate_single_vs_multiple_options(self):
+        """Single option has no competitor so success_rate is None; multiple options give a float in [0, 1]."""
+        eng = MonteCarloEngine(num_simulations=100, seed=42)
+        eng.add_factor(Factor("Score", 1.0, maximize=True))
+        opt_a = DecisionOption("A")
+        opt_a.add_variable("Score", DistributionType.NORMAL, 10.0, 2.0)
+        eng.add_option(opt_a)
+
+        # Single option => success_rate must be None
+        res_single = eng.run()
+        assert res_single["A"].success_rate is None
+
+        # Two options => success_rate must be a float in [0, 1]
+        opt_b = DecisionOption("B")
+        opt_b.add_variable("Score", DistributionType.NORMAL, 11.0, 2.0)
+        eng.add_option(opt_b)
+
+        res_multi = eng.run()
+        assert res_multi["A"].success_rate is not None
+        assert 0.0 <= res_multi["A"].success_rate <= 1.0
+        assert res_multi["B"].success_rate is not None
+        assert 0.0 <= res_multi["B"].success_rate <= 1.0
+
+    def test_cross_option_mean_uses_tail_penalized_scores(self):
+        """Cross-option mean must be computed from tail-penalized scores on both sides."""
+        eng = MonteCarloEngine(num_simulations=500, seed=0)
+        eng.add_factor(Factor("X", 1.0, maximize=True))
+
+        opt_a = DecisionOption("A")
+        opt_a.add_variable("X", DistributionType.NORMAL, -15.0, 5.0)
+
+        opt_b = DecisionOption("B")
+        opt_b.add_variable("X", DistributionType.NORMAL, 0.0, 10.0)
+
+        opt_c = DecisionOption("C")
+        opt_c.add_variable("X", DistributionType.DETERMINISTIC, -10.0)
+
+        eng.add_option(opt_a)
+        eng.add_option(opt_b)
+        eng.add_option(opt_c)
+
+        res = eng.run(normalize=False)
+
+        penalized_cross_mean = (res["A"].raw_scores + res["B"].raw_scores + res["C"].raw_scores) / 3.0
+        unpenalized_cross_mean = (res["A"].raw_factor_data["X"] + res["B"].raw_factor_data["X"] + res["C"].raw_factor_data["X"]) / 3.0
+
+        sr_penalized = float(np.mean(res["A"].raw_scores > penalized_cross_mean))
+        sr_unpenalized = float(np.mean(res["A"].raw_scores > unpenalized_cross_mean))
+
+        assert sr_penalized != sr_unpenalized
+        assert res["A"].success_rate == sr_penalized

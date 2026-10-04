@@ -179,7 +179,7 @@ def _execute_analysis(
                     "Score": s.mean_score,
                     "Std": s.std_dev,
                     "CVaR": s.cvar_95,
-                    "Success": f"{s.success_rate:.0%}",
+                    "Success": f"{s.success_rate:.0%}" if s.success_rate is not None else "n/a",
                 }
                 for n, s in mc.items()
             ]
