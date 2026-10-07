@@ -206,9 +206,43 @@ class Statistics(BaseModel):
     cvar_95: float
     raw_scores: np.ndarray | None = Field(default=None, exclude=True) # Exclude from JSON dump
     raw_factor_data: dict[str, np.ndarray] | None = Field(default=None, exclude=True)
+    standard_error: float | None = None
 
-    def __init__(self, option_name: str, mean_score: float, std_dev: float, min_score: float, max_score: float, percentile_5: float, percentile_95: float, success_rate: float | None, factor_stats: dict[str, dict[str, float]], var_95: float, cvar_95: float, raw_scores: np.ndarray | None = None, raw_factor_data: dict[str, np.ndarray] | None = None, **kwargs):
-        super().__init__(option_name=option_name, mean_score=mean_score, std_dev=std_dev, min_score=min_score, max_score=max_score, percentile_5=percentile_5, percentile_95=percentile_95, success_rate=success_rate, factor_stats=factor_stats, var_95=var_95, cvar_95=cvar_95, raw_scores=raw_scores, raw_factor_data=raw_factor_data, **kwargs)
+    def __init__(
+        self,
+        option_name: str,
+        mean_score: float,
+        std_dev: float,
+        min_score: float,
+        max_score: float,
+        percentile_5: float,
+        percentile_95: float,
+        success_rate: float | None,
+        factor_stats: dict[str, dict[str, float]],
+        var_95: float,
+        cvar_95: float,
+        raw_scores: np.ndarray | None = None,
+        raw_factor_data: dict[str, np.ndarray] | None = None,
+        standard_error: float | None = None,
+        **kwargs,
+    ):
+        super().__init__(
+            option_name=option_name,
+            mean_score=mean_score,
+            std_dev=std_dev,
+            min_score=min_score,
+            max_score=max_score,
+            percentile_5=percentile_5,
+            percentile_95=percentile_95,
+            success_rate=success_rate,
+            factor_stats=factor_stats,
+            var_95=var_95,
+            cvar_95=cvar_95,
+            raw_scores=raw_scores,
+            raw_factor_data=raw_factor_data,
+            standard_error=standard_error,
+            **kwargs,
+        )
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
 

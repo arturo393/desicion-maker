@@ -31,6 +31,7 @@ REPORT_SCHEMA = {
                     "var_95": {"type": "number"},
                     "cvar_95": {"type": "number"},
                     "success_rate": {"type": ["number", "null"]},
+                    "standard_error": {"type": ["number", "null"]},
                 },
             },
         },

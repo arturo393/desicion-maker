@@ -307,6 +307,7 @@ class UnifiedDecisionFramework:
                 "causal_dag": causal_dag,
                 "mc_results": mc_results,
                 "factors": self.mc_engine.factors,
+                "convergence": self.mc_engine.last_convergence,
             }
 
         # Filter vetoed options BEFORE computing subsequent rankings (TOPSIS, PROMETHEE,
@@ -488,6 +489,7 @@ class UnifiedDecisionFramework:
             "action_threshold": MinimumActionThreshold.to_dict(threshold),
             "gate_result": DecisionGate.to_dict(gate_result),
             "winner_agreement": winner_agreement,
+            "convergence": self.mc_engine.last_convergence,
             "causal_dag": causal_dag,
 
             "commitment": None if commitment is None else {

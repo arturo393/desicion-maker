@@ -197,6 +197,7 @@ def save_json_report(data: ReportData) -> str:
                 "var_95": stats.var_95,
                 "cvar_95": stats.cvar_95,
                 "success_rate": stats.success_rate,
+                "standard_error": stats.standard_error,
             }
             for name, stats in data.mc_results.items()
         },

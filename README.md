@@ -42,6 +42,7 @@ The smoke suite runs each `src/decision_maker/analyses/*.py` as a subprocess and
 engine's own trace (`DM_MC_TRACE`): an analysis passes only if it ran the engine and the engine told
 its options apart. A new analysis is picked up automatically. The engine itself refuses an empty or
 incomplete model (no options, no factors, or a factor an option has no variable for).
+Includes verification against reference libraries (`pymcdm` for PROMETHEE II and TOPSIS/WSM) and axiomatic property-based tests via `hypothesis` (dominance, weight scaling, permutation invariance, rank reversal).
 
 ## The Engines
 

@@ -10,6 +10,7 @@ __all__ = ["MonteCarloEngine"]
 
 import json
 import logging
+import math
 import os
 from typing import Any
 
@@ -21,6 +22,12 @@ logger = logging.getLogger(__name__)
 
 RUIN_THRESHOLD_PERCENTILE = 5.0
 EPSILON_SCORE = 1e-12
+
+# Z-score multiplier for the standard error of the difference between the top two option means.
+# Under asymptotic normality (Z ~ 1.96 approx 2.0), this establishes a ~95% confidence threshold.
+# If the gap between the two leading options is less than CONVERGENCE_Z * sqrt(se1^2 + se2^2),
+# the ranking between #1 and #2 is within Monte Carlo simulation noise and cannot be distinguished.
+CONVERGENCE_Z: float = 2.0
 
 
 class MonteCarloEngine:
@@ -40,6 +47,12 @@ class MonteCarloEngine:
         # Every run() starts from this seed, so any run is reproducible from the seed in its trace.
         # A generator kept on the instance would make the second run depend on the first.
         self.seed: int = seed if seed is not None else int(np.random.SeedSequence().entropy)
+        self.last_convergence: dict[str, Any] = {
+            "converged": None,
+            "gap": None,
+            "threshold": None,
+            "suggested_num_simulations": None,
+        }
 
     def add_factor(self, factor: Factor) -> None:
         self.factors.append(factor)
@@ -224,10 +237,13 @@ class MonteCarloEngine:
                 else None
             )
 
+            std = float(np.std(total_scores))
+            se = std / math.sqrt(self.num_simulations) if self.num_simulations > 0 else 0.0
+
             results[opt.name] = Statistics(
                 option_name=opt.name,
                 mean_score=float(np.mean(total_scores)),
-                std_dev=float(np.std(total_scores)),
+                std_dev=std,
                 min_score=float(np.min(total_scores)),
                 max_score=float(np.max(total_scores)),
                 percentile_5=p5,
@@ -238,7 +254,44 @@ class MonteCarloEngine:
                 cvar_95=cvar,
                 raw_scores=total_scores,
                 raw_factor_data=opt_data,
+                standard_error=se,
             )
+
+        if len(results) <= 1:
+            self.last_convergence = {
+                "converged": None,
+                "gap": None,
+                "threshold": None,
+                "suggested_num_simulations": None,
+            }
+        else:
+            sorted_stats = sorted(results.values(), key=lambda s: s.mean_score, reverse=True)
+            top1, top2 = sorted_stats[0], sorted_stats[1]
+            gap = float(top1.mean_score - top2.mean_score)
+            se1 = top1.standard_error if top1.standard_error is not None else 0.0
+            se2 = top2.standard_error if top2.standard_error is not None else 0.0
+            pooled_se = math.sqrt(se1**2 + se2**2)
+            threshold = float(CONVERGENCE_Z * pooled_se)
+
+            converged = bool(gap >= threshold)
+            if converged:
+                suggested_n = self.num_simulations
+            else:
+                if gap > 0:
+                    suggested_n = int(math.ceil(self.num_simulations * (threshold / gap) ** 2))
+                else:
+                    suggested_n = self.num_simulations * 10
+                logger.warning(
+                    f"Monte Carlo convergence warning: gap ({gap:.4f}) is smaller than threshold "
+                    f"({threshold:.4f}); sube num_simulations a ~{suggested_n}"
+                )
+
+            self.last_convergence = {
+                "converged": converged,
+                "gap": gap,
+                "threshold": threshold,
+                "suggested_num_simulations": suggested_n,
+            }
 
         _trace(results, seed=self.seed)
         return results

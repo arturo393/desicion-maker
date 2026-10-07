@@ -108,3 +108,4 @@ violations*.txt
 /docs/.obsidian/plugins/*/main.js
 /docs/.obsidian/plugins/*/styles.css
 /docs/.obsidian/plugins/*/node_modules/
+.hypothesis/
