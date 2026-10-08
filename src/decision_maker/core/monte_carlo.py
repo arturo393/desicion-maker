@@ -17,6 +17,11 @@ from typing import Any
 import numpy as np
 
 from decision_maker.core.models import DecisionOption, Factor, Statistics
+from decision_maker.core.scenarios import (
+    apply_shared_drivers,
+    collect_drivers,
+    is_fully_shared_model,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -47,6 +52,7 @@ class MonteCarloEngine:
         # Every run() starts from this seed, so any run is reproducible from the seed in its trace.
         # A generator kept on the instance would make the second run depend on the first.
         self.seed: int = seed if seed is not None else int(np.random.SeedSequence().entropy)
+        self.driver_samples: dict[str, np.ndarray] = {}
         self.last_convergence: dict[str, Any] = {
             "converged": None,
             "gap": None,
@@ -62,6 +68,14 @@ class MonteCarloEngine:
             logger.warning(f"Duplicate option name '{option.name}' — previous will be overwritten")
         self._option_names.add(option.name)
         self.options.append(option)
+
+    def drivers(self) -> dict[str, list[tuple[str, str]]]:
+        """Map driver name to list of (option_name, variable_name) pairs using it."""
+        return collect_drivers(self.options)
+
+    def is_fully_shared(self) -> bool:
+        """Return True if every variable in every option is bound to a shared driver."""
+        return is_fully_shared_model(self.options)
 
     def _apply_correlation(self, samples: dict[str, np.ndarray]) -> dict[str, np.ndarray]:
         """Apply Cholesky decomposition to induce correlation between factors."""
@@ -87,7 +101,14 @@ class MonteCarloEngine:
             return samples
 
         for opt in self.options:
-            available = [fn for fn in factor_names if fn in opt.variables]
+            # Exclude variables with a shared driver: intra-option Iman-Conover correlation
+            # reorders samples within an option and would break the inter-option comonotonic
+            # coupling established by the shared scenario driver.
+            available = [
+                fn
+                for fn in factor_names
+                if fn in opt.variables and getattr(opt.variables[fn], "driver", None) is None
+            ]
             if len(available) < 2:
                 continue
 
@@ -149,6 +170,13 @@ class MonteCarloEngine:
             for v_name, var in opt.variables.items():
                 opt_data[v_name] = var.sample(self.num_simulations, rng=rng)
             sampled_data[opt.name] = opt_data
+
+        sampled_data, self.driver_samples = apply_shared_drivers(
+            sampled_data=sampled_data,
+            options=self.options,
+            num_simulations=self.num_simulations,
+            rng=rng,
+        )
 
         sampled_data = self._apply_correlation(sampled_data)
 

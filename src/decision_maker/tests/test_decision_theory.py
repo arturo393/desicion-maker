@@ -47,7 +47,7 @@ class TestDecisionTheoryEngine:
         assert "High" in strategies["Minimax Regret"]
 
     def test_minimax_regret_uses_percentile_states(self):
-        """Regret must compare quantile states (comonotonic assumption) rather than arbitrary simulation indices."""
+        """Regret must compare quantile states when not fully shared."""
         import numpy as np
         scores_a = np.array([10.0, 20.0, 30.0, 40.0, 50.0])
         scores_b = np.array([50.0, 40.0, 30.0, 20.0, 10.0])
@@ -55,5 +55,40 @@ class TestDecisionTheoryEngine:
             "A": Statistics("A", 30.0, 14.14, 10.0, 50.0, 12.0, 48.0, 1.0, {}, 12.0, 10.0, raw_scores=scores_a),
             "B": Statistics("B", 30.0, 14.14, 10.0, 50.0, 12.0, 48.0, 1.0, {}, 12.0, 10.0, raw_scores=scores_b),
         }
-        strategies = DecisionTheoryEngine.analyze(results)
+        strategies = DecisionTheoryEngine.analyze(results, is_fully_shared=False)
         assert "Max Regret: 0.00" in strategies["Minimax Regret"]
+        assert "percentiles" in strategies["Minimax Regret"]
+
+    def test_minimax_regret_uses_simulation_when_fully_shared(self):
+        """When fully shared, Minimax Regret evaluates pointwise scenario regret across simulations."""
+        import numpy as np
+        # Scenario 0: A=10, B=25 (best=25, regret A=15, B=0)
+        # Scenario 1: A=50, B=30 (best=50, regret A=0, B=20)
+        scores_a = np.array([10.0, 50.0])
+        scores_b = np.array([25.0, 30.0])
+        results = {
+            "A": Statistics("A", 30.0, 20.0, 10.0, 50.0, 12.0, 48.0, 0.5, {}, 12.0, 10.0, raw_scores=scores_a),
+            "B": Statistics("B", 27.5, 2.5, 25.0, 30.0, 25.2, 29.8, 0.5, {}, 25.2, 25.0, raw_scores=scores_b),
+        }
+        # Max regret for A is 15.0 (in scenario 0); max regret for B is 20.0 (in scenario 1).
+        # Minimax regret choice is A with max regret 15.00.
+        strategies = DecisionTheoryEngine.analyze(results, is_fully_shared=True)
+        assert "A (Max Regret: 15.00" in strategies["Minimax Regret"]
+        assert "simulación" in strategies["Minimax Regret"]
+
+    def test_minimax_regret_differentiates_simulation_from_percentiles(self):
+        """Opposing outcomes produce 0 regret under percentiles but 80 regret under simulation."""
+        import numpy as np
+        scores_a = np.array([10.0, 90.0])
+        scores_b = np.array([90.0, 10.0])
+        results = {
+            "A": Statistics("A", 50.0, 40.0, 10.0, 90.0, 14.0, 86.0, 0.5, {}, 14.0, 10.0, raw_scores=scores_a),
+            "B": Statistics("B", 50.0, 40.0, 10.0, 90.0, 14.0, 86.0, 0.5, {}, 14.0, 10.0, raw_scores=scores_b),
+        }
+        # Under percentiles: both sorted vectors are identical [10, 90], regret per state is 0.00
+        strat_pct = DecisionTheoryEngine.analyze(results, is_fully_shared=False)
+        assert "Max Regret: 0.00" in strat_pct["Minimax Regret"]
+
+        # Under simulation: scenario 0 best is B (regret A=80), scenario 1 best is A (regret B=80)
+        strat_sim = DecisionTheoryEngine.analyze(results, is_fully_shared=True)
+        assert "Max Regret: 80.00" in strat_sim["Minimax Regret"]

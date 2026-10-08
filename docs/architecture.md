@@ -13,7 +13,7 @@ updated: 2026-10-01
 
 # Architecture
 
-Dual Python + Rust framework for multi-criteria decision analysis under uncertainty. 19 motores ruteables, 599 tests (plus a smoke suite that runs every analysis: `uv run pytest -m smoke`). The Monte Carlo engine runs in Python/NumPy; the `rust_core/` crate implements the same normalization but is not on the execution path (see [[adr/001-use-rust-for-math-engine]]).
+Dual Python + Rust framework for multi-criteria decision analysis under uncertainty. 19 motores ruteables, 617 tests (plus a smoke suite that runs every analysis: `uv run pytest -m smoke`). The Monte Carlo engine runs in Python/NumPy; the `rust_core/` crate implements the same normalization but is not on the execution path (see [[adr/001-use-rust-for-math-engine]]).
 
 ## Building Blocks
 
@@ -104,6 +104,15 @@ run_analysis(mode)
        +-- RankAggregator.aggregate()       # Borda of all 4 methods
 ```
 
+### Engine Maturity
+Each routable engine declares a level in `core/engine_maturity.py`, and `run_analysis` returns it under `engine_maturity` for the engines that ran:
+- **validated**: agrees with an external reference or an independent calculation (MonteCarlo, PROMETHEE).
+- **characterized**: what it computes is known exactly, though it differs from the textbook method (TOPSIS: on crisp input, a weighted sum of min-max scores, with rank reversal).
+- **experimental**: everything else. Its output has not been checked against anything outside this repo.
+
+### Shared Scenarios and Value of Information
+`add_variable(..., driver="market")` ties variables of different options to one risk factor, so simulation k is the same state of the world for all of them (`core/scenarios.py`). When every variable has a driver, Minimax Regret is computed per scenario and EVPI is valid; EVPPI per driver (`core/value_of_information.py`) ranks which uncertainty is worth resolving first.
+
 ### Winner Selection and Agreement
 The approved winner (`approved_winner`) is selected solely by the Monte Carlo mean score among non-vetoed options (`max(mc_results, key=lambda x: x[1].mean_score)`). To provide transparency when multi-criteria engines suggest differing trade-offs, the result includes a `"winner_agreement"` dictionary:
 - `"topsis"`: whether the TOPSIS leader coincides with the approved winner.
@@ -155,7 +164,7 @@ Statistics (per option after MC)
 
 ## Test Coverage
 
-599 tests across all engines, plus the smoke suite (`-m smoke`, one per analysis). Run with:
+617 tests across all engines, plus the smoke suite (`-m smoke`, one per analysis). Run with:
 
 ```bash
 uv run pytest src/decision_maker/tests/ -v

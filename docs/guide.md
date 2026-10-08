@@ -111,6 +111,28 @@ Keys that are easy to misread: `topsis_scores` and `future.promethee_scores` com
 engines (fuzzy vs crisp, see [[topsis]] and [[promethee]]), and `future.bayesian_probs` is a
 probability of *being best*, not a score ([[bayesian-inference-engine]]).
 
+## Shared Risk Factors and What to Find Out First
+
+By default each option is sampled on its own, so simulation 17 of option A and simulation 17 of
+option B are unrelated draws. When two options depend on the same thing in the world, say it:
+
+```python
+local.add_variable("Revenue", DistributionType.NORMAL, 100, 20, driver="demand")
+export.add_variable("Revenue", DistributionType.NORMAL, 120, 45, driver="demand")
+```
+
+Both revenues now rise and fall together (rank correlation 1); each keeps its own distribution.
+This is a strong assumption: use it only for a factor that moves every dependent variable the
+same way.
+
+`run_analysis` then returns `value_of_information`:
+
+- `evpi`: how much the expected score would rise if all uncertainty were resolved before
+  deciding. Only computed when every variable has a driver; otherwise `None`, with the reason.
+- `evppi_by_driver`: the same for one driver at a time, largest first. The top entry is the
+  uncertainty worth researching first; a value near zero means knowing it would not change the
+  decision. With fewer than ~10,000 simulations it reads slightly high.
+
 ## Example: 3 Mac Upgrade Options
 
 See [`examples/mac_upgrade_comparison.py`](../examples/mac_upgrade_comparison.py) for a complete comparison across all 3 modes.

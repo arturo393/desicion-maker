@@ -29,6 +29,7 @@ from decision_maker.core.decision_commitment import DecisionCommitment
 from decision_maker.core.decision_gates import DecisionGate
 from decision_maker.core.decision_journal import DecisionJournal
 from decision_maker.core.decision_theory import DecisionTheoryEngine
+from decision_maker.core.engine_maturity import resolve_run_engine_maturity
 from decision_maker.core.ergodicity import ErgodicityAnalyzer
 from decision_maker.core.explainability import ExplainabilityEngine, NarrativeContext
 from decision_maker.core.game_theory import GameTheoryEngine
@@ -54,6 +55,7 @@ from decision_maker.core.utils import (
     DEFAULT_BOOTSTRAP_ITERATIONS,
     SCALE_MISMATCH_THRESHOLD,
 )
+from decision_maker.core.value_of_information import calculate_value_of_information
 from decision_maker.core.visualization import PlotContext, VisualizationEngine
 
 logger = logging.getLogger(__name__)
@@ -328,7 +330,10 @@ class UnifiedDecisionFramework:
         future_metrics: dict[str, Any] = {}
 
         if mode in ("standard", "advanced"):
-            strategies = self.dt_engine.analyze(mc_results)
+            strategies = self.dt_engine.analyze(
+                mc_results,
+                is_fully_shared=self.mc_engine.is_fully_shared(),
+            )
             sensitivity_results = self.sens_engine.analyze(mc_results, self.mc_engine.factors)
 
             promethee_uncertainty = _promethee_with_uncertainty(
@@ -515,6 +520,16 @@ class UnifiedDecisionFramework:
                 ),
                 "routing_trace": self.reasoning_trace.summary(),
             },
+            "value_of_information": calculate_value_of_information(
+                mc_results=mc_results,
+                is_fully_shared=self.mc_engine.is_fully_shared(),
+                drivers=self.mc_engine.drivers(),
+                driver_samples=self.mc_engine.driver_samples,
+            ),
+            "engine_maturity": resolve_run_engine_maturity(
+                mode=mode,
+                recommended_engines=profile.recommended_engines if mode == "auto" else None,
+            ),
         }
 
     def _analyze_uncertainty(self, mc_results: dict[str, Statistics]) -> dict[str, Any]:

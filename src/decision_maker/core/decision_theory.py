@@ -22,6 +22,7 @@ class DecisionTheoryEngine:
     def analyze(
         mc_results: dict[str, Statistics],
         hurwicz_alpha: float = 0.5,
+        is_fully_shared: bool = False,
     ) -> dict[str, str]:
         if not mc_results:
             return {}
@@ -54,29 +55,49 @@ class DecisionTheoryEngine:
         laplace = max(mc_results.items(), key=lambda x: x[1].mean_score)
         strategies["Laplace (Risk Neutral)"] = f"{laplace[0]} (Avg: {laplace[1].mean_score:.2f})"
 
-        # Minimax Regret: evaluate regret across states defined by quantile levels.
-        # Comonotonicity assumption: evaluating regret across matching percentiles assumes
-        # states of the world act comonotonically across options (favorable/unfavorable outcomes
-        # align at equivalent quantiles), resolving the problem of comparing arbitrary independent
-        # Monte Carlo simulation draws as if they were identical real-world scenarios.
+        # Minimax Regret:
+        # If the model is fully shared, simulation k in option A corresponds to the exact same
+        # real-world scenario as simulation k in option B. We can compute pointwise regret per
+        # simulation scenario (standard decision theory formulation).
+        # If not fully shared, options are sampled independently; evaluating regret pointwise
+        # per simulation draw would compare uncorrelated random draws and measure sampling noise,
+        # so we fall back to comparing matching percentiles (quantile states).
         first_stats = next(iter(mc_results.values()))
         if first_stats.raw_scores is not None:
-            n_states = len(REGRET_STATE_PERCENTILES)
-            state_matrix = np.zeros((len(mc_results), n_states))
-            for i, (_name, stats) in enumerate(mc_results.items()):
-                state_matrix[i] = np.percentile(stats.raw_scores, REGRET_STATE_PERCENTILES)
-            best_per_state = np.max(state_matrix, axis=0)
-            max_regrets = np.max(best_per_state - state_matrix, axis=1)
-            min_regret_idx = int(np.argmin(max_regrets))
-            min_regret_option = list(mc_results.keys())[min_regret_idx]
-            min_regret_val = float(max_regrets[min_regret_idx])
+            if is_fully_shared:
+                method = "simulación"
+                reason = "modelo totalmente compartido con escenarios comunes acoplados"
+                n_sims = len(first_stats.raw_scores)
+                regret_matrix = np.zeros((len(mc_results), n_sims))
+                for i, (_name, stats) in enumerate(mc_results.items()):
+                    regret_matrix[i] = stats.raw_scores
+                best_per_sim = np.max(regret_matrix, axis=0)
+                max_regrets = np.max(best_per_sim - regret_matrix, axis=1)
+                min_regret_idx = int(np.argmin(max_regrets))
+                min_regret_option = list(mc_results.keys())[min_regret_idx]
+                min_regret_val = float(max_regrets[min_regret_idx])
+            else:
+                method = "percentiles"
+                reason = "modelo no totalmente compartido (opciones independientes)"
+                n_states = len(REGRET_STATE_PERCENTILES)
+                state_matrix = np.zeros((len(mc_results), n_states))
+                for i, (_name, stats) in enumerate(mc_results.items()):
+                    state_matrix[i] = np.percentile(stats.raw_scores, REGRET_STATE_PERCENTILES)
+                best_per_state = np.max(state_matrix, axis=0)
+                max_regrets = np.max(best_per_state - state_matrix, axis=1)
+                min_regret_idx = int(np.argmin(max_regrets))
+                min_regret_option = list(mc_results.keys())[min_regret_idx]
+                min_regret_val = float(max_regrets[min_regret_idx])
         else:
+            method = "medias"
+            reason = "sin raw_scores disponibles"
             means = {name: stats.mean_score for name, stats in mc_results.items()}
             best_possible = max(means.values())
             regrets = {name: best_possible - val for name, val in means.items()}
             min_regret_option = min(regrets.items(), key=lambda x: x[1])[0]
             min_regret_val = min(regrets.values())
-
-        strategies["Minimax Regret"] = f"{min_regret_option} (Max Regret: {min_regret_val:.2f})"
+        strategies["Minimax Regret"] = (
+            f"{min_regret_option} (Max Regret: {min_regret_val:.2f} [{method}: {reason}])"
+        )
 
         return strategies

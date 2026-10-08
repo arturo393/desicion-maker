@@ -123,11 +123,19 @@ class UncertainVariable(BaseModel):
     name: str = Field(..., min_length=1)
     dist_type: DistributionType
     params: list[float] = Field(default_factory=list)
+    driver: str | None = Field(default=None)
 
-    def __init__(self, name: str, dist_type: DistributionType, params: list[float] = None, **kwargs):
+    def __init__(
+        self,
+        name: str,
+        dist_type: DistributionType,
+        params: list[float] | None = None,
+        driver: str | None = None,
+        **kwargs: Any,
+    ):
         if params is None:
             params = []
-        super().__init__(name=name, dist_type=dist_type, params=params, **kwargs)
+        super().__init__(name=name, dist_type=dist_type, params=params, driver=driver, **kwargs)
 
     @model_validator(mode='after')
     def validate_params(self) -> 'UncertainVariable':
@@ -257,9 +265,16 @@ class DecisionOption(BaseModel):
             variables = {}
         super().__init__(name=name, description=description, variables=variables, **kwargs)
 
-    def add_variable(self, name: str, dist_type: DistributionType, *params: float) -> None:
+    def add_variable(
+        self,
+        name: str,
+        dist_type: DistributionType,
+        *params: float,
+        driver: str | None = None,
+    ) -> None:
         self.variables[name] = UncertainVariable(
             name=name,
             dist_type=dist_type,
-            params=list(params)
+            params=list(params),
+            driver=driver,
         )
