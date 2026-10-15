@@ -13,7 +13,7 @@ updated: 2026-10-02
 
 # 📊 Catálogo de Análisis de Decisiones Aplicadas
 
-Este registro centraliza los 37 análisis de decisión cuantitativa en `src/decision_maker/analyses/` —más `_template.py`, la plantilla canónica, que no es un análisis y por eso no cuenta— y los 7 scripts auxiliares en `src/decision_maker/scripts/`. Cada archivo representa un caso concreto modelado con metodologías estocásticas y multicriterio.
+Este registro centraliza los 38 análisis de decisión cuantitativa en `src/decision_maker/analyses/` —más `_template.py`, la plantilla canónica, que no es un análisis y por eso no cuenta— y los 7 scripts auxiliares en `src/decision_maker/scripts/`. Cada archivo representa un caso concreto modelado con metodologías estocásticas y multicriterio.
 
 Hub general de base de datos: [[database-hub]] | Catálogo de reportes y salidas: [[results-catalog]].
 
@@ -58,6 +58,7 @@ Hub general de base de datos: [[database-hub]] | Catálogo de reportes y salidas
 | `ANA-UQOMM-V6` | `uqomm_adopcion_v6_leakyfeeder.py` | Estrategia para máxima adopción de mercado en leaky feeder | [[monte-carlo-engine]], [[antifragile-engine]] | `active` |
 | `ANA-VLAD25` | `vlad25_modo_diagnostico_decision.py` | Coexistencia de modo polling legacy y push para VLAD25 | [[bayesian-inference-engine]], [[topsis]] | `active` |
 | `ANA-DIAG-LINEA-BASE` | `diagnostico_remoto_linea_base_decision.py` | Sobre qué línea de sw-diagnosticoremoto seguir construyendo (development, VHF v4.2.0 vendida, UHF ulad): unificar, sobre cuál base, o separarlas | [[unified-orchestrator]] (modo `standard`), [[monte-carlo-engine]], [[topsis]], [[decision-theory]], [[sensitivity-analysis]] | `active` |
+| `ANA-UI-ESTADO-RED` | `ui_estado_red_competencia.py` | Vista principal de estado de la red leaky feeder frente a lo que ofrece la competencia (Becker, PBE) | [[unified-orchestrator]] (modo `standard`), [[monte-carlo-engine]], [[decision-theory]], [[pareto-frontier]] | `active` |
 
 ---
 
