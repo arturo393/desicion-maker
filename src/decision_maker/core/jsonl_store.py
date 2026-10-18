@@ -6,10 +6,11 @@ Does NOT: Know about any specific domain model or business logic.
 
 from __future__ import annotations
 
-__all__ = ["JsonlStore"]
+__all__ = ["JsonlStore", "results_dir"]
 
 import json
 import logging
+import os
 from dataclasses import asdict
 from pathlib import Path
 from typing import Any, Generic, TypeVar
@@ -17,6 +18,15 @@ from typing import Any, Generic, TypeVar
 logger = logging.getLogger(__name__)
 
 T = TypeVar("T")
+
+
+def results_dir() -> Path:
+    """Where generated stores and reports write: $DM_RESULTS_DIR, else results/ under the cwd.
+
+    The env var exists so the test suite can point it at a temp dir: before 2026-10-18 every run of
+    the suite appended to the repo's results/ (reasoning_traces.jsonl grew 1830 → 2021 in one day).
+    """
+    return Path(os.getenv("DM_RESULTS_DIR") or "results")
 
 
 class JsonlStore(Generic[T]):
@@ -60,7 +70,7 @@ class JsonlStore(Generic[T]):
         self.path.parent.mkdir(parents=True, exist_ok=True)
         with open(self.path, "w") as f:
             for entry in self._entries:
-                f.write(json.dumps(asdict(entry)) + "\n")
+                f.write(json.dumps(asdict(entry)) + "\n")  # type: ignore[call-overload]  # T is always a dataclass; TypeVar cannot express it
 
     def entries(self) -> list[T]:
         return list(self._entries)

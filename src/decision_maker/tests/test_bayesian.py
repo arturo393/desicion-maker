@@ -44,3 +44,20 @@ class TestBayesianEngine:
         assert posteriors["Extreme"] > 0.5
         assert 0 <= posteriors["Extreme"] <= 1
         assert all(0 <= v <= 1 for v in posteriors.values())
+
+
+def test_posteriors_stay_probabilities_when_a_causal_graph_exists():
+    # analyze() used to add "_causal_graph" (a dict) to the posteriors: max(probs, key=probs.get) in
+    # the report then compared a dict with a float and crashed (found by mypy, 2026-10-18).
+    engine = BayesianEngine()
+    engine.add_node("Demand")
+    engine.add_node("Price", parents=["Demand"])
+    mc = {
+        "A": Statistics("A", 100, 10, 80, 120, 85, 115, 0.9, {"X": {"mean": 10}}, 85, 80),
+        "B": Statistics("B", 80, 10, 60, 100, 65, 95, 0.7, {"X": {"mean": 5}}, 65, 60),
+    }
+    probs = engine.analyze(mc)
+    assert set(probs) == {"A", "B"}
+    assert sum(probs.values()) == 1.0
+    assert max(probs, key=lambda k: probs[k]) == "A"
+    assert engine.causal_graph() == {"Demand": [], "Price": ["Demand"]}

@@ -17,7 +17,7 @@ from decision_maker.core.utils import resolve_winner
 
 
 def generate_html_inline(data: ReportData) -> str:
-    bluf_winner, bluf_reason = resolve_winner(data.topsis_scores, data.mc_results)
+    bluf_winner, bluf_reason = resolve_winner(data.mc_results)
 
     best_mc = max(data.mc_results.items(), key=lambda x: x[1].mean_score)[0]
     robustness = f"{data.sensitivity.get('robustness_score', 0) * 100:.0f}%" if data.sensitivity else "N/A"
@@ -33,7 +33,7 @@ def generate_html_inline(data: ReportData) -> str:
     )
 
     html = html_head + f"""<header class="header"><h1>Decision Intelligence Report</h1><div><span style="color:#8b949e;margin-right:1rem">{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}</span><span class="badge">{data.mode.upper()} TIER</span></div></header>
-<div class="kpi-card"><div class="kpi-title">Optimal Recommendation</div><div class="kpi-value success">{bluf_winner}</div><div class="kpi-sub">{bluf_reason}</div></div>
+<div class="kpi-card"><div class="kpi-title">Recommendation</div><div class="kpi-value success">{bluf_winner}</div><div class="kpi-sub">{bluf_reason}</div></div>
 <div class="kpi-card"><div class="kpi-title">Max Expected Value</div><div class="kpi-value">{best_mc}</div><div class="kpi-sub">Highest MC mean</div></div>
 <div class="kpi-card"><div class="kpi-title">Robustness</div><div class="kpi-value accent">{robustness}</div><div class="kpi-sub">Weight shock stability</div></div>
 <div class="kpi-card"><div class="kpi-title">Pareto Efficient</div><div class="kpi-value">{pareto_count} Options</div><div class="kpi-sub">Non-dominated frontier</div></div>"""

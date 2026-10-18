@@ -118,8 +118,9 @@ class PortfolioOptimizer:
 
         # Build return vector and covariance matrix from raw_scores
         returns = np.array([mc_results[n].mean_score for n in names])
-        if all(s.raw_scores is not None for s in mc_results.values()):
-            score_matrix = np.column_stack([mc_results[n].raw_scores for n in names])
+        raws = [mc_results[n].raw_scores for n in names]
+        if all(r is not None for r in raws):
+            score_matrix = np.column_stack([r for r in raws if r is not None])
             cov_matrix = np.cov(score_matrix, rowvar=False)
         else:
             stds = np.array([mc_results[n].std_dev for n in names])

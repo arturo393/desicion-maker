@@ -33,7 +33,7 @@ PYDANTIC_BASE = "BaseModel"
 # ---------------------------------------------------------------------------
 UX01_BASELINE = {
     ("adaptive_router.py", "_compute_complexity"): 5,
-    ("decision_commitment.py", "create"): 11,
+    ("decision_commitment.py", "create"): 10,
     ("decision_gates.py", "apply"): 5,
     ("decision_journal.py", "log_decision"): 14,
     ("decision_journal.py", "log_outcome"): 5,

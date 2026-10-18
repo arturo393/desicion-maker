@@ -10,6 +10,7 @@ __all__ = ["WeightDerivationEngine"]
 
 import itertools
 import logging
+from collections.abc import Callable
 from typing import Any
 
 import numpy as np
@@ -271,7 +272,7 @@ class WeightDerivationEngine:
         method: str,
         **kwargs,
     ) -> dict[str, Any]:
-        methods = {
+        methods: dict[str, Callable[..., dict[str, Any]]] = {
             "swing": WeightDerivationEngine.swing_weights,
             "swing_ranked": lambda **kw: WeightDerivationEngine.swing_from_ranking(
                 kw.get("ranked_factors", []),

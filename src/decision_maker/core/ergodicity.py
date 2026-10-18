@@ -85,6 +85,8 @@ class ErgodicityAnalyzer:
         horizons: list[int],
     ) -> ErgodicityResult:
         scores = stats.raw_scores
+        if scores is None:
+            raise ValueError(f"{name} has no raw_scores; analyze() skips such options before calling this")
 
         ensemble_mean = float(np.mean(scores))
         ensemble_std = float(np.std(scores))

@@ -15,16 +15,16 @@ from decision_maker.core.models import Statistics
 
 
 class CausalNode:
-    def __init__(self, name: str, parents: list[str] = None):
+    def __init__(self, name: str, parents: list[str] | None = None):
         self.name = name
         self.parents = parents or []
-        self.probabilities = {} # CPTs would go here in a real implementation
+        self.probabilities: dict[str, float] = {}  # CPTs would go here in a real implementation
 
 class BayesianEngine:
     def __init__(self):
         self.nodes: dict[str, CausalNode] = {}
 
-    def add_node(self, name: str, parents: list[str] = None) -> None:
+    def add_node(self, name: str, parents: list[str] | None = None) -> None:
         """Construct a Causal Graph / Bayesian Network node."""
         self.nodes[name] = CausalNode(name, parents)
 
@@ -66,10 +66,10 @@ class BayesianEngine:
                     best_idx = i
             best_counts[best_idx] += 1
 
-        posteriors = {name: float(count / num_posterior_samples) for name, count in zip(names, best_counts, strict=False)}
+        # Only probabilities here: the graph used to ride along as "_causal_graph" and broke every
+        # max(probs, key=probs.get) downstream. It is available from causal_graph().
+        return {name: float(count / num_posterior_samples) for name, count in zip(names, best_counts, strict=False)}
 
-        # Attach Causal Graph structural metadata to the output if nodes exist
-        if self.nodes:
-            posteriors["_causal_graph"] = {name: node.parents for name, node in self.nodes.items()}
-
-        return posteriors
+    def causal_graph(self) -> dict[str, list[str]]:
+        """Node -> parents of the causal graph built with add_node()."""
+        return {name: node.parents for name, node in self.nodes.items()}

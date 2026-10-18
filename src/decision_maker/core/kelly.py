@@ -88,6 +88,8 @@ class KellyCriterionEngine:
         win_threshold: float = 0.0,
     ) -> KellyResult:
         scores = stats.raw_scores
+        if scores is None:
+            raise ValueError(f"{name} has no raw_scores; analyze() skips such options before calling this")
 
         # win_threshold is the field-average benchmark passed from analyze(). An
         # option "wins" a simulation when it beats the field average. On normalized
@@ -138,7 +140,7 @@ class KellyCriterionEngine:
             edge=edge,
             odds=odds,
             win_probability=win_probability,
-            max_loss_fraction=max_loss_fraction,
+            max_loss_fraction=float(max_loss_fraction),
             verdict=verdict,
         )
 

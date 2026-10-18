@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "decision-maker/ledger-entry/v1",
+  "title": "Decision ledger entry",
+  "description": "One line of decisions/ledger.jsonl: a decision a person took, how sure they were, how and when it will be checked, and what happened. Producer: decision_maker.core.decision_commitment.Commitment.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["decision_id", "timestamp", "chosen_option", "confidence", "success_metric", "review_date", "outcome_recorded", "was_successful"],
+  "properties": {
+    "decision_id": {"type": "string", "pattern": "^commit_[0-9a-f]{12}$"},
+    "timestamp": {"type": "string", "description": "ISO 8601, UTC, when the decision was recorded"},
+    "chosen_option": {"type": "string", "minLength": 1},
+    "reasoning": {"type": "string"},
+    "confidence": {"type": "number", "exclusiveMinimum": 0, "maximum": 1, "description": "Stated probability that it works; what calibration scores"},
+    "success_metric": {"type": "string", "minLength": 1, "description": "Something observable in the world, never a model statistic"},
+    "success_threshold": {"type": "number", "description": "Legacy field, 0 in new entries"},
+    "deadline": {"type": "string", "description": "Legacy field, empty in new entries; review_date replaces it"},
+    "review_date": {"type": "string", "format": "date"},
+    "reversible": {"type": "boolean"},
+    "exit_criteria": {"type": "string"},
+    "pre_mortem": {"type": "string"},
+    "post_mortem": {"type": "string"},
+    "outcome_recorded": {"type": "boolean"},
+    "was_successful": {"type": "boolean", "description": "Meaningful only when outcome_recorded is true"},
+    "actual_result": {"type": "string"},
+    "tags": {"type": "array", "items": {"type": "string"}}
+  }
+}

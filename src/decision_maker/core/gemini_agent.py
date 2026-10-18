@@ -47,6 +47,8 @@ class GeminiDeepResearchAgent:
     def _generate(self, prompt: str) -> str:
         if self.backend == "agy":
             return ask_agy(prompt)
+        if self._client is None:
+            raise RuntimeError("Gemini backend selected but no client was created (missing API key or SDK)")
         response = self._client.models.generate_content(model=self.model, contents=prompt)
         return response.text
 

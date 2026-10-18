@@ -16,12 +16,12 @@ from typing import Any
 
 import numpy as np
 
-from decision_maker.core.jsonl_store import JsonlStore
+from decision_maker.core.jsonl_store import JsonlStore, results_dir
 from decision_maker.core.models import Factor, Statistics
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_JOURNAL_PATH = "results/decision_journal.jsonl"
+DEFAULT_JOURNAL_NAME = "decision_journal.jsonl"  # under results_dir()
 
 
 @dataclass
@@ -65,7 +65,7 @@ class DecisionJournal(JsonlStore[JournalEntry]):
     """
 
     def __init__(self, journal_path: str | Path | None = None):
-        super().__init__(journal_path, DEFAULT_JOURNAL_PATH, id_field="decision_id")
+        super().__init__(journal_path, str(results_dir() / DEFAULT_JOURNAL_NAME), id_field="decision_id")
 
     def _deserialize(self, data: dict[str, Any]) -> JournalEntry:
         return JournalEntry(**data)
@@ -156,7 +156,7 @@ class DecisionJournal(JsonlStore[JournalEntry]):
             if entry.engine_used:
                 engine_usage[entry.engine_used] = engine_usage.get(entry.engine_used, 0) + 1
 
-        patterns = []
+        patterns: list[dict[str, Any]] = []
         if assumption_counts:
             top_assumptions = sorted(assumption_counts.items(), key=lambda x: x[1], reverse=True)[:5]
             patterns.append({"type": "recurring_assumptions", "items": top_assumptions})

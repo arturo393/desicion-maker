@@ -136,7 +136,13 @@ def is_archive(text: str) -> bool:
     be gone. Those are counted and reported, never treated as failures — and never
     silently dropped either, because a historical note that reads like a current
     inventory is its own kind of lie.
+
+    A bitácora day (id BITACORA-YYYY-MM-DD) is historical by definition: it records what was
+    true that day. It failed here once a later day retired a file an earlier day had named
+    (2026-10-18), which would have forced rewriting the past to keep CI green.
     """
+    if re.search(r"^id:\s*BITACORA-\d{4}-\d{2}-\d{2}\s*$", text, re.M):
+        return True
     m = re.search(r"^tags:\s*\[(.*?)\]\s*$", text, re.M)
     return bool(m and "archive" in {t.strip().strip("'\" ") for t in m.group(1).split(",")})
 

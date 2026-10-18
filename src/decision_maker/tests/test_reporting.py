@@ -1,5 +1,6 @@
 import os
 import tempfile
+from pathlib import Path
 
 import pandas as pd
 import pytest
@@ -185,3 +186,56 @@ class TestReporting:
             "ai_insights": {},
         }
         validate_report(valid_with_null)
+
+
+class TestRecommendationIsTheValidatedEngine:
+    """The report recommends what the Monte Carlo (validated) ranks first, like commitment_draft does.
+
+    Until 2026-10-18 the Markdown/HTML "Recommended Strategy" was TOPSIS's winner, a characterized
+    engine that on crisp data is a weighted sum, so one run could recommend two different options.
+    """
+
+    def _data(self, tmpdir, weight_robustness=None):
+        results = {
+            "A": Statistics("A", 100, 10, 80, 120, 85, 115, 0.9, {"X": {"mean": 50}}, 85, 80),
+            "B": Statistics("B", 80, 10, 60, 100, 65, 95, 0.7, {"X": {"mean": 30}}, 65, 60),
+        }
+        return ReportData(
+            mode="standard",
+            mc_results=results,
+            topsis_scores=pd.Series({"B": 0.9, "A": 0.1}),  # TOPSIS disagrees on purpose
+            strategies={},
+            pareto={"efficient_frontier": ["A", "B"], "dominated_options": []},
+            sensitivity={"weight_changes": [], "score_changes": [], "robustness_score": 1.0},
+            future={},
+            ai_reports={},
+            factors=[Factor("X", 1.0, maximize=True)],
+            results_dir=tmpdir,
+            weight_robustness=weight_robustness,
+        ).prepare()
+
+    def test_markdown_recommends_the_monte_carlo_winner(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            md = Path(save_report(self._data(tmpdir))["md"]).read_text()
+        assert "**Recommendation:** **A**" in md
+        assert "second opinion" in md.lower()
+        assert "**B**" in md
+        assert "`validated`" in md
+        assert "`experimental`" in md
+
+    def test_markdown_reports_weight_robustness(self):
+        wr = {"stated_winner": "A", "informed": {"A": 0.81, "B": 0.19}, "uninformed": {"A": 0.6, "B": 0.4},
+              "verdict": "robust"}
+        with tempfile.TemporaryDirectory() as tmpdir:
+            md = Path(save_report(self._data(tmpdir, wr))["md"]).read_text()
+        assert "Weight Robustness" in md
+        assert "81%" in md
+        assert "robust" in md
+
+    def test_html_headline_is_the_monte_carlo_winner(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            html = Path(save_report(self._data(tmpdir))["html"]).read_text()
+        import re
+
+        recommendation = html.split("Recommendation", 1)[1][:300]
+        assert re.search(r">\s*A\s*<", recommendation)

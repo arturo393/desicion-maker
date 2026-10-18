@@ -18,10 +18,10 @@ class RankAggregator:
     def borda_count(rankings: dict[str, pd.Series]) -> pd.Series:
         if not rankings:
             return pd.Series()
-        all_options = set()
+        seen: set[str] = set()
         for series in rankings.values():
-            all_options.update(series.index)
-        all_options = sorted(all_options)
+            seen.update(series.index)
+        all_options = sorted(seen)
         n = len(all_options)
         borda_scores = {opt: 0.0 for opt in all_options}
         for _method_name, series in rankings.items():
@@ -43,10 +43,10 @@ class RankAggregator:
     def copeland(rankings: dict[str, pd.Series]) -> pd.Series:
         if not rankings:
             return pd.Series()
-        all_options = set()
+        seen: set[str] = set()
         for series in rankings.values():
-            all_options.update(series.index)
-        all_options = sorted(all_options)
+            seen.update(series.index)
+        all_options = sorted(seen)
         copeland_scores = {opt: 0.0 for opt in all_options}
         for a in all_options:
             for b in all_options:

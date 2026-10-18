@@ -28,6 +28,7 @@ class DistributionType(StrEnum):
     LOGNORMAL = "lognormal"
     GAMMA = "gamma"
     POISSON = "poisson"
+    PERT = "pert"
 
 # Validation rules: (min_params, param_names)
 VALIDATION_RULES = {
@@ -41,7 +42,11 @@ VALIDATION_RULES = {
     DistributionType.LOGNORMAL: (2, ("mean", "sigma")),
     DistributionType.GAMMA: (2, ("shape", "scale")),
     DistributionType.POISSON: (1, ("rate",)),
+    DistributionType.PERT: (3, ("min", "most_likely", "max")),
 }
+
+# Beta-PERT weight on the most likely value: the classic 4 makes mean = (min + 4*mode + max) / 6.
+PERT_LAMBDA = 4.0
 
 def _sample_deterministic(params: list[float], size: int, rng: np.random.Generator | None = None) -> np.ndarray:
     return np.full(size, params[0])
@@ -103,7 +108,13 @@ def _sample_poisson(params: list[float], size: int, rng: np.random.Generator | N
         return rng.poisson(lam, size).astype(float)
     return np.random.poisson(lam, size).astype(float)
 
-
+def _sample_pert(params: list[float], size: int, rng: np.random.Generator | None = None) -> np.ndarray:
+    lo, mode, hi = params[0], params[1], params[2]
+    span = hi - lo
+    a = 1.0 + PERT_LAMBDA * (mode - lo) / span
+    b = 1.0 + PERT_LAMBDA * (hi - mode) / span
+    draws = rng.beta(a, b, size) if rng is not None else np.random.beta(a, b, size)
+    return lo + draws * span
 
 SAMPLE_DISPATCH: dict[DistributionType, Callable] = {
     DistributionType.DETERMINISTIC: _sample_deterministic,
@@ -116,6 +127,7 @@ SAMPLE_DISPATCH: dict[DistributionType, Callable] = {
     DistributionType.LOGNORMAL: _sample_lognormal,
     DistributionType.GAMMA: _sample_gamma,
     DistributionType.POISSON: _sample_poisson,
+    DistributionType.PERT: _sample_pert,
 }
 
 
@@ -150,6 +162,11 @@ class UncertainVariable(BaseModel):
 
         if self.dist_type == DistributionType.NORMAL and len(self.params) >= 2 and self.params[1] < 0:
             raise ValueError(f"NORMAL std must be >= 0, got {self.params[1]}")
+
+        if self.dist_type == DistributionType.PERT:
+            lo, mode, hi = self.params[:3]
+            if not (lo <= mode <= hi and lo < hi):
+                raise ValueError(f"PERT needs min <= most_likely <= max with min < max, got {self.params[:3]}")
 
         return self
 
@@ -260,7 +277,9 @@ class DecisionOption(BaseModel):
     description: str = ""
     variables: dict[str, UncertainVariable] = Field(default_factory=dict)
 
-    def __init__(self, name: str, description: str = "", variables: dict[str, UncertainVariable] = None, **kwargs):
+    def __init__(
+        self, name: str, description: str = "", variables: dict[str, UncertainVariable] | None = None, **kwargs: Any
+    ):
         if variables is None:
             variables = {}
         super().__init__(name=name, description=description, variables=variables, **kwargs)

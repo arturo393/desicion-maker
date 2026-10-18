@@ -12,7 +12,7 @@ import json
 import logging
 import math
 import os
-from typing import Any
+from typing import Any, cast
 
 import numpy as np
 
@@ -22,11 +22,10 @@ from decision_maker.core.scenarios import (
     collect_drivers,
     is_fully_shared_model,
 )
+from decision_maker.core.utils import DEFAULT_SEED
 
 logger = logging.getLogger(__name__)
 
-RUIN_THRESHOLD_PERCENTILE = 5.0
-EPSILON_SCORE = 1e-12
 
 # Z-score multiplier for the standard error of the difference between the top two option means.
 # Under asymptotic normality (Z ~ 1.96 approx 2.0), this establishes a ~95% confidence threshold.
@@ -40,7 +39,7 @@ class MonteCarloEngine:
         self,
         num_simulations: int = 10000,
         correlation_matrix: np.ndarray | None = None,
-        seed: int | None = None,
+        seed: int | None = DEFAULT_SEED,
     ):
         if num_simulations < 1:
             raise ValueError(f"num_simulations must be >= 1, got {num_simulations}")
@@ -49,9 +48,12 @@ class MonteCarloEngine:
         self.options: list[DecisionOption] = []
         self._option_names: set = set()
         self.correlation_matrix = correlation_matrix
-        # Every run() starts from this seed, so any run is reproducible from the seed in its trace.
+        # Reproducible by default (DEFAULT_SEED since 2026-10-18): same model, same numbers. Pass
+        # seed=None for fresh entropy. Every run() starts from this seed, so any run is reproducible
+        # from the seed in its trace.
         # A generator kept on the instance would make the second run depend on the first.
-        self.seed: int = seed if seed is not None else int(np.random.SeedSequence().entropy)
+        # SeedSequence() with no argument always draws an int entropy; the stub types it for every constructor.
+        self.seed: int = seed if seed is not None else cast(int, np.random.SeedSequence().entropy)
         self.driver_samples: dict[str, np.ndarray] = {}
         self.last_convergence: dict[str, Any] = {
             "converged": None,
@@ -77,7 +79,7 @@ class MonteCarloEngine:
         """Return True if every variable in every option is bound to a shared driver."""
         return is_fully_shared_model(self.options)
 
-    def _apply_correlation(self, samples: dict[str, np.ndarray]) -> dict[str, np.ndarray]:
+    def _apply_correlation(self, samples: dict[str, dict[str, np.ndarray]]) -> dict[str, dict[str, np.ndarray]]:
         """Apply Cholesky decomposition to induce correlation between factors."""
         if self.correlation_matrix is None:
             return samples
@@ -87,18 +89,21 @@ class MonteCarloEngine:
         if n_factors < 2:
             return samples
 
+        # A matrix the engine cannot apply is a modeling error, not a hint: until 2026-10-18 each of
+        # these cases logged a warning and ran uncorrelated, so the result carried a narrower spread
+        # than the analysis had modelled and nothing in it said so.
         if self.correlation_matrix.shape != (n_factors, n_factors):
-            logger.warning(
-                f"Correlation matrix shape {self.correlation_matrix.shape} "
-                f"doesn't match {n_factors} factors — skipping correlation"
+            raise ValueError(
+                f"Correlation matrix shape {self.correlation_matrix.shape} doesn't match the "
+                f"{n_factors} factors {factor_names}"
             )
-            return samples
+        if not np.allclose(self.correlation_matrix, self.correlation_matrix.T):
+            raise ValueError("Correlation matrix is not symmetric")
 
         try:
             L = np.linalg.cholesky(self.correlation_matrix)
-        except np.linalg.LinAlgError:
-            logger.warning("Correlation matrix not positive definite — skipping correlation")
-            return samples
+        except np.linalg.LinAlgError as exc:
+            raise ValueError("Correlation matrix is not positive definite") from exc
 
         for opt in self.options:
             # Exclude variables with a shared driver: intra-option Iman-Conover correlation
@@ -128,14 +133,15 @@ class MonteCarloEngine:
             from scipy.stats import norm as norm_dist
             uniform_correlated = norm_dist.cdf(correlated)
 
+            # Iman-Conover: keep each marginal, reorder it so draw i takes the value whose rank
+            # matches the rank of the correlated score in row i. The scatter form
+            # `template[ranks] = sorted` applied the inverse permutation, which is a random one:
+            # rho=0.8 came out as Spearman 0.003 until 2026-10-18.
             for j, fn in enumerate(available):
                 if fn in samples[opt.name]:
-                    original = samples[opt.name][fn]
-                    order = np.argsort(original)
-                    template = np.zeros(self.num_simulations)
-                    rank_order = np.argsort(np.argsort(uniform_correlated[:, j]))
-                    template[rank_order] = original[order]
-                    samples[opt.name][fn] = template
+                    sorted_values = np.sort(samples[opt.name][fn])
+                    ranks = np.argsort(np.argsort(uniform_correlated[:, j]))
+                    samples[opt.name][fn] = sorted_values[ranks]
 
         return samples
 
@@ -164,9 +170,9 @@ class MonteCarloEngine:
         logger.info(f"Running {self.num_simulations} Monte Carlo simulations in Python...")
 
         rng = np.random.default_rng(self.seed)
-        sampled_data = {}
+        sampled_data: dict[str, dict[str, np.ndarray]] = {}
         for opt in self.options:
-            opt_data = {}
+            opt_data: dict[str, np.ndarray] = {}
             for v_name, var in opt.variables.items():
                 opt_data[v_name] = var.sample(self.num_simulations, rng=rng)
             sampled_data[opt.name] = opt_data
@@ -226,23 +232,13 @@ class MonteCarloEngine:
                         else:
                             total_scores -= vals * f.weight
 
-            if np.std(total_scores) > EPSILON_SCORE:
-                ruin_threshold = np.percentile(total_scores, RUIN_THRESHOLD_PERCENTILE)
-                ruin_mask = total_scores <= ruin_threshold
-                ruin_count = np.sum(ruin_mask)
-                if ruin_count > 0:
-                    ruin_penalty = 1.0 - (ruin_count / self.num_simulations)
-                    # Restar |s|*(1-p) en vez de multiplicar: con s<0 (normalize=False)
-                    # multiplicar por p<1 acercaba la cola a cero y la premiaba.
-                    total_scores[ruin_mask] -= np.abs(total_scores[ruin_mask]) * (1.0 - ruin_penalty)
-
+            # No tail trim (removed 2026-10-18): it cut each option's own worst 5 %, which every option
+            # has, so it hit a safe option and a ruinous one alike. Tail risk is reported as
+            # cvar_95/var_95, and a real ruin line belongs in DecisionGate with a threshold the
+            # decision maker states.
             option_scores[opt.name] = total_scores
             option_factor_stats[opt.name] = factor_stats
 
-        # cross_option_mean is calculated from option_scores that ALREADY include the tail/ruin
-        # penalty. Comparing penalized total_scores against an unpenalized cross-option mean
-        # created an asymmetric benchmark where penalized options were compared against a baseline
-        # that ignored downside tail risk. Both sides now consistently use tail-penalized scores.
         score_matrix = np.column_stack(list(option_scores.values())) if option_scores else np.empty((self.num_simulations, 0))
         cross_option_mean = np.mean(score_matrix, axis=1) if score_matrix.shape[1] > 0 else np.zeros(self.num_simulations)
 

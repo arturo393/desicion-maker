@@ -79,7 +79,7 @@ def ranking_confidence(
     names = list(mc_results.keys())
     n_opts = len(names)
 
-    raw_scores = {}
+    raw_scores: dict[str, np.ndarray | None] = {}
     for name, stats in mc_results.items():
         if stats.raw_scores is not None and len(stats.raw_scores) > 1:
             raw_scores[name] = np.asarray(stats.raw_scores, dtype=float)
@@ -92,8 +92,9 @@ def ranking_confidence(
     for b in range(n_resamples):
         resampled_means = np.zeros(n_opts)
         for i, name in enumerate(names):
-            if raw_scores[name] is not None:
-                sample = rng.choice(raw_scores[name], size=len(raw_scores[name]), replace=True)
+            own = raw_scores[name]
+            if own is not None:
+                sample = rng.choice(own, size=len(own), replace=True)
                 resampled_means[i] = sample.mean()
             else:
                 resampled_means[i] = mc_results[name].mean_score

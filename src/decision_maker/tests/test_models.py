@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 
 from decision_maker.core.models import DecisionOption, DistributionType, Factor, UncertainVariable
 
@@ -248,3 +249,29 @@ class TestDecisionOption:
         opt = DecisionOption("Test")
         assert opt.description == ""
         assert opt.variables == {}
+
+
+class TestPert:
+    """Beta-PERT from (min, most likely, max): how people actually estimate cost and duration."""
+
+    def test_mean_matches_the_pert_formula(self):
+        var = UncertainVariable("Cost", DistributionType.PERT, [1000, 1500, 4000])
+        samples = var.sample(200_000, rng=np.random.default_rng(0))
+        # PERT mean = (min + 4*mode + max) / 6
+        assert samples.mean() == pytest.approx((1000 + 4 * 1500 + 4000) / 6, rel=0.005)
+
+    def test_stays_inside_its_bounds(self):
+        # The reason it exists here: a NORMAL cost of [5000, 1000] (the old template) draws negative
+        # costs; PERT cannot leave [min, max].
+        samples = UncertainVariable("Cost", DistributionType.PERT, [0, 2, 10]).sample(50_000, rng=np.random.default_rng(1))
+        assert samples.min() >= 0
+        assert samples.max() <= 10
+
+    def test_is_right_skewed_when_the_mode_is_near_the_minimum(self):
+        samples = UncertainVariable("Days", DistributionType.PERT, [10, 12, 40]).sample(50_000, rng=np.random.default_rng(2))
+        assert np.mean(samples) > np.median(samples)
+
+    @pytest.mark.parametrize("params", [[5, 1, 10], [1, 11, 10], [3, 3, 3], [10, 5, 1]])
+    def test_refuses_parameters_out_of_order(self, params):
+        with pytest.raises(ValueError, match="PERT"):
+            UncertainVariable("X", DistributionType.PERT, params)

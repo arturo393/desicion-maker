@@ -96,7 +96,7 @@ def test_every_analysis_file_is_in_the_table() -> None:
     """
     text = _read(DOCS / "decision-analyses.md")
     rows = re.findall(r"^\| `ANA-[^`]*`\s*\|\s*`([^`]+\.py)`", text, re.MULTILINE)
-    on_disk = {p.name for p in (REPO / "src" / "decision_maker" / "analyses").glob("*.py")}
+    on_disk = {p.name for p in (REPO / "analyses").glob("*.py")}
 
     assert len(rows) == len(on_disk), (
         f"the table lists {len(rows)} analyses but analyses/ holds {len(on_disk)} files"
@@ -111,7 +111,7 @@ def test_prose_analysis_count_excludes_the_template() -> None:
     prose = re.search(r"los (\d+) an[aá]lisis de decisi[oó]n cuantitativa", text)
     assert prose, "decision-analyses.md no longer states the analysis count in the expected form"
 
-    on_disk = {p.name for p in (REPO / "src" / "decision_maker" / "analyses").glob("*.py")}
+    on_disk = {p.name for p in (REPO / "analyses").glob("*.py")}
     assert "_template.py" in on_disk, "the template moved; this test's premise needs revisiting"
 
     claimed = int(prose.group(1))
@@ -193,7 +193,7 @@ def test_documented_engine_count_is_the_derived_one() -> None:
     detect the number being wrong — only reading it off the source can.
     """
     expected = len(ENGINE_UNIVERSE)
-    for name in ("architecture.md", "roadmap.md", "kanban.md"):
+    for name in ("architecture.md", "roadmap.md", "Tablero.md"):
         # "N motores" a secas tambien matchea prosa sobre una cantidad parcial ("faltan
         # tres motores"), asi que se exige la frase canonica del total.
         match = re.search(r"(\d+)\s+motores ruteables", _read(DOCS / name), re.IGNORECASE)
@@ -252,3 +252,19 @@ def test_default_markexpr_matches_pyproject() -> None:
 
     addopts = tomllib.loads((REPO / "pyproject.toml").read_text())["tool"]["pytest"]["ini_options"]["addopts"]
     assert f'-m "{DEFAULT_MARKEXPR}"' in addopts
+
+
+def test_readme_version_matches_pyproject() -> None:
+    """The README heading and the package metadata state the same release.
+
+    pyproject said 3.0.0 while the README and the CHANGELOG had moved to 3.1 (found 2026-10-18):
+    `pip show` and the docs disagreed about which release was installed.
+    """
+    import tomllib
+
+    declared = tomllib.loads(_read(REPO / "pyproject.toml"))["project"]["version"]
+    heading = re.search(r"^# .*\(v(\d+\.\d+)\)", _read(REPO / "README.md"), re.MULTILINE)
+    assert heading, "README.md no longer states the version in its heading as (vX.Y)"
+    assert declared.startswith(heading.group(1) + "."), (
+        f"pyproject.toml declares {declared} but README.md says v{heading.group(1)}"
+    )

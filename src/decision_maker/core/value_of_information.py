@@ -81,8 +81,8 @@ def calculate_value_of_information(
 
     # Extract score matrix S of shape (N, M)
     option_names = list(mc_results.keys())
-    first_stats = mc_results[option_names[0]]
-    if first_stats.raw_scores is None:
+    raws = [mc_results[name].raw_scores for name in option_names]
+    if any(r is None for r in raws):  # checked on every option, not only the first
         return {
             "evpi": {
                 "value": None,
@@ -95,7 +95,7 @@ def calculate_value_of_information(
             "winner_mean_score": 0.0,
         }
 
-    scores_matrix = np.column_stack([mc_results[name].raw_scores for name in option_names])
+    scores_matrix = np.column_stack([r for r in raws if r is not None])
     num_simulations, _num_options = scores_matrix.shape
 
     # Baseline prior best expected payoff: max_i mean_k(s_i(k))

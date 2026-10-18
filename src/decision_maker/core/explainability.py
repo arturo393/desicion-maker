@@ -73,7 +73,7 @@ class ExplainabilityEngine:
         result: dict[str, Any] = {"options": {}, "max_possible": max_possible}
 
         for opt_name, stats in mc_results.items():
-            option_factors = []
+            option_factors: list[dict[str, Any]] = []
             for f in factors:
                 if f.name not in stats.factor_stats:
                     continue
@@ -296,18 +296,20 @@ class ExplainabilityEngine:
                             counterfactual=counterfactual,
                         )
                     )
-                    ai_text = agent.research("Explain decision", prompt)
-                    if hasattr(ai_text, "__await__"):
-                        try:
-                            import asyncio
+                    import asyncio
 
-                            ai_text = asyncio.run(ai_text)
-                        except RuntimeError:
-                            logger.warning("AI narrative skipped: event loop already running")
-                            ai_text = None
+                    # research() is a coroutine; this sync method cannot await it inside a running loop.
+                    ai_text: str | None
+                    coro = agent.research("Explain decision", prompt)
+                    try:
+                        ai_text = asyncio.run(coro)
+                    except RuntimeError:
+                        coro.close()  # never awaited: close it instead of leaking a warning
+                        logger.warning("AI narrative skipped: event loop already running")
+                        ai_text = None
                     if ai_text:
                         lines.append("**AI-Generated Analysis:**")
-                        lines.append(ai_text if isinstance(ai_text, str) else str(ai_text))
+                        lines.append(ai_text)
             except (ConnectionError, TimeoutError, ValueError) as e:
                 logger.warning(f"AI narrative generation failed: {e}")
 

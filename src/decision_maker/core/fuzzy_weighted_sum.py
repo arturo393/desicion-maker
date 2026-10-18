@@ -109,7 +109,7 @@ class FuzzyWeightedSum:
                 "breakdown": breakdown,
             })
 
-        results.sort(key=lambda x: x["overall_score"], reverse=True)
+        results.sort(key=lambda x: float(x["overall_score"]), reverse=True)  # type: ignore[arg-type]  # overall_score is the float set just above
         for rank, res in enumerate(results, 1):
             res["rank"] = rank
         return results

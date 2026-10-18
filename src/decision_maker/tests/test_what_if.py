@@ -127,3 +127,13 @@ class TestWhatIfEngine:
         bounds = _compute_raw_bounds(_build_mc_results(), ["Cost", "Quality"])
         assert bounds["Cost"]["min"] == 10.0
         assert bounds["Cost"]["max"] == 22.0
+
+    @pytest.mark.parametrize("exc", [EOFError, KeyboardInterrupt])
+    def test_repl_exits_cleanly_on_ctrl_d_or_ctrl_c(self, engine, monkeypatch, exc):
+        # The handler called logger.info() with no message: leaving the REPL with Ctrl+D or Ctrl+C
+        # raised TypeError instead of exiting (found by mypy, 2026-10-18).
+        def raise_exc(_prompt=""):
+            raise exc
+
+        monkeypatch.setattr("builtins.input", raise_exc)
+        engine.repl()

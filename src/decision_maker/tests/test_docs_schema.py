@@ -23,16 +23,17 @@ import pytest
 
 VAULT = Path(__file__).resolve().parents[3] / "docs"
 
-# Measured 28-Sep-2026. Change these on purpose, never by accident.
-EXPECTED_NOTES = 54
+# Measured 28-Sep-2026, recounted 18-Oct-2026: +bitacora days, +2 module notes, -12 historical notes retired.
+# Change these on purpose, never by accident.
+EXPECTED_NOTES = 50
 EXPECTED_TAGS = 58
-EXPECTED_ARCHIVE = 25
-EXPECTED_MODULE_NOTES = 21
+EXPECTED_ARCHIVE = 14
+EXPECTED_MODULE_NOTES = 23
 
 REQUIRED_FIELDS = {
     "aliases", "tags", "id", "title", "type", "category", "status", "related", "updated",
 }
-OPTIONAL_FIELDS = {"created", "module", "class", "kanban-plugin"}
+OPTIONAL_FIELDS = {"created", "module", "class", "kanban-plugin", "proyecto_gestion"}
 KNOWN_FIELDS = REQUIRED_FIELDS | OPTIONAL_FIELDS
 
 # The 12 values the `type` field accepts, which are also the Tipo tag axis.
@@ -127,7 +128,7 @@ class TestFieldVocabulary:
 
         table = {
             match.group(1)
-            for match in re.finditer(r"^\|\s*`([a-z-]+)`\s*\|", prose, re.M)
+            for match in re.finditer(r"^\|\s*`([a-z_-]+)`\s*\|", prose, re.M)  # `_`: proyecto_gestion was invisible
         }
         used: set[str] = set()
         for p in _notes():

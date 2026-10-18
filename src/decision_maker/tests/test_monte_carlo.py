@@ -2,6 +2,7 @@ import math
 
 import numpy as np
 import pytest
+from scipy import stats
 
 from decision_maker.core.models import DecisionOption, DistributionType, Factor
 from decision_maker.core.monte_carlo import MonteCarloEngine
@@ -52,17 +53,23 @@ class TestMonteCarloEngine:
         assert (r["A"].raw_factor_data["X"] == 10.0).all()
         assert (r["B"].raw_factor_data["X"] == 20.0).all()
 
-    def test_tail_penalty_worsens_negative_scores(self):
-        """Con normalize=False y puntajes negativos la penalizacion de cola no puede mejorar la cola."""
-        np.random.seed(0)
-        engine = MonteCarloEngine(num_simulations=2000)
-        opt = DecisionOption("Neg")
+    def test_score_is_exactly_the_weighted_value(self):
+        """No hidden adjustment: every draw scores sum(w * x). Tail risk is reported (cvar_95), not baked in.
+
+        Until 2026-10-18 the engine trimmed each option's own worst 5 % of draws. Every option always has
+        a worst 5 %, so the trim fired for a safe option and a ruinous one alike: it measured nothing.
+        """
+        engine = MonteCarloEngine(num_simulations=2000, seed=0)
+        opt = DecisionOption("A")
         opt.add_variable("X", DistributionType.NORMAL, -100, 50)
-        engine.add_factor(Factor("X", 1.0, maximize=True))
+        opt.add_variable("Y", DistributionType.NORMAL, 10, 3)
+        engine.add_factor(Factor("X", 0.7, maximize=True))
+        engine.add_factor(Factor("Y", 0.3, maximize=False))
         engine.add_option(opt)
-        np.random.seed(0)
-        raw = engine.run(normalize=False)["Neg"]
-        assert raw.min_score <= float(np.min(raw.raw_factor_data["X"]))
+        r = engine.run(normalize=False)["A"]
+        expected = 0.7 * r.raw_factor_data["X"] - 0.3 * r.raw_factor_data["Y"]
+        np.testing.assert_allclose(r.raw_scores, expected)
+        assert r.cvar_95 < r.percentile_5 < r.mean_score
 
     def test_multiple_options(self):
         engine = MonteCarloEngine(num_simulations=100)
@@ -266,10 +273,13 @@ class TestMonteCarloEngine:
         engine.add_factor(Factor("Y", 0.5, maximize=True))
         engine.add_option(opt)
         results = engine.run()
-        assert "A" in results
-        assert np.isfinite(results["A"].mean_score)
+        # The effect, not the intention: the sampled X and Y must carry the requested dependence.
+        # A Gaussian copula with rho=0.8 gives Spearman 6/pi*asin(0.4) ~= 0.786.
+        data = results["A"].raw_factor_data
+        rho = stats.spearmanr(data["X"], data["Y"])[0]
+        assert rho == pytest.approx(0.786, abs=0.03)
 
-    def test_correlation_matrix_wrong_shape_skipped(self):
+    def test_correlation_matrix_wrong_shape_raises(self):
         corr = np.array([[1.0, 0.8, 0.5], [0.8, 1.0, 0.5], [0.5, 0.5, 1.0]])
         engine = MonteCarloEngine(num_simulations=1000, correlation_matrix=corr)
         opt = DecisionOption("A")
@@ -278,10 +288,12 @@ class TestMonteCarloEngine:
         engine.add_factor(Factor("X", 0.5, maximize=True))
         engine.add_factor(Factor("Y", 0.5, maximize=True))
         engine.add_option(opt)
-        results = engine.run()
-        assert "A" in results
+        # It used to log a warning and run uncorrelated: an analysis asked for dependence and got
+        # independence, with a narrower spread than it modelled and nothing in the result saying so.
+        with pytest.raises(ValueError, match="shape"):
+            engine.run()
 
-    def test_correlation_matrix_not_positive_definite_skipped(self):
+    def test_correlation_matrix_not_positive_definite_raises(self):
         corr = np.array([[1.0, 1.5], [1.5, 1.0]])
         engine = MonteCarloEngine(num_simulations=1000, correlation_matrix=corr)
         opt = DecisionOption("A")
@@ -290,8 +302,19 @@ class TestMonteCarloEngine:
         engine.add_factor(Factor("X", 0.5, maximize=True))
         engine.add_factor(Factor("Y", 0.5, maximize=True))
         engine.add_option(opt)
-        results = engine.run()
-        assert "A" in results
+        with pytest.raises(ValueError, match="positive definite"):
+            engine.run()
+
+    def test_correlation_matrix_asymmetric_raises(self):
+        engine = MonteCarloEngine(num_simulations=100, correlation_matrix=np.array([[1.0, 0.5], [0.1, 1.0]]))
+        opt = DecisionOption("A")
+        opt.add_variable("X", DistributionType.NORMAL, 0, 1)
+        opt.add_variable("Y", DistributionType.NORMAL, 0, 1)
+        engine.add_factor(Factor("X", 0.5, maximize=True))
+        engine.add_factor(Factor("Y", 0.5, maximize=True))
+        engine.add_option(opt)
+        with pytest.raises(ValueError, match="symmetric"):
+            engine.run()
 
     def test_correlation_matrix_none_skips_correlation(self):
         engine = MonteCarloEngine(num_simulations=100)
@@ -375,31 +398,35 @@ class TestMonteCarloEngine:
         assert res_multi["B"].success_rate is not None
         assert 0.0 <= res_multi["B"].success_rate <= 1.0
 
-    def test_cross_option_mean_uses_tail_penalized_scores(self):
-        """Cross-option mean must be computed from tail-penalized scores on both sides."""
+    def test_success_rate_compares_against_the_cross_option_mean(self):
         eng = MonteCarloEngine(num_simulations=500, seed=0)
         eng.add_factor(Factor("X", 1.0, maximize=True))
-
-        opt_a = DecisionOption("A")
-        opt_a.add_variable("X", DistributionType.NORMAL, -15.0, 5.0)
-
-        opt_b = DecisionOption("B")
-        opt_b.add_variable("X", DistributionType.NORMAL, 0.0, 10.0)
-
-        opt_c = DecisionOption("C")
-        opt_c.add_variable("X", DistributionType.DETERMINISTIC, -10.0)
-
-        eng.add_option(opt_a)
-        eng.add_option(opt_b)
-        eng.add_option(opt_c)
-
+        for name, mean, std in (("A", -15.0, 5.0), ("B", 0.0, 10.0), ("C", -10.0, 1.0)):
+            opt = DecisionOption(name)
+            opt.add_variable("X", DistributionType.NORMAL, mean, std)
+            eng.add_option(opt)
         res = eng.run(normalize=False)
+        cross = (res["A"].raw_scores + res["B"].raw_scores + res["C"].raw_scores) / 3.0
+        assert res["A"].success_rate == float(np.mean(res["A"].raw_scores > cross))
 
-        penalized_cross_mean = (res["A"].raw_scores + res["B"].raw_scores + res["C"].raw_scores) / 3.0
-        unpenalized_cross_mean = (res["A"].raw_factor_data["X"] + res["B"].raw_factor_data["X"] + res["C"].raw_factor_data["X"]) / 3.0
 
-        sr_penalized = float(np.mean(res["A"].raw_scores > penalized_cross_mean))
-        sr_unpenalized = float(np.mean(res["A"].raw_scores > unpenalized_cross_mean))
+def _two_option_engine(**kwargs) -> MonteCarloEngine:
+    engine = MonteCarloEngine(num_simulations=500, **kwargs)
+    engine.add_factor(Factor("X", 1.0, maximize=True))
+    for name, mean in (("A", 1.0), ("B", 1.05)):
+        opt = DecisionOption(name)
+        opt.add_variable("X", DistributionType.NORMAL, mean, 1.0)
+        engine.add_option(opt)
+    return engine
 
-        assert sr_penalized != sr_unpenalized
-        assert res["A"].success_rate == sr_penalized
+
+def test_same_model_same_numbers_by_default():
+    """Reproducible unless asked otherwise. 42 of 44 analyses passed no seed, and one of them changed
+    winner between two runs of the same code (2026-10-18): a result nobody could reproduce."""
+    a = _two_option_engine().run()
+    b = _two_option_engine().run()
+    assert a["A"].mean_score == b["A"].mean_score
+
+
+def test_explicit_none_still_draws_fresh_entropy():
+    assert _two_option_engine(seed=None).seed != _two_option_engine(seed=None).seed

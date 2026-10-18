@@ -28,10 +28,9 @@ logger = logging.getLogger(__name__)
 # router never dispatches to. Routable engine and analysis module are two
 # different things and the notes used to add them up.
 #
-# Genetic is in the universe but in no route's recommended list, including
-# advanced's, whose own reasoning string says "Full suite needed". Whether that
-# is deliberate is an open question recorded in docs/kanban.md; it was not
-# changed here, because routing behaviour is a product decision.
+# Genetic runs in the fixed `advanced` mode (ideal_option), so the advanced route recommends it too:
+# until 2026-10-18 it was in no route, and mode="auto" landing on advanced skipped what mode="advanced"
+# ran. Decided for consistency between the two ways of asking for the same tier.
 ENGINE_UNIVERSE: tuple[str, ...] = (
     "MonteCarlo",
     "TOPSIS",
@@ -107,6 +106,7 @@ ROUTES: dict[str, tuple[tuple[str, ...], tuple[str, ...]]] = {
             "MLSurrogate",
             "Portfolio",
             "InformationTheory",
+            "Genetic",
         ),
         (),
     ),

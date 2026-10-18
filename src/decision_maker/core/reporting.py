@@ -27,6 +27,8 @@ from typing import Any
 import pandas as pd
 
 from decision_maker.core.content import REPORT_CSS
+from decision_maker.core.engine_maturity import ENGINE_MATURITY
+from decision_maker.core.jsonl_store import results_dir
 from decision_maker.core.models import Factor, Statistics
 from decision_maker.core.report_schema import validate_report
 from decision_maker.core.utils import resolve_winner
@@ -54,6 +56,7 @@ class ReportData:
     counterfactual: dict | None = None
     decision_matrix: dict[str, Any] = field(default_factory=dict)
     algo_comp: dict[str, Any] = field(default_factory=dict)
+    weight_robustness: dict[str, Any] | None = None
 
     def prepare(self) -> ReportData:
         """Compute derived fields from raw input data."""
@@ -64,7 +67,7 @@ class ReportData:
         if not self.timestamp:
             self.timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         if not self.results_dir:
-            self.results_dir = os.path.join(os.getcwd(), "results")
+            self.results_dir = str(results_dir().resolve())
         return self
 
 
@@ -139,7 +142,7 @@ def prepare_decision_matrix(mc_results: dict[str, Statistics], factors: list[Fac
         if vals:
             bounds[fn] = (min(vals), max(vals))
 
-    decision_matrix = {}
+    decision_matrix: dict[str, dict[str, Any]] = {}
     for name, stats in mc_results.items():
         decision_matrix[name] = {"total_score": stats.mean_score}
         for factor in factors:
@@ -175,7 +178,7 @@ def build_algorithm_comparison(
             algo_comp.setdefault(name, {})
             algo_comp[name].update(data)
 
-    if _has_promethee("advanced", future):
+    if future is not None and _has_promethee("advanced", future):
         for name, data in _rank_scores(future["promethee_scores"], "promethee").items():
             algo_comp.setdefault(name, {})
             algo_comp[name].update(data)
@@ -213,9 +216,31 @@ def save_json_report(data: ReportData) -> str:
     return json_path
 
 
+def _tag(engine: str) -> str:
+    """Maturity label for a report heading, from engine_maturity (the single source)."""
+    return f"`{ENGINE_MATURITY[engine]['level']}`"
+
+
+def _second_opinion(topsis_scores: pd.Series, winner: str) -> str:
+    if topsis_scores.empty:
+        return ""
+    top = topsis_scores.index[0]
+    verdict = "agrees" if top == winner else f"ranks **{top}** first instead"
+    return f"Second opinion — TOPSIS {_tag('TOPSIS')} (a weighted sum on crisp data) {verdict}.\n"
+
+
+def _weight_robustness_lines(wr: dict[str, Any] | None) -> list[str]:
+    if not wr:
+        return []
+    w = wr["stated_winner"]
+    return [
+        f"**Weight Robustness** `experimental`: **{w}** is **{wr['verdict']}** — wins {wr['informed'][w]:.0%} "
+        f"of plausible weightings near yours and {wr['uninformed'][w]:.0%} with weights unknown.\n"
+    ]
+
+
 def save_markdown_report(data: ReportData) -> str:
-    bluf_winner, bluf_reason = resolve_winner(data.topsis_scores, data.mc_results)
-    mc_winner = max(data.mc_results.values(), key=lambda x: x.mean_score).option_name
+    bluf_winner, bluf_reason = resolve_winner(data.mc_results)
     date_now = datetime.now().strftime("%Y-%m-%d %H:%M")
     date_iso = datetime.now().strftime("%Y-%m-%d")
     lines = [
@@ -240,15 +265,12 @@ def save_markdown_report(data: ReportData) -> str:
         f"![Factor Importance](factor_importance_{data.timestamp}.png)\n",
         f"![Robustness Audit](robustness_audit_{data.timestamp}.png)\n",
         "## 1. Executive Summary\n",
-        f"> **Recommended Strategy:** **{bluf_winner}** is the most balanced option ({bluf_reason}), ideal for minimizing risk across all fronts. However, **{mc_winner}** offers the highest direct expected value (Monte Carlo).\n",
-        f"**Situation Analysis:** {bluf_reason}. "
-        + (
-            "Warning: **Low Robustness:** The current decision is volatile."
-            if data.sensitivity.get("robustness_score", 0) * 100 < 30
-            else ""
-        )
-        + "\n",
-        "### 1.1 Algorithm Consensus",
+        f"> **Recommendation:** **{bluf_winner}** — {bluf_reason} {_tag('MonteCarlo')}.\n",
+        _second_opinion(data.topsis_scores, bluf_winner),
+        *_weight_robustness_lines(data.weight_robustness),
+        "Each section is labelled with its engine's maturity: `validated` (matches an external "
+        "reference), `characterized` (exactly known, differs from the textbook), `experimental`.\n",
+        f"### 1.1 Algorithm Consensus {_tag('MonteCarlo')} {_tag('TOPSIS')}",
     ]
 
     has_prom = _has_promethee(data.mode, data.future)
@@ -266,7 +288,7 @@ def save_markdown_report(data: ReportData) -> str:
             "### 1.2 Visual Summary (Expected Value)\n```text",
             _bar_chart(data.mc_results),
             "```\n",
-            "### 1.3 Strategic Option Set (Pareto Efficiency)",
+            f"### 1.3 Strategic Option Set (Pareto Efficiency) {_tag('Pareto')}",
             f"- **Pareto Efficient Options:** {', '.join(data.pareto.get('efficient_frontier', []))}",
         ]
     )
@@ -278,7 +300,7 @@ def save_markdown_report(data: ReportData) -> str:
     if data.mode in ("standard", "advanced") and data.sensitivity:
         lines.extend(
             [
-                "\n### 1.4 Stability Diagnosis",
+                f"\n### 1.4 Stability Diagnosis {_tag('Sensitivity')}",
                 f"- **Priority Consistency:** {data.sensitivity.get('robustness_score', 0) * 100:.0f}%",
             ]
         )
@@ -302,7 +324,7 @@ def save_markdown_report(data: ReportData) -> str:
             ]
             lines.extend(
                 [
-                    "\n### 1.5 Distributionally Robust Optimization (DRO)",
+                    f"\n### 1.5 Distributionally Robust Optimization (DRO) {_tag('Robust')}",
                     _md_table(["Option", "DRO Score", "Stability"], dro_rows),
                 ]
             )
@@ -339,7 +361,7 @@ def save_html_report(data: ReportData) -> str:
         logger.warning(f"Template rendering unavailable ({e}), falling back to inline HTML generation")
         return _generate_html_inline(data)
 
-    bluf_winner, _ = resolve_winner(data.topsis_scores, data.mc_results)
+    bluf_winner, _ = resolve_winner(data.mc_results)
     best_mc = max(data.mc_results.items(), key=lambda x: x[1].mean_score)[0]
     robust_raw = data.sensitivity.get("robustness_score", 0) * 100 if data.sensitivity else 0
     max_score = max(s.mean_score for s in data.mc_results.values()) if data.mc_results else 1
@@ -349,7 +371,7 @@ def save_html_report(data: ReportData) -> str:
         for n, s in data.mc_results.items()
     ]
     kpi_cards = [
-        {"title": "Balanced Recommendation", "value": bluf_winner, "sub": "Winner by balance", "class": "success"},
+        {"title": "Recommendation", "value": bluf_winner, "sub": "Highest MC expected value (validated)", "class": "success"},
         {"title": "Maximum Expected Value", "value": best_mc, "sub": "Best average score", "class": ""},
         {
             "title": "Criterion Consistency",
@@ -376,7 +398,7 @@ def save_html_report(data: ReportData) -> str:
     if data.future:
         bayesian = data.future.get("bayesian_probs")
         if isinstance(bayesian, dict) and bayesian:
-            leader = max(bayesian, key=bayesian.get)
+            leader = max(bayesian, key=lambda k: bayesian[k])
             advanced_insights["bayesian_prob"] = float(bayesian[leader])
             advanced_insights["bayesian_leader"] = leader
         ideal = data.future.get("ideal_option")
@@ -413,7 +435,7 @@ def _generate_html_inline(data: ReportData) -> str:
 def print_report(data: ReportData):
     if data.explanation:
         logger.info("\n" + "-" * 70 + "\nDECISION EXPLANATION\n" + "-" * 70 + f"\n{data.explanation}")
-    bluf_winner, bluf_reason = resolve_winner(data.topsis_scores, data.mc_results)
+    bluf_winner, bluf_reason = resolve_winner(data.mc_results)
     logger.info("\n" + "=" * 70 + f"\nDECISION ANALYSIS REPORT ({data.mode.upper()} TIER)\n" + "=" * 70 + "\n")
     logger.info(f"RECOMMENDATION: {bluf_winner} is optimal based on {bluf_reason}.\n")
     logger.info("\n" + _bar_chart(data.mc_results))
@@ -421,7 +443,7 @@ def print_report(data: ReportData):
 
 def save_report(data: ReportData) -> dict[str, str]:
     if not data.results_dir:
-        data.results_dir = os.path.join(os.getcwd(), "results")
+        data.results_dir = str(results_dir().resolve())
     if not data.timestamp:
         data.timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     os.makedirs(data.results_dir, exist_ok=True)

@@ -18,12 +18,12 @@ try:
     import plotly.express as px
     import plotly.graph_objects as go
     import streamlit as st
-except ImportError:
-    st = None
-    pd = None
-    go = None
-    px = None
-    np = None
+except ImportError:  # the dashboard extra is optional; main() reports it instead of failing at import
+    st = None  # type: ignore[assignment]
+    pd = None  # type: ignore[assignment]
+    go = None  # type: ignore[assignment]
+    px = None  # type: ignore[assignment]
+    np = None  # type: ignore[assignment]
 
 
 def run_dashboard():

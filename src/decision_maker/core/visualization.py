@@ -13,8 +13,9 @@ import os
 from dataclasses import dataclass
 
 import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
-import seaborn as sns
+from scipy.stats import gaussian_kde
 
 from decision_maker.core.models import Factor, Statistics
 
@@ -75,7 +76,7 @@ class VisualizationEngine:
         plt.figure(figsize=(10, 6))
         for name, stats in mc_results.items():
             if stats.raw_scores is not None:
-                sns.kdeplot(stats.raw_scores, label=f"{name}", fill=True, alpha=0.4, linewidth=2)
+                _density(stats.raw_scores, name)
 
         plt.title("Risk Profiles: How likely is each outcome?", pad=20, fontsize=14, fontweight="bold")
         plt.xlabel("Quality Score (0-1)", fontsize=12)
@@ -99,7 +100,8 @@ class VisualizationEngine:
         df = df.sort_values("Importance", ascending=False)
 
         plt.figure()
-        sns.barplot(x="Importance", y="Factor", data=df, hue="Factor", palette="viridis", legend=False)
+        plt.barh(df["Factor"], df["Importance"], color=plt.get_cmap("viridis")(np.linspace(0, 1, len(df))))
+        plt.gca().invert_yaxis()  # most important on top
         plt.title(f"Non-linear Factor Importance (Mutual Information) - {first_opt}")
         plt.xlabel("Relative Information Gain (0-1)")
         plt.ylabel("Decision Factor")
@@ -121,16 +123,14 @@ class VisualizationEngine:
         fig, ax1 = plt.subplots(figsize=(10, 6))
 
         # Bar for DRO Score
-        sns.barplot(
-            x="Option", y="DRO_Score", data=df, ax=ax1, alpha=0.8, hue="Option", palette="viridis", legend=False
-        )
+        ax1.bar(df["Option"], df["DRO_Score"], alpha=0.8, color=plt.get_cmap("viridis")(np.linspace(0, 1, len(df))))
         ax1.set_ylabel("Defensive Score (Worst Case)", color="#58a6ff", fontsize=11)
         ax1.set_xlabel("")
         ax1.tick_params(axis="x", rotation=15)
 
         # Line for Stability
         ax2 = ax1.twinx()
-        sns.lineplot(x="Option", y="Stability", data=df, ax=ax2, marker="o", color="#f85149", linewidth=3, markersize=8)
+        ax2.plot(df["Option"], df["Stability"], marker="o", color="#f85149", linewidth=3, markersize=8)
         ax2.set_ylabel("Certainty Level (0-1)", color="#f85149", fontsize=11)
         ax2.set_ylim(0, 1.1)
         ax2.grid(False)
@@ -141,3 +141,15 @@ class VisualizationEngine:
         plt.savefig(path, dpi=150, bbox_inches="tight")
         plt.close()
         return path
+
+
+def _density(values: np.ndarray, label: str) -> None:
+    """Filled density curve (matplotlib + scipy; seaborn was a dependency for these four calls only)."""
+    values = np.asarray(values, dtype=float)
+    if np.ptp(values) == 0:  # a constant has no density: mark the point instead
+        plt.axvline(values[0], label=label, linewidth=2)
+        return
+    grid = np.linspace(values.min(), values.max(), 256)
+    density = gaussian_kde(values)(grid)
+    (line,) = plt.plot(grid, density, label=label, linewidth=2)
+    plt.fill_between(grid, density, alpha=0.4, color=line.get_color())

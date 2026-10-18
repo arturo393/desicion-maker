@@ -16,11 +16,11 @@ from typing import Any
 
 import numpy as np
 
-from decision_maker.core.jsonl_store import JsonlStore
+from decision_maker.core.jsonl_store import JsonlStore, results_dir
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_OUTCOMES_PATH = "results/outcomes.jsonl"
+DEFAULT_OUTCOMES_NAME = "outcomes.jsonl"  # under results_dir()
 
 
 @dataclass
@@ -55,7 +55,7 @@ class OutcomeTracker(JsonlStore[OutcomeEntry]):
     """
 
     def __init__(self, outcomes_path: str | Path | None = None):
-        super().__init__(outcomes_path, DEFAULT_OUTCOMES_PATH, id_field="decision_id")
+        super().__init__(outcomes_path, str(results_dir() / DEFAULT_OUTCOMES_NAME), id_field="decision_id")
 
     def _deserialize(self, data: dict[str, Any]) -> OutcomeEntry:
         return OutcomeEntry(**data)
@@ -74,9 +74,11 @@ class OutcomeTracker(JsonlStore[OutcomeEntry]):
         tags: list[str] | None = None,
     ) -> OutcomeEntry:
         was_correct = predicted_winner == actual_winner
-        best_actual = actual_score
         predicted_score = engine_scores.get(predicted_winner, 0.0) if engine_scores else 0.0
-        regret = best_actual - predicted_score if was_correct else 0.0
+        # Regret is what the miss cost: zero on a right call, the gap to the actual winner otherwise.
+        # It was inverted until 2026-10-18 (zero on every miss), which made average_regret report
+        # a perfect record for a predictor that was always wrong.
+        regret = 0.0 if was_correct else max(0.0, actual_score - predicted_score)
 
         entry = OutcomeEntry(
             decision_id=decision_id,
@@ -137,6 +139,7 @@ class OutcomeTracker(JsonlStore[OutcomeEntry]):
         recent_10 = self.accuracy(last_n=min(10, n))
         recent_50 = self.accuracy(last_n=min(50, n))
         overall = self.accuracy()
+        tags = self.tag_accuracy()
 
         return {
             "total_decisions": n,
@@ -145,8 +148,8 @@ class OutcomeTracker(JsonlStore[OutcomeEntry]):
             "accuracy_last_50": recent_50,
             "avg_regret": self.average_regret(),
             "tag_accuracy": self.tag_accuracy(),
-            "best_tag": max(self.tag_accuracy(), key=self.tag_accuracy().get) if self.tag_accuracy() else None,
-            "worst_tag": min(self.tag_accuracy(), key=self.tag_accuracy().get) if self.tag_accuracy() else None,
+            "best_tag": max(tags, key=lambda t: tags[t]) if tags else None,
+            "worst_tag": min(tags, key=lambda t: tags[t]) if tags else None,
             "trend": "improving" if recent_10 > overall else "declining" if recent_10 < overall else "stable",
         }
 

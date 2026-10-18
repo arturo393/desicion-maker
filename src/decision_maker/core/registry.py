@@ -218,6 +218,8 @@ class DecisionRegistry:
                 ),
             )
             self._conn.commit()
+            if cur.lastrowid is None:  # sqlite sets it on every successful INSERT
+                raise sqlite3.Error(f"INSERT of template {req.name!r} returned no row id")
             return cur.lastrowid
         except sqlite3.IntegrityError:
             logger.warning(f"Template '{req.name}' already exists, updating")
@@ -280,7 +282,7 @@ class DecisionRegistry:
         return cur.rowcount > 0
 
     def seed_default_templates(self) -> None:
-        defaults = [
+        defaults: list[dict[str, Any]] = [
             {
                 "name": "Vendor Selection",
                 "description": "Compare technology vendors across cost, quality, support, and risk",

@@ -27,7 +27,7 @@
         {% for card in kpi_cards %}
         <div class="kpi-card">
             <div class="kpi-title">
-                {% if card.title == 'Balanced Recommendation' %}Recommendation{% else %}{{ card.title }}{% endif %}
+                {{ card.title }}
             </div>
             <div class="kpi-value" style="color: {% if 'Success' in card.title %}var(--success){% elif 'Potential' in card.title %}var(--accent){% else %}#fff{% endif %};">
                 {{ card.value }}

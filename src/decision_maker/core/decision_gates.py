@@ -162,7 +162,7 @@ class DecisionGate:
                 ))
             elif ruin_probabilities and name in ruin_probabilities:
                 ruin_p = ruin_probabilities[name]
-                if ruin_p > DecisionGate.RUIN_PROBABILITY_THRESHOLD:
+                if ruin_p is not None and ruin_p > DecisionGate.RUIN_PROBABILITY_THRESHOLD:
                     result.gate_verdicts.append(GateVerdict(
                         gate_name="ruin",
                         option_name=name,

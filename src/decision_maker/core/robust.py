@@ -39,7 +39,7 @@ class RobustOptimizer:
         if not mc_results or not factors:
             return {}
 
-        results = {
+        results: dict[str, Any] = {
             "robust_ranking": {},
             "dro_scores": {},
             "stability_metrics": {},

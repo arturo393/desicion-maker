@@ -148,3 +148,40 @@ class TestApiServer:
         assert body["hit_rate"] == 0.5
         assert body["mean_confidence"] == pytest.approx(0.85)
         assert body["verdict"] in ("moderately_calibrated", "poorly_calibrated", "overconfident")
+
+
+class TestLedgerEndpoints:
+    """Read-only view of decisions/ledger.jsonl for other tools; the conftest points it at a temp file."""
+
+    def _seed(self):
+        from decision_maker.core.decision_commitment import DecisionCommitment
+
+        ledger = DecisionCommitment()
+        a = ledger.create("A", 0.8, "piloto operativo", "2099-01-01")
+        ledger.create("B", 0.6, "cliente firma", "2099-01-01")
+        ledger.record_outcome(a.decision_id, was_successful=True)
+
+    def test_lists_by_status(self, client):
+        self._seed()
+        assert len(client.get("/ledger").json()["decisions"]) == 2
+        closed = client.get("/ledger", params={"status": "closed"}).json()["decisions"]
+        assert [d["chosen_option"] for d in closed] == ["A"]
+        assert [d["chosen_option"] for d in client.get("/ledger?status=open").json()["decisions"]] == ["B"]
+
+    def test_rejects_an_unknown_status(self, client):
+        assert client.get("/ledger?status=whatever").status_code == 400
+
+    def test_calibration_reads_closed_decisions(self, client):
+        self._seed()
+        body = client.get("/ledger/calibration").json()
+        assert body["summary"]["closed"] == 1
+        assert body["calibration"]["num_predictions"] == 1
+        assert body["calibration"]["brier_score"] == pytest.approx(0.04)  # (0.8 - 1)^2
+
+
+def test_server_binds_loopback_by_default():
+    import inspect
+
+    from decision_maker.api.server import run_server
+
+    assert inspect.signature(run_server).parameters["host"].default == "127.0.0.1"

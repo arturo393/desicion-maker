@@ -26,6 +26,8 @@ from decision_maker.core.config_runner import run_from_config  # noqa: E402
 from decision_maker.core.models import DecisionOption, DistributionType, Factor  # noqa: E402
 from decision_maker.core.orchestrator import UnifiedDecisionFramework  # noqa: E402
 from decision_maker.core.what_if import WhatIfEngine  # noqa: E402
+from decision_maker.ledger_cli import register as register_ledger_commands  # noqa: E402
+from decision_maker.ledger_cli import show_commitment_draft  # noqa: E402
 
 app = typer.Typer(
     name="decision-maker",
@@ -113,6 +115,7 @@ def run(
         raise typer.Exit(code=1) from e
 
     _show_result_files(result)
+    show_commitment_draft(result)
 
     if explain and result:
         _generate_explanation(result)
@@ -145,6 +148,7 @@ def list_distributions():
     typer.echo("  lognormal      params: [mean, sigma]")
     typer.echo("  gamma          params: [shape, scale]")
     typer.echo("  poisson        params: [lam]")
+    typer.echo("  pert           params: [min, most_likely, max]   (costs, durations)")
 
 
 async def _run_interactive(
@@ -250,6 +254,9 @@ def _generate_explanation(result: dict) -> None:
     typer.echo("=" * 70)
     typer.echo(narrative)
     typer.echo("=" * 70 + "\n")
+
+
+register_ledger_commands(app)
 
 
 def main():

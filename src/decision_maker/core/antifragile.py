@@ -97,15 +97,16 @@ class AntifragileEngine:
 
         single_scores = {n: s.mean_score for n, s in mc_results.items()}
         single_risk = {n: s.std_dev for n, s in mc_results.items()}
-        best_single = max(single_scores, key=single_scores.get)
+        best_single = max(single_scores, key=lambda n: single_scores[n])
 
-        barbells = []
+        barbells: list[dict[str, Any]] = []
         for a, b in combinations(names, 2):
             portfolio_score = (single_scores[a] + single_scores[b]) / 2.0
 
             # Use empirical covariance instead of assuming zero correlation (Taleb filter)
-            if mc_results[a].raw_scores is not None and mc_results[b].raw_scores is not None:
-                cov_matrix = np.cov(mc_results[a].raw_scores, mc_results[b].raw_scores)
+            raw_a, raw_b = mc_results[a].raw_scores, mc_results[b].raw_scores
+            if raw_a is not None and raw_b is not None:
+                cov_matrix = np.cov(raw_a, raw_b)
                 cov_ab = cov_matrix[0, 1] if cov_matrix.shape == (2, 2) else 0.0
             else:
                 cov_ab = 0.0
@@ -127,7 +128,7 @@ class AntifragileEngine:
                         "portfolio_score": portfolio_score,
                         "portfolio_risk": portfolio_risk,
                         "diversification_gain": portfolio_score - max(single_scores[a], single_scores[b]),
-                        "beats_best_single": portfolio_score > best_single,
+                        "beats_best_single": portfolio_score > single_scores[best_single],
                     }
                 )
 
@@ -367,7 +368,7 @@ class AntifragileEngine:
 
         names = list(mc_results.keys())
         original_scores = {n: s.mean_score for n, s in mc_results.items()}
-        original_winner = max(original_scores, key=original_scores.get)
+        original_winner = max(original_scores, key=lambda n: original_scores[n])
 
         # Compute global bounds per factor using all available data
         factor_names = list({f.name for f in factors})
@@ -381,10 +382,10 @@ class AntifragileEngine:
                     vals.append(stats.factor_stats[fn]["mean"])
             global_bounds[fn] = {"min": min(vals) if vals else 0.0, "max": max(vals) if vals else 1.0}
 
-        candidates = []
+        candidates: list[dict[str, Any]] = []
 
         for factor_to_remove in factors:
-            remaining = [f for f in factors if f.name != factor_to_remove]
+            remaining = [f for f in factors if f.name != factor_to_remove.name]
             if not remaining:
                 continue
 
@@ -392,32 +393,35 @@ class AntifragileEngine:
             if total_remaining_weight == 0:
                 continue
 
-            new_scores = {}
+            new_scores: dict[str, float] = {}
             for name, stats in mc_results.items():
+                raw_data: dict[str, np.ndarray]
                 if stats.raw_factor_data is not None:
                     raw_data = stats.raw_factor_data
                 else:
                     raw_data = {fn: np.array([fstats["mean"]]) for fn, fstats in stats.factor_stats.items()}
 
-                total = None
+                total: np.ndarray | None = None
                 for f in remaining:
                     if f.name not in raw_data:
                         continue
                     w = f.weight / total_remaining_weight
-                    vals = raw_data[f.name]
+                    factor_vals = np.asarray(raw_data[f.name], dtype=float)
                     # Normalize with the same global bounds the MonteCarloEngine uses
                     # so recomputed scores are on the SAME [0,1] scale as original_scores.
                     b = global_bounds.get(f.name, {"min": 0.0, "max": 1.0})
                     norm_vals = (
-                        (vals - b["min"]) / (b["max"] - b["min"]) if b["max"] > b["min"] else np.ones_like(vals)
+                        (factor_vals - b["min"]) / (b["max"] - b["min"])
+                        if b["max"] > b["min"]
+                        else np.ones_like(factor_vals)
                     )
-                    w_vals = (norm_vals * w) if f.maximize else ((1.0 - norm_vals) * w)
+                    w_vals: np.ndarray = (norm_vals * w) if f.maximize else ((1.0 - norm_vals) * w)
                     total = w_vals if total is None else total + w_vals
 
                 new_scores[name] = float(np.mean(total)) if total is not None else 0.0
 
             all_improved = all(new_scores[n] >= original_scores[n] - EPSILON for n in names)
-            new_winner = max(new_scores, key=new_scores.get)
+            new_winner = max(new_scores, key=lambda n: new_scores[n])
             winner_flipped = new_winner != original_winner
 
             candidates.append(

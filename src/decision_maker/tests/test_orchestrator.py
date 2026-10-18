@@ -34,6 +34,33 @@ class TestUnifiedDecisionFramework:
         assert "files" in result
 
     @pytest.mark.asyncio
+    async def test_a_run_drafts_but_never_commits(self, framework, tmp_path, monkeypatch):
+        ledger = tmp_path / "ledger.jsonl"
+        monkeypatch.setenv("DM_LEDGER_PATH", str(ledger))
+        result = await framework.run_analysis(mode="express")
+        assert "commitment" not in result
+        draft = result["commitment_draft"]
+        assert draft is not None, "B dominates on the weighted value: the threshold should clear"
+        assert set(draft) == {"chosen_option", "confidence", "reasoning"}
+        assert not ledger.exists()
+
+    @pytest.mark.asyncio
+    async def test_standard_mode_reports_weight_robustness(self, framework):
+        result = await framework.run_analysis(mode="standard")
+        wr = result["weight_robustness"]
+        # B is better on benefit (0.7) and worse on cost (0.3): it wins at the stated weights,
+        # and A takes the draws where cost weighs more. Both readings must add up to one.
+        assert wr["stated_winner"] == "B"
+        assert sum(wr["informed"].values()) == pytest.approx(1.0)
+        assert sum(wr["uninformed"].values()) == pytest.approx(1.0)
+        assert wr["verdict"] in {"robust", "contested", "fragile"}
+
+    @pytest.mark.asyncio
+    async def test_express_mode_skips_weight_robustness(self, framework):
+        result = await framework.run_analysis(mode="express")
+        assert result["weight_robustness"] is None
+
+    @pytest.mark.asyncio
     async def test_standard_mode(self, framework):
         result = await framework.run_analysis(mode="standard")
         assert "strategies" in result

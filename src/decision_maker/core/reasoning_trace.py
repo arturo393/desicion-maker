@@ -16,11 +16,11 @@ from typing import Any
 
 import numpy as np
 
-from decision_maker.core.jsonl_store import JsonlStore
+from decision_maker.core.jsonl_store import JsonlStore, results_dir
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_TRACE_PATH = "results/reasoning_traces.jsonl"
+DEFAULT_TRACE_NAME = "reasoning_traces.jsonl"  # under results_dir()
 
 
 @dataclass
@@ -57,7 +57,7 @@ class ReasoningTrace(JsonlStore[TraceEntry]):
     """
 
     def __init__(self, trace_path: str | Path | None = None):
-        super().__init__(trace_path, DEFAULT_TRACE_PATH, id_field="decision_id")
+        super().__init__(trace_path, str(results_dir() / DEFAULT_TRACE_NAME), id_field="decision_id")
 
     def _deserialize(self, data: dict[str, Any]) -> TraceEntry:
         return TraceEntry(**data)

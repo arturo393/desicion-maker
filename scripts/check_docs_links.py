@@ -42,27 +42,9 @@ INLINE_CODE = re.compile(r"`[^`]*`")
 # the exact link target, never by file alone: an exemption scoped to the file
 # would mask every dead link added to it afterwards, which is the opposite of
 # what this table is for. A new link in one of these files still goes red.
-KNOWN_BROKEN: dict[str, dict[str, str]] = {
-    "docs/reorganization/deliverables.md": {
-        t: "proposed documentation tree from a plan that was never executed; "
-           "the targets do not exist anywhere, so rewriting the paths fixes nothing"
-        for t in (
-            "./ANALISIS_REORGANIZACION_FINAL.md", "./README_REORGANIZATION.md",
-            "./REORGANIZATION_COMPLETE.md", "./REORGANIZATION_PLAN.md",
-            "./REORGANIZATION_SUMMARY.md", "./docs/CREAR_NUEVO_SCRIPT.md",
-            "./docs/QUICK_START.md",
-        )
-    } | {
-        # NOT the same case as the ones above, and it used to be filed with them:
-        # this is a directory that never existed, not a doc from the phantom tree.
-        "./python/scripts/": "proposed script directory from the same unexecuted plan; "
-                            "the path does not exist on disk either way",
-    },
-    "docs/reorganization/plan.md": {
-        "./REORGANIZATION_PLAN.md#ejecución":
-            "plan/proposal document; the link-shaped string is proposed content"
-    },
-}
+# Empty since 2026-10-18: its nine entries all lived in docs/reorganization/, retired from the vault
+# (recoverable from git, see legacy-docs.md). Zero pre-existing breakage: any dead link is new.
+KNOWN_BROKEN: dict[str, dict[str, str]] = {}
 
 
 def frontmatter_aliases(text: str) -> list[str]:

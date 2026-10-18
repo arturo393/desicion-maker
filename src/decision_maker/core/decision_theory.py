@@ -62,15 +62,13 @@ class DecisionTheoryEngine:
         # If not fully shared, options are sampled independently; evaluating regret pointwise
         # per simulation draw would compare uncorrelated random draws and measure sampling noise,
         # so we fall back to comparing matching percentiles (quantile states).
-        first_stats = next(iter(mc_results.values()))
-        if first_stats.raw_scores is not None:
+        raws = [s.raw_scores for s in mc_results.values()]
+        present = [r for r in raws if r is not None]
+        if len(present) == len(raws):  # every option, not only the first
             if is_fully_shared:
                 method = "simulación"
                 reason = "modelo totalmente compartido con escenarios comunes acoplados"
-                n_sims = len(first_stats.raw_scores)
-                regret_matrix = np.zeros((len(mc_results), n_sims))
-                for i, (_name, stats) in enumerate(mc_results.items()):
-                    regret_matrix[i] = stats.raw_scores
+                regret_matrix = np.vstack(present)
                 best_per_sim = np.max(regret_matrix, axis=0)
                 max_regrets = np.max(best_per_sim - regret_matrix, axis=1)
                 min_regret_idx = int(np.argmin(max_regrets))
@@ -81,8 +79,8 @@ class DecisionTheoryEngine:
                 reason = "modelo no totalmente compartido (opciones independientes)"
                 n_states = len(REGRET_STATE_PERCENTILES)
                 state_matrix = np.zeros((len(mc_results), n_states))
-                for i, (_name, stats) in enumerate(mc_results.items()):
-                    state_matrix[i] = np.percentile(stats.raw_scores, REGRET_STATE_PERCENTILES)
+                for i, scores in enumerate(present):
+                    state_matrix[i] = np.percentile(scores, REGRET_STATE_PERCENTILES)
                 best_per_state = np.max(state_matrix, axis=0)
                 max_regrets = np.max(best_per_state - state_matrix, axis=1)
                 min_regret_idx = int(np.argmin(max_regrets))

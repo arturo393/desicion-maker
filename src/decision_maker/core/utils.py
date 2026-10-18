@@ -9,7 +9,7 @@ from __future__ import annotations
 __all__ = [
     "EPSILON",
     "DEFAULT_SEED",
-    "SCALE_MISMATCH_THRESHOLD",
+    "RANGE_AMPLIFICATION_THRESHOLD",
     "DEFAULT_BOOTSTRAP_ITERATIONS",
     "WEIGHT_DELTA",
     "SCORE_DELTAS",
@@ -32,7 +32,9 @@ from decision_maker.core.models import EPSILON  # noqa: E402
 # ── More Shared Constants ───────────────────────────────────────────
 
 DEFAULT_SEED = 42
-SCALE_MISMATCH_THRESHOLD = 10
+# A factor whose options differ by less than this fraction of its magnitude gets a warning:
+# normalization would hand that near-tie the factor's whole weight.
+RANGE_AMPLIFICATION_THRESHOLD = 0.05
 DEFAULT_BOOTSTRAP_ITERATIONS = 200
 WEIGHT_DELTA = 0.2
 SCORE_DELTAS = [0.1, -0.1, 0.2, -0.2]
@@ -65,9 +67,12 @@ def compute_global_bounds(
     return bounds
 
 
-def resolve_winner(topsis_scores, mc_results) -> tuple[str, str]:
-    """Determine the winner and the reason from TOPSIS or MC results."""
-    if not topsis_scores.empty:
-        return topsis_scores.index[0], "F-TOPSIS risk-adjusted distance to ideal"
+def resolve_winner(mc_results) -> tuple[str, str]:
+    """The recommended option: highest Monte Carlo mean, the validated engine.
+
+    Same rule as the orchestrator's commitment_draft. TOPSIS used to win this when present, so a
+    report could recommend one option and the draft another (fixed 2026-10-18); TOPSIS is now shown
+    as a second opinion only.
+    """
     winner = max(mc_results.items(), key=lambda x: x[1].mean_score)[0]
-    return winner, "Monte Carlo expected value"
+    return winner, "highest Monte Carlo expected value"

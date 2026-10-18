@@ -15,8 +15,14 @@ import numpy as np
 import pytest
 from scipy.stats import spearmanr
 
-from decision_maker.core.models import DecisionOption, DistributionType, Factor
+from decision_maker.core.models import DecisionOption, DistributionType, Factor, Statistics
 from decision_maker.core.monte_carlo import MonteCarloEngine
+
+
+def _raw(stats: Statistics, factor: str) -> np.ndarray:
+    """The run's samples for one factor; MonteCarloEngine.run() always fills raw_factor_data."""
+    assert stats.raw_factor_data is not None
+    return stats.raw_factor_data[factor]
 
 CORRELATION_TOLERANCE: float = 1e-4
 TEST_SIMULATIONS: int = 2000
@@ -41,8 +47,8 @@ class TestSharedScenarioDrivers:
 
         results = engine.run(normalize=False)
 
-        samples_a = results["Option_A"].raw_factor_data["Market"]
-        samples_b = results["Option_B"].raw_factor_data["Market"]
+        samples_a = _raw(results["Option_A"], "Market")
+        samples_b = _raw(results["Option_B"], "Market")
 
         corr, _p = spearmanr(samples_a, samples_b)
         assert pytest.approx(1.0, abs=CORRELATION_TOLERANCE) == corr, (
@@ -59,7 +65,7 @@ class TestSharedScenarioDrivers:
         engine.add_option(opt)
 
         results = engine.run(normalize=False)
-        coupled_samples = results["Project"].raw_factor_data["Cost"]
+        coupled_samples = _raw(results["Project"], "Cost")
 
         # Sample directly without driver using the exact same generator seed to inspect original draws
         rng = np.random.default_rng(TEST_SEED)
@@ -97,10 +103,10 @@ class TestSharedScenarioDrivers:
         s2_f2 = opt2.variables["F2"].sample(TEST_SIMULATIONS, rng=rng_baseline)
 
         # Check raw factor data matches exactly
-        assert np.array_equal(res_standard["Opt1"].raw_factor_data["F1"], s1_f1)
-        assert np.array_equal(res_standard["Opt1"].raw_factor_data["F2"], s1_f2)
-        assert np.array_equal(res_standard["Opt2"].raw_factor_data["F1"], s2_f1)
-        assert np.array_equal(res_standard["Opt2"].raw_factor_data["F2"], s2_f2)
+        assert np.array_equal(_raw(res_standard["Opt1"], "F1"), s1_f1)
+        assert np.array_equal(_raw(res_standard["Opt1"], "F2"), s1_f2)
+        assert np.array_equal(_raw(res_standard["Opt2"], "F1"), s2_f1)
+        assert np.array_equal(_raw(res_standard["Opt2"], "F2"), s2_f2)
 
     def test_driver_variables_excluded_from_intra_option_correlation(self) -> None:
         """Variables bound to a driver must be excluded from intra-option correlation.
@@ -137,8 +143,8 @@ class TestSharedScenarioDrivers:
         # F1 across A and B must retain rank correlation 1.0 because it was excluded from
         # _apply_correlation. If it were not excluded, intra-option reordering would have
         # destroyed the inter-option coupling.
-        f1_a = results["A"].raw_factor_data["F1"]
-        f1_b = results["B"].raw_factor_data["F1"]
+        f1_a = _raw(results["A"], "F1")
+        f1_b = _raw(results["B"], "F1")
         rank_corr_f1, _ = spearmanr(f1_a, f1_b)
         assert pytest.approx(1.0, abs=CORRELATION_TOLERANCE) == rank_corr_f1
 

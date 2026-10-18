@@ -245,7 +245,7 @@ class WhatIfEngine:
             try:
                 raw = input("\nwhat-if> ").strip()
             except (EOFError, KeyboardInterrupt):
-                logger.info()
+                logger.info("")
                 break
 
             if not raw:

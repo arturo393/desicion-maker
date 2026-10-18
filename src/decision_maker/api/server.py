@@ -1,4 +1,6 @@
 
+from typing import Any
+
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -7,10 +9,11 @@ from sqlmodel import select
 from decision_maker.api.templates import TEMPLATES
 from decision_maker.core.db import create_session
 from decision_maker.core.db_models import AnalysisSession, OutcomeRecord
+from decision_maker.core.decision_commitment import DecisionCommitment
 from decision_maker.core.models import DecisionOption, DistributionType, Factor
 from decision_maker.core.orchestrator import UnifiedDecisionFramework
 
-app = FastAPI(title="Decision Maker God-Mode API", version="3.0.0")
+app = FastAPI(title="Decision Maker API", version="3.1.0")
 
 app.add_middleware(
     CORSMiddleware,
@@ -55,7 +58,7 @@ async def analyze(req: AnalysisRequest):
         fw = UnifiedDecisionFramework()
         fw.mc_engine.num_simulations = 10000
         for f in req.factors:
-            kwargs = {"name": f.name, "weight": f.weight, "maximize": f.maximize, "category": f.category}
+            kwargs: dict[str, Any] = {"name": f.name, "weight": f.weight, "maximize": f.maximize, "category": f.category}
             if f.stakeholder_weights is not None:
                 kwargs["stakeholder_weights"] = f.stakeholder_weights
             fw.add_factor(Factor(**kwargs))
@@ -234,7 +237,27 @@ def get_calibration():
     ]
     return compute_calibration(outcomes)
 
-def run_server(host="0.0.0.0", port=8001):
+@app.get("/ledger")
+def get_ledger(status: str = "all"):
+    """Decisions in the ledger (read-only: decide/close stay in the CLI). status: all | open | due | closed."""
+    ledger = DecisionCommitment()
+    pick = {"all": ledger.entries, "open": ledger.open, "due": ledger.due, "closed": ledger.closed}
+    if status not in pick:
+        raise HTTPException(status_code=400, detail=f"status must be one of {sorted(pick)}")
+    return {"ledger": str(ledger.path), "decisions": [_serialize(e.__dict__) for e in pick[status]()]}
+
+
+@app.get("/ledger/calibration")
+def get_ledger_calibration():
+    """Stated confidence against outcomes, over closed decisions in the ledger."""
+    ledger = DecisionCommitment()
+    return {"summary": ledger.summary(), "calibration": ledger.calibration()}
+
+
+# Loopback by default: the ledger holds personal decisions and the API has no auth. Serving the LAN
+# is a deliberate choice (host="0.0.0.0"), not the default; it was the default until 2026-10-18,
+# when the only remote client, the React demo dashboard, was deleted.
+def run_server(host="127.0.0.1", port=8001):
     # Imported here, not at module scope: uvicorn is the process that
     # SERVES the app, not part of what the app IS. At module scope it made
     # this file un-importable without an ASGI server, so the route tests

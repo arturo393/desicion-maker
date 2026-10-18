@@ -101,6 +101,22 @@ class TestBarbellAnalysis:
             expected = (b["a_score"] + b["b_score"]) / 2.0
             assert abs(b["portfolio_score"] - expected) < 1e-6
 
+    def test_tied_options_do_not_crash(self):
+        # A pair only enters the list when its average ties or beats every single option, i.e. when
+        # options tie. That branch compared the score with best_single, the NAME of the best option:
+        # TypeError on every tie (found by mypy, 2026-10-18).
+        def tied(name):
+            return Statistics(
+                option_name=name, mean_score=1.0, std_dev=0.1, min_score=0.8, max_score=1.2,
+                percentile_5=0.85, percentile_95=1.15, success_rate=None, factor_stats={},
+                var_95=0.85, cvar_95=0.82,
+            )
+
+        mc = {n: tied(n) for n in ("A", "B", "C")}
+        result = AntifragileEngine.barbell_analysis(mc, [Factor("X", 1.0)])
+        assert result["num_barbells_found"] == 3
+        assert all(b["beats_best_single"] is False for b in result["barbells"])  # a tie is not a win
+
     def test_empty_returns_empty_dict(self):
         result = AntifragileEngine.barbell_analysis({}, [Factor("X", 1.0)])
         assert "Need at least 3 options" in result["summary"]
@@ -176,6 +192,13 @@ class TestViaNegativa:
         for c in result:
             for name in mc_results:
                 assert name in c["score_changes"]
+
+    def test_removing_a_factor_actually_removes_it(self, mc_results, factors):
+        # The filter compared f.name with the Factor object, so it never matched: every "removal"
+        # recomputed with all factors and via negativa reported nothing (found 2026-10-18).
+        by_removed = {c["removed_factor"]: c for c in AntifragileEngine.via_negativa(mc_results, factors)}
+        assert by_removed["Cost"]["new_winner"] == "RiskyOptB"  # only Return left: B has 20
+        assert by_removed["Return"]["new_winner"] == "SafeOptA"  # only Cost left: A costs 100
 
     def test_empty_returns_empty_list(self):
         assert AntifragileEngine.via_negativa({}, [Factor("X", 1.0)]) == []

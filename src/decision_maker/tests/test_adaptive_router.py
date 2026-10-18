@@ -109,3 +109,13 @@ class TestAdaptiveRouter:
         p_no_corr = AdaptiveRouter.profile(options, factors, has_correlation=False)
         p_corr = AdaptiveRouter.profile(options, factors, has_correlation=True)
         assert p_corr.complexity_score > p_no_corr.complexity_score
+
+
+
+def test_every_engine_the_advanced_mode_runs_is_in_the_advanced_route():
+    """mode="auto" landing on advanced must recommend what mode="advanced" runs; Genetic was missing."""
+    from decision_maker.core.adaptive_router import AdaptiveRouter
+
+    recommended, _ = AdaptiveRouter._route("advanced")
+    for engine in ("Bayesian", "Bootstrap", "PROMETHEE", "Genetic"):
+        assert engine in recommended, engine

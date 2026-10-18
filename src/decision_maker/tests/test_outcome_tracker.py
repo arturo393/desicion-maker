@@ -89,6 +89,8 @@ class TestOutcomeTracker:
             engine_scores={"A": 5.0, "B": 10.0},
         )
         assert entry.was_correct is False
+        # Picking A cost 10 - 5: the gap between what happened and what the pick was worth.
+        assert entry.regret == pytest.approx(5.0)
 
     def test_accuracy_calculation(self, tmp_path):
         tracker = self._make_tracker(tmp_path)
@@ -119,7 +121,9 @@ class TestOutcomeTracker:
         tracker = self._make_tracker(tmp_path)
         tracker.record("d1", "A", 0.8, "A", 5.0, engine_scores={"A": 5.0})
         tracker.record("d2", "A", 0.7, "B", 10.0, engine_scores={"A": 3.0})
-        assert tracker.average_regret() >= 0.0
+        # A right call costs nothing; the wrong one costs 10 - 3. A ">= 0" check passed with the
+        # regret inverted (zero on misses), so it pins the value.
+        assert tracker.average_regret() == pytest.approx(3.5)
 
     def test_tag_accuracy(self, tmp_path):
         tracker = self._make_tracker(tmp_path)
@@ -156,3 +160,12 @@ class TestOutcomeTracker:
         assert s["total_decisions"] == 1
         assert "accuracy_overall" in s
         assert "trend" in s
+
+
+def test_default_stores_follow_dm_results_dir(tmp_path, monkeypatch):
+    from decision_maker.core.decision_journal import DecisionJournal
+    from decision_maker.core.reasoning_trace import ReasoningTrace
+
+    monkeypatch.setenv("DM_RESULTS_DIR", str(tmp_path / "out"))
+    for store in (OutcomeTracker(), ReasoningTrace(), DecisionJournal()):
+        assert store.path.parent == tmp_path / "out", type(store).__name__
