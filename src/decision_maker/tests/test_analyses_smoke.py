@@ -27,7 +27,7 @@ import pytest
 pytestmark = pytest.mark.smoke
 
 REPO = Path(__file__).resolve().parents[3]
-ANALYSES = REPO / "src" / "decision_maker" / "analyses"
+ANALYSES = REPO / "analyses"
 SCRIPTS = sorted(p for p in ANALYSES.glob("*.py") if p.name != "_template.py")
 TIMEOUT_S = 900
 WORKERS = 8
@@ -42,13 +42,11 @@ NO_ENGINE: dict[str, str] = {
     "mineria_integration": OWN_TOPSIS,
     "spectrum_analyzer_selection": OWN_TOPSIS,
     "plc_bridge_comparativa": OWN_TOPSIS,
-    "commandmessage_refactor_decision": OWN_MC,
     "commandmessage_refactor_llm_20260823": OWN_MC,
     "decision_concon": "closed-form scoring, no engine",
     "decision_vina_vs_concon": "closed-form scoring, no engine",
     "decision_patmos_calculator": "calculator, no ranking",
     "power_supply_research": "report generator, no engine",
-    "refactoring_commandmessage": "prints a hand-written analysis, no engine",
 }
 
 # Analyses that MUST fail offline, and the text that says why. Failing loudly is the contract here:

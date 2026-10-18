@@ -15,7 +15,7 @@ from pathlib import Path
 
 import pytest
 
-ANALYSES = Path(__file__).resolve().parents[1] / "analyses"
+ANALYSES = Path(__file__).resolve().parents[3] / "analyses"
 
 
 def _load(name: str):
