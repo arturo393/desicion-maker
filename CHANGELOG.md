@@ -6,7 +6,7 @@ title: "Decision Maker Changelog"
 type: changelog
 category: project-management
 status: active
-related: ["[[docs/kanban|kanban]]", "[[docs/index|index]]", "[[docs/adr/001-use-rust-for-math-engine|adr-001]]"]
+related: ["[[docs/Tablero|Tablero]]", "[[docs/index|index]]", "[[docs/adr/001-use-rust-for-math-engine|adr-001]]"]
 created: 2026-08-10
 updated: 2026-10-02
 ---
@@ -20,12 +20,39 @@ All notable changes to this project will be documented in this file.
 Desde v3.1 (2026-08-23). Commits del 2026-09-28 en adelante más el árbol de trabajo del 2026-10-01.
 
 ### ✨ Added
+- **Ledger de decisiones** (`core/decision_commitment.py`, `ledger_cli.py`, `decisions/ledger.schema.json`, 2026-10-18): `decision-maker decide|review|close|calibration`. Exige fecha de revisión futura, métrica observable (rechaza estadísticos del modelo) y confianza en (0, 1]; Brier y ECE sobre decisiones cerradas. `--json` en `review` y `calibration`; esquema publicado junto al archivo con test de conformidad contra el productor.
+- **Robustez ante los pesos** (`core/weight_robustness.py`, clave `weight_robustness` en modo `standard`, 2026-10-18): probabilidad de ganar con pesos inciertos, lecturas informada (Dirichlet alrededor de los pesos) y sin información (uniforme), veredicto `robust|contested|fragile`. Validada contra la cola de una Beta.
+- **Distribución PERT** (`core/models.py`, 2026-10-18): `[min, most_likely, max]` para costos y plazos.
+- **API del ledger** (`api/server.py`, 2026-10-18): `GET /ledger` y `GET /ledger/calibration`, sólo lectura.
+- **`DM_RESULTS_DIR`** (`core/jsonl_store.py`, 2026-10-18): dónde escriben los almacenes y reportes generados; la suite lo apunta a un temporal.
 - **Escenarios comunes entre opciones** (`core/scenarios.py`, `core/models.py`, `core/monte_carlo.py`): `DecisionOption.add_variable(..., driver="nombre")`. Las variables con el mismo driver, de cualquier opción, se reordenan por rangos siguiendo un vector uniforme común sembrado del run: correlación de rangos 1 (comonotonía) y marginales intactas. Se excluyen de la correlación intra-opción. Un modelo sin drivers no consume números aleatorios extra y da exactamente lo mismo que antes con la misma semilla.
 - **Minimax Regret por escenario** (`core/decision_theory.py`): con el modelo totalmente compartido compara simulación por simulación; si no, por percentiles. El texto del resultado dice qué método usó.
 - **Valor de la información** (`core/value_of_information.py`, clave `value_of_information` del orquestador): EVPI total, válido sólo con modelo totalmente compartido (si no, `None` con la razón), y EVPPI por driver con 20 bins por cuantiles, ordenado de mayor a menor. Sesgo hacia arriba con N chico: medido hasta 0,7 % de la media del ganador con N=1.000, nulo con N=10.000.
 - **Madurez de motores** (`core/engine_maturity.py`, clave `engine_maturity` del orquestador): `validated` (coincide con una referencia externa o un cálculo independiente), `characterized` (se sabe exactamente qué calcula aunque difiera del estándar) o `experimental`. Hoy: MonteCarlo y PROMETHEE validados, TOPSIS caracterizado, 16 experimentales. Un test exige entrada para cada motor ruteable y evidencia existente para cada `validated`.
 
+### 💥 Changed
+- **Una corrida ya no crea un compromiso** (2026-10-18): el resultado trae `commitment_draft` en lugar de `commitment`; el compromiso lo registra una persona con `decide`. El ledger pasa de `results/commitments.jsonl` (no versionado) a `decisions/ledger.jsonl` (versionado); el archivo viejo queda donde está, sin migrar: eran corridas, no decisiones.
+- **Matriz de correlación inválida lanza `ValueError`** en vez de ignorarse con un warning.
+- **`analyses/` y `analyses/research/` salen del paquete** a la raíz del repo; `src/decision_maker/analyses/metadata.json` se retira (lo reemplaza la tabla de `docs/decision-analyses.md`).
+- **Versión 3.1.0** en `pyproject.toml` (decía 3.0.0).
+- **La recomendación de los reportes es la del Monte Carlo** (`core/utils.py::resolve_winner`, 2026-10-18): antes era la de TOPSIS y podía contradecir a `commitment_draft`. TOPSIS aparece como segunda opinión y cada sección lleva la madurez de su motor; el reporte incluye la robustez ante los pesos.
+- **Penalización de cola retirada del Monte Carlo**: el puntaje es exactamente la suma ponderada. Ningún ganador de los 44 análisis cambió más allá del ruido de semilla.
+- **Genetic en la ruta `advanced` del router**, igual que en el modo fijo.
+- **`MonteCarloEngine` reproducible por defecto** (`seed=DEFAULT_SEED`); `seed=None` explícito para entropía nueva.
+- **`seaborn` retirado de las dependencias**; los gráficos usan matplotlib + scipy.
+- **6 análisis superados a `analyses/archive/`**; **retirados** `archive/`, `jira/`, `scripts/jira_manager.py`, `ROADMAP_v3.0.md`, `dashboard/` y 12 notas históricas de `docs/` (recuperables desde `0aecd52`); `README_POWER_SUPPLY_DECISION.md` → `docs/sw-diagnosticoremoto/05-power-supply/analisis-decision.md`.
+- **La API escucha en `127.0.0.1` por defecto** (antes `0.0.0.0`): no tiene autenticación y el ledger guarda decisiones personales.
+- **«Scale mismatch» reemplazada por una advertencia de recorrido** (`_check_range_amplification`): la vieja era siempre falsa con normalización.
+
 ### 🐛 Fixed
+- **La correlación entre factores nunca se aplicaba** (`core/monte_carlo.py`, 2026-10-18): el reordenamiento de Iman-Conover usaba la permutación inversa; ρ=0,8 daba Spearman 0,003. Ningún análisis del repo pasaba una matriz.
+- **Regret invertido** (`core/outcome_tracker.py`, 2026-10-18): era 0 en cada predicción fallida.
+- **Imports rotos en dos scripts de investigación** (`analyses/research/`, 2026-10-18).
+- **La vía negativa nunca quitaba ningún factor** (`core/antifragile.py`, 2026-10-18): comparaba `str` con `Factor`. Cambia el resultado de todo análisis que la use.
+- **Barbell con opciones empatadas lanzaba `TypeError`** (`core/antifragile.py`): comparaba un puntaje con el nombre de la mejor opción.
+- **Salir del REPL what-if con Ctrl+D/Ctrl+C lanzaba `TypeError`** (`core/what_if.py`).
+- **`BayesianEngine.analyze()` mezclaba el grafo causal con las probabilidades** (`core/bayesian.py`); el grafo sale ahora por `causal_graph()`.
+- **mypy en CI**, 0 errores; `orchestrator.py` partido en `orchestrator_steps.py`.
 - **Semilla en Bootstrap de TOPSIS** (`core/bootstrap.py`, `core/orchestrator.py`): incorpora `seed: int | None = None` a `confidence_intervals` y `BootstrapConfig`, creando un `np.random.default_rng(seed)` local determinista en lugar de llamar a `np.random.normal` global. En `orchestrator.py` deriva `bootstrap_seed = (self.mc_engine.seed + BOOTSTRAP_SEED_OFFSET)` para aislar la secuencia de perturbación del remuestreo Monte Carlo sin correlación espuria.
 - **`success_rate` nulo con una sola opción y simetría de penalización de cola** (`core/monte_carlo.py`, `core/models.py`, `core/report_schema.py`, `core/antifragile.py`, `api/server.py`, `dashboard/app.py`, `cli.py`, `core/deep_research_decision_agent.py`): reporta `success_rate = None` cuando sólo existe una opción evaluada (evitando un 100% ficticio por falta de competidores). Además unifica la comparación de `total_scores` contra `cross_option_mean` aplicando a ambos lados los puntajes con penalización de cola por ruina. Se actualizó el schema de reporte para admitir `["number", "null"]` y los consumidores para representar `"n/a"`.
 - **Normalización y validación en TOPSIS** (`core/topsis.py`): normaliza criterios de beneficio mediante escala min-max lineal `(x - min) / (max - min)` con guarda ante división por cero, corrigiendo la inversión de rankings con valores negativos. Lanza `ValueError` explícito si `len(weights)` o `len(maximize)` no coinciden con la cantidad de factores, eliminando el truncamiento silencioso y subsiguiente `IndexError`.
@@ -67,7 +94,7 @@ Desde v3.1 (2026-08-23). Commits del 2026-09-28 en adelante más el árbol de tr
 - **Comparación contra pymcdm** (`tests/test_reference_libraries.py`): validación cruzada de motores multicriterio contra la biblioteca externa `pymcdm` (v1.4.0). PROMETHEE II (`PrometheeEngine`) evaluado en flujos netos y ranking contra `pymcdm.methods.PROMETHEE_II` con funciones de preferencia "usual" y "vshape" (con parámetros $p$) en matrices fijas y pseudoaleatorias con criterios mixtos de beneficio y costo (coincidencia exacta). TOPSIS crisp verificado contra `pymcdm.methods.WSM(minmax_normalization)` y contra suma ponderada min-max manual en NumPy (coincidencia exacta); divergencia con el TOPSIS euclidiano clásico de `pymcdm` documentada y marcada con `xfail(strict=True)`.
 - **Control de convergencia del Monte Carlo y error estándar** (`core/monte_carlo.py`, `core/models.py`, `core/orchestrator.py`, `core/report_schema.py`, `core/reporting.py`, `tests/test_monte_carlo_convergence.py`): incorpora `standard_error: float | None = None` a `Statistics` ($\text{std} / \sqrt{N}$); implementa diagnóstico de convergencia que compara el gap de las dos mejores medias contra $\text{CONVERGENCE\_Z} \cdot \sqrt{\text{se}_1^2 + \text{se}_2^2}$ ($Z=2.0$, ~95% de confianza) y emite un warning con recomendación de $N$ usando la regla $1/\sqrt{N}$; expuesto en `engine.last_convergence` y bajo la clave `"convergence"` en `run_analysis`; serializado en reportes JSON y validado con control negativo.
 - **Tests por propiedades con hypothesis** (`tests/test_properties.py`): verificación axiomática mediante pruebas generativas: dominancia (MC, TOPSIS, PROMETHEE II), invariancia ante escala positiva de pesos ($k > 0$ preserva rankings) e invariancia ante permutación de orden de opciones con variables deterministas. Hallazgo de inversión de rango (rank reversal) en TOPSIS al agregar una tercera opción dominada confirmado empíricamente por hypothesis (`xfail(strict=True)` con contraejemplo mínimo).
-- **Rigor de verificación y ratchets documentales** (`docs/kanban.md`, `docs/architecture.md`, `docs/index.md`, `README.md`): ratchets actualizados a 599 tests unitarios; tarjetas de librerías de referencia, convergencia MC y tests por propiedades movidas a Done en el Kanban; confirmación y contraejemplo mínimo de rank reversal incorporados a la tarjeta de puntaje relativo.
+- **Rigor de verificación y ratchets documentales** (`docs/Tablero.md`, `docs/architecture.md`, `docs/index.md`, `README.md`): ratchets actualizados a 599 tests unitarios; tarjetas de librerías de referencia, convergencia MC y tests por propiedades movidas a Done en el Kanban; confirmación y contraejemplo mínimo de rank reversal incorporados a la tarjeta de puntaje relativo.
 - **Validación de motores contra la literatura** (`tests/test_published_examples.py`): AHP contra el autovector principal, PROMETHEE II contra un cálculo a mano según Brans & Vincke (1985), y TOPSIS contra el TOPSIS clásico calculado en el test sobre los datos del caza de Hwang & Yoon (1981). Todos los valores esperados se calculan en el test; ninguno se cita de una tabla. Dos `xfail(strict=True)` documentan que el TOPSIS del motor no es el clásico.
 - **Humo de todos los análisis** (`tests/test_analyses_smoke.py`, `uv run pytest -m smoke`, paso propio en CI): corre cada `analyses/*.py` como subproceso, sin LLM. Exige exit 0 sin traceback, que los que necesitan LLM o datos fallen con un motivo, y —leyendo la traza del propio motor (`DM_MC_TRACE`), no la salida del script— que cada análisis haya corrido `MonteCarloEngine` puntuando al menos una opción y distinguiendo entre ellas. Control negativo: con el motor y el shim viejos puestos de vuelta, falla exactamente en los cinco análisis que comparaban 0.0 contra 0.0. Un análisis nuevo entra solo por el glob. 11 análisis declarados `NO_ENGINE` (TOPSIS/MC propios, calculadoras): para ellos sólo se verifica que corran.
 - `DM_MC_TRACE=<archivo>`: una línea JSON por corrida del motor con la media de cada opción. Apagado por defecto.
@@ -76,7 +103,7 @@ Desde v3.1 (2026-08-23). Commits del 2026-09-28 en adelante más el árbol de tr
 - **Backend `agy`** (`core/agy_backend.py`): sin `GEMINI_API_KEY`, las llamadas a IA se responden con el CLI de Antigravity (`agy -p` en modo plan y sandbox). `DM_LLM_BACKEND=auto|api|agy`; `gemini_helper.ask_llm` lanza en vez de devolver el error como texto. Los tres `power_supply_*` que importaban `google.generativeai` directo pasan por él.
 - Los 5 checkers documentales se ejecutan desde pytest, no sólo como pasos de CI (`6fdba0b`).
 - Ratchets sobre las cifras que declaran las notas: tests, análisis, motores, piso de Python (`18cb0ae`).
-- Vault de Obsidian consolidado en `docs/`, auditoría estructural y 4 checkers en CI (`81582b5`), con [[docs/database-hub|database-hub]] (centro de base de datos relacional), [[docs/kanban|kanban]] (tablero del proyecto) y [[docs/note-schema|note-schema]] (esquema canónico de notas).
+- Vault de Obsidian consolidado en `docs/`, auditoría estructural y 4 checkers en CI (`81582b5`), con [[docs/database-hub|database-hub]] (centro de base de datos relacional), [[docs/Tablero|Tablero]] (tablero del proyecto) y [[docs/note-schema|note-schema]] (esquema canónico de notas).
 
 ### 🗑️ Removed
 - `mkdocs.yml` y el extra `docs` de `pyproject.toml` (`a1a8eae`): nunca se usó y no puede leer los wikilinks del vault.

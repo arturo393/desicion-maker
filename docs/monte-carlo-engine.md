@@ -27,7 +27,9 @@ updated: 2026-10-01
 2. Se aplica la factorización de Cholesky `L` de la matriz.
 3. Se vuelve a uniformes y se reordena para **preservar los marginales originales** — la correlación no deforma la distribución de cada variable.
 
-Dos guardas el motor de una matriz inválida: si la forma no es `(n_factores, n_factores)` o si no es definida positiva, se registra un warning y se sigue **sin correlación**.
+Una matriz que el motor no puede aplicar es un error de modelado y lanza `ValueError`: forma distinta de `(n_factores, n_factores)`, asimétrica o no definida positiva. Hasta el 18-Oct-2026 cada uno de esos casos dejaba un warning y seguía **sin correlación**, así que el resultado mostraba una dispersión más angosta que la modelada sin decirlo.
+
+**Y la correlación válida tampoco se aplicaba.** El paso 3 asignaba con `template[rangos] = ordenados`, que aplica la permutación inversa —una permutación cualquiera—: con ρ = 0,8 pedido, la muestra salía con Spearman 0,003. El test viejo sólo comprobaba que la media fuera finita. Ahora `test_correlation_matrix_applied` mide la dependencia en las muestras (Spearman 0,786 = 6/π·asin(0,4)) y falla contra el código viejo.
 
 > **Lo que este motor no es.** La matriz es una estructura **estadística** que entra por parámetro. El motor no la deriva, no la valida contra los datos y no tiene noción de causalidad. El DAG causal vive en `causal_dag.py` y lo invoca el orquestador — no este motor. Una versión anterior de esta nota afirmaba que el motor "rechaza la falacia de sustitución perfecta" y "evita condicionar sobre colliders"; ninguna de las dos cosas está en el código.
 
@@ -40,20 +42,17 @@ Con `normalize=True` (el default), cada factor se lleva a `[0,1]` con los **lím
 
 Que los límites sean globales y no por opción es lo que hace comparables los puntajes. La fórmula está en `MonteCarloEngine.run()`, en el bloque que empieza con el comentario `# Normalize exactly like the Rust MonteCarloEngine`, que apunta a que replica el motor de Rust.
 
-### Penalización de cola
+### Sin penalización de cola (retirada el 18-Oct-2026)
 
-`RUIN_THRESHOLD_PERCENTILE = 5.0`. Las trayectorias en o por debajo del percentil 5 **de la propia opción** pierden una fracción de su magnitud:
+Hasta el 18-Oct-2026 el motor restaba una fracción a las trayectorias en o bajo el percentil 5 **de la propia opción**. Como toda opción tiene un 5 % peor por construcción, el recorte caía igual sobre una opción segura que sobre una ruinosa (medido: N(0,1) y N(0,1000) recibían el mismo factor 0,95). No medía riesgo: era un recorte fijo.
 
-```
-ruin_penalty = 1 - (ruin_count / num_simulations)
-score_cola  -= |score_cola| * (1 - ruin_penalty)
-```
+Se retiró en vez de rediseñarse, por simplicidad. El puntaje de cada sorteo es exactamente la suma ponderada (`test_score_is_exactly_the_weighted_value`). El riesgo de cola sigue a la vista en `var_95` y `cvar_95`, y una línea de ruina de verdad —«perder más de X»— se declara en [[decision-gates]], con un umbral que pone quien decide.
 
-**Qué mide en realidad:** como el umbral es el percentil 5 de la misma opción, `ruin_count` es ~5 % de las trayectorias por construcción y el factor queda en ~0.95 para cualquier distribución continua, tenga cola fina o masiva (medido: N(0,1) y N(0,1000) dan 0.9500). No distingue colas; es un recorte fijo del ~5 % inferior. Solo cambia con empates (distribuciones discretas), y ahí de una forma que no depende del tamaño de la cola.
+**Efecto medido sobre los análisis del repo:** se corrieron los 44 análisis antes y después y se comparó el ganador de cada una de las 83 corridas del motor. Cambiaron 2, las dos en `uqomm_adopcion_v6_leakyfeeder`, y las dos son empates técnicos (diferencia menor a 0,006) que cambian de ganador entre dos corridas del mismo código, porque ese análisis no fija semilla. Ningún ganador cambió por la penalización.
 
-Se resta `|s|` en vez de multiplicar para que con `normalize=False` y puntajes negativos la penalización empeore la cola en vez de acercarla a cero (antes de 2026-10-01 la mejoraba). En el camino por defecto (`normalize=True`, puntajes en [0,1]) las dos fórmulas coinciden.
+### Semilla: reproducible por defecto
 
-Para que castigue colas de verdad, el umbral tendría que ser común a todas las opciones (p. ej. el percentil 5 de la matriz conjunta). Se mantiene el umbral por opción porque cambiarlo reordena todos los análisis ya hechos; la señal para revisarlo es un caso donde dos opciones con colas distintas reciban la misma penalización y eso decida el ranking.
+Desde el 18-Oct-2026 `MonteCarloEngine` usa `DEFAULT_SEED` (42) si no se le pasa otra: el mismo modelo da los mismos números. Antes usaba entropía nueva en cada corrida, y como 42 de los 44 análisis no fijaban semilla, un empate técnico podía cambiar de ganador entre dos corridas del mismo código. Para azar real, `seed=None` explícito. La semilla de cada corrida queda en la traza `DM_MC_TRACE`.
 
 ### Qué devuelve
 

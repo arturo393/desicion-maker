@@ -13,7 +13,7 @@ updated: 2026-10-01
 
 # Architecture
 
-Dual Python + Rust framework for multi-criteria decision analysis under uncertainty. 19 motores ruteables, 617 tests (plus a smoke suite that runs every analysis: `uv run pytest -m smoke`). The Monte Carlo engine runs in Python/NumPy; the `rust_core/` crate implements the same normalization but is not on the execution path (see [[adr/001-use-rust-for-math-engine]]).
+Dual Python + Rust framework for multi-criteria decision analysis under uncertainty. 19 motores ruteables, 735 tests (plus a smoke suite that runs every analysis: `uv run pytest -m smoke`). The Monte Carlo engine runs in Python/NumPy; the `rust_core/` crate implements the same normalization but is not on the execution path (see [[adr/001-use-rust-for-math-engine]]).
 
 ## Building Blocks
 
@@ -39,6 +39,7 @@ results = await fw.run_analysis(mode="standard")
 | Pareto | `pareto.py` | Efficient frontier / dominated options | all |
 | Decision Theory | `decision_theory.py` | Maximax, Maximin, Hurwicz, Laplace, Minimax Regret | standard+ |
 | Sensitivity | `sensitivity.py` | Weight/score shock analysis | standard+ |
+| Weight Robustness | `weight_robustness.py` | P(each option wins) under uncertain weights, informed and uninformed — [[weight-robustness]] | standard+ |
 | PROMETHEE (uncertainty) | `promethee.py` | Averaged net flow across p5/mean/p95 | standard+ |
 | Robust | `robust.py` | Worst-case score under weight shocks | standard+ |
 | Rank Aggregation | `aggregator.py` | Borda count across methods | standard+ |
@@ -62,7 +63,8 @@ results = await fw.run_analysis(mode="standard")
 | Kelly Criterion | `kelly.py` | Optimal bet sizing under uncertainty (field-benchmark win threshold) | standalone |
 | Fuzzy Weighted Sum | `fuzzy_weighted_sum.py` | Weighted-sum aggregation with fuzzy membership | standalone |
 
-This table is a **module index**, not an engine count. Of the rows above, 19 are engines the router dispatches to and their names come from `ENGINE_UNIVERSE` in `core/adaptive_router.py`; the rest are analysis, presentation or infrastructure modules the router never calls (Visualization, Topology, Registry, What-If, the Rust core). Two rows are the same engine as another: `PROMETHEE (uncertainty)` and `PROMETHEE II (crisp)` are both `PROMETHEE`. `Genetic` is in the universe and in no recommended route — see docs/kanban.md.
+This table is a **module index**, not an engine count. Of the rows above, 19 are engines the router dispatches to and their names come from `ENGINE_UNIVERSE` in `core/adaptive_router.py`; the rest are analysis, presentation or infrastructure modules the router never calls (Visualization, Topology, Registry, What-If, the Rust core). Two rows are the same engine as another: `PROMETHEE (uncertainty)` and `PROMETHEE II (crisp)` are both `PROMETHEE`. `Genetic` is in the universe and in no recommended route — see docs/Tablero.md.
+| Decision Ledger | `decision_commitment.py`, `ledger_cli.py` | Decisions a person took, review date, outcome, calibration. A run only drafts (`commitment_draft`) — [[decision-ledger]] | library + CLI |
 | Learning System | `outcome_tracker.py`, `calibration.py`, `decision_journal.py`, `adaptive_router.py` | Outcome tracking, confidence calibration, journal, adaptive routing | library |
 | Meta-Learning | `action_threshold.py`, `reasoning_trace.py`, `unknown_scanner.py`, `meta_calibration.py` | Action threshold, reasoning trace, unknown scanner, meta-calibration | library |
 | Decision Gates | `decision_gates.py` | Veto power: ruin, action threshold (ergodicity is informational) | library |
@@ -84,7 +86,7 @@ run_analysis(mode)
   |
   +-- MonteCarloEngine.run()             # simulate N scenarios
   +-- DecisionGate.apply()               # filter vetoed options before ranking
-  +-- _check_scale_mismatch()            # warn if scales differ >10x
+  +-- _check_range_amplification()       # warn when a <5% gap gets a full weight (orchestrator_steps.py)
   |
   +-- TOPSISEngine.analyze(fuzzy)        # rank approved options by distance to ideal
   +-- ParetoEngine.analyze()             # find efficient frontier
@@ -92,7 +94,8 @@ run_analysis(mode)
   +-- if standard+:
   |    +-- DecisionTheoryEngine.analyze()      # game-theory lenses
   |    +-- SensitivityEngine.analyze()         # weight shocks
-  |    +-- _promethee_with_uncertainty()       # PROMETHEE avg p5/p95
+  |    +-- weight_robustness()                 # P(win) with weights drawn per MC draw
+  |    +-- _promethee_with_uncertainty()       # PROMETHEE avg p5/p95 (orchestrator_steps.py)
   |    +-- RobustOptimizer.analyze()           # worst-case scores
   |    +-- RankAggregator.aggregate()          # Borda of TOPSIS+MC+PROMETHEE
   |
@@ -164,7 +167,7 @@ Statistics (per option after MC)
 
 ## Test Coverage
 
-617 tests across all engines, plus the smoke suite (`-m smoke`, one per analysis). Run with:
+735 tests across all engines, plus the smoke suite (`-m smoke`, one per analysis). Run with:
 
 ```bash
 uv run pytest src/decision_maker/tests/ -v

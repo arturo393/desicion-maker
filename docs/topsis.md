@@ -19,6 +19,10 @@ updated: 2026-09-27
 > Uso: `from decision_maker.core.topsis import TOPSISEngine`
 > No: manejar valores faltantes automáticamente.
 
+### Su papel en este framework: segunda opinión (decidido el 18-Oct-2026)
+
+Con datos fijos (p5 = media = p95) este TOPSIS da exactamente una suma ponderada de puntajes min-max (`test_crisp_topsis_is_a_min_max_weighted_sum`); el TOPSIS «de libro», con distancia euclidiana, puede ordenar distinto (dos tests `xfail(strict=True)` lo dejan escrito). Se decidió **no cambiar la matemática** —cambiarla reordenaría análisis ya hechos sin una razón concreta— y **no usarlo para recomendar**: la recomendación sale del Monte Carlo, que es el motor validado, y los reportes muestran a TOPSIS como «segunda opinión», diciendo si coincide o no. Lo que cambiaría la decisión: un caso real donde la diferencia entre la suma ponderada y la distancia euclidiana importe.
+
 ### Clases Principales
 
 - **`TOPSISEngine`**: `analyze(decision_matrix_fuzzy, weights, maximize)`. La matriz de entrada es un `dict[opción][factor] -> (p5, mean, p95)`, es decir **triplas de percentiles**, no escalares — por eso el motor es "fuzzy" en el sentido de incertidumbre, no de conjuntos difusos. El tercer parámetro se llama `maximize` (una lista de booleanos por factor), no `maximize_flags`.

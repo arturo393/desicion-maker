@@ -40,12 +40,12 @@ seguridad de perímetro ni modelado de datos de cada equipo (se reusa lo existen
 Se corrió un análisis MCDM con `@decision-maker` (`UnifiedDecisionFramework`, modo
 `"standard"`: Monte Carlo + TOPSIS + teorías de decisión + sensibilidad + robust + Borda).
 
-- Script: `src/decision_maker/analyses/tech_eval_monitoreo_mina.py`
+- Script: `analyses/tech_eval_monitoreo_mina.py`
 - Resultado: `results/tech_eval_monitoreo_mina.json`
 - Reejecutar (offline, sin display):
   ```bash
   cd /home/arturo/lumina/desicion-maker
-  MPLBACKEND=Agg .venv/bin/python src/decision_maker/analyses/tech_eval_monitoreo_mina.py
+  MPLBACKEND=Agg .venv/bin/python analyses/tech_eval_monitoreo_mina.py
   ```
 
 **Criterios (peso):** OfflineResilience 0.25 · EdgeInstallEase 0.15 · CostoEficiencia 0.15 ·
@@ -140,7 +140,7 @@ monitoreo de métricas puro, **F (Prometheus + Alertmanager) es la opción más 
 
 ## 8. Referencias
 
-- Análisis: `src/decision_maker/analyses/tech_eval_monitoreo_mina.py`
+- Análisis: `analyses/tech_eval_monitoreo_mina.py`
 - Resultado: `results/tech_eval_monitoreo_mina.json`
 - Framework: `decision-maker` (núcleo Rust + Python, 100% local; extra `ai` solo en la nube)
 - Stack base reutilizable: `sw-diagnosticoremoto` (`monitor-serial`, gateway, contratos)

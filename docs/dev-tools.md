@@ -32,9 +32,10 @@ Hub general de base de datos: [[database-hub]] | Esquema canónico de notas: [[n
 
 ## 🏗️ 2. Automatización y Gestión de Tareas
 
+`scripts/jira_manager.py` se retiró el 18-Oct-2026: el sitio de Jira Cloud estaba suspendido desde el 01-Oct y el seguimiento pasó al Sistema de Gestión I+D (agente `seguimiento`).
+
 | Script / Módulo | Propósito y Función | Integración |
 |:---|:---|:---|
-| `scripts/jira_manager.py` | Cliente automatizado para la API REST v3 de Jira Cloud. Permite sincronización de tareas de refactorización como [DM-25](../jira/DM-25.md). Exige `JIRA_EMAIL` y `JIRA_TOKEN` por entorno (no hay credenciales por defecto; sin ellas sale con código 2), tiene timeout y devuelve 1 si la creación falla. **El sitio de Jira Cloud respondió `SUSPENDED_INACTIVITY` el 2026-10-01**: hasta que se reactive, el script no puede hacer nada útil. | Jira Cloud Atlassian REST API |
 | `scripts/dev_agents_linter.py` | Linter AST que verifica las convenciones de código de la Dev-Agents Foundation (límite de parámetros, modelos Pydantic), incluidas las funciones `async def`. Falla si se le pasa algo que no es un directorio. | Calidad de código Python |
 | `alembic/` / `alembic.ini` | Motor de migraciones y evolución de esquema relacional SQLite documentado en [Alembic README](../alembic/README.md). | SQLAlchemy / SQLite |
 

@@ -6,7 +6,7 @@ title: "Decision Maker Documentation Portal"
 type: narrative
 category: governance
 status: stable
-related: ["[[decision-maker-moc]]", "[[database-hub]]", "[[kanban]]", "[[architecture]]", "[[guide]]"]
+related: ["[[decision-maker-moc]]", "[[database-hub]]", "[[Tablero]]", "[[architecture]]", "[[guide]]"]
 created: 2026-08-10
 updated: 2026-10-01
 ---
@@ -23,7 +23,7 @@ Analyze decisions with 20+ quantitative methods — Monte Carlo, TOPSIS, PROMETH
 
 ```bash
 uv sync
-cp src/decision_maker/analyses/_template.py my_decision.py  # then edit
+cp analyses/_template.py my_decision.py  # then edit
 uv run python my_decision.py
 ```
 
@@ -40,32 +40,30 @@ uv run python my_decision.py
 | [[guide]] | The narrative — how to model and run one decision | Writing your first analysis |
 | [[decision-maker-moc]] | **The vault's primary index** — one card per module | Looking up a module, or working in Obsidian |
 | [[database-hub]] | **Database Hub** — relational catalog, Dataview queries and database tables | Exploring the documentation as a database |
-| [[kanban]] | **Kanban Board** — repository tasks, backlog and sprints | Tracking development status |
+| [[Tablero]] | **Kanban Board** — repository tasks, backlog and sprints | Tracking development status |
 
 The MOC and Database Hub form the navigation layer; the three notes above are the runtime story. They are not
 alternatives: [[decision-maker-moc]] indexes the notes, and [[database-hub]] exposes them as structured database records. Where they describe the same engine, **the code is the authority**: both were found
 making claims the code contradicted, and the vault was corrected against the source.
 
 - [[database-hub]] — structured database views and Dataview queries
-- [[kanban]] — interactive repository Kanban board
+- [[Tablero]] — interactive repository Kanban board
 - [[decision-analyses]] — catalog of applied real-world decision scripts
-- [[legacy-docs]] — historical archive and specifications outside docs
-- [[roadmap]] — quantitative development roadmap (source: [ROADMAP_v3.0.md](../ROADMAP_v3.0.md))
+- [[legacy-docs]] — what historical material was retired on 2026-10-18 and how to recover it from git
+- [[roadmap]] — direction of the project; tasks live in [[Tablero]]
 - [[changelog]] — version history log (source: [CHANGELOG.md](../CHANGELOG.md))
 - [[unified-orchestrator]] — the `UnifiedDecisionFramework` behind the quick start
 - [[monte-carlo-engine]] — the simulation every other engine consumes
 - [[note-schema]] — how a note in this vault is written (tags, skeleton)
 - [Examples](../examples/mac_upgrade_comparison.py) — reference implementations
-- [Jira tracking](../jira/DM-25.md) — executive summary + work log (ID-1846)
 
-> The four markdown links above leave the vault (they resolve to `../CHANGELOG.md`,
-> `../ROADMAP_v3.0.md`, `../examples/…`, `../jira/DM-25.md`). They stay markdown links **on purpose**:
+> The markdown links above that leave the vault (`../CHANGELOG.md`, `../examples/…`) stay markdown
+> links **on purpose**:
 > they point at repo files, not at notes, so there is no wikilink target to resolve. Do not convert
 > them — Obsidian cannot open a note that does not exist in the vault.
 
 ## Archive
 
-- [[reorganization/README|Reorganización]] — historical records of the 2026 reorganization
 - [[sw-diagnosticoremoto/README|sw-diagnosticoremoto]] — remote diagnostics: power supply analysis and mine monitoring proposal
 
 > Both are **folders**, and a folder is not a note. The `README.md` inside each is the closest thing
@@ -83,15 +81,19 @@ making claims the code contradicted, and the vault was corrected against the sou
 │   │   ├── outcome_tracker.py, calibration.py, decision_journal.py, adaptive_router.py  # learning system
 │   │   ├── action_threshold.py, reasoning_trace.py, unknown_scanner.py, meta_calibration.py  # meta-learning
 │   │   ├── decision_gates.py # veto: ergodicity, ruin, causal DAG, commitment
+│   │   ├── weight_robustness.py  # P(win) under uncertain weights
+│   │   ├── decision_commitment.py # decision ledger
 │   │   └── fuzzy_weighted_sum.py
-│   ├── analyses/             # decision scripts (decision_concon, sophos_xg115, vlad25…)
+│   ├── ledger_cli.py         # decide / review / close / calibration
 │   ├── api/server.py         # FastAPI REST
 │   ├── dashboard/app.py      # Streamlit UI
-│   └── tests/                # 617 tests (+ smoke: -m smoke)
+│   └── tests/                # 735 tests (+ smoke: -m smoke)
+├── analyses/                 # decision scripts, outside the package (decision_concon, sophos_xg115, vlad25…)
+│   └── research/             # one-off LLM research scripts (need network; never run in CI)
+├── decisions/ledger.jsonl    # decisions taken and their outcomes (versioned)
 ├── rust_core/                # Rust crate decision_maker_core (pyo3 + rayon)
 ├── examples/
 ├── docs/                     # Obsidian vault root (config: docs/.obsidian/)
-├── jira/                     # local Jira tracking (DM-25.md ↔ ID-1846)
 └── README.md
 ```
 

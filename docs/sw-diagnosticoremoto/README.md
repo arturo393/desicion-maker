@@ -23,6 +23,7 @@ archivos a minúsculas, así que un `[[nombre-archivo]]` a secas depende de que 
 otro documento del vault repita ese nombre.
 
 ### 05-Power-Supply / Investigación
+- [[sw-diagnosticoremoto/05-power-supply/analisis-decision|Análisis de decisión de la estrategia del módulo de poder]] (estaba en la raíz del repo hasta el 18-Oct-2026)
 - [[sw-diagnosticoremoto/05-power-supply/investigacion/analisis-vistas|Análisis de vistas y dashboards]]
 - [[sw-diagnosticoremoto/05-power-supply/investigacion/estado-del-arte|Estado del arte: software de diagnóstico de fuentes de poder]]
 - [[sw-diagnosticoremoto/05-power-supply/investigacion/planificacion-desarrollo|Planificación de desarrollo]]
@@ -33,7 +34,7 @@ otro documento del vault repita ese nombre.
 
 ### Decisión de línea base
 
-El análisis `diagnostico_remoto_linea_base_decision.py` (en `src/decision_maker/analyses/`, v1.2 del 2026-10-01) decide sobre qué línea de sw-diagnosticoremoto se sigue construyendo. Son tres líneas, no dos: `development` (Go + monitor-serial), la VHF vendida (rama v4.1.1-fixed, tag v4.2.0) y su hermana UHF (ulad / uhf-v1.1.0); las dos vendidas salen de v4.1.0 y comparten arquitectura. Cada cliente tiene su propio mini servidor, así que cualquier cambio de arquitectura es una migración en sitio por cliente.
+El análisis `diagnostico_remoto_linea_base_decision.py` (en `analyses/`, v1.2 del 2026-10-01) decide sobre qué línea de sw-diagnosticoremoto se sigue construyendo. Son tres líneas, no dos: `development` (Go + monitor-serial), la VHF vendida (rama v4.1.1-fixed, tag v4.2.0) y su hermana UHF (ulad / uhf-v1.1.0); las dos vendidas salen de v4.1.0 y comparten arquitectura. Cada cliente tiene su propio mini servidor, así que cualquier cambio de arquitectura es una migración en sitio por cliente.
 
 Compara seis opciones (A todo a `development`, B volver a UHF y congelar `development`, C reemplazo de una vez, C2 estrangulamiento, D dos líneas a propósito, E una línea VHF+UHF) con el modo `standard` del orquestador. Corre offline. Hace 18 llamadas a `run_analysis` (el caso base, los shocks de peso y el escenario S4) y cada una deja su juego de reportes en la carpeta `results` del directorio de trabajo, así que conviene correrlo desde la raíz del repo, donde esa carpeta está en `.gitignore`.
 

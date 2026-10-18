@@ -6,7 +6,7 @@ title: "Lumina Decision Maker MOC"
 type: moc
 category: governance
 status: stable
-related: ["[[index]]", "[[database-hub]]", "[[kanban]]", "[[architecture]]", "[[guide]]", "[[results-catalog]]"]
+related: ["[[index]]", "[[database-hub]]", "[[Tablero]]", "[[architecture]]", "[[guide]]", "[[results-catalog]]"]
 created: 2026-08-10
 updated: 2026-09-28
 ---
@@ -15,7 +15,7 @@ updated: 2026-09-28
 
 Este es el Mapa de Contenido (MOC) del motor cuantitativo de decisiones estocásticas.
 
-Es el **índice principal de navegación** de este vault, conectado con el [[database-hub]] y el tablero [[kanban]].
+Es el **índice principal de navegación** de este vault, conectado con el [[database-hub]] y el tablero [[Tablero]].
 
 ## 📊 1. Motores Core (Generación y Simulación)
 
@@ -34,6 +34,7 @@ Es el **índice principal de navegación** de este vault, conectado con el [[dat
 - [[pareto-frontier]]
 - [[decision-theory]]
 - [[rank-aggregator]]
+- [[weight-robustness]] — probabilidad de ganar con pesos inciertos
 
 ## 🌐 3. Topología, Optimización y Escenarios
 
@@ -49,20 +50,20 @@ Es el **índice principal de navegación** de este vault, conectado con el [[dat
 
 - [[reporting-and-registry]]
 - [[data-models-and-schemas]]
+- [[decision-ledger]] — decisiones tomadas, revisión y calibración
 - [[decision-analyses]] — catálogo de decisiones y casos reales
 - [[results-catalog]] — catálogo de resultados, trazas de razonamiento y gráficos en results/
 
 ## 🗂️ 5. Gobernanza del Vault y Base de Datos
 
 - [[database-hub]] — centro de base de datos relacional y consultas Dataview
-- [[kanban]] — tablero Kanban oficial del repositorio
+- [[Tablero]] — tablero Kanban oficial del repositorio
 - [[dev-tools]] — herramientas de desarrollo, linters y scripts de QA
 - [[legacy-docs]] — catálogo de documentación histórica y legacy
 - [[roadmap]] — hoja de ruta de desarrollo cuantitativo
 - [[changelog]] — registro histórico de versiones y cambios
 - [[note-schema]] — esqueleto canónico, vocabulario de tags, regla de idioma
-- [[decision-maker-worklog]] — bitácora y registro de tareas del trabajo en curso
-- [[reorganization/README|Reorganización]] — archivo histórico de la reorganización de 2026
+- [[bitacora]] — bitácora, un archivo por día en `bitacora/`
 - [[sw-diagnosticoremoto/README|sw-diagnosticoremoto]] — diagnóstico remoto: fuente de poder y monitoreo mina
 
 ## 📚 6. Capa Narrativa
@@ -85,4 +86,4 @@ qué clase hay— se entra por acá y no por el archivo suelto:
 
 ## Cobertura
 
-El vault documenta de forma exhaustiva los motores clave del pipeline cuantitativo (`monte_carlo.py`, `bayesian.py`, `antifragile.py`, `ergodicity.py`, `decision_gates.py`, `topsis.py`, `promethee.py`, `ahp.py`, `pareto.py`, `decision_theory.py`, `aggregator.py`, `topology.py`, `portfolio.py`, `genetic.py`, `robust.py`, `sensitivity.py`, `bootstrap.py`, `what_if.py`, `schemas.py`, `registry.py`, `reporting.py`, `orchestrator.py`). Módulos auxiliares o de soporte interno se gestionan en [[decision-maker-worklog]] y [[kanban]].
+El vault documenta de forma exhaustiva los motores clave del pipeline cuantitativo (`monte_carlo.py`, `bayesian.py`, `antifragile.py`, `ergodicity.py`, `decision_gates.py`, `topsis.py`, `promethee.py`, `ahp.py`, `pareto.py`, `decision_theory.py`, `aggregator.py`, `topology.py`, `portfolio.py`, `genetic.py`, `robust.py`, `sensitivity.py`, `bootstrap.py`, `what_if.py`, `schemas.py`, `registry.py`, `reporting.py`, `orchestrator.py`). Módulos auxiliares o de soporte interno se gestionan en [[bitacora]] y [[Tablero]].

@@ -1,42 +1,32 @@
 ---
-aliases: [Roadmap, Roadmap v3, Project Roadmap]
+aliases: [Roadmap, Roadmap v3, Roadmap v3.0, ROADMAP_v3.0, Project Roadmap]
 tags: [roadmap, lumina, quant, archive]
 id: DOC-ROADMAP
 title: "Roadmap de Desarrollo Cuantitativo"
 type: roadmap
 category: project-management
 status: active
-related: ["[[kanban]]", "[[decision-maker-moc]]", "[[index]]", "[[architecture]]"]
+related: ["[[Tablero]]", "[[decision-maker-moc]]", "[[index]]", "[[architecture]]"]
 created: 2026-08-10
-updated: 2026-09-27
+updated: 2026-10-18
 ---
 
 # 🗺️ Roadmap: Decision Intelligence Framework
 
-Vista integrada en el vault de Obsidian para la hoja de ruta del proyecto. Archivo fuente en la raíz del repositorio: [ROADMAP_v3.0.md](../ROADMAP_v3.0.md).
+Una sola hoja de ruta, y corta a propósito: **la dirección** vive acá, **las tareas** en el [[Tablero]]. Hasta el 18-Oct-2026 había tres copias —`ROADMAP_v3.0.md` en la raíz, esta nota y el Backlog del Tablero— con las mismas cinco mejoras escritas tres veces; se dejó esta.
 
-Tablero de ejecución en tiempo real: [[kanban]].
+## Dónde está (v3.1)
 
----
+- Motor validado: [[monte-carlo-engine]], con correlación entre factores, escenarios comunes y valor de la información.
+- [[weight-robustness]]: si el ganador sobrevive a otros pesos razonables.
+- [[decision-ledger]]: las decisiones tomadas, su revisión y la calibración de la confianza.
+- 19 motores ruteables: 2 validados, 1 caracterizado ([[topsis]], segunda opinión), 16 experimentales y etiquetados como tales en cada reporte.
 
-## 🎯 Estado Actual (v3.0)
+## Hacia dónde (criterios del dueño, 18-Oct-2026)
 
-El framework dispone de **19 motores ruteables**, API REST, interfaz web interactiva y CLI.
+1. **Que el sistema sepa si acierta.** Cerrar decisiones reales en el ledger; con unas 20 cerradas la calibración empieza a decir algo.
+2. **Simplicidad.** Menos motores, mejor validados; un solo almacén de resultados; una sola capa de LLM.
+3. **Calidad del modelo de valor.** Funciones de valor por criterio y ayuda para estimar rangos, con spec aprobada antes.
+4. **Conectividad.** Todo lo que otro repo lea sale con esquema publicado y `--json`.
 
-### Motores Completados
-- **Antifrágil**: [[antifragile-engine]] — estrategia Barbell, convexidad, indexación de fragilidad y vía negativa.
-- **Simulación Estocástica**: [[monte-carlo-engine]] — simulación de $N$ escenarios, cópula gaussiana para correlación.
-- **Inferencia Empírica**: [[bayesian-inference-engine]] — probabilidades posteriores por opción.
-- **MCDA**: [[topsis]], [[promethee]], [[ahp]] — ordenamiento multicriterio y jerarquías.
-- **Optimización y Topología**: [[portfolio-optimizer]], [[genetic-algorithms]], [[topological-data-analysis]].
-- **Infraestructura**: [[unified-orchestrator]], [[data-models-and-schemas]], [[reporting-and-registry]].
-
----
-
-## 🚀 Próximas Mejoras (v3.1+)
-
-1. 🤖 **AI-Powered Parameter Estimation**: Inferencia empírica de distribuciones mediante Gemini (`DistributionType.AI_FETCH`).
-2. ⚖️ **Interactive AHP CLI Wizard**: Asistente interactivo guiado por terminal para comparaciones por pares.
-3. 📉 **Funciones de Utilidad Dinámica**: Funciones de utilidad no lineal (rendimientos decrecientes, curvas S).
-4. 📊 **Enhanced Visualization Suite**: Visualizaciones interactivas con Plotly exportables a HTML interactivo.
-5. 🐳 **Docker Deployment**: Dockerfile y docker-compose para despliegue productivo de API y Dashboard.
+Las tareas concretas de cada punto, con prioridad, están en el [[Tablero]].

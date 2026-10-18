@@ -1,20 +1,28 @@
 ---
-aliases: [Kanban, Tablero Kanban, Project Kanban]
+aliases: [Tablero, Kanban, kanban, Tablero Kanban, Project Kanban]
 tags: [kanban, lumina, quant, project-management, archive]
 kanban-plugin: basic
+proyecto_gestion: []
 id: KANBAN-REPO
 title: "Tablero Kanban de Decision Maker"
 type: kanban
 category: project-management
 status: active
-related: ["[[decision-maker-moc]]", "[[decision-maker-worklog]]", "[[index]]", "[[roadmap]]"]
+related: ["[[decision-maker-moc]]", "[[bitacora]]", "[[index]]", "[[roadmap]]"]
 created: 2026-09-27
-updated: 2026-10-02
+updated: 2026-10-18
 ---
 
 # 📋 Tablero Kanban: Decision Maker Framework
 
-Tablero interactivo de seguimiento de tareas, hitos y desarrollo del framework cuantitativo. Compatible con el plugin **Obsidian Kanban** y estructurado como registro relacional de base de datos.
+Qué falta, en el plugin **Obsidian Kanban**. El porqué de lo hecho va en la [[bitacora]], un archivo por día. Mismo nombre y lugar (`docs/Tablero.md`) que en los demás repositorios; `proyecto_gestion` queda vacío hasta que este repo tenga proyecto en el Sistema de Gestión I+D.
+
+Criterios para priorizar desde el 18-Oct-2026: **simplicidad** (menos motores, mejor validados), **escalabilidad** (vectorizado, sin estado oculto) y **conectividad** (formatos planos con esquema que otros repos y plataformas puedan leer).
+
+## 🤔 Por Decidir
+
+Sin decisiones abiertas: las cuatro del 18-Oct se resolvieron con el criterio «profesional y simple» que pidió el dueño (ver Completado).
+
 
 ## 📋 Backlog (Hojas de Ruta / v3.1+)
 
@@ -26,26 +34,31 @@ Tablero interactivo de seguimiento de tareas, hitos y desarrollo del framework c
 
 ## 📌 Por Hacer / En Cola (To Do)
 
-- [ ] 🧬 **¿`Genetic` sin ruta es deliberado?** Está en `ENGINE_UNIVERSE` y en ninguna ruta, ni en `advanced` — decisión de producto #p2
-- [ ] 🧩 **`scripts/samba_performance_strategy.py` no corre**: migración a medias — construye `UnifiedDecisionFramework(debug=...)` y llama `analyze_option`, que el framework no tiene. Su propio docstring ya dice que hay que reescribirlo #analyses #p3
+- [ ] 🧩 **Una sola capa de LLM**: `gemini_agent`, `gemini_helper`, `agy_backend`, `deep_research_decision_agent` y `devils_advocate` (608 líneas) hacen una sola cosa: preguntarle a un modelo. Unificar en un cliente. Spec corta antes #core #p2
+- [ ] 💼 **Retirar la capa legacy `CareerOption`/`DecisionAnalysisEngine`**: 8 análisis técnicos modelan protocolos con campos de carrera profesional (salario, burnout). Migrarlos al modelo normal y borrar la capa. Spec corta antes #analyses #p2
+- [ ] 🗄️ **Cuatro almacenes**: `registry.py` (SQLite directo), SQLModel + Alembic (API), JSONL en `results/` y el ledger. Unificar con migración; es el último porque toca datos guardados #process #p3
+- [ ] 🧪 **11 análisis con motor casero** (`NO_ENGINE` en `test_analyses_smoke.py`): migrarlos al motor común o archivarlos; hoy el humo sólo prueba que corren #analyses #p2
+- [ ] 🦀 **`rust_core/` se compila en cada CI sin usarse**: el ADR 001 lo conserva, pero el build backend `maturin` obliga al toolchain de Rust para instalar el paquete. Opción: backend puro Python y el crate como extra opcional. Toca el ADR #infra #p3
+- [ ] ⚖️ **Ponderación por recorrido en los análisis existentes**: la plantilla ya pregunta por recorrido (`swing_weights`) y la corrida avisa cuando una diferencia menor al 5 % recibe el peso entero; los 43 análisis viejos siguen con pesos tipeados. Revisarlos uno por uno cuando se reabran #analyses #p2
+- [ ] 📒 **Registrar las primeras decisiones reales en el ledger**: el mecanismo existe desde el 18-Oct (`decision-maker decide/review/close/calibration`); faltan los datos. Empezar por la línea base del diagnóstico remoto y el piloto Nexa. Con ~20 decisiones cerradas el Brier empieza a decir algo #process #p1
+- [ ] 📈 **Funciones de valor por criterio (MAVT)**: el modelo sigue siendo aditivo y lineal en el valor normalizado. Una función por criterio —saturación, umbral, aversión al riesgo— fijada por el decisor quita además el rank reversal del min-max. Antes de implementarlo, spec aprobada #quant #p1
+- [ ] 🎯 **Elicitación p10/p90 con chequeo de sobreconfianza**: hoy los rangos se tipean a mano. Pedir p10/p90, ajustar PERT o lognormal, y mostrar cuánto se ensancha si el experto es tan sobreconfiado como la media #quant #p2
+- [ ] 🖼️ **Mostrar `weight_robustness` en el reporte HTML y en el dashboard Streamlit**: hoy sólo está en el resultado y en la plantilla #viz #p2
+- [ ] 📝 **Notas de módulo para `config_runner.py` y el resto sin dueño**: falta nota dueña (`module:`) para 38 de los 59 módulos de `core/` (medido 2026-10-01). De los de primera clase en el pipeline `standard` sólo falta `config_runner.py` #docs #p3
+- [ ] 🧩 **`analyses/research/samba_performance_strategy.py` no corre**: migración a medias — construye `UnifiedDecisionFramework(debug=...)` y llama `analyze_option`, que el framework no tiene. Su propio docstring ya dice que hay que reescribirlo #analyses #p3
 - [ ] 🕳️ **Punto ciego del humo: 11 análisis con motor propio** (`NO_ENGINE` en `test_analyses_smoke.py`): para los que tienen TOPSIS/MC propio en numpy, el humo sólo prueba que corren, no que distingan opciones. Migrarlos al framework o darles su propia aserción #qa #p3
 - [ ] ✏️ **`samba`/`commandmessage`/varios declaran metodologías que no aplican**: se corrigió la tabla de [[decision-analyses]], pero los docstrings de varios scripts siguen prometiendo «13 metodologías» o Monte Carlo sin usarlo #docs #p3
-- [ ] 📐 **Decidir qué TOPSIS queremos: hoy, con datos crisp, es una suma ponderada**: `core/topsis.py` es TOPSIS difuso a la Chen (suma distancias por criterio), y con a=b=c eso da exactamente la suma ponderada de puntajes min-max (`test_crisp_topsis_is_a_min_max_weighted_sum`). Con los datos del caza de Hwang & Yoon ordena A3>A1>A4>A2; el TOPSIS clásico (normalización vectorial, distancia euclidiana) da A1>A3>A4>A2. Con triángulos (p5, media, p95) se aparta algo, no mucho. Pasar a distancia euclidiana cambia rankings ya hechos: decisión de modelado. Dos tests `xfail(strict=True)` lo marcan #quant #p1
 - [ ] 📶 **`process_utility_analysis.py` no lee la investigación que dice reinterpretar**: `json.load(f)` sin asignar; el análisis está escrito a mano. Reescribirlo sobre `power_supply_research_results.json` o declararlo como plantilla #analyses #p2
 - [ ] ⚠️ **`pymcdm.methods.PROMETHEE_II` agota su generador interno de funciones de preferencia tras una corrida**: cuando se inicializa con listas de parámetros ($p$, $q$), `self.pfs` se almacena como una expresión generadora que se consume en la primera invocación. Llamar a la misma instancia por segunda vez lanza `IndexError: axis 1 is out of bounds`. Cualquier wrapper o benchmark debe instanciar un nuevo `PROMETHEE_II` por corrida o convertir `pfs` a tupla #deps #qa #p3
 - [ ] 🔁 **Puntaje relativo y rank reversal**: el puntaje es min-max sobre las opciones de la corrida, así que agregar una opción puede reordenar las demás. **Confirmado y medido con `hypothesis` en `test_properties.py` (`test_rank_reversal_topsis_with_dominated_third_option`)**: con $w=[0.25, 0.75]$, $A=[1.0, 7.0]$ y $B=[2.0, 6.0]$, $A$ gana inicialmente ($0.75 > 0.25$); al introducir $C=[0.0, 0.0]$ estrictamente dominada por ambas, el rango se expande de forma no uniforme y $B$ pasa a ganar ($0.8929 > 0.8750$). Evaluar funciones de valor por criterio fijadas por el decisor para evitar distorsión relativa #quant #p2
 - [ ] 📐 **EVPPI sesgado hacia arriba con N chico**: el máximo de medias por bin con ruido supera el de las medias verdaderas. Medido con un factor de riesgo que no cambia la decisión: hasta 0,7 % de la media del ganador con N=1.000 y 0 con N=10.000. Corregirlo (p. ej. restar el EVPPI de un driver permutado) o exigir N mínimo; tampoco se hizo EVSI (información muestral) #quant #p3
-- [ ] 📒 **Registrar el resultado de las decisiones reales**: `OutcomeTracker`/`DecisionJournal` existen y ningún análisis los usa. Empezar por la línea base del diagnóstico remoto. Es lo que prueba si el framework decide bien #process #p1
-- [ ] 📦 **Publicar en PyPI con versión etiquetada**: depende de «Versión sin fuente única» #infra #p3
+- [ ] 📦 **Publicar en PyPI con versión etiquetada**: la versión ya tiene una sola fuente (`pyproject.toml`, y `test_readme_version_matches_pyproject` ata el README); faltan los tags de git (`v3.1.0`) #infra #p3
 - [ ] 🧮 **La compuerta de ruina decide «no aplicable» por el rango de los puntajes, no por `normalize`**: con `normalize=False` y todos los puntajes en [0, 1] también dice «no aplicable» (correcto en el resultado, ninguno puede bajar de 0, pero por inferencia). Pasarle el flag explícito #quant #p3
 - [ ] 📏 **`sqm_santiago`/`furniture_diy` siguen cortando en 5.0 y 3.5**: el texto ya dice «posición relativa», pero los umbrales absolutos sobre un puntaje min-max no significan nada. Quitarlos o ranquear #analyses #p3
 - [ ] 🔬 **Correr los `power_supply_*` con `agy`**: ya no necesitan API key, pero no se corrieron enteros (~25 s por consulta). Los dos `process_*` leen los datasets que ellos generan, así que van después #analyses #p2
 - [ ] 📡 **Cerrar la decisión de línea base del diagnóstico remoto**: E gana, pero (a) la fecha de ID-1476 decide entre E y D (escenario S4 en empate), (b) S6 sin verificar: si los arreglos que le faltan a v4.2.0 importan en un VHF de campo, (c) S2: clientes instalados por línea. Fijar semilla para que S4 sea reproducible #analyses #p1
 - [ ] ♻️ **Re-correr lo que usó datos por factor entre 2026-08-23 y 2026-09-29**: `factor_stats`/`raw_factor_data` eran los de la última opción. Sólo afecta reportes de sensibilidad, explicabilidad, antifrágil o genético; los rankings están sanos ([[results-catalog]]) #analyses #p2
-- [ ] 📉 **¿La penalización de cola tiene que distinguir colas?** Hoy recorta ~5 % fijo por opción ([[monte-carlo-engine]]). Cambiar a un umbral común reordena todos los análisis ya hechos — decisión de modelado #quant #p2
 - [ ] 🌿 **Rama por defecto de GitHub en `main`**: se sincronizó `improve-computer-decision` con `main` (mismo HEAD). La cuenta de `gh` (`arturoSigmadev`) tiene push pero no admin; cambiar la default branch a `main` en Settings → Default branch de GitHub cuando sea conveniente #infra #p2
-- [ ] 🗂️ **`metadata.json` cubre 5 de 37 análisis** y sus `results_location` no existen: completarlo o retirarlo #docs #p3
-- [ ] 🏷️ **Versión sin fuente única**: `pyproject.toml` dice 3.0.0, la doc v3.1, y no hay tags de git #infra #p3
 - [ ] 🧱 **`commandmessage_*` fallan en un clon limpio**: escriben en `results/` sin crearlo. Y los `sniffertelemetry` v1–v4 comparten nombres de opción, así que sus `analysis_*.json` genéricos no se distinguen #analyses #p3
 - [ ] 🔍 **Huecos que quedan en los checkers**: anclas `#...` no se verifican; `check_obsidian_language.py` detecta archivo con una ventana de 400 caracteres y no saca fences `~~~`; `dev_agents_linter.py` indexa UX-01 por nombre de función y dos métodos homónimos se pisan #qa #p3
 - [ ] 📝 **Documentar módulos auxiliares restantes**: crear notas para submódulos de soporte secundario en `src/decision_maker/core/` (como `config_runner.py`, `jsonl_store.py`) #docs #p3
@@ -59,6 +72,31 @@ Sin tarjetas.
 Sin tarjetas.
 
 ## ✅ Completado (Done)
+
+- [x] 🧹 **Limpieza del 18-Oct, segunda tanda** (2026-10-18): 6 versiones superadas de análisis a `analyses/archive/` (sniffer v1–v3, minería v1, dos de CommandMessage); 12 notas históricas, `archive/`, Jira y el roadmap duplicado retirados del repo (recuperables desde `0aecd52`, índice en [[legacy-docs]]); el análisis de power supply de la raíz movido junto a su investigación; un solo roadmap ([[roadmap]]) #docs
+- [x] 🪶 **`seaborn` eliminado** (2026-10-18): lo usaban 4 llamadas de gráficos, reemplazadas por matplotlib + scipy. `scikit-learn` se queda: lo usan 3 motores experimentales y volverlo opcional agregaba ramas; se resuelve al podar esos motores #infra
+- [x] 🎲 **Semilla fija por defecto** (2026-10-18): `MonteCarloEngine` usa `DEFAULT_SEED`; mismo modelo, mismos números. `seed=None` explícito para azar real #quant
+- [x] 🏷️ **Sin nombres de marketing** (2026-10-18): `_add_god_mode_metrics` → `_add_advanced_engine_metrics`; la API se llama «Decision Maker API» #core
+- [x] 📐 **TOPSIS queda como segunda opinión** (2026-10-18): la matemática no cambia; la recomendación de los reportes pasa a ser la del Monte Carlo, igual que `commitment_draft`. Antes el reporte recomendaba al ganador de TOPSIS y el borrador al del Monte Carlo: una misma corrida podía recomendar dos opciones distintas ([[topsis]]) #quant
+- [x] 🏷️ **Motores experimentales: etiquetados, no ocultos** (2026-10-18): ocultarlos rompía las claves que leen los 44 análisis. Cada sección del reporte lleva la madurez de su motor (`validated`, `characterized`, `experimental`), leída de `engine_maturity.py` #quant
+- [x] ✂️ **Penalización de cola retirada** (2026-10-18): recortaba el 5 % peor de cada opción, que toda opción tiene, así que no medía ruina. Antes y después en los 44 análisis: 0 ganadores cambiados más allá del ruido de semilla. El riesgo de cola queda en `cvar_95` y la ruina real en [[decision-gates]] con umbral explícito #quant
+- [x] 🧬 **Genetic en la ruta `advanced`** (2026-10-18): el modo fijo lo corría y el router automático no; ahora coinciden, con test y control negativo #core
+- [x] 🚨 **Advertencia falsa de escala reemplazada** (2026-10-18): «Scale mismatch» comparaba magnitudes crudas que la normalización ya anula y saltaba en casi todos los análisis. Ahora avisa lo que sí importa: una diferencia menor al 5 % entre opciones que igual recibe el peso entero (`_check_range_amplification`, 3 tests con control negativo) #quant
+- [x] 🎚️ **La plantilla pondera por recorrido** (2026-10-18): `SWING` con la pregunta «¿qué factor moverías primero de su peor a su mejor valor?» y `WeightDerivationEngine.swing_weights` #analyses
+- [x] 🧾 **Los tests ya no escriben en `results/`** (2026-10-18): `DM_RESULTS_DIR` para los almacenes y reportes; verificado por el efecto, la suite completa deja los tres JSONL idénticos byte a byte #qa
+- [x] 🌐 **API del ledger** (2026-10-18): `GET /ledger?status=all|open|due|closed` y `GET /ledger/calibration`, sólo lectura. La API escucha en `127.0.0.1` por defecto: no tiene auth y el ledger guarda decisiones personales #api
+- [x] 🧭 **Ledger de decisiones: una corrida ya no compromete nada** (2026-10-18): `core/decision_commitment.py` exige fecha de revisión ISO futura, una métrica observable (rechaza `mean_score`, `p95`…: el modelo no puede calificarse a sí mismo) y confianza en (0, 1]. El orquestador devuelve `commitment_draft`; el compromiso lo registra una persona con `decision-maker decide`. `review`, `close` y `calibration` (Brier/ECE sobre decisiones cerradas) en `ledger_cli.py`. Archivo versionado `decisions/ledger.jsonl` ([[decision-ledger]]) #process #core
+- [x] ⚖️ **Robustez ante los pesos** (2026-10-18): `core/weight_robustness.py`, en modo `standard`. Cada sorteo del Monte Carlo lleva su propio vector de pesos: lectura informada (Dirichlet alrededor de los pesos declarados) y sin información (uniforme). Validada contra la cola de una Beta en forma cerrada; control negativo hecho ([[weight-robustness]]) #quant #core
+- [x] 🔗 **La correlación nunca funcionó, y fallaba en silencio** (2026-10-18): la permutación de Iman-Conover estaba invertida (ρ=0,8 pedido daba Spearman 0,003), y una matriz de forma equivocada, asimétrica o no definida positiva se ignoraba con un warning. Ahora se aplica (test mide Spearman 0,786) y lo inválido lanza `ValueError` #quant #core
+- [x] ↩️ **Regret invertido** (2026-10-18): `OutcomeTracker` daba regret 0 en cada fallo; el test `>= 0.0` no podía fallar. Corregido con el valor fijado #core #qa
+- [x] 📦 **Análisis fuera del paquete** (2026-10-18): los 44 análisis a `analyses/` y los 7 scripts a `analyses/research/`; hacks de `sys.path` quitados, dos imports rotos reparados, `metadata.json` retirado (cubría 5 de 37 y lo reemplaza la tabla de [[decision-analyses]], que tiene ratchet). `test_analyses_imports.py` verifica cada import con control negativo #analyses
+- [x] 🏷️ **Versión con una sola fuente** (2026-10-18): `pyproject.toml` 3.1.0, atado al README por test #infra
+- [x] 📊 **Distribución PERT** (2026-10-18): `[mín, más probable, máx]`, para costos y plazos; la plantilla deja de modelar costos con una normal que admite negativos #quant
+- [x] 🔐 **El ledger se versiona en este repo** (2026-10-18, decidido por el dueño): el repo es privado y de un solo dueño. Lo que lo cambiaría: que alguien más lo clone; entonces `DM_LEDGER_PATH` a un repo privado #process
+- [x] 🗑️ **Dashboard React borrado** (2026-10-18, decidido por el dueño): era la plantilla de Vite con un payload de demo fijo; queda Streamlit (`src/decision_maker/dashboard/app.py`) como única interfaz web #infra
+- [x] 🧷 **mypy como mecanismo y `orchestrator.py` bajo 500 líneas** (2026-10-18): 82 → 0 errores, paso en CI; 685 → 494 líneas con `orchestrator_steps.py`. Destapó 4 defectos reales: REPL de what-if, barbell con empates, **vía negativa que nunca quitaba factores** y probabilidades bayesianas contaminadas por el grafo causal ([[bitacora]]) #qa #core
+- [x] 🔌 **Esquema publicado del ledger y `--json`** (2026-10-18): `decisions/ledger.schema.json` con conformidad contra el productor; `review --json`, `calibration --json` #api
+- [x] 🗂️ **Tablero y bitácora con la convención de los demás repos** (2026-10-18): `docs/Tablero.md` y `docs/bitacora/AAAA-MM-DD.md`; el worklog único se dividió por fecha sin reescribir el contenido #docs
 
 - [x] 🌐 **Escenarios comunes, valor de la información y madurez de motores** (2026-10-08, `agy` + revisión): `add_variable(..., driver="mercado")` acopla de forma comonótona las variables de todas las opciones que dependen del mismo factor de riesgo, conservando cada marginal (`core/scenarios.py`); sin drivers, mismos números que antes con la misma semilla. Minimax Regret vuelve a ser por escenario cuando el modelo está totalmente compartido. EVPI total (sólo con modelo totalmente compartido) y EVPPI por driver, ordenado: «qué conviene averiguar primero» (`core/value_of_information.py`). Madurez de los 19 motores en `core/engine_maturity.py` con test que impide «validated» sin evidencia: MonteCarlo y PROMETHEE validados, TOPSIS caracterizado, el resto experimental #core
 

@@ -1,14 +1,14 @@
 ---
-aliases: [Power Supply Strategy Analysis, Decision Fuente de Poder]
-tags: [analysis, decision, power-supply, sw-diagnosticoremoto, lumina]
+aliases: [Power Supply Strategy Analysis, Decision Fuente de Poder, README_POWER_SUPPLY_DECISION]
+tags: [archive, lumina, sw-diagnosticoremoto, power-supply]
 id: CASE-POWER-SUPPLY
 title: "Análisis de Decisión: Power Supply Module Strategy"
-type: analysis
+type: archive
 category: remote-diagnostics
-status: stable
-related: ["[[docs/sw-diagnosticoremoto/README|sw-diagnosticoremoto]]", "[[docs/database-hub|database-hub]]", "[[docs/index|index]]"]
+status: archive
+related: ["[[sw-diagnosticoremoto/README|sw-diagnosticoremoto]]", "[[database-hub]]", "[[index]]"]
 created: 2026-01-15
-updated: 2026-09-27
+updated: 2026-10-18
 ---
 
 # 🎯 ANÁLISIS DE DECISIÓN: Power Supply Module Strategy

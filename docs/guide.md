@@ -21,7 +21,7 @@ updated: 2026-10-01
 ## Step 1: Create Your Script
 
 ```bash
-cp src/decision_maker/analyses/_template.py my_decision.py
+cp analyses/_template.py my_decision.py
 ```
 
 ## Step 2: Define Factors
@@ -61,8 +61,9 @@ fw.add_option(opt)
 | Type | Params | Use |
 |------|--------|-----|
 | `DETERMINISTIC` | `value` | Known with certainty |
-| `NORMAL` | `mean, std` | Natural variation around a mean |
+| `NORMAL` | `mean, std` | Quantities that can go either way. Not for costs: a NORMAL cost draws negative values |
 | `UNIFORM` | `min, max` | Range with equal probability |
+| `PERT` | `min, most_likely, max` | **Costs and durations.** Stays inside its bounds and skews like real estimates; mean = (min + 4·mode + max)/6 |
 | `TRIANGULAR` | `min, mode, max` | Range with most likely value |
 | `BETA` | `alpha, beta` | Bounded [0,1] distributions |
 | `LOGNORMAL` | `mu, sigma` | Positive-skewed (prices, salaries) |
@@ -99,6 +100,8 @@ The result dict contains:
 | `strategies` | Maximax, Maximin, Hurwicz, Laplace, Minimax Regret |
 | `pareto` | Efficient frontier and dominated options |
 | `sensitivity` | Robustness score and winner-flip scenarios |
+| `weight_robustness` | P(each option wins) with uncertain weights: `informed` (around yours), `uninformed` (any weights), and a `verdict` (standard, advanced) — [[weight-robustness]] |
+| `commitment_draft` | What the run would recommend committing to. **Nothing is written**: see Step 6 |
 | `future.promethee_uncertainty` | PROMETHEE net flows (averaged) |
 | `future.robust_optimizer` | Worst-case ranking under weight shocks |
 | `future.rank_aggregation` | Borda consensus ranking |
@@ -110,6 +113,23 @@ The result dict contains:
 Keys that are easy to misread: `topsis_scores` and `future.promethee_scores` come from different
 engines (fuzzy vs crisp, see [[topsis]] and [[promethee]]), and `future.bayesian_probs` is a
 probability of *being best*, not a score ([[bayesian-inference-engine]]).
+
+## Step 6: Commit, Then Review
+
+A run never commits to anything. If you take the decision, record it — with a date to look back and
+something you will *observe* if it worked:
+
+```bash
+uv run decision-maker decide --option "Option A" --confidence 0.75 \
+    --metric "piloto operativo en faena antes del 30-Nov" --review-by 2026-12-01
+uv run decision-maker review        # what is due
+uv run decision-maker close commit_ab12cd34ef56 --success --result "operativo el 27-Nov"
+uv run decision-maker calibration   # Brier and ECE over closed decisions
+```
+
+The ledger refuses a metric that names a model statistic (`mean_score`, `p95`…): the model cannot
+grade its own recommendation. It lives in `decisions/ledger.jsonl` (versioned) or `$DM_LEDGER_PATH`.
+Why this matters and what the ledger refuses: [[decision-ledger]].
 
 ## Shared Risk Factors and What to Find Out First
 

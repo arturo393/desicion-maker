@@ -6,7 +6,7 @@ title: "Decision Maker Framework"
 type: narrative
 category: overview
 status: active
-related: ["[[docs/index|index]]", "[[docs/database-hub|database-hub]]", "[[docs/kanban|kanban]]", "[[docs/architecture|architecture]]"]
+related: ["[[docs/index|index]]", "[[docs/database-hub|database-hub]]", "[[docs/Tablero|Tablero]]", "[[docs/architecture|architecture]]"]
 created: 2026-08-10
 updated: 2026-10-01
 ---
@@ -19,7 +19,7 @@ Dual Python + Rust library for multi-criteria decision analysis under uncertaint
 
 ```bash
 uv sync
-cp src/decision_maker/analyses/_template.py my_decision.py  # then edit
+cp analyses/_template.py analyses/my_decision.py  # then edit
 uv run python my_decision.py
 ```
 
@@ -38,7 +38,7 @@ uv run pytest            # unit + docs ratchets (~25 s)
 uv run pytest -m smoke   # every analysis end to end, offline (~2 min)
 ```
 
-The smoke suite runs each `src/decision_maker/analyses/*.py` as a subprocess and reads the Monte Carlo
+The smoke suite runs each `analyses/*.py` as a subprocess and reads the Monte Carlo
 engine's own trace (`DM_MC_TRACE`): an analysis passes only if it ran the engine and the engine told
 its options apart. A new analysis is picked up automatically. The engine itself refuses an empty or
 incomplete model (no options, no factors, or a factor an option has no variable for).
@@ -56,6 +56,7 @@ Module index, not an engine count: 19 are routable (`ENGINE_UNIVERSE` in `src/de
 | Pareto | Efficient frontier, dominated options |
 | Decision Theory | Maximax, Maximin, Hurwicz, Laplace, Minimax Regret |
 | Sensitivity | Weight/score shock analysis |
+| Weight Robustness | P(each option wins) when the weights are uncertain too: informed and uninformed readings |
 | Robust | Worst-case ranking under parameter shocks |
 | Bayesian | Posterior probability each option is best |
 | Genetic | Evolves the ideal composite option |
@@ -74,7 +75,7 @@ Module index, not an engine count: 19 are routable (`ENGINE_UNIVERSE` in `src/de
 | Registry | SQLite-backed persistent decision store |
 | Rust Math Core | Monte Carlo Min-Max normalization in Rust (pyo3 + rayon); built and tested, not imported by the framework |
 | Ergodicity | Time-average vs ensemble growth, ruin probability, Kelly criterion |
-| Learning System | Outcome tracking, confidence calibration, decision journal, adaptive routing |
+| Learning System | Decision ledger (decide → review → close → calibration), outcome tracking, decision journal, adaptive routing |
 | Meta-Learning | Action threshold, reasoning trace, unknown scanner, meta-calibration |
 | Decision Gates | Veto power: ruin, action threshold (ergodicity is informational) |
 
@@ -82,7 +83,7 @@ Module index, not an engine count: 19 are routable (`ENGINE_UNIVERSE` in `src/de
 ## Modes
 
 - **express** — MC + TOPSIS + Pareto (quick exploration)
-- **standard** — express + decision theory + sensitivity + PROMETHEE uncertainty + robust + Borda
+- **standard** — express + decision theory + sensitivity + weight robustness + PROMETHEE uncertainty + robust + Borda
 - **advanced** — standard + crisp PROMETHEE + Bayesian + Genetic + Bootstrap
 
 ## API & Dashboard
@@ -96,17 +97,17 @@ Module index, not an engine count: 19 are routable (`ENGINE_UNIVERSE` in `src/de
 uv run decision-maker --help
 ```
 
-Commands: `run` (from YAML config, with `--what-if` for interactive REPL), `list-distributions` (show available distributions).
+Commands: `run` (from YAML config, with `--what-if` for interactive REPL), `list-distributions`, and the decision ledger: `decide`, `review`, `close`, `calibration` — a run only drafts a commitment; a person records it ([docs/decision-ledger.md](docs/decision-ledger.md)).
 
 ## Documentation
 
 - [Index](docs/index.md) — overview and layout
 - [Database Hub](docs/database-hub.md) — Obsidian relational database views, tables & Dataview queries
-- [Kanban Board](docs/kanban.md) — interactive project Kanban board
+- [Kanban Board](docs/Tablero.md) — interactive project Kanban board
 - [Architecture](docs/architecture.md) — building blocks, runtime flow
 - [Guide](docs/guide.md) — how to model a decision step by step
 - [Changelog](CHANGELOG.md) — version history
-- [Roadmap](ROADMAP_v3.0.md) — planned features
+- [Roadmap](docs/roadmap.md) — direction; tasks live in the [Tablero](docs/Tablero.md)
 - [Examples](examples/) — reference implementations
 
 ## Requirements
@@ -122,7 +123,7 @@ Commands: `run` (from YAML config, with `--what-if` for interactive REPL), `list
 
 ## Known Limitations
 
-Measured on 2026-10-01; tracked in the [Kanban Board](docs/kanban.md).
+Measured on 2026-10-01; tracked in the [Kanban Board](docs/Tablero.md).
 
 - Results of `mining_decision`, `mining_improved`, `furniture_diy`, `refactoring_decision`,
   `sqm_santiago` and the script `ip_config_strategy` produced before
@@ -132,5 +133,5 @@ Measured on 2026-10-01; tracked in the [Kanban Board](docs/kanban.md).
   analysis is hand-written and does not read it.
 - Per-option `factor_stats` / `raw_factor_data` in results produced 2026-08-23 → 2026-09-29 belong
   to the last option (fixed in `41c33a3`); rankings and `mean_score` are unaffected.
-- The Monte Carlo tail penalty trims a fixed ~5 % of each option's own distribution, so it does not
-  tell a thin tail from a heavy one ([docs/monte-carlo-engine.md](docs/monte-carlo-engine.md)).
+- Results before 2026-10-18 carry a tail trim (each option's own worst 5 %) that has since been
+  removed; re-running the 44 analyses changed no winner beyond seed noise ([docs/monte-carlo-engine.md](docs/monte-carlo-engine.md)).

@@ -6,7 +6,7 @@ title: "Note Schema and Vault Governance"
 type: meta
 category: governance
 status: stable
-related: ["[[decision-maker-moc]]", "[[index]]", "[[database-hub]]", "[[kanban]]"]
+related: ["[[decision-maker-moc]]", "[[index]]", "[[database-hub]]", "[[Tablero]]"]
 created: 2026-08-10
 updated: 2026-09-27
 ---
@@ -51,23 +51,24 @@ class: "ClasePrincipal"
 
 ### Los doce campos y cuáles son obligatorios
 
-El skeleton mostraba sólo `aliases` y `tags`; en el vault hay **13 campos en uso**. La tabla los separa por obligatoriedad real, medida el 28-Sep-2026 sobre las 54 notas:
+El skeleton mostraba sólo `aliases` y `tags`; en el vault hay **14 campos en uso**. La tabla los separa por obligatoriedad real (recontada el 18-Oct-2026 sobre 50 notas, tras retirar el material histórico), medida el 28-Sep-2026 sobre las 54 notas:
 
 | Campo | Obligatorio | Presente en | Para qué |
 |---|---|---|---|
-| `aliases` | sí | 54/54 | Nombres antiguos por los que el enlace todavía resuelve. |
-| `tags` | sí | 54/54 | Los cuatro ejes, ver abajo. |
-| `id` | sí | 54/54 | Clave estable; el registro de [[database-hub]] lo cita. |
-| `title` | sí | 54/54 | Título legible, independiente del nombre de archivo. |
-| `type` | sí | 54/54 | Uno de los 12 valores medidos: `module`, `archive`, `moc`, `meta`, `narrative`, `adr`, `architecture`, `changelog`, `worklog`, `guide`, `kanban`, `roadmap`. |
-| `category` | sí | 54/54 | Eje temático; coincide con la primera palabra de `tags`. |
-| `status` | sí | 54/54 | `draft` \| `stable` \| `deprecated`. |
-| `related` | sí | 54/54 | Wikilinks, entre comillas, siempre. |
-| `updated` | sí | 54/54 | Fecha de la última revisión real del contenido. |
-| `created` | sí | 54/54 | Primera aparición **en este vault**. Para 10 notas se recuperó del primer commit de git; las 6 de `sw-diagnosticoremoto/` y `tests-results/` no tienen procedencia en el historial, así que su fecha es la de entrada al vault (27-Sep-2026), no la de autoría. Faltaban en 16 y se rellenaron el 28-Sep-2026. |
-| `module` | sólo `type: module` | 21/21 | Ruta completa del módulo. Es un **canal de propiedad**: debe concordar con el heading `## \`modulo.py\`` y con la fila del registro. |
-| `class` | sólo `type: module` | 21/21 | Clase principal del módulo. |
+| `aliases` | sí | 50/50 | Nombres antiguos por los que el enlace todavía resuelve. |
+| `tags` | sí | 50/50 | Los cuatro ejes, ver abajo. |
+| `id` | sí | 50/50 | Clave estable; el registro de [[database-hub]] lo cita. |
+| `title` | sí | 50/50 | Título legible, independiente del nombre de archivo. |
+| `type` | sí | 50/50 | Uno de los 12 valores medidos: `module`, `archive`, `moc`, `meta`, `narrative`, `adr`, `architecture`, `changelog`, `worklog`, `guide`, `kanban`, `roadmap`. |
+| `category` | sí | 50/50 | Eje temático; coincide con la primera palabra de `tags`. |
+| `status` | sí | 50/50 | `draft` \| `stable` \| `deprecated`. |
+| `related` | sí | 50/50 | Wikilinks, entre comillas, siempre. |
+| `updated` | sí | 50/50 | Fecha de la última revisión real del contenido. |
+| `created` | sí | 50/50 | Primera aparición **en este vault**. Para 10 notas se recuperó del primer commit de git; las 6 de `sw-diagnosticoremoto/` y `tests-results/` no tienen procedencia en el historial, así que su fecha es la de entrada al vault (27-Sep-2026), no la de autoría. Faltaban en 16 y se rellenaron el 28-Sep-2026. |
+| `module` | sólo `type: module` | 23/23 | Ruta completa del módulo. Es un **canal de propiedad**: debe concordar con el heading `## \`modulo.py\`` y con la fila del registro. |
+| `class` | sólo `type: module` | 23/23 | Clase principal del módulo. |
 | `kanban-plugin` | sólo `type: kanban` | 2/2 | Configuración del tablero. |
+| `proyecto_gestion` | sólo el [[Tablero]] | 1/1 | Ids del proyecto en el Sistema de Gestión I+D; es la convención común a todos los repos, que lee el agente `seguimiento`. Vacío mientras este repo no tenga proyecto. |
 
 `module` y `class` se declaran también en el skeleton porque el bloque tiene que ser copiable tal cual, pero sólo aplican a fichas de módulo. `test_docs_fidelity.py` verifica que los tres canales de propiedad concuerden.
 
@@ -84,7 +85,7 @@ Cuatro ejes. Todos en minúscula, palabras compuestas siempre con guion.
 | Eje | Regla | Valores |
 |---|---|---|
 | Tipo | Qué es la nota. `module` = documenta un `.py` del paquete. `moc` = índice. `meta` = gobernanza del vault. `archive` = histórico, fuera del control de idioma. | 12 — los mismos que acepta el campo `type`, y `test_docs_schema.py` los compara. |
-| Proyecto | `lumina`, `quant`. **Presentes en las 54 notas.** Antes vivían sólo en el MOC, así que `tag:#lumina` devolvía una sola nota: el índice, que es la que nunca debería ser la respuesta. | 2 |
+| Proyecto | `lumina`, `quant`. **Presentes en las 50 notas.** Antes vivían sólo en el MOC, así que `tag:#lumina` devolvía una sola nota: el índice, que es la que nunca debería ser la respuesta. | 2 |
 | Tema | Al menos uno por nota `module`. | resto |
 | Autoría | `taleb`, `jaynes`, `mcelreath`. **Sólo tags.** Ver abajo. | 3 |
 
@@ -92,7 +93,7 @@ Cuatro ejes. Todos en minúscula, palabras compuestas siempre con guion.
 
 **El vocabulario completo son 58 valores y no se enumera aquí a propósito.** Una lista de 58 valores escrita en prosa es un índice que nadie mantiene: cuando se revisó ya nombraba 44 que no estaban, y una lista así se pudre más rápido de lo que se lee. Lo que se declara es la **regla** de los cuatro ejes, y el conteo va fijado en `test_docs_schema.py`: ese test se pone rojo si el número cambia, así que un tag nuevo obliga a decidir si pertenece a un eje o a actualizar el número a propósito.
 
-**El tag `archive` excluye del control de idioma, y excluye mucho.** Hoy son 25 de 54 notas, y entre ellas [[database-hub]] —la referencian 28 notas distintas del vault, 42 instancias de enlace, contando por ruta completa y no por nombre de archivo— y [[kanban]]. El tag mezcla dos intenciones —"esto es histórico" y "esto está en otro idioma"— y por eso alcanza a las dos notas más consultadas del vault. Se mantiene porque el filtro es correcto, pero el número está fijado en el test: si alguien confunde `archive` con `deprecated`, el CI se pone rojo en vez de silenciosamente dejar de verificar 25 notas.
+**El tag `archive` excluye del control de idioma, y excluye mucho.** Hoy son 14 de 50 notas, y entre ellas [[database-hub]] —la referencian 28 notas distintas del vault, 42 instancias de enlace, contando por ruta completa y no por nombre de archivo— y [[Tablero]]. El tag mezcla dos intenciones —"esto es histórico" y "esto está en otro idioma"— y por eso alcanza a las dos notas más consultadas del vault. Se mantiene porque el filtro es correcto, pero el número está fijado en el test: si alguien confunde `archive` con `deprecated`, el CI se pone rojo en vez de silenciosamente dejar de verificar 25 notas.
 
 ## Los dos axes que no se mezclan
 
@@ -101,7 +102,10 @@ Cuatro ejes. Todos en minúscula, palabras compuestas siempre con guion.
 
 ## Convención de Nombres de Archivo
 
-`lowercase-with-hyphens`. Única excepción: `README.md`, que GitHub, GitLab y el resto de plataformas ya leen como la portada de un directorio, así que una convención propia no aporta nada ahí.
+`lowercase-with-hyphens`. Dos excepciones, y las dos por la misma razón —una convención que ya existe fuera de este vault gana sobre una propia—:
+
+- `README.md`, que GitHub, GitLab y el resto de plataformas ya leen como la portada de un directorio.
+- `Tablero.md` y `bitacora/AAAA-MM-DD.md`: el tablero y la bitácora tienen el mismo nombre y lugar en todos los repositorios (convención del 16-Oct-2026), para que el agente que los mantiene no necesite una tabla por repo. Adoptado aquí el 18-Oct-2026; `kanban` y `decision-maker-worklog` quedan como alias, así que los enlaces viejos siguen abriendo.
 
 El porqué no es estético: las 15 notas de este vault se llamaban `AHP.md`, `TOPSIS.md`, `Monte_Carlo_Engine.md`, y un wikilink escrito con otro caso o con `_` no las abre. La resolución de Obsidian es sensible a mayúsculas en Linux y en GitHub, así que el nombre del archivo **es** parte del contrato del enlace.
 

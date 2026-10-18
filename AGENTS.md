@@ -38,3 +38,19 @@ uv run pytest          # run unit tests
 - Monte Carlo: N caminos suficientes para convergencia; nunca 1 trayectoria única.
 - Decision analysis: separar modelado (Python) de presentación (dashboard/streamlit).
 - Configurable values en config, no magic numbers.
+
+## Criterios de diseño (pedidos por el dueño el 2026-10-18)
+- **Simplicidad**: menos motores y mejor validados antes que motores nuevos. Un motor nuevo entra con
+  validación contra una referencia externa o una forma cerrada, y su nivel en `core/engine_maturity.py`.
+- **Escalabilidad**: cálculo vectorizado sobre los sorteos (sin bucles por sorteo en Python) y sin
+  estado oculto: todo lo aleatorio recibe semilla.
+- **Conectividad**: lo que otro repo o plataforma tenga que leer sale en un formato plano con esquema
+  publicado y test de conformidad contra el productor (ej. `decisions/ledger.schema.json`), y los
+  comandos del CLI que otros consumen tienen `--json`.
+
+## Dónde va cada cosa
+- `src/decision_maker/` es la librería instalable. Los casos de uso van en `analyses/` (y los scripts
+  de investigación con red en `analyses/research/`), fuera del paquete.
+- Una corrida nunca compromete nada: devuelve `commitment_draft`. Las decisiones reales se registran con
+  `decision-maker decide` en `decisions/ledger.jsonl` (versionado) y se cierran con `close`.
+- Tablero en `docs/Tablero.md`; bitácora en `docs/bitacora/AAAA-MM-DD.md`, un archivo por día.

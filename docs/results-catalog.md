@@ -40,7 +40,7 @@ Dentro de `results/` residen artefactos especializados utilizados en la validaci
 
 | Archivo Fuente | Formato | Descripción Técnica | Módulo Relacionado |
 |:---|:---|:---|:---|
-| `results/reasoning_traces.jsonl` | JSON Lines | Trazas completas del flujo de razonamiento y meta-decisión automatizada ejecutadas por agentes cuantitativos. | [[tests-results/meta-decision-result]] |
+| `results/reasoning_traces.jsonl` | JSON Lines | Trazas completas del flujo de razonamiento y meta-decisión automatizada ejecutadas por agentes cuantitativos. | — (la nota de ejemplo se retiró el 18-Oct-2026: [[legacy-docs]]) |
 | `results/exportador_nms_protocolo_v5.json` | JSON | Datos estructurados de simulación y evaluación de protocolos de exportación hacia software de monitoreo de red (NMS). | [[decision-analyses]] |
 | `results/commandmessage_refactor_llm_20260823.json` | JSON | Registro de prompting y evaluación comparativa asistida por LLM para la reescritura del protocolo CommandMessage. | [[decision-analyses]] |
 | `results/sophos_xg115_decision_20260810_135741.json` | JSON | Dataset de evaluación multicriterio estocástica para la decisión de reemplazo vs licenciamiento de hardware perimetral Sophos. | [[decision-analyses]] |

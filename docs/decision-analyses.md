@@ -13,7 +13,7 @@ updated: 2026-10-02
 
 # 📊 Catálogo de Análisis de Decisiones Aplicadas
 
-Este registro centraliza los 38 análisis de decisión cuantitativa en `src/decision_maker/analyses/` —más `_template.py`, la plantilla canónica, que no es un análisis y por eso no cuenta— y los 7 scripts auxiliares en `src/decision_maker/scripts/`. Cada archivo representa un caso concreto modelado con metodologías estocásticas y multicriterio.
+Este registro centraliza los 37 análisis de decisión cuantitativa en `analyses/` —más `_template.py`, la plantilla canónica, que no es un análisis y por eso no cuenta— y los 7 scripts auxiliares en `analyses/research/`. Cada archivo representa un caso concreto modelado con metodologías estocásticas y multicriterio.
 
 Hub general de base de datos: [[database-hub]] | Catálogo de reportes y salidas: [[results-catalog]].
 
@@ -21,7 +21,7 @@ Hub general de base de datos: [[database-hub]] | Catálogo de reportes y salidas
 
 ## 🏠 1. Decisiones Personales, de Carrera y Presupuesto
 
-| ID | Script (`src/decision_maker/analyses/`) | Objetivo y Pregunta de Decisión | Metodologías Empleadas | Estado |
+| ID | Script (`analyses/`) | Objetivo y Pregunta de Decisión | Metodologías Empleadas | Estado |
 |:---|:---|:---|:---|:---|
 | `ANA-CONCON` | `decision_concon.py` | Evaluación de vivienda y estilo de vida en Concón vs Santiago | Suma ponderada difusa propia, determinista; no usa el motor del framework | `active` |
 | `ANA-VINA-CONCON` | `decision_vina_vs_concon.py` | Comparativa multicriterio Viña del Mar (Patmos) vs Concón | Puntaje ponderado determinista; no usa el motor del framework | `active` |
@@ -31,14 +31,13 @@ Hub general de base de datos: [[database-hub]] | Catálogo de reportes y salidas
 | `ANA-FURNITURE` | `furniture_diy.py` | Compra de muebles DIY nuevos vs usados de segunda mano | [[monte-carlo-engine]], [[topsis]], [[pareto-frontier]] | `active` |
 | `ANA-MINING-V2` | `mining_improved.py` | Carrera profesional en el sector minero (versión v2 mejorada) | [[monte-carlo-engine]], [[topsis]], [[sensitivity-analysis]] | `active` |
 | `ANA-SQM` | `sqm_santiago.py` | Viabilidad y estrategia de proyecto para SQM en Santiago | [[topsis]], análisis de escenarios | `active` |
-| `ANA-MINING-V1` | `mining_decision.py` | Carrera en minería (versión original histórica) | Árboles de decisión, valor esperado | `archive` |
 | `ANA-REFACTOR` | `refactoring_decision.py` | Evaluación de refactorización de código FSK / LoRa legacy | Análisis de punto de equilibrio, payoff matrix | `completed` |
 
 ---
 
 ## 🛠️ 2. Hardware, Redes e Infraestructura Minera
 
-| ID | Script (`src/decision_maker/analyses/`) | Problema de Ingeniería Modelado | Motores Clave | Estado |
+| ID | Script (`analyses/`) | Problema de Ingeniería Modelado | Motores Clave | Estado |
 |:---|:---|:---|:---|:---|
 | `ANA-SOPHOS` | `sophos_xg115_decision.py` | Evaluación de appliance Sophos XG115: firmware vs reemplazo | [[monte-carlo-engine]], [[topsis]], [[promethee]] | `active` |
 | `ANA-BECKER-HW` | `becker_hardware_decision.py` | Hardware receptor FSK para Becker Varis en gateway | TOPSIS propio (numpy) + research LLM opcional; no usa el motor del framework | `active` |
@@ -47,9 +46,6 @@ Hub general de base de datos: [[database-hub]] | Catálogo de reportes y salidas
 | `ANA-FSK-SCANNER` | `fsk_scanner_integration.py` | Dónde vive la integración del FSK scanner Becker Varis. v2 (2026-10-01): gana Hybrid fsk-scanner + monitor-serial (0.795) | [[unified-orchestrator]] (modo `standard`), [[monte-carlo-engine]], [[topsis]], [[pareto-frontier]] | `active` |
 | `ANA-MINERIA-INT` | `mineria_integration.py` | Integración de datos RDSS a sistemas de control mineros | TOPSIS propio (numpy) + research LLM opcional; no usa el motor del framework | `active` |
 | `ANA-PLC-BRIDGE` | `plc_bridge_comparativa.py` | Comparativa entre PLC puente Modbus vs API CSV vs existentes | TOPSIS propio (numpy); no usa el motor del framework | `active` |
-| `ANA-SNIFFER-V1` | `sniffertelemetry_destino.py` | Destino y arquitectura de repositorio `sw-sniffertelemetry` | [[decision-theory]], árboles de decisión | `archive` |
-| `ANA-SNIFFER-V2` | `sniffertelemetry_destino_v2.py` | Destino con criterio de menor costo de mantenimiento | [[topsis]], ponderación de criterios | `active` |
-| `ANA-SNIFFER-V3` | `sniffertelemetry_destino_v3_leakyfeeder.py` | Destino bajo restricción de red leaky feeder | [[robust-optimization]], [[decision-gates]] | `active` |
 | `ANA-SNIFFER-V4` | `sniffertelemetry_destino_v4_hibrido.py` | Arquitectura híbrida elegida: diagnóstico + demo + exportador | [[portfolio-optimizer]], [[topsis]] | `active` |
 | `ANA-EXPORTADOR-V5` | `exportador_nms_protocolo_v5.py` | Protocolo del exportador hacia NMS (Modbus vs API REST) | [[decision-theory]], [[bootstrap-ranking]] | `active` |
 | `ANA-SPECTRUM` | `spectrum_analyzer_selection.py` | Selección de analizador de espectro para banco de pruebas RF | TOPSIS propio (numpy) + research LLM opcional; no usa el motor del framework | `active` |
@@ -59,6 +55,11 @@ Hub general de base de datos: [[database-hub]] | Catálogo de reportes y salidas
 | `ANA-VLAD25` | `vlad25_modo_diagnostico_decision.py` | Coexistencia de modo polling legacy y push para VLAD25 | [[bayesian-inference-engine]], [[topsis]] | `active` |
 | `ANA-DIAG-LINEA-BASE` | `diagnostico_remoto_linea_base_decision.py` | Sobre qué línea de sw-diagnosticoremoto seguir construyendo (development, VHF v4.2.0 vendida, UHF ulad): unificar, sobre cuál base, o separarlas | [[unified-orchestrator]] (modo `standard`), [[monte-carlo-engine]], [[topsis]], [[decision-theory]], [[sensitivity-analysis]] | `active` |
 | `ANA-UI-ESTADO-RED` | `ui_estado_red_competencia.py` | Vista principal de estado de la red leaky feeder frente a lo que ofrece la competencia (Becker, PBE) | [[unified-orchestrator]] (modo `standard`), [[monte-carlo-engine]], [[decision-theory]], [[pareto-frontier]] | `active` |
+| `ANA-NEXA-PLAZO` | `nexa_piloto_bombeo_plazo.py` | Piloto Nexa Cerro Lindo: probabilidad de dejar operativo el bombeo remoto antes del 30-Nov-2026, por alcance, y qué riesgos se comen el plazo | [[unified-orchestrator]], [[monte-carlo-engine]] | `active` |
+| `ANA-NEXA-COMPLETITUD` | `nexa_plan_completitud.py` | Piloto Nexa: huecos del plan sin tarea (base de datos, backend, frontend, firmware) y si cada uno entra al piloto, antes del segundo sniffer o después | [[unified-orchestrator]], [[monte-carlo-engine]] | `active` |
+| `ANA-NEXA-PARALELO` | `nexa_trabajo_paralelo.py` | Piloto Nexa: cuánto cambia el plazo de FAT/SAT con agentes en paralelo, sin suponer que la revisión humana y el banco escalan | [[unified-orchestrator]], [[monte-carlo-engine]] | `active` |
+| `ANA-SNIFFER-FOTA` | `sniffer_estandarizacion_fota.py` | Sniffer de telemetría: cómo y cuándo incorporar bootloader + FOTA (UART y RS485) y alinearse con los demás firmwares G474 | [[unified-orchestrator]], [[monte-carlo-engine]] | `active` |
+| `ANA-SNIFFER-TRAMA` | `sniffer_trama_telemetria.py` | Sniffer de telemetría: trama de telemetría nueva o la actual, dentro del encuadre RDSS, antes de escribir el decodificador | [[unified-orchestrator]], [[monte-carlo-engine]] | `active` |
 
 ---
 
@@ -80,16 +81,14 @@ Hub general de base de datos: [[database-hub]] | Catálogo de reportes y salidas
 
 ## 🔄 4. Refactorización de Protocolos y Plantillas
 
-| ID | Script (`src/decision_maker/analyses/`) | Alcance | Metodologías |
+| ID | Script (`analyses/`) | Alcance | Metodologías |
 |:---|:---|:---|:---|
-| `ANA-CMDMSG-REFACTOR` | `commandmessage_refactor_decision.py` | Refactorización de CommandMessage (protocolo RDSS) | Monte Carlo y TOPSIS propios (numpy); no usa el motor del framework |
 | `ANA-CMDMSG-LLM` | `commandmessage_refactor_llm_20260823.py` | Evaluación de refactor asistido por LLM vs manual | Monte Carlo y TOPSIS propios (numpy), sensibilidad de pesos; no usa el motor del framework |
-| `ANA-CMDMSG-CPP` | `refactoring_commandmessage.py` | Análisis de impacto de modularización C++ en firmware | Análisis escrito a mano, sin cálculo |
 | `ANA-TEMPLATE` | `_template.py` | Plantilla canónica estandarizada para nuevos análisis de decisión | Plantilla Python tipada |
 
 ---
 
-## 🔍 5. Scripts de Utilidad y Búsqueda (`src/decision_maker/scripts/`)
+## 🔍 5. Scripts de Utilidad y Búsqueda (`analyses/research/`)
 
 | ID | Script | Propósito y Función |
 |:---|:---|:---|
@@ -120,3 +119,18 @@ Todos los scripts canalizan sus resultados hacia `results/`, catalogados detalla
 - Vistas web interactivas: `results/report_*.html`
 - Gráficos de auditoría: `results/risk_profiles_*.png`, `results/factor_importance_*.png`, `results/robustness_audit_*.png`
 - Registro estructurado SQLite persistente gestionado por [[reporting-and-registry]]
+
+---
+
+## 🗄️ Archivados (`analyses/archive/`)
+
+Versiones reemplazadas por otra más nueva de la misma pregunta. Siguen en el repo y en git, pero no corren en el humo ni cuentan en el total; se movieron el 18-Oct-2026. Su ID pasa de `ANA-` a `ARC-`.
+
+| ID | Script | Pregunta | Por qué se archivó |
+|:---|:---|:---|:---|
+| `ARC-SNIFFER-V1` | `archive/sniffertelemetry_destino.py` | Destino y arquitectura de repositorio `sw-sniffertelemetry` | Reemplazado por v4 (arquitectura híbrida elegida) |
+| `ARC-SNIFFER-V2` | `archive/sniffertelemetry_destino_v2.py` | Destino con criterio de menor costo de mantenimiento | Reemplazado por v4 |
+| `ARC-SNIFFER-V3` | `archive/sniffertelemetry_destino_v3_leakyfeeder.py` | Destino bajo restricción de red leaky feeder | Reemplazado por v4 |
+| `ARC-MINING-V1` | `archive/mining_decision.py` | Carrera en minería (versión original histórica) | Reemplazado por `mining_improved.py` (v2) |
+| `ARC-CMDMSG-REFACTOR` | `archive/commandmessage_refactor_decision.py` | Refactorización de CommandMessage (protocolo RDSS) | Reemplazado por `commandmessage_refactor_llm_20260823.py` (REV 2) |
+| `ARC-CMDMSG-CPP` | `archive/refactoring_commandmessage.py` | Análisis de impacto de modularización C++ en firmware | Análisis escrito a mano sobre el mismo tema; reemplazado por REV 2 |

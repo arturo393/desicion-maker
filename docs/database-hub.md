@@ -6,7 +6,7 @@ title: "Centro de Base de Datos y Catálogo Relacional"
 type: moc
 category: governance
 status: active
-related: ["[[decision-maker-moc]]", "[[index]]", "[[kanban]]", "[[roadmap]]", "[[note-schema]]"]
+related: ["[[decision-maker-moc]]", "[[index]]", "[[Tablero]]", "[[roadmap]]", "[[note-schema]]"]
 created: 2026-09-27
 updated: 2026-09-27
 ---
@@ -15,7 +15,7 @@ updated: 2026-09-27
 
 Este documento centraliza la documentación del repositorio estructurada como una **Base de Datos Relacional para Obsidian**. Cada documento del sistema posee propiedades uniformes (`id`, `title`, `type`, `category`, `status`, `related`, `tags`) permitiendo su consulta mediante tablas relacionales estáticas y consultas dinámicas con el plugin **Dataview**.
 
-Tablero Kanban asociado: [[kanban]] | Mapa de Contenido canónico: [[decision-maker-moc]].
+Tablero Kanban asociado: [[Tablero]] | Mapa de Contenido canónico: [[decision-maker-moc]].
 
 ---
 
@@ -44,6 +44,8 @@ Tablero Kanban asociado: [[kanban]] | Mapa de Contenido canónico: [[decision-ma
 | `MOD-ORCHESTRATOR` | [[unified-orchestrator]] | `core/orchestrator.py` | `infrastructure` | `stable` | [[data-models-and-schemas]], [[monte-carlo-engine]] |
 | `MOD-SCHEMAS` | [[data-models-and-schemas]] | `core/schemas.py` | `infrastructure` | `stable` | [[unified-orchestrator]], [[reporting-and-registry]] |
 | `MOD-REGISTRY` | [[reporting-and-registry]] | `core/registry.py` | `infrastructure` | `stable` | [[data-models-and-schemas]], [[topological-data-analysis]] |
+| `MOD-WEIGHT-ROBUSTNESS` | [[weight-robustness]] | `core/weight_robustness.py` | `mcda` | `stable` | [[monte-carlo-engine]], [[sensitivity-analysis]] |
+| `MOD-DECISION-LEDGER` | [[decision-ledger]] | `core/decision_commitment.py` | `learning` | `stable` | [[unified-orchestrator]], [[guide]] |
 
 ---
 
@@ -65,11 +67,11 @@ Tablero Kanban asociado: [[kanban]] | Mapa de Contenido canónico: [[decision-ma
 
 | ID | Documento / Nota | Tipo | Categoría | Estado | Propósito y Alcance |
 |:---|:---|:---|:---|:---|:---|
-| `DB-ANALYSES` | [[decision-analyses]] | `moc` | `analyses` | `active` | Catálogo de decisiones reales modeladas en `src/decision_maker/analyses/` |
+| `DB-ANALYSES` | [[decision-analyses]] | `moc` | `analyses` | `active` | Catálogo de decisiones reales modeladas en `analyses/` |
 | `DB-RESULTS` | [[results-catalog]] | `moc` | `analyses` | `active` | Catálogo de reportes, trazas JSON y gráficos en `results/` |
-| `DOC-LEGACY-HUB` | [[legacy-docs]] | `moc` | `legacy` | `archive` | Catálogo de documentación histórica en `archive/legacy/` |
-| `KANBAN-REPO` | [[kanban]] | `kanban` | `project-management` | `active` | Tablero interactivo Kanban para Obsidian con backlog, tareas y estado actual |
-| `WORKLOG-DM` | [[decision-maker-worklog]] | `worklog` | `project-management` | `active` | Bitácora detallada de trabajo realizado, refactorizaciones y auditorías |
+| `DOC-LEGACY-HUB` | [[legacy-docs]] | `moc` | `legacy` | `archive` | Qué documentación histórica se retiró y cómo recuperarla de git |
+| `KANBAN-REPO` | [[Tablero]] | `kanban` | `project-management` | `active` | Tablero interactivo Kanban para Obsidian con backlog, tareas y estado actual |
+| `WORKLOG-DM` | [[bitacora]] | `worklog` | `project-management` | `active` | Bitácora detallada de trabajo realizado, refactorizaciones y auditorías |
 | `DOC-ROADMAP` | [[roadmap]] | `roadmap` | `project-management` | `active` | Hito v3.0 completado y roadmap de funcionalidades planificadas v3.1+ |
 | `DOC-CHANGELOG` | [[changelog]] | `changelog` | `project-management` | `active` | Historial de versiones y evolución arquitectónica del framework |
 
@@ -92,18 +94,6 @@ Tablero Kanban asociado: [[kanban]] | Mapa de Contenido canónico: [[decision-ma
 
 | ID | Documento / Nota | Eje | Descripción |
 |:---|:---|:---|:---|
-| `ARCH-REORG-README` | [[reorganization/README]] | `reorganization` | Portal del proceso de reorganización histórica |
-| `ARCH-REORG-PLAN` | [[reorganization/plan]] | `reorganization` | Plan de migración y estructura original |
-| `ARCH-REORG-ANALYSIS` | [[reorganization/analysis]] | `reorganization` | Análisis comparativo y diagnóstico estructural previo |
-| `ARCH-REORG-SUMMARY` | [[reorganization/summary]] | `reorganization` | Resumen ejecutivo del ordenamiento de scripts |
-| `ARCH-REORG-DELIV` | [[reorganization/deliverables]] | `reorganization` | Entregables y estado de artefactos |
-| `ARCH-REORG-IMPROV` | [[reorganization/improvement-analysis]] | `reorganization` | Análisis de oportunidades de mejora |
-| `ARCH-REORG-PIP` | [[reorganization/personal-improvement-plan]] | `reorganization` | Plan individual de optimización y métricas |
-| `ARCH-REORG-COMPLETE` | [[reorganization/complete]] | `reorganization` | Cierre del proceso de reestructuración |
-| `ARCH-SESS-SUMMARY` | [[session-logs/reorganization-summary]] | `session-logs` | Minuta de la sesión de reorganización |
-| `ARCH-SESS-TESTS` | [[session-logs/test-results]] | `session-logs` | Registro histórico de ejecución de pruebas |
-| `ARCH-SESS-VERIF` | [[session-logs/verification-report]] | `session-logs` | Reporte de verificación y análisis de consistencia |
-| `ARCH-META-RESULT` | [[tests-results/meta-decision-result]] | `tests-results` | Resultados de meta-decisión automatizada |
 
 ---
 
@@ -114,24 +104,10 @@ Documentos que residen fuera de `docs/` indexados para acceso directo:
 | ID | Documento | Ubicación | Tipo | Descripción |
 |:---|:---|:---|:---|:---|
 | `ROOT-README` | [README.md](../README.md) | Raíz | `narrative` | Portada principal del framework en GitHub |
-| `ROOT-ROADMAP` | [ROADMAP_v3.0.md](../ROADMAP_v3.0.md) | Raíz | `roadmap` | Hoja de ruta completa v3.0 y v3.1+ |
 | `ROOT-CHANGELOG` | [CHANGELOG.md](../CHANGELOG.md) | Raíz | `changelog` | Historial completo de versiones |
 | `GOV-AGENTS` | [AGENTS.md](../AGENTS.md) | Raíz | `governance` | Guía de agentes de IA y mapa del dominio Lumina |
-| `CASE-POWER-SUPPLY` | [README_POWER_SUPPLY_DECISION.md](../README_POWER_SUPPLY_DECISION.md) | Raíz | `analysis` | Análisis formal de decisión para fuente de poder |
-| `JIRA-ID-1846` | [DM-25.md](../jira/DM-25.md) | `jira/` | `task` | Tracking ejecutivo de refactorización cuantitativa |
+| `CASE-POWER-SUPPLY` | [[sw-diagnosticoremoto/05-power-supply/analisis-decision]] | `docs/sw-diagnosticoremoto/05-power-supply/` | `analysis` | Análisis formal de decisión para fuente de poder |
 | `DOC-PKG-README` | [README.md](../src/decision_maker/README.md) | `src/decision_maker/` | `narrative` | Documentación técnica del paquete Python |
-| `COMP-DASHBOARD` | [README.md](../dashboard/README.md) | `dashboard/` | `narrative` | Frontend web Vite + React |
-| `ARCH-MINING-GUIDE` | [MINING_CAREER_GUIDE.md](../archive/legacy/MINING_CAREER_GUIDE.md) | `archive/legacy/` | `legacy` | Guía de carrera en minería con 13 métodos |
-| `ARCH-ENHANCED-COMP` | [ENHANCED_COMPARISON.md](../archive/legacy/ENHANCED_COMPARISON.md) | `archive/legacy/` | `legacy` | Comparativa estocástica de negocios (10 factores) |
-| `ARCH-UNIFIED-FRAMEWORK` | [README_UNIFIED_FRAMEWORK.md](../archive/legacy/README_UNIFIED_FRAMEWORK.md) | `archive/legacy/` | `legacy` | Especificación de arquitectura unificada previa |
-| `ARCH-SUPER-POWERED` | [README_SUPER_POWERED.md](../archive/legacy/README_SUPER_POWERED.md) | `archive/legacy/` | `legacy` | Algoritmos multicriterio avanzados (AHP/TOPSIS/PROMETHEE) |
-| `ARCH-SYSTEM-COMPLETION` | [SYSTEM_COMPLETION_SUMMARY.md](../archive/legacy/SYSTEM_COMPLETION_SUMMARY.md) | `archive/legacy/` | `legacy` | Métricas de completitud y auditoría |
-| `ARCH-INTEG-SYSTEM` | [INTEGRATED_SYSTEM_README.md](../archive/legacy/INTEGRATED_SYSTEM_README.md) | `archive/legacy/` | `legacy` | Arquitectura de sistema integrado estocástico |
-| `ARCH-INTEG-SUMMARY` | [INTEGRATION_SUMMARY.md](../archive/legacy/INTEGRATION_SUMMARY.md) | `archive/legacy/` | `legacy` | Resumen de primera fase de integración de motores |
-| `ARCH-LEGACY-INDEX` | [INDEX.md](../archive/legacy/INDEX.md) | `archive/legacy/` | `legacy` | Índice temático histórico del repositorio |
-| `ARCH-LEGACY-OLD` | [README_OLD.md](../archive/legacy/README_OLD.md) | `archive/legacy/` | `legacy` | Portada original previa a v3.0 |
-| `ARCH-LEGACY-BACKUP` | [README.backup.md](../archive/legacy/README.backup.md) | `archive/legacy/` | `legacy` | Respaldo anterior a la modularización |
-| `ARCH-STOCHASTIC-ARCH` | [README.md](../archive/stochastic-decision-architect/README.md) | `archive/stochastic-decision-architect/` | `legacy` | Prototipo web React + TypeScript con Gemini |
 | `DB-MIGRATIONS` | [README.md](../alembic/README.md) | `alembic/` | `meta` | Historial de versiones y migraciones de esquema con Alembic |
 
 ---
