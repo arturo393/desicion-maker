@@ -34,8 +34,6 @@ Sin decisiones abiertas: las cuatro del 18-Oct se resolvieron con el criterio «
 
 ## 📌 Por Hacer / En Cola (To Do)
 
-- [ ] 🧩 **Una sola capa de LLM**: `gemini_agent`, `gemini_helper`, `agy_backend`, `deep_research_decision_agent` y `devils_advocate` (608 líneas) hacen una sola cosa: preguntarle a un modelo. Unificar en un cliente. Spec corta antes #core #p2
-- [ ] 💼 **Retirar la capa legacy `CareerOption`/`DecisionAnalysisEngine`**: 8 análisis técnicos modelan protocolos con campos de carrera profesional (salario, burnout). Migrarlos al modelo normal y borrar la capa. Spec corta antes #analyses #p2
 - [ ] 🗄️ **Cuatro almacenes**: `registry.py` (SQLite directo), SQLModel + Alembic (API), JSONL en `results/` y el ledger. Unificar con migración; es el último porque toca datos guardados #process #p3
 - [ ] 🧪 **11 análisis con motor casero** (`NO_ENGINE` en `test_analyses_smoke.py`): migrarlos al motor común o archivarlos; hoy el humo sólo prueba que corren #analyses #p2
 - [ ] 🦀 **`rust_core/` se compila en cada CI sin usarse**: el ADR 001 lo conserva, pero el build backend `maturin` obliga al toolchain de Rust para instalar el paquete. Opción: backend puro Python y el crate como extra opcional. Toca el ADR #infra #p3
@@ -73,6 +71,8 @@ Sin tarjetas.
 
 ## ✅ Completado (Done)
 
+- [x] 🧩 **Un solo transporte de LLM** (2026-10-18): `gemini_helper.ask_llm` decide API o `agy` en un único lugar (`select_backend`); `GeminiDeepResearchAgent` delega en él en vez de tener su copia, y la segunda clase con el mismo nombre en el adaptador legacy se eliminó. `devils_advocate` queda: es un consumidor, no un transporte #core
+- [x] 💼 **`CareerOption` se queda como adaptador, recortado** (2026-10-18): 4 análisis activos corren sobre él y retirarlo es reescribir el modelo de cada uno en sus términos técnicos —un cambio de modelado por análisis—. Se le quitó lo muerto (`_calculate_overall_score`) y lo duplicado; su encabezado dice que es legacy y que lo nuevo usa `DecisionOption`. Cada análisis migra cuando se reabra #analyses
 - [x] 🧹 **Limpieza del 18-Oct, segunda tanda** (2026-10-18): 6 versiones superadas de análisis a `analyses/archive/` (sniffer v1–v3, minería v1, dos de CommandMessage); 12 notas históricas, `archive/`, Jira y el roadmap duplicado retirados del repo (recuperables desde `0aecd52`, índice en [[legacy-docs]]); el análisis de power supply de la raíz movido junto a su investigación; un solo roadmap ([[roadmap]]) #docs
 - [x] 🪶 **`seaborn` eliminado** (2026-10-18): lo usaban 4 llamadas de gráficos, reemplazadas por matplotlib + scipy. `scikit-learn` se queda: lo usan 3 motores experimentales y volverlo opcional agregaba ramas; se resuelve al podar esos motores #infra
 - [x] 🎲 **Semilla fija por defecto** (2026-10-18): `MonteCarloEngine` usa `DEFAULT_SEED`; mismo modelo, mismos números. `seed=None` explícito para azar real #quant

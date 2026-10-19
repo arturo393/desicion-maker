@@ -291,7 +291,7 @@ def print_results(options: list[CareerOption], results: list) -> None:
 
 async def run_with_gemini(options: list[CareerOption]) -> None:
     """Ejecuta análisis completo con Gemini IA"""
-    from decision_maker.core.deep_research_decision_agent import GeminiDeepResearchAgent
+    from decision_maker.core.gemini_agent import GeminiDeepResearchAgent
 
     api_key = os.getenv("GEMINI_API_KEY")
     if not api_key:

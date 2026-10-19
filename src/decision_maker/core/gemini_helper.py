@@ -12,7 +12,7 @@ import os
 
 from decision_maker.core.agy_backend import AgyError, agy_available, ask_agy, llm_backend
 
-__all__ = ["GEMINI_AVAILABLE", "LLMUnavailable", "ask_llm", "search_with_gemini"]
+__all__ = ["GEMINI_AVAILABLE", "LLMUnavailable", "ask_llm", "search_with_gemini", "select_backend"]
 
 # SDK detection
 try:
@@ -36,10 +36,20 @@ class LLMUnavailable(RuntimeError):
     """No backend can answer: no SDK + GEMINI_API_KEY, and no agy on PATH."""
 
 
-def ask_llm(query: str, model_name: str = "gemini-2.0-flash") -> str:
-    """Answer `query` with the API (either SDK) if it has a key, else `agy`. Raises on failure."""
-    api_key = os.environ.get("GEMINI_API_KEY")
-    backend = llm_backend(api_ready=GEMINI_SDK_AVAILABLE and bool(api_key))
+def select_backend(api_key: str | None = None) -> str:
+    """'api', 'agy' or 'none' for this key (default: $GEMINI_API_KEY). The one place that decides."""
+    key = api_key or os.environ.get("GEMINI_API_KEY")
+    return llm_backend(api_ready=GEMINI_SDK_AVAILABLE and bool(key))
+
+
+def ask_llm(query: str, model_name: str = "gemini-2.0-flash", api_key: str | None = None) -> str:
+    """Answer `query` with the API (either SDK) if it has a key, else `agy`. Raises on failure.
+
+    The only LLM transport in the framework: GeminiDeepResearchAgent used to carry its own copy of
+    this key/SDK/agy selection (unified 2026-10-18).
+    """
+    api_key = api_key or os.environ.get("GEMINI_API_KEY")
+    backend = select_backend(api_key)
     if backend == "none":
         raise LLMUnavailable("no SDK + GEMINI_API_KEY, and no agy on PATH")
     if backend == "agy":

@@ -1,14 +1,11 @@
 from __future__ import annotations
 
-import numpy as np
 import pytest
 
 from decision_maker.core.deep_research_decision_agent import (
     CAREER_FACTORS,
-    AnalysisResult,
     CareerOption,
     DecisionAnalysisEngine,
-    GeminiDeepResearchAgent,
 )
 
 
@@ -69,11 +66,6 @@ class TestDecisionAnalysisEngine:
     def test_career_factor_weights_sum_to_one(self):
         assert sum(w for _, w, _ in CAREER_FACTORS) == pytest.approx(1.0)
 
-    def test_calculate_overall_score_penalizes_risk(self):
-        result = AnalysisResult(monte_carlo_score=1.0, risk_score=0.2)
-        score = DecisionAnalysisEngine._calculate_overall_score(result)
-        assert np.isclose(score, 0.8)
-
     def test_topsis_rank_simple(self):
         scores = DecisionAnalysisEngine.topsis_rank(
             ["A", "B"],
@@ -109,10 +101,3 @@ class TestDecisionAnalysisEngine:
         # Check recommendation matches overall_score (A) rather than TOPSIS (B)
         assert results["A"].recommendation == "Recommended"
         assert results["B"].recommendation == ""
-
-
-class TestGeminiDeepResearchAgent:
-    def test_wrapper_delegates_and_availability(self):
-        agent = GeminiDeepResearchAgent()
-        # is_available reflects underlying client presence; research returns gracefully when unavailable
-        assert isinstance(agent.is_available, bool)

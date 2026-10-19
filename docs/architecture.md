@@ -13,7 +13,7 @@ updated: 2026-10-01
 
 # Architecture
 
-Dual Python + Rust framework for multi-criteria decision analysis under uncertainty. 19 motores ruteables, 735 tests (plus a smoke suite that runs every analysis: `uv run pytest -m smoke`). The Monte Carlo engine runs in Python/NumPy; the `rust_core/` crate implements the same normalization but is not on the execution path (see [[adr/001-use-rust-for-math-engine]]).
+Dual Python + Rust framework for multi-criteria decision analysis under uncertainty. 19 motores ruteables, 734 tests (plus a smoke suite that runs every analysis: `uv run pytest -m smoke`). The Monte Carlo engine runs in Python/NumPy; the `rust_core/` crate implements the same normalization but is not on the execution path (see [[adr/001-use-rust-for-math-engine]]).
 
 ## Building Blocks
 
@@ -167,7 +167,7 @@ Statistics (per option after MC)
 
 ## Test Coverage
 
-735 tests across all engines, plus the smoke suite (`-m smoke`, one per analysis). Run with:
+734 tests across all engines, plus the smoke suite (`-m smoke`, one per analysis). Run with:
 
 ```bash
 uv run pytest src/decision_maker/tests/ -v

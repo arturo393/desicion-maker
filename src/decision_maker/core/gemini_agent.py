@@ -17,7 +17,8 @@ import re
 
 from dotenv import load_dotenv
 
-from decision_maker.core.agy_backend import AgyError, ask_agy, llm_backend
+from decision_maker.core import gemini_helper
+from decision_maker.core.agy_backend import AgyError
 from decision_maker.core.content import calibration_prompt, research_prompt
 
 logger = logging.getLogger(__name__)
@@ -29,28 +30,16 @@ class GeminiDeepResearchAgent:
     def __init__(self, api_key: str | None = None, model: str | None = None):
         load_dotenv()
         self.api_key = api_key or os.getenv("GEMINI_API_KEY")
-        self.model = model or os.getenv("GEMINI_MODEL", self.DEFAULT_MODEL)
-        self._client = None
-        if self.api_key:
-            try:
-                from google import genai as _genai
-
-                self._client = _genai.Client(api_key=self.api_key)
-            except ImportError:
-                pass
-        self.backend = llm_backend(api_ready=self._client is not None)
+        self.model: str = model or os.getenv("GEMINI_MODEL") or self.DEFAULT_MODEL
+        self.backend = gemini_helper.select_backend(self.api_key)
 
     @property
     def is_available(self) -> bool:
         return self.backend != "none"
 
     def _generate(self, prompt: str) -> str:
-        if self.backend == "agy":
-            return ask_agy(prompt)
-        if self._client is None:
-            raise RuntimeError("Gemini backend selected but no client was created (missing API key or SDK)")
-        response = self._client.models.generate_content(model=self.model, contents=prompt)
-        return response.text
+        # One transport for the whole framework: gemini_helper.ask_llm.
+        return gemini_helper.ask_llm(prompt, self.model, api_key=self.api_key)
 
     async def research(self, topic: str, context: str = "") -> str:
         if not self.is_available:

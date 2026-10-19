@@ -1,7 +1,10 @@
 """
-Autonomous agent integrating Gemini deep research into decision analysis models.
-Usage: from decision_maker.core.deep_research_decision_agent import DeepResearchDecisionAgent
-Does NOT: Execute local shell commands or modify system settings.
+Legacy adapter: CareerOption / DecisionAnalysisEngine, the API the oldest analyses were written against.
+Usage: from decision_maker.core.deep_research_decision_agent import CareerOption, DecisionAnalysisEngine
+Does NOT: call any LLM (that is core.gemini_agent), or suit new analyses — those use DecisionOption + UnifiedDecisionFramework.
+
+Kept on purpose (2026-10-18): 4 active analyses run on it, and retiring it means rewriting each one's model in its
+own technical terms, which is a modeling change per analysis. Each migrates when it is reopened.
 """
 
 from __future__ import annotations
@@ -11,7 +14,6 @@ from typing import Any
 
 import numpy as np
 
-from decision_maker.core.gemini_agent import GeminiDeepResearchAgent as _GeminiAgent
 from decision_maker.core.models import DecisionOption, DistributionType, Factor
 from decision_maker.core.orchestrator import UnifiedDecisionFramework
 
@@ -186,11 +188,6 @@ class DecisionAnalysisEngine:
         return self._cached_results[option.name]
 
     @staticmethod
-    def _calculate_overall_score(result: AnalysisResult) -> float:
-        """Composite score penalizing risk, used by legacy scripts."""
-        return result.monte_carlo_score * (1.0 - result.risk_score)
-
-    @staticmethod
     def topsis_rank(alternatives: list[str], criteria: dict[str, Any]) -> dict[str, float]:
         names = list(criteria.keys())
         weights = [criteria[n]["weight"] for n in names]
@@ -215,17 +212,3 @@ class DecisionAnalysisEngine:
 
         scores = d_neg / (d_pos + d_neg + 1e-9)
         return dict(zip(alternatives, scores, strict=False))
-
-
-class GeminiDeepResearchAgent:
-    """Legacy Gemini agent — wraps current API."""
-
-    def __init__(self):
-        self._agent = _GeminiAgent()
-
-    async def research(self, topic: str, context: str = "") -> str:
-        return await self._agent.research(topic, context)
-
-    @property
-    def is_available(self) -> bool:
-        return self._agent.is_available
