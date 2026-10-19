@@ -13,7 +13,7 @@ updated: 2026-10-02
 
 # 📊 Catálogo de Análisis de Decisiones Aplicadas
 
-Este registro centraliza los 37 análisis de decisión cuantitativa en `analyses/` —más `_template.py`, la plantilla canónica, que no es un análisis y por eso no cuenta— y los 7 scripts auxiliares en `analyses/research/`. Cada archivo representa un caso concreto modelado con metodologías estocásticas y multicriterio.
+Este registro centraliza los 38 análisis de decisión cuantitativa en `analyses/` —más `_template.py`, la plantilla canónica, que no es un análisis y por eso no cuenta— y los 7 scripts auxiliares en `analyses/research/`. Cada archivo representa un caso concreto modelado con metodologías estocásticas y multicriterio.
 
 Hub general de base de datos: [[database-hub]] | Catálogo de reportes y salidas: [[results-catalog]].
 
@@ -58,6 +58,7 @@ Hub general de base de datos: [[database-hub]] | Catálogo de reportes y salidas
 | `ANA-NEXA-PLAZO` | `nexa_piloto_bombeo_plazo.py` | Piloto Nexa Cerro Lindo: probabilidad de dejar operativo el bombeo remoto antes del 30-Nov-2026, por alcance, y qué riesgos se comen el plazo | [[unified-orchestrator]], [[monte-carlo-engine]] | `active` |
 | `ANA-NEXA-COMPLETITUD` | `nexa_plan_completitud.py` | Piloto Nexa: huecos del plan sin tarea (base de datos, backend, frontend, firmware) y si cada uno entra al piloto, antes del segundo sniffer o después | [[unified-orchestrator]], [[monte-carlo-engine]] | `active` |
 | `ANA-NEXA-PARALELO` | `nexa_trabajo_paralelo.py` | Piloto Nexa: cuánto cambia el plazo de FAT/SAT con agentes en paralelo, sin suponer que la revisión humana y el banco escalan | [[unified-orchestrator]], [[monte-carlo-engine]] | `active` |
+| `ANA-NEXA-DEMO-FLORIDA` | `nexa_demo_florida.py` | Demo para Nexa en Florida el 16-Nov-2026: si llega funcionando, con qué alcance y cuándo hay que salir con el equipo. Reutiliza el modelo en paralelo y agrega la cadena hacia atrás (kit, viaje, inducción, montaje, ensayo) | [[unified-orchestrator]], [[monte-carlo-engine]] | `active` |
 | `ANA-SNIFFER-FOTA` | `sniffer_estandarizacion_fota.py` | Sniffer de telemetría: cómo y cuándo incorporar bootloader + FOTA (UART y RS485) y alinearse con los demás firmwares G474 | [[unified-orchestrator]], [[monte-carlo-engine]] | `active` |
 | `ANA-SNIFFER-TRAMA` | `sniffer_trama_telemetria.py` | Sniffer de telemetría: trama de telemetría nueva o la actual, dentro del encuadre RDSS, antes de escribir el decodificador | [[unified-orchestrator]], [[monte-carlo-engine]] | `active` |
 

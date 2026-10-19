@@ -87,7 +87,7 @@ making claims the code contradicted, and the vault was corrected against the sou
 │   ├── ledger_cli.py         # decide / review / close / calibration
 │   ├── api/server.py         # FastAPI REST
 │   ├── dashboard/app.py      # Streamlit UI
-│   └── tests/                # 734 tests (+ smoke: -m smoke)
+│   └── tests/                # 735 tests (+ smoke: -m smoke)
 ├── analyses/                 # decision scripts, outside the package (decision_concon, sophos_xg115, vlad25…)
 │   └── research/             # one-off LLM research scripts (need network; never run by the gate)
 ├── decisions/ledger.jsonl    # decisions taken and their outcomes (versioned)
