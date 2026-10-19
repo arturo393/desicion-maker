@@ -130,8 +130,8 @@ class TopologicalDataAnalysis:
                 max_gap_idx = max(gaps, key=lambda x: x[0])[1]
                 if gaps[max(gaps, key=lambda x: x[0])[1]][0] > 0.1:
                     # Split at max gap
-                    threshold = (linkage[max_gap_idx] + linkage[max_gap_idx + 1]) / 2
-                    adj = (dist_matrix > 0) & (dist_matrix <= threshold)
+                    split_at = (linkage[max_gap_idx] + linkage[max_gap_idx + 1]) / 2
+                    adj = (dist_matrix > 0) & (dist_matrix <= split_at)
                     visited = set()
                     for start in range(n_opts):
                         if start in visited:
