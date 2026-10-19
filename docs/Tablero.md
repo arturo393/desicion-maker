@@ -71,6 +71,7 @@ Sin tarjetas.
 
 ## ✅ Completado (Done)
 
+- [x] 🏠 **CI local en vez de GitHub Actions** (2026-10-19, decidido por el dueño): `scripts/check.sh` replica todos los pasos del workflow retirado y suma Python 3.12; `--fast` corre en cada push vía `.githooks/pre-push`. Control negativo: un error de lint corta el gate con código 1 ([[dev-tools]]) #infra
 - [x] 🧩 **Un solo transporte de LLM** (2026-10-18): `gemini_helper.ask_llm` decide API o `agy` en un único lugar (`select_backend`); `GeminiDeepResearchAgent` delega en él en vez de tener su copia, y la segunda clase con el mismo nombre en el adaptador legacy se eliminó. `devils_advocate` queda: es un consumidor, no un transporte #core
 - [x] 💼 **`CareerOption` se queda como adaptador, recortado** (2026-10-18): 4 análisis activos corren sobre él y retirarlo es reescribir el modelo de cada uno en sus términos técnicos —un cambio de modelado por análisis—. Se le quitó lo muerto (`_calculate_overall_score`) y lo duplicado; su encabezado dice que es legacy y que lo nuevo usa `DecisionOption`. Cada análisis migra cuando se reabra #analyses
 - [x] 🧹 **Limpieza del 18-Oct, segunda tanda** (2026-10-18): 6 versiones superadas de análisis a `analyses/archive/` (sniffer v1–v3, minería v1, dos de CommandMessage); 12 notas históricas, `archive/`, Jira y el roadmap duplicado retirados del repo (recuperables desde `0aecd52`, índice en [[legacy-docs]]); el análisis de power supply de la raíz movido junto a su investigación; un solo roadmap ([[roadmap]]) #docs

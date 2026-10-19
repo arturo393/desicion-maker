@@ -43,7 +43,16 @@ Hub general de base de datos: [[database-hub]] | Esquema canónico de notas: [[n
 
 ## ⚡ 3. Ejecución de la Batería de QA
 
-Para ejecutar las verificaciones locales antes de commit:
+Desde el 19-Oct-2026 no hay CI en GitHub: la verificación es local y la orquesta `scripts/check.sh`.
+
+| Comando | Cuándo | Qué corre |
+|---|---|---|
+| `scripts/check.sh --fast` | en cada `git push`, vía `.githooks/pre-push` (~1 min) | lock congelado, ruff, mypy, linter dev-agents, los cuatro checkers de docs, tests |
+| `scripts/check.sh` | a mano, antes de mergear a `main` (~8 min) | lo anterior + humo de todos los análisis, cobertura del core ≥ 80 % y mypy + tests en Python 3.12 |
+
+El hook se activa una vez por clon: `git config core.hooksPath .githooks`. Se saltea sólo en emergencia, con `git push --no-verify`. Python 3.12 está en el gate completo porque un error de tipos que sólo aparece con los stubs de numpy de 3.12 llegó a `main` el 19-Oct-2026.
+
+Cada checker por separado:
 
 ```bash
 # Validar enlaces de documentación

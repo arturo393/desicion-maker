@@ -89,7 +89,7 @@ making claims the code contradicted, and the vault was corrected against the sou
 │   ├── dashboard/app.py      # Streamlit UI
 │   └── tests/                # 734 tests (+ smoke: -m smoke)
 ├── analyses/                 # decision scripts, outside the package (decision_concon, sophos_xg115, vlad25…)
-│   └── research/             # one-off LLM research scripts (need network; never run in CI)
+│   └── research/             # one-off LLM research scripts (need network; never run by the gate)
 ├── decisions/ledger.jsonl    # decisions taken and their outcomes (versioned)
 ├── rust_core/                # Rust crate decision_maker_core (pyo3 + rayon)
 ├── examples/

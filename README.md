@@ -34,9 +34,14 @@ uv run decision-maker list-distributions
 ## Testing
 
 ```bash
-uv run pytest            # unit + docs ratchets (~25 s)
-uv run pytest -m smoke   # every analysis end to end, offline (~2 min)
+uv run pytest            # unit + docs ratchets (~1 min)
+uv run pytest -m smoke   # every analysis end to end, offline (~3 min)
+scripts/check.sh --fast  # pre-push gate: lock, ruff, mypy, linter, docs checkers, tests
+scripts/check.sh         # full gate: + smoke, core coverage >= 80 %, Python 3.12
 ```
+
+There is no CI on GitHub: verification runs locally. `.githooks/pre-push` runs the fast gate;
+enable it once per clone with `git config core.hooksPath .githooks`.
 
 The smoke suite runs each `analyses/*.py` as a subprocess and reads the Monte Carlo
 engine's own trace (`DM_MC_TRACE`): an analysis passes only if it ran the engine and the engine told

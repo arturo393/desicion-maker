@@ -31,6 +31,7 @@ Desde v3.1 (2026-08-23). Commits del 2026-09-28 en adelante más el árbol de tr
 - **Madurez de motores** (`core/engine_maturity.py`, clave `engine_maturity` del orquestador): `validated` (coincide con una referencia externa o un cálculo independiente), `characterized` (se sabe exactamente qué calcula aunque difiera del estándar) o `experimental`. Hoy: MonteCarlo y PROMETHEE validados, TOPSIS caracterizado, 16 experimentales. Un test exige entrada para cada motor ruteable y evidencia existente para cada `validated`.
 
 ### 💥 Changed
+- **Sin CI en GitHub** (2026-10-19): `scripts/check.sh` (gate completo, con Python 3.12) y `--fast` en `.githooks/pre-push`.
 - **Una corrida ya no crea un compromiso** (2026-10-18): el resultado trae `commitment_draft` en lugar de `commitment`; el compromiso lo registra una persona con `decide`. El ledger pasa de `results/commitments.jsonl` (no versionado) a `decisions/ledger.jsonl` (versionado); el archivo viejo queda donde está, sin migrar: eran corridas, no decisiones.
 - **Matriz de correlación inválida lanza `ValueError`** en vez de ignorarse con un warning.
 - **`analyses/` y `analyses/research/` salen del paquete** a la raíz del repo; `src/decision_maker/analyses/metadata.json` se retira (lo reemplaza la tabla de `docs/decision-analyses.md`).

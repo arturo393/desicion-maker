@@ -51,20 +51,20 @@ class: "ClasePrincipal"
 
 ### Los doce campos y cuáles son obligatorios
 
-El skeleton mostraba sólo `aliases` y `tags`; en el vault hay **14 campos en uso**. La tabla los separa por obligatoriedad real (recontada el 18-Oct-2026 sobre 50 notas, tras retirar el material histórico), medida el 28-Sep-2026 sobre las 54 notas:
+El skeleton mostraba sólo `aliases` y `tags`; en el vault hay **14 campos en uso**. La tabla los separa por obligatoriedad real (recontada el 18-Oct-2026 sobre 51 notas, tras retirar el material histórico), medida el 28-Sep-2026 sobre las 54 notas:
 
 | Campo | Obligatorio | Presente en | Para qué |
 |---|---|---|---|
-| `aliases` | sí | 50/50 | Nombres antiguos por los que el enlace todavía resuelve. |
-| `tags` | sí | 50/50 | Los cuatro ejes, ver abajo. |
-| `id` | sí | 50/50 | Clave estable; el registro de [[database-hub]] lo cita. |
-| `title` | sí | 50/50 | Título legible, independiente del nombre de archivo. |
-| `type` | sí | 50/50 | Uno de los 12 valores medidos: `module`, `archive`, `moc`, `meta`, `narrative`, `adr`, `architecture`, `changelog`, `worklog`, `guide`, `kanban`, `roadmap`. |
-| `category` | sí | 50/50 | Eje temático; coincide con la primera palabra de `tags`. |
-| `status` | sí | 50/50 | `draft` \| `stable` \| `deprecated`. |
-| `related` | sí | 50/50 | Wikilinks, entre comillas, siempre. |
-| `updated` | sí | 50/50 | Fecha de la última revisión real del contenido. |
-| `created` | sí | 50/50 | Primera aparición **en este vault**. Para 10 notas se recuperó del primer commit de git; las 6 de `sw-diagnosticoremoto/` y `tests-results/` no tienen procedencia en el historial, así que su fecha es la de entrada al vault (27-Sep-2026), no la de autoría. Faltaban en 16 y se rellenaron el 28-Sep-2026. |
+| `aliases` | sí | 51/51 | Nombres antiguos por los que el enlace todavía resuelve. |
+| `tags` | sí | 51/51 | Los cuatro ejes, ver abajo. |
+| `id` | sí | 51/51 | Clave estable; el registro de [[database-hub]] lo cita. |
+| `title` | sí | 51/51 | Título legible, independiente del nombre de archivo. |
+| `type` | sí | 51/51 | Uno de los 12 valores medidos: `module`, `archive`, `moc`, `meta`, `narrative`, `adr`, `architecture`, `changelog`, `worklog`, `guide`, `kanban`, `roadmap`. |
+| `category` | sí | 51/51 | Eje temático; coincide con la primera palabra de `tags`. |
+| `status` | sí | 51/51 | `draft` \| `stable` \| `deprecated`. |
+| `related` | sí | 51/51 | Wikilinks, entre comillas, siempre. |
+| `updated` | sí | 51/51 | Fecha de la última revisión real del contenido. |
+| `created` | sí | 51/51 | Primera aparición **en este vault**. Para 10 notas se recuperó del primer commit de git; las 6 de `sw-diagnosticoremoto/` y `tests-results/` no tienen procedencia en el historial, así que su fecha es la de entrada al vault (27-Sep-2026), no la de autoría. Faltaban en 16 y se rellenaron el 28-Sep-2026. |
 | `module` | sólo `type: module` | 23/23 | Ruta completa del módulo. Es un **canal de propiedad**: debe concordar con el heading `## \`modulo.py\`` y con la fila del registro. |
 | `class` | sólo `type: module` | 23/23 | Clase principal del módulo. |
 | `kanban-plugin` | sólo `type: kanban` | 2/2 | Configuración del tablero. |
@@ -85,7 +85,7 @@ Cuatro ejes. Todos en minúscula, palabras compuestas siempre con guion.
 | Eje | Regla | Valores |
 |---|---|---|
 | Tipo | Qué es la nota. `module` = documenta un `.py` del paquete. `moc` = índice. `meta` = gobernanza del vault. `archive` = histórico, fuera del control de idioma. | 12 — los mismos que acepta el campo `type`, y `test_docs_schema.py` los compara. |
-| Proyecto | `lumina`, `quant`. **Presentes en las 50 notas.** Antes vivían sólo en el MOC, así que `tag:#lumina` devolvía una sola nota: el índice, que es la que nunca debería ser la respuesta. | 2 |
+| Proyecto | `lumina`, `quant`. **Presentes en las 51 notas.** Antes vivían sólo en el MOC, así que `tag:#lumina` devolvía una sola nota: el índice, que es la que nunca debería ser la respuesta. | 2 |
 | Tema | Al menos uno por nota `module`. | resto |
 | Autoría | `taleb`, `jaynes`, `mcelreath`. **Sólo tags.** Ver abajo. | 3 |
 
@@ -93,7 +93,7 @@ Cuatro ejes. Todos en minúscula, palabras compuestas siempre con guion.
 
 **El vocabulario completo son 58 valores y no se enumera aquí a propósito.** Una lista de 58 valores escrita en prosa es un índice que nadie mantiene: cuando se revisó ya nombraba 44 que no estaban, y una lista así se pudre más rápido de lo que se lee. Lo que se declara es la **regla** de los cuatro ejes, y el conteo va fijado en `test_docs_schema.py`: ese test se pone rojo si el número cambia, así que un tag nuevo obliga a decidir si pertenece a un eje o a actualizar el número a propósito.
 
-**El tag `archive` excluye del control de idioma, y excluye mucho.** Hoy son 14 de 50 notas, y entre ellas [[database-hub]] —la referencian 28 notas distintas del vault, 42 instancias de enlace, contando por ruta completa y no por nombre de archivo— y [[Tablero]]. El tag mezcla dos intenciones —"esto es histórico" y "esto está en otro idioma"— y por eso alcanza a las dos notas más consultadas del vault. Se mantiene porque el filtro es correcto, pero el número está fijado en el test: si alguien confunde `archive` con `deprecated`, el CI se pone rojo en vez de silenciosamente dejar de verificar 25 notas.
+**El tag `archive` excluye del control de idioma, y excluye mucho.** Hoy son 14 de 51 notas, y entre ellas [[database-hub]] —la referencian 28 notas distintas del vault, 42 instancias de enlace, contando por ruta completa y no por nombre de archivo— y [[Tablero]]. El tag mezcla dos intenciones —"esto es histórico" y "esto está en otro idioma"— y por eso alcanza a las dos notas más consultadas del vault. Se mantiene porque el filtro es correcto, pero el número está fijado en el test: si alguien confunde `archive` con `deprecated`, el CI se pone rojo en vez de silenciosamente dejar de verificar 25 notas.
 
 ## Los dos axes que no se mezclan
 

@@ -8,7 +8,7 @@ category: project-management
 status: active
 related: ["[[Tablero]]", "[[decision-maker-moc]]", "[[database-hub]]", "[[index]]"]
 created: 2026-08-10
-updated: 2026-10-18
+updated: 2026-10-19
 ---
 
 # Bitácora de Decision Maker
@@ -21,6 +21,7 @@ Es la misma convención que siguen los demás repositorios: una sola forma de en
 
 | Día | Tema |
 |---|---|
+| [[2026-10-19]] | Error de tipos sólo en Python 3.12; CI local en vez de GitHub Actions |
 | [[2026-10-18]] | Ledger de decisiones, robustez ante los pesos, correlación reparada, análisis fuera del paquete |
 | [[2026-10-02]] | Modelo vacío y humo de todos los análisis |
 | [[2026-10-01]] | Auditoría en paralelo, backend `agy` y FSK |

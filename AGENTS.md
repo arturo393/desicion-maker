@@ -30,11 +30,17 @@ SafetyMind (`../../safetymind/`) sin preguntar.
 ```bash
 # Python library, uv-based
 uv sync
-uv run pytest          # run unit tests
+uv run pytest            # unit tests
+scripts/check.sh --fast  # gate del pre-push (~1 min): lock, ruff, mypy, linter, docs, tests
+scripts/check.sh         # gate completo (~8 min): + humo, cobertura >= 80 %, Python 3.12
 ```
 
+**No hay CI en GitHub** (retirada el 2026-10-19 por decisión del dueño): la verificación es local.
+El hook `.githooks/pre-push` corre el gate rápido; se activa una vez por clon con
+`git config core.hooksPath .githooks`. El gate completo se corre a mano antes de mergear a `main`.
+
 ## Conventions
-- Python 3.11+, typed (type hints obligatorios). El piso es `>=3.11` de `pyproject.toml` y la CI corre la matriz 3.11/3.12; antes decía 3.12+, que era más restrictivo que lo que el código y la CI exigen. Si alguna vez se sube el piso, se suben las tres cosas juntas, no sólo esta línea.
+- Python 3.11+, typed (type hints obligatorios). El piso es `>=3.11` de `pyproject.toml` y el gate completo (`scripts/check.sh`) verifica 3.11 y 3.12; antes decía 3.12+, que era más restrictivo que lo que el código y la verificación exigen. Si alguna vez se sube el piso, se suben las tres cosas juntas, no sólo esta línea.
 - Monte Carlo: N caminos suficientes para convergencia; nunca 1 trayectoria única.
 - Decision analysis: separar modelado (Python) de presentación (dashboard/streamlit).
 - Configurable values en config, no magic numbers.

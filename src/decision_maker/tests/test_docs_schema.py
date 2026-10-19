@@ -25,7 +25,7 @@ VAULT = Path(__file__).resolve().parents[3] / "docs"
 
 # Measured 28-Sep-2026, recounted 18-Oct-2026: +bitacora days, +2 module notes, -12 historical notes retired.
 # Change these on purpose, never by accident.
-EXPECTED_NOTES = 50
+EXPECTED_NOTES = 51
 EXPECTED_TAGS = 58
 EXPECTED_ARCHIVE = 14
 EXPECTED_MODULE_NOTES = 23
